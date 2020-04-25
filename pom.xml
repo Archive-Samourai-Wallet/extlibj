@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.github.Samourai-Wallet</groupId>
+	<groupId>io.samourai.code.whirlpool</groupId>
 	<artifactId>extlibj</artifactId>
 	<version>develop-SNAPSHOT</version>
 	<name>extlibj</name>
@@ -27,9 +27,9 @@
 			<version>20180130</version>
 		</dependency>
 		<dependency>
-			<groupId>com.github.Samourai-Wallet.bitcoinj</groupId>
+			<groupId>io.samourai.code.whirlpool</groupId>
 			<artifactId>bitcoinj-core</artifactId>
-			<version>001-whirlpool</version>
+			<version>develop-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -102,7 +102,7 @@
 		</repository>
 	</repositories>
   <scm>
-    <connection>scm:git:https://github.com/Samourai-Wallet/ExtLibJ.git</connection>
+    <connection>scm:git:git@code.samourai.io:whirlpool/ExtLibJ.git</connection>
     <tag>0.0.6</tag>
   </scm>
 </project>
