@@ -27,7 +27,7 @@
 			<version>20180130</version>
 		</dependency>
 		<dependency>
-			<groupId>io.samourai.code.whirlpool</groupId>
+			<groupId>io.samourai.code.wallet.bitcoinj</groupId>
 			<artifactId>bitcoinj-core</artifactId>
 			<version>001-whirlpool</version>
 		</dependency>
