@@ -39,6 +39,7 @@ public class UnspentResponse {
     }
 
     public static class Xpub {
+      public String m;
       public String path;
     }
 
