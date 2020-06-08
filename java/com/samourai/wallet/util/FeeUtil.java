@@ -42,8 +42,8 @@ public class FeeUtil {
             + 8
             + 1
             + 1;
-    if (log.isDebugEnabled()) {
-      log.debug(
+    if (log.isTraceEnabled()) {
+      log.trace(
           "tx size estimation: "
               + txSize
               + "b ("
@@ -72,8 +72,8 @@ public class FeeUtil {
         estimatedSizeSegwit(
             inputsP2PKH, inputsP2SHP2WPKH, inputsP2WPKH, outputsNonOpReturn, outputsOpReturn);
     long minerFee = calculateFee(size, feePerB);
-    if (log.isDebugEnabled()) {
-      log.debug("minerFee = " + minerFee + " (size=" + size + "b, feePerB=" + feePerB + "s/b)");
+    if (log.isTraceEnabled()) {
+      log.trace("minerFee = " + minerFee + " (size=" + size + "b, feePerB=" + feePerB + "s/b)");
     }
     return minerFee;
   }
@@ -82,8 +82,8 @@ public class FeeUtil {
     long fee = txSize * feePerB;
     if (Math.ceil(fee) < txSize) {
       long adjustedFee = txSize + (txSize / 20);
-      if (log.isDebugEnabled()) {
-        log.debug("adjustedFee: " + adjustedFee + " (fee=" + fee + ", txSize=" + txSize + ")");
+      if (log.isTraceEnabled()) {
+        log.trace("adjustedFee: " + adjustedFee + " (fee=" + fee + ", txSize=" + txSize + ")");
       }
       return adjustedFee;
     } else {

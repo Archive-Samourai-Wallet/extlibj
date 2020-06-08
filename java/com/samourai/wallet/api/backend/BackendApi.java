@@ -23,6 +23,7 @@ public class BackendApi implements OAuthApi {
   private static final String URL_PUSHTX = "/pushtx/";
   private static final String URL_GET_AUTH_LOGIN = "/auth/login";
   private static final String URL_GET_AUTH_REFRESH = "/auth/refresh";
+  private static final String ZPUB_SEPARATOR = "%7C";
 
   private IBackendClient httpClient;
   private String urlBackend;
@@ -31,6 +32,10 @@ public class BackendApi implements OAuthApi {
   public BackendApi(IBackendClient httpClient, String urlBackend, Optional<OAuthManager> oAuthManager) {
     this.httpClient = httpClient;
     this.urlBackend = urlBackend;
+
+    if (oAuthManager == null) {
+      oAuthManager = Optional.empty();
+    }
     this.oAuthManager = oAuthManager;
     if (log.isDebugEnabled()) {
       String oAuthStr = oAuthManager.isPresent() ? "yes" : "no";
@@ -38,8 +43,18 @@ public class BackendApi implements OAuthApi {
     }
   }
 
+  private String computeZpubStr(String[] zpubs) {
+    String zpubStr = StringUtils.join(zpubs,ZPUB_SEPARATOR);
+    return zpubStr;
+  }
+
   public List<UnspentResponse.UnspentOutput> fetchUtxos(String zpub) throws Exception {
-    String url = computeAuthUrl(urlBackend + URL_UNSPENT + zpub);
+    return fetchUtxos(new String[]{zpub});
+  }
+
+  public List<UnspentResponse.UnspentOutput> fetchUtxos(String[] zpubs) throws Exception {
+    String zpubStr = computeZpubStr(zpubs);
+    String url = computeAuthUrl(urlBackend + URL_UNSPENT + zpubStr);
     if (log.isDebugEnabled()) {
       log.debug("fetchUtxos: " + url);
     }
@@ -53,26 +68,29 @@ public class BackendApi implements OAuthApi {
     return unspentOutputs;
   }
 
-  public List<MultiAddrResponse.Address> fetchAddresses(String zpub) throws Exception {
-    String url = computeAuthUrl(urlBackend + URL_MULTIADDR + zpub);
+  public Map<String,MultiAddrResponse.Address> fetchAddresses(String[] zpubs) throws Exception {
+    String zpubStr = computeZpubStr(zpubs);
+    String url = computeAuthUrl(urlBackend + URL_MULTIADDR + zpubStr);
     if (log.isDebugEnabled()) {
       log.debug("fetchAddress: " + url);
     }
     Map<String,String> headers = computeHeaders();
     MultiAddrResponse multiAddrResponse = httpClient.getJson(url, MultiAddrResponse.class, headers);
-    List<MultiAddrResponse.Address> addresses = new ArrayList<MultiAddrResponse.Address>();
+    Map<String,MultiAddrResponse.Address> addressesByZpub = new LinkedHashMap<String, MultiAddrResponse.Address>();
     if (multiAddrResponse.addresses != null) {
-      addresses = Arrays.asList(multiAddrResponse.addresses);
+      for (MultiAddrResponse.Address address : multiAddrResponse.addresses) {
+        addressesByZpub.put(address.address, address);
+      }
     }
-    return addresses;
+    return addressesByZpub;
   }
 
   public MultiAddrResponse.Address fetchAddress(String zpub) throws Exception {
-    List<MultiAddrResponse.Address> addresses = fetchAddresses(zpub);
+    Collection<MultiAddrResponse.Address> addresses = fetchAddresses(new String[]{zpub}).values();
     if (addresses.size() != 1) {
       throw new Exception("Address count=" + addresses.size());
     }
-    MultiAddrResponse.Address address = addresses.get(0);
+    MultiAddrResponse.Address address = addresses.iterator().next();
 
     if (log.isDebugEnabled()) {
       log.debug(
