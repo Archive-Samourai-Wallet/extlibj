@@ -56,7 +56,7 @@ public class BackendApi implements OAuthApi {
     String zpubStr = computeZpubStr(zpubs);
     String url = computeAuthUrl(urlBackend + URL_UNSPENT + zpubStr);
     if (log.isDebugEnabled()) {
-      log.debug("fetchUtxos: " + url);
+      log.debug("fetchUtxos");
     }
     Map<String,String> headers = computeHeaders();
     UnspentResponse unspentResponse = httpClient.getJson(url, UnspentResponse.class, headers);
@@ -72,7 +72,7 @@ public class BackendApi implements OAuthApi {
     String zpubStr = computeZpubStr(zpubs);
     String url = computeAuthUrl(urlBackend + URL_MULTIADDR + zpubStr);
     if (log.isDebugEnabled()) {
-      log.debug("fetchAddress: " + url);
+      log.debug("fetchAddress");
     }
     Map<String,String> headers = computeHeaders();
     MultiAddrResponse multiAddrResponse = httpClient.getJson(url, MultiAddrResponse.class, headers);
@@ -107,7 +107,7 @@ public class BackendApi implements OAuthApi {
   public void initBip84(String zpub) throws Exception {
     String url = computeAuthUrl(urlBackend + URL_INIT_BIP84);
     if (log.isDebugEnabled()) {
-      log.debug("initBip84: zpub=" + zpub);
+      log.debug("initBip84");
     }
     Map<String,String> headers = computeHeaders();
     Map<String, String> postBody = new HashMap<String, String>();
