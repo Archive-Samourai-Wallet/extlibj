@@ -1,9 +1,6 @@
 package com.samourai.wallet.api.backend;
 
-import com.samourai.wallet.api.backend.beans.HttpException;
-import com.samourai.wallet.api.backend.beans.MultiAddrResponse;
-import com.samourai.wallet.api.backend.beans.RefreshTokenResponse;
-import com.samourai.wallet.api.backend.beans.UnspentResponse;
+import com.samourai.wallet.api.backend.beans.*;
 import com.samourai.wallet.util.oauth.OAuthApi;
 import com.samourai.wallet.util.oauth.OAuthManager;
 import java8.util.Optional;
@@ -18,6 +15,7 @@ public class BackendApi implements OAuthApi {
 
   private static final String URL_UNSPENT = "/unspent?active=";
   private static final String URL_MULTIADDR = "/multiaddr?active=";
+  private static final String URL_TXS = "/txs?active=";
   private static final String URL_INIT_BIP84 = "/xpub";
   private static final String URL_MINER_FEES = "/fees";
   private static final String URL_PUSHTX = "/pushtx/";
@@ -102,6 +100,17 @@ public class BackendApi implements OAuthApi {
               + address.change_index);
     }
     return address;
+  }
+
+  public TxsResponse fetchTxs(String[] zpubs, int page, int count) throws Exception {
+    String zpubStr = computeZpubStr(zpubs);
+
+    String url = computeAuthUrl(urlBackend + URL_TXS + zpubStr+"&page="+page+"&count="+count);
+    if (log.isDebugEnabled()) {
+      log.debug("fetchTxs");
+    }
+    Map<String,String> headers = computeHeaders();
+    return httpClient.getJson(url, TxsResponse.class, headers);
   }
 
   public void initBip84(String zpub) throws Exception {
