@@ -49,33 +49,16 @@ public class STONEWALLx2 extends Cahoots {
         this.account = account;
     }
 
-    public boolean inc(HashMap<_TransactionOutPoint, Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs, HashMap<String,ECKey> keyBag) throws Exception    {
-
-        switch(this.getStep())    {
-            case 0:
-                return doStep1(inputs, outputs);
-            case 1:
-                return doStep2(inputs, outputs);
-            case 2:
-                return doStep3(keyBag);
-            case 3:
-                return doStep4(keyBag);
-            default:
-                // error
-                return false;
-        }
-    }
-
     //
     // counterparty
     //
-    protected boolean doStep1(HashMap<_TransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
+    protected void doStep1(HashMap<_TransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
         if(this.getStep() != 0 || this.getSpendAmount() == 0L)   {
-            return false;
+            throw new Exception("Invalid step/amount");
         }
         if(this.getType() == Cahoots.CAHOOTS_STONEWALLx2 && outputs == null)    {
-            return false;
+            throw new Exception("Invalid outputs");
         }
 
         Transaction transaction = new Transaction(params);
@@ -112,14 +95,12 @@ public class STONEWALLx2 extends Cahoots {
         this.psbt = new PSBT(transaction);
 
         this.setStep(1);
-
-        return true;
     }
 
     //
     // sender
     //
-    protected boolean doStep2(HashMap<_TransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
+    protected void doStep2(HashMap<_TransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
         Transaction transaction = psbt.getTransaction();
         if (log.isDebugEnabled()) {
@@ -140,21 +121,19 @@ public class STONEWALLx2 extends Cahoots {
         }
 
         TransactionOutput _output = null;
-        if(FormatsUtilGeneric.getInstance().isValidBitcoinAddress(strDestination, params))    {
-            if(FormatsUtilGeneric.getInstance().isValidBech32(strDestination))    {
-                Pair<Byte, byte[]> pair = Bech32Segwit.decode(params instanceof TestNet3Params ? "tb" : "bc", strDestination);
-                byte[] scriptPubKey = Bech32Segwit.getScriptPubkey(pair.getLeft(), pair.getRight());
-                _output = new TransactionOutput(params, null, Coin.valueOf(spendAmount), scriptPubKey);
-            }
-            else    {
-                Script toOutputScript = ScriptBuilder.createOutputScript(Address.fromBase58(params, strDestination));
-                _output = new TransactionOutput(params, null, Coin.valueOf(spendAmount), toOutputScript.getProgram());
-            }
-            transaction.addOutput(_output);
+        if(!FormatsUtilGeneric.getInstance().isValidBitcoinAddress(strDestination, params)) {
+            throw new Exception("Invalid destination address");
+        }
+        if(FormatsUtilGeneric.getInstance().isValidBech32(strDestination))    {
+            Pair<Byte, byte[]> pair = Bech32Segwit.decode(params instanceof TestNet3Params ? "tb" : "bc", strDestination);
+            byte[] scriptPubKey = Bech32Segwit.getScriptPubkey(pair.getLeft(), pair.getRight());
+            _output = new TransactionOutput(params, null, Coin.valueOf(spendAmount), scriptPubKey);
         }
         else    {
-            return false;
+            Script toOutputScript = ScriptBuilder.createOutputScript(Address.fromBase58(params, strDestination));
+            _output = new TransactionOutput(params, null, Coin.valueOf(spendAmount), toOutputScript.getProgram());
         }
+        transaction.addOutput(_output);
 
         for(_TransactionOutPoint outpoint : inputs.keySet())   {
             Triple triple = inputs.get(outpoint);
@@ -179,14 +158,12 @@ public class STONEWALLx2 extends Cahoots {
         psbt = new PSBT(transaction);
 
         this.setStep(2);
-
-        return true;
     }
 
     //
     // counterparty
     //
-    protected boolean doStep3(HashMap<String,ECKey> keyBag)    {
+    protected void doStep3(HashMap<String,ECKey> keyBag)    {
 
         Transaction transaction = this.getTransaction();
         List<TransactionInput> inputs = new ArrayList<TransactionInput>();
@@ -213,20 +190,16 @@ public class STONEWALLx2 extends Cahoots {
         signTx(keyBag);
 
         this.setStep(3);
-
-        return true;
     }
 
     //
     // sender
     //
-    protected boolean doStep4(HashMap<String,ECKey> keyBag)    {
+    protected void doStep4(HashMap<String,ECKey> keyBag)    {
 
         signTx(keyBag);
 
         this.setStep(4);
-
-        return true;
     }
 
 }

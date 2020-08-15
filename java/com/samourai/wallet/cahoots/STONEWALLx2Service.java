@@ -31,21 +31,32 @@ public class STONEWALLx2Service {
         this.params = params;
     }
 
-    public STONEWALLx2 process(STONEWALLx2 stonewall, CahootsWallet cahootsWallet) throws Exception {
-        HD_Wallet hdWallet = cahootsWallet.getHdWallet();
-        BIP84Wallet bip84Wallet = new BIP84Wallet(hdWallet, params);
-        int step = stonewall.getStep();
-        STONEWALLx2 payload;
+    public STONEWALLx2 startInitiator(CahootsWallet cahootsWallet, long amount, String address, int account) {
+        byte[] fingerprint = cahootsWallet.getBip84Wallet().getWallet().getFingerprint();
+        STONEWALLx2 stonewall0 = doSTONEWALLx2_0(amount, address, account, fingerprint);
+        if (log.isDebugEnabled()) {
+            log.debug("# STONEWALLx2 => step="+stonewall0.getStep());
+        }
+        return stonewall0;
+    }
 
+    public STONEWALLx2 startCollaborator(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, int account) throws Exception {
+        STONEWALLx2 stonewall1 = doSTONEWALLx2_1(stonewall0, cahootsWallet, account);
+        if (log.isDebugEnabled()) {
+            log.debug("# STONEWALLx2 => step="+stonewall1.getStep());
+        }
+        return stonewall1;
+    }
+
+    public STONEWALLx2 resume(STONEWALLx2 stonewall, CahootsWallet cahootsWallet, long feePerB) throws Exception {
+        int step = stonewall.getStep();
+        if (log.isDebugEnabled()) {
+            log.debug("# STONEWALLx2 <= step="+step);
+        }
+        STONEWALLx2 payload;
         switch (step) {
-            case 0:
-                stonewall.setCounterpartyAccount(cahootsWallet.getAccount());  // set counterparty account
-                byte[] fingerprint = hdWallet.getFingerprint();
-                stonewall.setFingerprintCollab(fingerprint);
-                payload = doSTONEWALLx2_1(stonewall, bip84Wallet, cahootsWallet);
-                break;
             case 1:
-                payload = doSTONEWALLx2_2(stonewall, bip84Wallet, cahootsWallet.getFeePerB(), cahootsWallet);
+                payload = doSTONEWALLx2_2(stonewall, cahootsWallet, feePerB);
                 break;
             case 2:
                 payload = doSTONEWALLx2_3(stonewall, cahootsWallet);
@@ -58,6 +69,9 @@ public class STONEWALLx2Service {
         }
         if (payload == null) {
             throw new Exception("Cannot compose #Cahoots");
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("# STONEWALLx2 => step="+payload.getStep());
         }
         return payload;
     }
@@ -82,7 +96,12 @@ public class STONEWALLx2Service {
     //
     // counterparty
     //
-    public STONEWALLx2 doSTONEWALLx2_1(STONEWALLx2 stonewall0, BIP84Wallet bip84Wallet, CahootsWallet cahootsWallet) throws Exception {
+    public STONEWALLx2 doSTONEWALLx2_1(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, int account) throws Exception {
+        BIP84Wallet bip84Wallet = cahootsWallet.getBip84Wallet();
+
+        stonewall0.setCounterpartyAccount(account);
+        byte[] fingerprint = bip84Wallet.getWallet().getFingerprint();
+        stonewall0.setFingerprintCollab(fingerprint);
 
         List<UTXO> utxos = cahootsWallet.getCahootsUTXO(stonewall0.getCounterpartyAccount());
         Collections.shuffle(utxos);
@@ -144,7 +163,7 @@ public class STONEWALLx2Service {
             }
         }
         if (!(totalContributedAmount > stonewall0.getSpendAmount() + SamouraiWalletConst.bDust.longValue())) {
-            return null;
+            throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
         }
 
         if (log.isDebugEnabled()) {
@@ -208,7 +227,7 @@ public class STONEWALLx2Service {
         }
 
         STONEWALLx2 stonewall1 = new STONEWALLx2(stonewall0);
-        stonewall1.inc(inputsA, outputsA, null);
+        stonewall1.doStep1(inputsA, outputsA);
 
         return stonewall1;
     }
@@ -216,11 +235,12 @@ public class STONEWALLx2Service {
     //
     // sender
     //
-    public STONEWALLx2 doSTONEWALLx2_2(STONEWALLx2 stonewall1, BIP84Wallet bip84Wallet, long feePerB, CahootsWallet cahootsWallet) throws Exception {
+    public STONEWALLx2 doSTONEWALLx2_2(STONEWALLx2 stonewall1, CahootsWallet cahootsWallet, long feePerB) throws Exception {
 
         Transaction transaction = stonewall1.getTransaction();
         if (log.isDebugEnabled()) {
             log.debug("step2 tx:" + Hex.toHexString(transaction.bitcoinSerialize()));
+            log.debug("step2 tx:" + transaction);
         }
         int nbIncomingInputs = transaction.getInputs().size();
 
@@ -293,7 +313,7 @@ public class STONEWALLx2Service {
             }
         }
         if (!(totalSelectedAmount > FeeUtil.getInstance().estimatedFeeSegwit(0, 0, nbTotalSelectedOutPoints + nbIncomingInputs, 4, 0, feePerB) + stonewall1.getSpendAmount() + SamouraiWalletConst.bDust.longValue())) {
-            return null;
+            throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
         }
 
         if (log.isDebugEnabled()) {
@@ -344,12 +364,14 @@ public class STONEWALLx2Service {
                 stonewall1.getPSBT().setTransaction(transaction);
             }
             else {
-                return null;
+                throw new Exception("Cannot compose #Cahoots: invalid tx outputs");
             }
 
         }
         else {
-            return null;
+            log.error("outputs: "+transaction.getOutputs().size());
+            log.error("tx:"+transaction.toString());
+            throw new Exception("Cannot compose #Cahoots: invalid tx outputs count");
         }
 
         NetworkParameters params = stonewall1.getParams();
@@ -360,6 +382,7 @@ public class STONEWALLx2Service {
         //
         //
 
+        BIP84Wallet bip84Wallet = cahootsWallet.getBip84Wallet();
         String zpub = bip84Wallet.getWallet().getAccountAt(stonewall1.getAccount()).zpubstr();
         HashMap<_TransactionOutPoint, Triple<byte[], byte[], String>> inputsB = new HashMap<_TransactionOutPoint, Triple<byte[], byte[], String>>();
 
@@ -389,7 +412,7 @@ public class STONEWALLx2Service {
         }
 
         STONEWALLx2 stonewall2 = new STONEWALLx2(stonewall1);
-        stonewall2.inc(inputsB, outputsB, null);
+        stonewall2.doStep2(inputsB, outputsB);
 
         return stonewall2;
     }
@@ -402,7 +425,7 @@ public class STONEWALLx2Service {
         HashMap<String, ECKey> keyBag_A = computeKeyBag(stonewall2, myAccount, cahootsWallet);
 
         STONEWALLx2 stonewall3 = new STONEWALLx2(stonewall2);
-        stonewall3.inc(null, null, keyBag_A);
+        stonewall3.doStep3(keyBag_A);
 
         return stonewall3;
     }
@@ -415,10 +438,9 @@ public class STONEWALLx2Service {
         HashMap<String, ECKey> keyBag_B = computeKeyBag(stonewall3, myAccount, cahootsWallet);
 
         STONEWALLx2 stonewall4 = new STONEWALLx2(stonewall3);
-        stonewall4.inc(null, null, keyBag_B);
+        stonewall4.doStep4(keyBag_B);
 
         return stonewall4;
-
     }
 
     private HashMap<String, ECKey> computeKeyBag(STONEWALLx2 stonewall, int myAccount, CahootsWallet cahootsWallet) {
