@@ -34,7 +34,7 @@ public class TestCahootsWallet extends CahootsWallet {
 
     @Override
     public String getUnspentPath(String address) {
-        return "1/2/3";
+        return "M/0/1";
     }
 
     @Override

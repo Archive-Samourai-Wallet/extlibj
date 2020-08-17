@@ -1,10 +1,13 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bip69.BIP69InputComparator;
 import com.samourai.wallet.bip69.BIP69OutputComparator;
 import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.cahoots.psbt.PSBTEntry;
 import com.samourai.wallet.segwit.SegwitAddress;
+import com.samourai.wallet.util.FeeUtil;
+import com.samourai.wallet.util.JavaUtil;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.*;
 import org.bitcoinj.params.TestNet3Params;
@@ -57,33 +60,16 @@ public class Stowaway extends Cahoots {
         this.account = account;
     }
 
-    public boolean inc(HashMap<_TransactionOutPoint, Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs, HashMap<String,ECKey> keyBag) throws Exception    {
-
-        switch(this.getStep())    {
-            case 0:
-                return doStep1(inputs, outputs);
-            case 1:
-                return doStep2(inputs, outputs);
-            case 2:
-                return doStep3(keyBag);
-            case 3:
-                return doStep4(keyBag);
-            default:
-                // error
-                return false;
-        }
-    }
-
     //
     // receiver
     //
-    public boolean doStep1(HashMap<_TransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
+    public void doStep1(HashMap<_TransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
         if(this.getStep() != 0 || this.getSpendAmount() == 0L)   {
-            return false;
+            throw new Exception("Invalid step/amount");
         }
         if(this.getType() == Cahoots.CAHOOTS_STOWAWAY && outputs == null)    {
-            return false;
+            throw new Exception("Invalid outputs");
         }
 
         Transaction transaction = new Transaction(params);
@@ -127,14 +113,12 @@ public class Stowaway extends Cahoots {
         }
 
         this.setStep(1);
-
-        return true;
     }
 
     //
     // sender
     //
-    public boolean doStep2(HashMap<_TransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
+    public void doStep2(HashMap<_TransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
         Transaction transaction = psbt.getTransaction();
         if (log.isDebugEnabled()) {
@@ -173,12 +157,11 @@ public class Stowaway extends Cahoots {
 
         // psbt: modify spend output
         List<PSBTEntry> updatedEntries = new ArrayList<PSBTEntry>();
-        int LONG_BYTES = Long.SIZE / Byte.SIZE;
         for(PSBTEntry entry : psbt.getPsbtInputs())   {
             if(entry.getKeyType()[0] == PSBT.PSBT_IN_WITNESS_UTXO)    {
                 byte[] data = entry.getData();
-                byte[] scriptPubKey = new byte[data.length - LONG_BYTES];
-                System.arraycopy(data, LONG_BYTES, scriptPubKey, 0, scriptPubKey.length);
+                byte[] scriptPubKey = new byte[data.length - JavaUtil.LONG_BYTES];
+                System.arraycopy(data, JavaUtil.LONG_BYTES, scriptPubKey, 0, scriptPubKey.length);
                 entry.setData(PSBT.writeSegwitInputUTXO(outputAmount + contributedAmount, scriptPubKey));
             }
             updatedEntries.add(entry);
@@ -208,14 +191,12 @@ public class Stowaway extends Cahoots {
         psbt = new PSBT(transaction);
 
         this.setStep(2);
-
-        return true;
     }
 
     //
     // receiver
     //
-    public boolean doStep3(HashMap<String,ECKey> keyBag)    {
+    public void doStep3(HashMap<String,ECKey> keyBag)    {
 
         Transaction transaction = this.getTransaction();
         List<TransactionInput> inputs = new ArrayList<TransactionInput>();
@@ -242,20 +223,15 @@ public class Stowaway extends Cahoots {
         signTx(keyBag);
 
         this.setStep(3);
-
-        return true;
     }
 
     //
     // sender
     //
-    public boolean doStep4(HashMap<String,ECKey> keyBag)    {
+    public void doStep4(HashMap<String,ECKey> keyBag)    {
 
         signTx(keyBag);
 
         this.setStep(4);
-
-        return true;
     }
-
 }

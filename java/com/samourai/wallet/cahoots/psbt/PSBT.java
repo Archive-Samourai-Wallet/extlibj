@@ -1,6 +1,7 @@
 package com.samourai.wallet.cahoots.psbt;
 
 import com.samourai.wallet.util.FormatsUtilGeneric;
+import com.samourai.wallet.util.JavaUtil;
 import com.samourai.wallet.util.Z85;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -642,18 +643,17 @@ public class PSBT {
     }
 
     public static byte[] writeSegwitInputUTXO(long value, byte[] scriptPubKey)    {
-
-        byte[] ret = new byte[scriptPubKey.length + Long.BYTES];
+        byte[] ret = new byte[scriptPubKey.length + JavaUtil.LONG_BYTES];
 
         // long to byte array
-        ByteBuffer xlat = ByteBuffer.allocate(Long.BYTES);
+        ByteBuffer xlat = ByteBuffer.allocate(JavaUtil.LONG_BYTES);
         xlat.order(ByteOrder.LITTLE_ENDIAN);
         xlat.putLong(0, value);
-        byte[] val = new byte[Long.BYTES];
+        byte[] val = new byte[JavaUtil.LONG_BYTES];
         xlat.get(val);
 
-        System.arraycopy(val, 0, ret, 0, Long.BYTES);
-        System.arraycopy(scriptPubKey, 0, ret, Long.BYTES, scriptPubKey.length);
+        System.arraycopy(val, 0, ret, 0, JavaUtil.LONG_BYTES);
+        System.arraycopy(scriptPubKey, 0, ret, JavaUtil.LONG_BYTES, scriptPubKey.length);
 
         return ret;
     }
@@ -721,16 +721,15 @@ public class PSBT {
     }
 
     public static byte[] writeBIP32Derivation(byte[] fingerprint, int purpose, int type, int account, int chain, int index) {
-
         // fingerprint and integer values to BIP32 derivation buffer
         byte[] bip32buf = new byte[24];
 
         System.arraycopy(fingerprint, 0, bip32buf, 0, fingerprint.length);
 
-        ByteBuffer xlat = ByteBuffer.allocate(Integer.BYTES);
+        ByteBuffer xlat = ByteBuffer.allocate(JavaUtil.INTEGER_BYTES);
         xlat.order(ByteOrder.LITTLE_ENDIAN);
         xlat.putInt(0, purpose + HARDENED);
-        byte[] out = new byte[Integer.BYTES];
+        byte[] out = new byte[JavaUtil.INTEGER_BYTES];
         xlat.get(out);
 //        System.out.println("purpose:" + Hex.toHexString(out));
         System.arraycopy(out, 0, bip32buf, fingerprint.length, out.length);

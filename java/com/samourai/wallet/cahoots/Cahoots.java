@@ -1,5 +1,6 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.util.Z85;
@@ -17,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 
-public class Cahoots {
+public abstract class Cahoots {
     private static final Logger log = LoggerFactory.getLogger(Cahoots.class);
 
     public static final int CAHOOTS_STONEWALLx2 = 0;
@@ -305,6 +306,10 @@ public class Cahoots {
         }
     }
 
+    public String toJSONString() {
+        return toJSON().toString();
+    }
+
     protected void signTx(HashMap<String,ECKey> keyBag) {
 
         Transaction transaction = psbt.getTransaction();
@@ -351,4 +356,11 @@ public class Cahoots {
 
     }
 
+    public boolean isContributedAmountSufficient(long totalContributedAmount) {
+        return totalContributedAmount > (getSpendAmount() + SamouraiWalletConst.bDust.longValue());
+    }
+
+    public boolean isContributedAmountSufficient(long totalContributedAmount, long estimatedFee) {
+        return totalContributedAmount > (getSpendAmount() + SamouraiWalletConst.bDust.longValue() + estimatedFee);
+    }
 }
