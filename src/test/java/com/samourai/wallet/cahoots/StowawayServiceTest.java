@@ -1,7 +1,6 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.wallet.segwit.BIP84Wallet;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -50,15 +49,15 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         verify(EXPECTED_PAYLOADS[1], payload1);
 
         // sender => doStowaway2
-        Stowaway payload2 = stowawayService.resume(payload1, cahootsWalletSender, feePerB);
+        Stowaway payload2 = stowawayService.reply(payload1, cahootsWalletSender, feePerB);
         verify(EXPECTED_PAYLOADS[2], payload2);
 
         // receiver => doStowaway3
-        Stowaway payload3 = stowawayService.resume(payload2, cahootsWalletCounterparty, feePerB);
+        Stowaway payload3 = stowawayService.reply(payload2, cahootsWalletCounterparty, feePerB);
         verify(EXPECTED_PAYLOADS[3], payload3);
 
         // sender => doStowaway4
-        Stowaway payload4 = stowawayService.resume(payload3, cahootsWalletSender, feePerB);
+        Stowaway payload4 = stowawayService.reply(payload3, cahootsWalletSender, feePerB);
         verify(EXPECTED_PAYLOADS[4], payload4);
     }
 }

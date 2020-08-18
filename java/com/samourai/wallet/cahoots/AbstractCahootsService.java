@@ -16,5 +16,5 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
 
     public abstract T startCollaborator(T payload0, CahootsWallet cahootsWallet, int account) throws Exception;
 
-    public abstract T resume(T payload, CahootsWallet cahootsWallet, long feePerB) throws Exception;
+    public abstract T reply(T payload, CahootsWallet cahootsWallet, long feePerB) throws Exception;
 }

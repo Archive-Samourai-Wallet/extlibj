@@ -516,7 +516,7 @@ public class PSBT {
         psbtOutputs.clear();
         strPSBT = null;
         psbtBytes = null;
-        psbtByteBuffer.clear();
+        ((Buffer)psbtByteBuffer).clear(); // cast required for Android
     }
 
     //
@@ -734,28 +734,28 @@ public class PSBT {
 //        System.out.println("purpose:" + Hex.toHexString(out));
         System.arraycopy(out, 0, bip32buf, fingerprint.length, out.length);
 
-        xlat.clear();
+        ((Buffer)xlat).clear(); // cast required for Android
         xlat.order(ByteOrder.LITTLE_ENDIAN);
         xlat.putInt(0, type + HARDENED);
         xlat.get(out);
 //        System.out.println("type:" + Hex.toHexString(out));
         System.arraycopy(out, 0, bip32buf, fingerprint.length + out.length, out.length);
 
-        xlat.clear();
+        ((Buffer)xlat).clear(); // cast required for Android
         xlat.order(ByteOrder.LITTLE_ENDIAN);
         xlat.putInt(0, account + HARDENED);
         xlat.get(out);
 //        System.out.println("account:" + Hex.toHexString(out));
         System.arraycopy(out, 0, bip32buf, fingerprint.length + (out.length * 2), out.length);
 
-        xlat.clear();
+        ((Buffer)xlat).clear(); // cast required for Android
         xlat.order(ByteOrder.LITTLE_ENDIAN);
         xlat.putInt(0, chain);
         xlat.get(out);
 //        System.out.println("chain:" + Hex.toHexString(out));
         System.arraycopy(out, 0, bip32buf, fingerprint.length + (out.length * 3), out.length);
 
-        xlat.clear();
+        ((Buffer)xlat).clear(); // cast required for Android
         xlat.order(ByteOrder.LITTLE_ENDIAN);
         xlat.putInt(0, index);
         xlat.get(out);

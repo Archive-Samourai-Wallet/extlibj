@@ -50,7 +50,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     }
 
     @Override
-    public Stowaway resume(Stowaway stowaway, CahootsWallet cahootsWallet, long feePerB) throws Exception {
+    public Stowaway reply(Stowaway stowaway, CahootsWallet cahootsWallet, long feePerB) throws Exception {
         int step = stowaway.getStep();
         if (log.isDebugEnabled()) {
             log.debug("# Stowaway <= step="+step);

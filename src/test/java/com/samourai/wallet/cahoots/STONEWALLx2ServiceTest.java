@@ -1,7 +1,6 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.wallet.segwit.BIP84Wallet;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -50,15 +49,15 @@ public class STONEWALLx2ServiceTest extends AbstractCahootsTest {
         verify(EXPECTED_PAYLOADS[1], payload1);
 
         // sender => doSTONEWALLx2_2
-        STONEWALLx2 payload2 = stonewallx2Service.resume(payload1, cahootsWalletSender, feePerB);
+        STONEWALLx2 payload2 = stonewallx2Service.reply(payload1, cahootsWalletSender, feePerB);
         verify(EXPECTED_PAYLOADS[2], payload2);
 
         // counterparty => doSTONEWALLx2_3
-        STONEWALLx2 payload3 = stonewallx2Service.resume(payload2, cahootsWalletCounterparty, feePerB);
+        STONEWALLx2 payload3 = stonewallx2Service.reply(payload2, cahootsWalletCounterparty, feePerB);
         verify(EXPECTED_PAYLOADS[3], payload3);
 
         // sender => doSTONEWALLx2_4
-        STONEWALLx2 payload4 = stonewallx2Service.resume(payload3, cahootsWalletSender, feePerB);
+        STONEWALLx2 payload4 = stonewallx2Service.reply(payload3, cahootsWalletSender, feePerB);
         verify(EXPECTED_PAYLOADS[4], payload4);
     }
 }

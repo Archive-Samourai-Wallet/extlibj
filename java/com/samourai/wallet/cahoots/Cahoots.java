@@ -306,6 +306,26 @@ public abstract class Cahoots {
         }
     }
 
+    public static Cahoots parse(String cahootsPayload) throws Exception {
+        if (!Cahoots.isCahoots(cahootsPayload.trim())) {
+            throw new Exception("Unrecognized #Cahoots");
+        }
+        JSONObject obj = new JSONObject(cahootsPayload);
+
+        if (!obj.has("cahoots") || !obj.getJSONObject("cahoots").has("type")) {
+            throw new Exception("Invalid #Cahoots");
+        }
+        int type = obj.getJSONObject("cahoots").getInt("type");
+
+        switch(type) {
+            case Cahoots.CAHOOTS_STOWAWAY:
+                return new Stowaway(obj);
+            case Cahoots.CAHOOTS_STONEWALLx2:
+                return new STONEWALLx2(obj);
+        }
+        throw new Exception("Unrecognized #Cahoots");
+    }
+
     public String toJSONString() {
         return toJSON().toString();
     }

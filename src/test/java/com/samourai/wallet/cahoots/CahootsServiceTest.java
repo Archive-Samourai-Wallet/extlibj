@@ -1,14 +1,13 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.wallet.segwit.BIP84Wallet;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CahootsDialogTest extends AbstractCahootsTest {
-    private static final Logger log = LoggerFactory.getLogger(CahootsDialogTest.class);
+public class CahootsServiceTest extends AbstractCahootsTest {
+    private static final Logger log = LoggerFactory.getLogger(CahootsServiceTest.class);
 
     private static final String SEED_WORDS = "all all all all all all all all all all all all";
     private static final String SEED_PASSPHRASE_INITIATOR = "initiator";
@@ -40,33 +39,33 @@ public class CahootsDialogTest extends AbstractCahootsTest {
         // instanciate sender
         long senderFeePerB = 1;
         int senderAccount = 0;
-        CahootsDialog cahootsSender = new CahootsDialog(params, cahootsWalletSender, senderFeePerB, senderAccount);
+        CahootsService cahootsSender = new CahootsService(params, cahootsWalletSender, senderFeePerB, senderAccount);
 
         // instanciate receiver
         long receiverFeePerB = 1;
         int receiverAccount = 0; //TODO
-        CahootsDialog cahootsReceiver = new CahootsDialog(params, cahootsWalletCounterparty, receiverFeePerB, receiverAccount);
+        CahootsService cahootsReceiver = new CahootsService(params, cahootsWalletCounterparty, receiverFeePerB, receiverAccount);
 
         // sender => start Stowaway
         long spendAmount = 5000;
-        Stowaway payload0 = cahootsSender.newStowaway(spendAmount);
-        verify(EXPECTED_PAYLOADS[0], payload0);
+        CahootsMessage payload0 = cahootsSender.newStowaway(spendAmount);
+        verify(EXPECTED_PAYLOADS[0], payload0, false);
 
         // receiver => doStowaway1
-        Stowaway payload1 = cahootsReceiver.newCollaborator(payload0.toJSONString());
-        verify(EXPECTED_PAYLOADS[1], payload1);
+        CahootsMessage payload1 = cahootsReceiver.reply(payload0);
+        verify(EXPECTED_PAYLOADS[1], payload1, false);
 
         // sender => doStowaway2
-        Stowaway payload2 = cahootsSender.resume(payload1.toJSONString());
-        verify(EXPECTED_PAYLOADS[2], payload2);
+        CahootsMessage payload2 = cahootsSender.reply(payload1);
+        verify(EXPECTED_PAYLOADS[2], payload2, false);
 
         // receiver => doStowaway3
-        Stowaway payload3 = cahootsReceiver.resume(payload2.toJSONString());
-        verify(EXPECTED_PAYLOADS[3], payload3);
+        CahootsMessage payload3 = cahootsReceiver.reply(payload2);
+        verify(EXPECTED_PAYLOADS[3], payload3, false);
 
         // sender => doStowaway4
-        Stowaway payload4 = cahootsSender.resume(payload3.toJSONString());
-        verify(EXPECTED_PAYLOADS[4], payload4);
+        CahootsMessage payload4 = cahootsSender.reply(payload3);
+        verify(EXPECTED_PAYLOADS[4], payload4, true);
     }
 
     @Test
@@ -92,33 +91,33 @@ public class CahootsDialogTest extends AbstractCahootsTest {
         // instanciate sender
         long senderFeePerB = 1;
         int senderAccount = 0;
-        CahootsDialog cahootsSender = new CahootsDialog(params, cahootsWalletSender, senderFeePerB, senderAccount);
+        CahootsService cahootsSender = new CahootsService(params, cahootsWalletSender, senderFeePerB, senderAccount);
 
         // instanciate counterparty
         long receiverFeePerB = 1;
         int receiverAccount = 0; //TODO
-        CahootsDialog cahootsCounterparty = new CahootsDialog(params, cahootsWalletCounterparty, receiverFeePerB, receiverAccount);
+        CahootsService cahootsCounterparty = new CahootsService(params, cahootsWalletCounterparty, receiverFeePerB, receiverAccount);
 
         // sender => start Stonewallx2
         long spendAmount = 5000;
         String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
-        STONEWALLx2 payload0 = cahootsSender.newStonewallx2(spendAmount, address);
-        verify(EXPECTED_PAYLOADS[0], payload0);
+        CahootsMessage payload0 = cahootsSender.newStonewallx2(spendAmount, address);
+        verify(EXPECTED_PAYLOADS[0], payload0, false);
 
         // counterparty => doSTONEWALLx2_1
-        STONEWALLx2 payload1 = cahootsCounterparty.newCollaborator(payload0.toJSONString());
-        verify(EXPECTED_PAYLOADS[1], payload1);
+        CahootsMessage payload1 = cahootsCounterparty.reply(payload0);
+        verify(EXPECTED_PAYLOADS[1], payload1, false);
 
         // sender => doSTONEWALLx2_2
-        STONEWALLx2 payload2 = cahootsSender.resume(payload1.toJSONString());
-        verify(EXPECTED_PAYLOADS[2], payload2);
+        CahootsMessage payload2 = cahootsSender.reply(payload1);
+        verify(EXPECTED_PAYLOADS[2], payload2, false);
 
         // counterparty => doSTONEWALLx2_3
-        STONEWALLx2 payload3 = cahootsCounterparty.resume(payload2.toJSONString());
-        verify(EXPECTED_PAYLOADS[3], payload3);
+        CahootsMessage payload3 = cahootsCounterparty.reply(payload2);
+        verify(EXPECTED_PAYLOADS[3], payload3, false);
 
         // sender => doSTONEWALLx2_4
-        STONEWALLx2 payload4 = cahootsSender.resume(payload3.toJSONString());
-        verify(EXPECTED_PAYLOADS[4], payload4);
+        CahootsMessage payload4 = cahootsSender.reply(payload3);
+        verify(EXPECTED_PAYLOADS[4], payload4, true);
     }
 }

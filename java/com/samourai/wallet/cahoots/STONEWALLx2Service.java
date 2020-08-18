@@ -46,7 +46,7 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
     }
 
     @Override
-    public STONEWALLx2 resume(STONEWALLx2 stonewall, CahootsWallet cahootsWallet, long feePerB) throws Exception {
+    public STONEWALLx2 reply(STONEWALLx2 stonewall, CahootsWallet cahootsWallet, long feePerB) throws Exception {
         int step = stonewall.getStep();
         if (log.isDebugEnabled()) {
             log.debug("# STONEWALLx2 <= step="+step);

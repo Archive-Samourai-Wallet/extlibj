@@ -22,14 +22,8 @@ public abstract class AbstractCahootsTest {
         return bip84Wallet;
     }
 
-    protected Stowaway cleanPayload(Stowaway payload) {
-        Stowaway copy = new Stowaway(payload);
-        doCleanPayload(copy);
-        return copy;
-    }
-
-    protected STONEWALLx2 cleanPayload(STONEWALLx2 payload) {
-        STONEWALLx2 copy = new STONEWALLx2(payload);
+    protected Cahoots cleanPayload(Cahoots payload) throws Exception {
+        Cahoots copy = Cahoots.parse(payload.toJSONString());
         doCleanPayload(copy);
         return copy;
     }
@@ -41,15 +35,14 @@ public abstract class AbstractCahootsTest {
         copy.psbt = null;
     }
 
-    protected void verify(String expectedPayload, STONEWALLx2 payload) {
-        String payloadStr = cleanPayload(payload).toJSONString();
+    protected void verify(String expectedPayload, Cahoots cahoots) throws Exception {
+        String payloadStr = cleanPayload(cahoots).toJSONString();
         log.info("### payload="+payloadStr);
         Assertions.assertEquals(expectedPayload, payloadStr);
     }
 
-    protected void verify(String expectedPayload, Stowaway payload) {
-        String payloadStr = cleanPayload(payload).toJSONString();
-        log.info("### payload="+payloadStr);
-        Assertions.assertEquals(expectedPayload, payloadStr);
+    protected void verify(String expectedPayload, CahootsMessage cahootsMessage, boolean expectedLastStep) throws Exception {
+        verify(expectedPayload, cahootsMessage.getCahoots());
+        Assertions.assertEquals(expectedLastStep, cahootsMessage.isLastStep());
     }
 }
