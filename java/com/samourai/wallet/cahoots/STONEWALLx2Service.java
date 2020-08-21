@@ -160,12 +160,12 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
                 break;
             }
         }
-        if (!stonewall0.isContributedAmountSufficient(totalContributedAmount)) {
-            throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
-        }
 
         if (log.isDebugEnabled()) {
-            log.debug("BIP84 selected utxos:" + selectedUTXO.size());
+            log.debug(selectedUTXO.size()+" selected utxos, totalContributedAmount="+totalContributedAmount+", requiredAmount="+stonewall0.computeRequiredAmount());
+        }
+        if (!stonewall0.isContributedAmountSufficient(totalContributedAmount)) {
+            throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
         }
 
         NetworkParameters params = stonewall0.getParams();
@@ -310,12 +310,12 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
                 break;
             }
         }
-        if (!stonewall1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB))) {
-            throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
-        }
-
+        long estimatedFee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB);
         if (log.isDebugEnabled()) {
-            log.debug("BIP84 selected utxos:" + selectedUTXO.size());
+            log.debug(selectedUTXO.size()+" selected utxos, totalContributedAmount="+totalSelectedAmount+", requiredAmount="+stonewall1.computeRequiredAmount(estimatedFee));
+        }
+        if (!stonewall1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee)) {
+            throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
         }
 
         long fee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB);

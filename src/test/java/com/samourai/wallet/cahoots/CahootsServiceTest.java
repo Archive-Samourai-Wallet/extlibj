@@ -49,23 +49,23 @@ public class CahootsServiceTest extends AbstractCahootsTest {
         // sender => start Stowaway
         long spendAmount = 5000;
         CahootsMessage payload0 = cahootsSender.newStowaway(spendAmount);
-        verify(EXPECTED_PAYLOADS[0], payload0, false);
+        verify(EXPECTED_PAYLOADS[0], payload0, false, CahootsType.STOWAWAY, CahootsTypeUser.SENDER);
 
         // receiver => doStowaway1
         CahootsMessage payload1 = cahootsReceiver.reply(payload0);
-        verify(EXPECTED_PAYLOADS[1], payload1, false);
+        verify(EXPECTED_PAYLOADS[1], payload1, false, CahootsType.STOWAWAY, CahootsTypeUser.RECEIVER);
 
         // sender => doStowaway2
         CahootsMessage payload2 = cahootsSender.reply(payload1);
-        verify(EXPECTED_PAYLOADS[2], payload2, false);
+        verify(EXPECTED_PAYLOADS[2], payload2, false, CahootsType.STOWAWAY, CahootsTypeUser.SENDER);
 
         // receiver => doStowaway3
         CahootsMessage payload3 = cahootsReceiver.reply(payload2);
-        verify(EXPECTED_PAYLOADS[3], payload3, false);
+        verify(EXPECTED_PAYLOADS[3], payload3, false, CahootsType.STOWAWAY, CahootsTypeUser.RECEIVER);
 
         // sender => doStowaway4
         CahootsMessage payload4 = cahootsSender.reply(payload3);
-        verify(EXPECTED_PAYLOADS[4], payload4, true);
+        verify(EXPECTED_PAYLOADS[4], payload4, true, CahootsType.STOWAWAY, CahootsTypeUser.SENDER);
     }
 
     @Test
@@ -102,22 +102,22 @@ public class CahootsServiceTest extends AbstractCahootsTest {
         long spendAmount = 5000;
         String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
         CahootsMessage payload0 = cahootsSender.newStonewallx2(spendAmount, address);
-        verify(EXPECTED_PAYLOADS[0], payload0, false);
+        verify(EXPECTED_PAYLOADS[0], payload0, false, CahootsType.STONEWALLX2, CahootsTypeUser.SENDER);
 
         // counterparty => doSTONEWALLx2_1
         CahootsMessage payload1 = cahootsCounterparty.reply(payload0);
-        verify(EXPECTED_PAYLOADS[1], payload1, false);
+        verify(EXPECTED_PAYLOADS[1], payload1, false, CahootsType.STONEWALLX2, CahootsTypeUser.COUNTERPARTY);
 
         // sender => doSTONEWALLx2_2
         CahootsMessage payload2 = cahootsSender.reply(payload1);
-        verify(EXPECTED_PAYLOADS[2], payload2, false);
+        verify(EXPECTED_PAYLOADS[2], payload2, false, CahootsType.STONEWALLX2, CahootsTypeUser.SENDER);
 
         // counterparty => doSTONEWALLx2_3
         CahootsMessage payload3 = cahootsCounterparty.reply(payload2);
-        verify(EXPECTED_PAYLOADS[3], payload3, false);
+        verify(EXPECTED_PAYLOADS[3], payload3, false, CahootsType.STONEWALLX2, CahootsTypeUser.COUNTERPARTY);
 
         // sender => doSTONEWALLx2_4
         CahootsMessage payload4 = cahootsSender.reply(payload3);
-        verify(EXPECTED_PAYLOADS[4], payload4, true);
+        verify(EXPECTED_PAYLOADS[4], payload4, true, CahootsType.STONEWALLX2, CahootsTypeUser.SENDER);
     }
 }

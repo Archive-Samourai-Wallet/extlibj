@@ -141,12 +141,11 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
             }
         }
 
+        if (log.isDebugEnabled()) {
+            log.debug(selectedUTXO.size()+" selected utxos, totalContributedAmount="+totalContributedAmount+", requiredAmount="+stowaway0.computeRequiredAmount());
+        }
         if (!stowaway0.isContributedAmountSufficient(totalContributedAmount)) {
             throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("BIP84 selected utxos:" + selectedUTXO.size());
         }
 
         NetworkParameters params = stowaway0.getParams();
@@ -267,12 +266,12 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
             }
         }
 
-        if (!stowaway1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB))) {
-            throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
-        }
-
+        long estimatedFee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB);
         if (log.isDebugEnabled()) {
-            log.debug("BIP84 selected utxos:" + selectedUTXO.size());
+            log.debug(selectedUTXO.size()+" selected utxos, totalContributedAmount="+totalSelectedAmount+", requiredAmount="+stowaway1.computeRequiredAmount(estimatedFee));
+        }
+        if (!stowaway1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee)) {
+            throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
         }
 
         long fee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB);

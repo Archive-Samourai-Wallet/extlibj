@@ -41,7 +41,7 @@ public class CahootsService {
 
     public CahootsMessage reply(CahootsMessage request) throws Exception {
         Cahoots payload = request.getCahoots();
-        AbstractCahootsService cahootsService = newCahootsService(payload.getType());
+        AbstractCahootsService cahootsService = newCahootsService(request.getType());
 
         Cahoots responsePayload;
         if (payload.getStep() == 0) {
@@ -55,11 +55,11 @@ public class CahootsService {
         return cahootsMessage;
     }
 
-    private AbstractCahootsService newCahootsService(int type) throws Exception {
-        switch(type) {
-            case Cahoots.CAHOOTS_STOWAWAY:
+    private AbstractCahootsService newCahootsService(CahootsType cahootsType) throws Exception {
+        switch(cahootsType) {
+            case STOWAWAY:
                 return new StowawayService(params);
-            case Cahoots.CAHOOTS_STONEWALLx2:
+            case STONEWALLX2:
                 return new STONEWALLx2Service(params);
         }
         throw new Exception("Unrecognized #Cahoots");

@@ -1,0 +1,29 @@
+package com.samourai.wallet.cahoots;
+
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.common.base.Optional;
+
+public enum CahootsType {
+    STONEWALLX2(0),
+    STOWAWAY(1);
+
+    private int value;
+
+    CahootsType(int value) {
+        this.value = value;
+    }
+
+    public static Optional<CahootsType> find(int value) {
+      for (CahootsType item : CahootsType.values()) {
+          if (item.value == value) {
+              return Optional.of(item);
+          }
+      }
+      return Optional.absent();
+    }
+
+    @JsonValue
+    public int getValue() {
+        return value;
+    }
+}

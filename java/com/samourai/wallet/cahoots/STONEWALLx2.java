@@ -40,7 +40,7 @@ public class STONEWALLx2 extends Cahoots {
     public STONEWALLx2(long spendAmount, String address, NetworkParameters params, int account)    {
         this.ts = System.currentTimeMillis() / 1000L;
         this.strID = Hex.toHexString(Sha256Hash.hash(BigInteger.valueOf(new SecureRandom().nextLong()).toByteArray()));
-        this.type = Cahoots.CAHOOTS_STONEWALLx2;
+        this.type = CahootsType.STONEWALLX2.getValue();
         this.step = 0;
         this.spendAmount = spendAmount;
         this.outpoints = new HashMap<String, Long>();
@@ -57,7 +57,7 @@ public class STONEWALLx2 extends Cahoots {
         if(this.getStep() != 0 || this.getSpendAmount() == 0L)   {
             throw new Exception("Invalid step/amount");
         }
-        if(this.getType() == Cahoots.CAHOOTS_STONEWALLx2 && outputs == null)    {
+        if(outputs == null)    {
             throw new Exception("Invalid outputs");
         }
 

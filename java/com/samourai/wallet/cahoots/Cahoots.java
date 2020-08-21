@@ -21,9 +21,6 @@ import java.util.HashMap;
 public abstract class Cahoots {
     private static final Logger log = LoggerFactory.getLogger(Cahoots.class);
 
-    public static final int CAHOOTS_STONEWALLx2 = 0;
-    public static final int CAHOOTS_STOWAWAY = 1;
-
     protected int version = 2;
     protected long ts = -1L;
     protected String strID = null;
@@ -316,11 +313,12 @@ public abstract class Cahoots {
             throw new Exception("Invalid #Cahoots");
         }
         int type = obj.getJSONObject("cahoots").getInt("type");
+        CahootsType cahootsType = CahootsType.find(type).get();
 
-        switch(type) {
-            case Cahoots.CAHOOTS_STOWAWAY:
+        switch(cahootsType) {
+            case STOWAWAY:
                 return new Stowaway(obj);
-            case Cahoots.CAHOOTS_STONEWALLx2:
+            case STONEWALLX2:
                 return new STONEWALLx2(obj);
         }
         throw new Exception("Unrecognized #Cahoots");
@@ -377,10 +375,18 @@ public abstract class Cahoots {
     }
 
     public boolean isContributedAmountSufficient(long totalContributedAmount) {
-        return totalContributedAmount > (getSpendAmount() + SamouraiWalletConst.bDust.longValue());
+        return totalContributedAmount >= computeRequiredAmount();
     }
 
     public boolean isContributedAmountSufficient(long totalContributedAmount, long estimatedFee) {
-        return totalContributedAmount > (getSpendAmount() + SamouraiWalletConst.bDust.longValue() + estimatedFee);
+        return totalContributedAmount >= computeRequiredAmount(estimatedFee);
+    }
+
+    public long computeRequiredAmount() {
+        return getSpendAmount() + SamouraiWalletConst.bDust.longValue();
+    }
+
+    public long computeRequiredAmount(long estimatedFee) {
+        return computeRequiredAmount()+estimatedFee;
     }
 }
