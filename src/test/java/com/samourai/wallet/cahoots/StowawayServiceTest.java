@@ -20,6 +20,8 @@ public class StowawayServiceTest extends AbstractCahootsTest {
 
     @Test
     public void Stowaway() throws Exception {
+        int account = 0;
+
         final String[] EXPECTED_PAYLOADS = {
                 "{\"cahoots\":{\"psbt\":\"\",\"cpty_account\":0,\"spend_amount\":5000,\"outpoints\":[],\"type\":1,\"dest\":\"\",\"params\":\"testnet\",\"version\":2,\"fee_amount\":0,\"fingerprint\":\"eed8a1cd\",\"step\":0,\"collabChange\":\"\",\"id\":\"testID\",\"account\":0,\"ts\":123456}}",
                 "{\"cahoots\":{\"fingerprint_collab\":\"f0d70870\",\"psbt\":\"\",\"cpty_account\":0,\"spend_amount\":5000,\"outpoints\":[{\"value\":10000,\"outpoint\":\"9407b31fd0159dc4dd3f5377e3b18e4b4aafef2977a52e76b95c3f899cbb05ad-1\"}],\"type\":1,\"dest\":\"tb1q9z5slgl572zlc6yl8zg32vndh7tfzltzz3pw8w\",\"params\":\"testnet\",\"version\":2,\"fee_amount\":0,\"fingerprint\":\"eed8a1cd\",\"step\":1,\"collabChange\":\"\",\"id\":\"testID\",\"account\":0,\"ts\":123456}}",
@@ -30,22 +32,20 @@ public class StowawayServiceTest extends AbstractCahootsTest {
 
         final BIP84Wallet bip84WalletSender = computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
         TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(bip84WalletSender, params);
-        cahootsWalletSender.mockUTXO("senderTx1", 1, 10000, "senderAddress1");
+        cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
 
         final BIP84Wallet bip84WalletCounterparty = computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
         TestCahootsWallet cahootsWalletCounterparty = new TestCahootsWallet(bip84WalletCounterparty, params);
-        cahootsWalletCounterparty.mockUTXO("counterpartyTx1", 1, 10000, "counterpartyAddress1");
+        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // sender => doStowaway0
         long spendAmount = 5000;
-        int senderAccount = 0;
-        Stowaway payload0 = stowawayService.startInitiator(cahootsWalletSender, spendAmount, senderAccount);
+        Stowaway payload0 = stowawayService.startInitiator(cahootsWalletSender, spendAmount, account);
         verify(EXPECTED_PAYLOADS[0], payload0);
 
         // receiver => doStowaway1
         long feePerB = 1;
-        int receiverAccount = 0;
-        Stowaway payload1 = stowawayService.startCollaborator(payload0, cahootsWalletCounterparty, receiverAccount);
+        Stowaway payload1 = stowawayService.startCollaborator(payload0, cahootsWalletCounterparty, account);
         verify(EXPECTED_PAYLOADS[1], payload1);
 
         // sender => doStowaway2

@@ -4,7 +4,6 @@ import com.samourai.wallet.segwit.BIP84Wallet;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.MyTransactionOutPoint;
-import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.whirlpool.WhirlpoolConst;
@@ -101,14 +100,14 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
         byte[] fingerprint = bip84Wallet.getWallet().getFingerprint();
         stonewall0.setFingerprintCollab(fingerprint);
 
-        List<UTXO> utxos = cahootsWallet.getCahootsUTXO(stonewall0.getCounterpartyAccount());
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall0.getCounterpartyAccount());
         Collections.shuffle(utxos);
 
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
         }
 
-        List<UTXO> selectedUTXO = new ArrayList<UTXO>();
+        List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
         long totalContributedAmount = 0L;
         for (int step = 0; step < 3; step++) {
 
@@ -117,9 +116,9 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
             }
 
             List<String> seenTxs = new ArrayList<String>();
-            selectedUTXO = new ArrayList<UTXO>();
+            selectedUTXO = new ArrayList<CahootsUtxo>();
             totalContributedAmount = 0L;
-            for (UTXO utxo : utxos) {
+            for (CahootsUtxo utxo : utxos) {
 
                 switch (step) {
                     case 0:
@@ -136,19 +135,14 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
                         break;
                 }
 
-                UTXO _utxo = new UTXO();
-                for (MyTransactionOutPoint outpoint : utxo.getOutpoints()) {
-                    if (!seenTxs.contains(outpoint.getTxHash().toString())) {
-                        _utxo.getOutpoints().add(outpoint);
-                        seenTxs.add(outpoint.getTxHash().toString());
-                    }
-                }
+                MyTransactionOutPoint outpoint = utxo.getOutpoint();
+                if (!seenTxs.contains(outpoint.getTxHash().toString())) {
+                    seenTxs.add(outpoint.getTxHash().toString());
 
-                if (_utxo.getOutpoints().size() > 0) {
-                    selectedUTXO.add(_utxo);
-                    totalContributedAmount += _utxo.getValue();
+                    selectedUTXO.add(utxo);
+                    totalContributedAmount += utxo.getValue();
                     if (log.isDebugEnabled()) {
-                        log.debug("BIP84 selected utxo:" + _utxo.getValue());
+                        log.debug("BIP84 selected utxo:" + utxo.getValue());
                     }
                 }
 
@@ -176,22 +170,19 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
         //
         //
 
-        HashMap<_TransactionOutPoint, Triple<byte[], byte[], String>> inputsA = new HashMap<_TransactionOutPoint, Triple<byte[], byte[], String>>();
+        HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>> inputsA = new HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>>();
 
-        for (UTXO utxo : selectedUTXO) {
-            for (MyTransactionOutPoint outpoint : utxo.getOutpoints()) {
-                _TransactionOutPoint _outpoint = new _TransactionOutPoint(outpoint);
-
-                ECKey eckey = cahootsWallet.getPrivKey(_outpoint.getAddress(), stonewall0.getCounterpartyAccount());
-                String path = cahootsWallet.getUnspentPath(_outpoint.getAddress());
-                inputsA.put(_outpoint, Triple.of(eckey.getPubKey(), stonewall0.getFingerprintCollab(), path));
-            }
+        for (CahootsUtxo utxo : selectedUTXO) {
+            MyTransactionOutPoint _outpoint = utxo.getOutpoint();
+            ECKey eckey = utxo.getKey();
+            String path = utxo.getPath();
+            inputsA.put(_outpoint, Triple.of(eckey.getPubKey(), stonewall0.getFingerprintCollab(), path));
         }
 
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsA = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
         if (stonewall0.getCounterpartyAccount() == WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT) {
             // contributor mix output
-            int idx = cahootsWallet.getHighestPostChangeIdx();
+            int idx = cahootsWallet.fetchPostChangeIndex();
             SegwitAddress segwitAddress0 = bip84Wallet.getAddressAt(stonewall0.getCounterpartyAccount(), 1, idx);
             byte[] scriptPubKey_A0 = Bech32UtilGeneric.getInstance().computeScriptPubKey(segwitAddress0.getBech32AsString(), params);
             _TransactionOutput output_A0 = new _TransactionOutput(params, null, Coin.valueOf(stonewall0.getSpendAmount()), scriptPubKey_A0);
@@ -242,7 +233,7 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
         }
         int nbIncomingInputs = transaction.getInputs().size();
 
-        List<UTXO> utxos = cahootsWallet.getCahootsUTXO(stonewall1.getAccount());
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall1.getAccount());
         Collections.shuffle(utxos);
 
         if (log.isDebugEnabled()) {
@@ -256,7 +247,7 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
             }
         }
 
-        List<UTXO> selectedUTXO = new ArrayList<UTXO>();
+        List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
         long totalSelectedAmount = 0L;
         int nbTotalSelectedOutPoints = 0;
         for (int step = 0; step < 3; step++) {
@@ -266,9 +257,9 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
             }
 
             List<String> _seenTxs = seenTxs;
-            selectedUTXO = new ArrayList<UTXO>();
+            selectedUTXO = new ArrayList<CahootsUtxo>();
             nbTotalSelectedOutPoints = 0;
-            for (UTXO utxo : utxos) {
+            for (CahootsUtxo utxo : utxos) {
 
                 switch (step) {
                     case 0:
@@ -285,20 +276,14 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
                         break;
                 }
 
-                UTXO _utxo = new UTXO();
-                for (MyTransactionOutPoint outpoint : utxo.getOutpoints()) {
-                    if (!_seenTxs.contains(outpoint.getTxHash().toString())) {
-                        _utxo.getOutpoints().add(outpoint);
-                        _seenTxs.add(outpoint.getTxHash().toString());
-                    }
-                }
+                if (!_seenTxs.contains(utxo.getOutpoint().getTxHash().toString())) {
+                    _seenTxs.add(utxo.getOutpoint().getTxHash().toString());
 
-                if (_utxo.getOutpoints().size() > 0) {
-                    selectedUTXO.add(_utxo);
-                    totalSelectedAmount += _utxo.getValue();
-                    nbTotalSelectedOutPoints += _utxo.getOutpoints().size();
+                    selectedUTXO.add(utxo);
+                    totalSelectedAmount += utxo.getValue();
+                    nbTotalSelectedOutPoints ++;
                     if (log.isDebugEnabled()) {
-                        log.debug("BIP84 selected utxo:" + _utxo.getValue());
+                        log.debug("BIP84 selected utxo:" + utxo.getValue());
                     }
                 }
 
@@ -382,22 +367,19 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
 
         BIP84Wallet bip84Wallet = cahootsWallet.getBip84Wallet();
         String zpub = bip84Wallet.getWallet().getAccountAt(stonewall1.getAccount()).zpubstr();
-        HashMap<_TransactionOutPoint, Triple<byte[], byte[], String>> inputsB = new HashMap<_TransactionOutPoint, Triple<byte[], byte[], String>>();
+        HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>> inputsB = new HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>>();
 
-        for (UTXO utxo : selectedUTXO) {
-            for (MyTransactionOutPoint outpoint : utxo.getOutpoints()) {
-                _TransactionOutPoint _outpoint = new _TransactionOutPoint(outpoint);
-
-                ECKey eckey = cahootsWallet.getPrivKey(_outpoint.getAddress(), stonewall1.getAccount());
-                String path = cahootsWallet.getUnspentPath(_outpoint.getAddress());
-                inputsB.put(_outpoint, Triple.of(eckey.getPubKey(), FormatsUtilGeneric.getInstance().getFingerprintFromXPUB(zpub), path));
-            }
+        for (CahootsUtxo utxo : selectedUTXO) {
+            MyTransactionOutPoint _outpoint = utxo.getOutpoint();
+            ECKey eckey = utxo.getKey();
+            String path = utxo.getPath();
+            inputsB.put(_outpoint, Triple.of(eckey.getPubKey(), FormatsUtilGeneric.getInstance().getFingerprintFromXPUB(zpub), path));
         }
 
         // spender change output
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsB = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
         if (stonewall1.getAccount() == WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT) {
-            int idx = cahootsWallet.getHighestPostChangeIdx();
+            int idx = cahootsWallet.fetchPostChangeIndex();
             SegwitAddress segwitAddress = bip84Wallet.getAddressAt(stonewall1.getAccount(), 1, idx);byte[] scriptPubKey_B0 = Bech32UtilGeneric.getInstance().computeScriptPubKey(segwitAddress.getBech32AsString(), params);
             _TransactionOutput output_B0 = new _TransactionOutput(params, null, Coin.valueOf((totalSelectedAmount - stonewall1.getSpendAmount()) - (fee / 2L)), scriptPubKey_B0);
             outputsB.put(output_B0, Triple.of(segwitAddress.getECKey().getPubKey(), stonewall1.getFingerprint(), "M/1/" + idx));
@@ -423,8 +405,8 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
     // counterparty
     //
     public STONEWALLx2 doSTONEWALLx2_3(STONEWALLx2 stonewall2, CahootsWallet cahootsWallet) throws Exception {
-        int myAccount = stonewall2.getCounterpartyAccount();
-        HashMap<String, ECKey> keyBag_A = cahootsWallet.computeKeyBag(stonewall2, myAccount);
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall2.getCounterpartyAccount());
+        HashMap<String, ECKey> keyBag_A = computeKeyBag(stonewall2, utxos);
 
         STONEWALLx2 stonewall3 = new STONEWALLx2(stonewall2);
         stonewall3.doStep3(keyBag_A);
@@ -436,8 +418,8 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
     // sender
     //
     public STONEWALLx2 doSTONEWALLx2_4(STONEWALLx2 stonewall3, CahootsWallet cahootsWallet) throws Exception {
-        int myAccount = stonewall3.getAccount();
-        HashMap<String, ECKey> keyBag_B = cahootsWallet.computeKeyBag(stonewall3, myAccount);
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall3.getAccount());
+        HashMap<String, ECKey> keyBag_B = computeKeyBag(stonewall3, utxos);
 
         STONEWALLx2 stonewall4 = new STONEWALLx2(stonewall3);
         stonewall4.doStep4(keyBag_B);

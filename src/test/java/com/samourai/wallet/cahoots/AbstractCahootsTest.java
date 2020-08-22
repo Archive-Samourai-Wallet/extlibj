@@ -43,7 +43,7 @@ public abstract class AbstractCahootsTest {
 
     protected void verify(String expectedPayload, CahootsMessage cahootsMessage, boolean lastStep, CahootsType type, CahootsTypeUser typeUser) throws Exception {
         verify(expectedPayload, cahootsMessage.getCahoots());
-        Assertions.assertEquals(lastStep, cahootsMessage.isLastStep());
+        Assertions.assertEquals(lastStep, cahootsMessage.isLastMessage());
         Assertions.assertEquals(type, cahootsMessage.getType());
         Assertions.assertEquals(typeUser, cahootsMessage.getTypeUser());
     }

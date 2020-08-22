@@ -104,24 +104,24 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
         byte[] fingerprint = bip84Wallet.getWallet().getFingerprint();
         stowaway0.setFingerprintCollab(fingerprint);
 
-        List<UTXO> utxos = cahootsWallet.getCahootsUTXO(0);
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(0);
         // sort in descending order by value
         Collections.sort(utxos, new UTXO.UTXOComparator());
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
         }
 
-        List<UTXO> selectedUTXO = new ArrayList<UTXO>();
+        List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
         long totalContributedAmount = 0L;
-        List<UTXO> highUTXO = new ArrayList<UTXO>();
-        for (UTXO utxo : utxos) {
+        List<CahootsUtxo> highUTXO = new ArrayList<CahootsUtxo>();
+        for (CahootsUtxo utxo : utxos) {
             if (utxo.getValue() > stowaway0.getSpendAmount() + SamouraiWalletConst.bDust.longValue()) {
                 highUTXO.add(utxo);
             }
         }
         if(highUTXO.size() > 0)    {
             SecureRandom random = new SecureRandom();
-            UTXO utxo = highUTXO.get(random.nextInt(highUTXO.size()));
+            CahootsUtxo utxo = highUTXO.get(random.nextInt(highUTXO.size()));
             if (log.isDebugEnabled()) {
                 log.debug("BIP84 selected random utxo:" + utxo.getValue());
             }
@@ -129,7 +129,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
             totalContributedAmount = utxo.getValue();
         }
         if (selectedUTXO.size() == 0) {
-            for (UTXO utxo : utxos) {
+            for (CahootsUtxo utxo : utxos) {
                 selectedUTXO.add(utxo);
                 totalContributedAmount += utxo.getValue();
                 if (log.isDebugEnabled()) {
@@ -156,16 +156,13 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
         //
         //
 
-        HashMap<_TransactionOutPoint, Triple<byte[], byte[], String>> inputsA = new HashMap<_TransactionOutPoint, Triple<byte[], byte[], String>>();
+        HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>> inputsA = new HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>>();
 
-        for (UTXO utxo : selectedUTXO) {
-            for (MyTransactionOutPoint outpoint : utxo.getOutpoints()) {
-                _TransactionOutPoint _outpoint = new _TransactionOutPoint(outpoint);
-
-                ECKey eckey = cahootsWallet.getPrivKey(_outpoint.getAddress(), 0);
-                String path = cahootsWallet.getUnspentPath(_outpoint.getAddress());
-                inputsA.put(_outpoint, Triple.of(eckey.getPubKey(), stowaway0.getFingerprintCollab(), path));
-            }
+        for (CahootsUtxo utxo : selectedUTXO) {
+            MyTransactionOutPoint _outpoint = utxo.getOutpoint();
+            ECKey eckey = utxo.getKey();
+            String path = utxo.getPath();
+            inputsA.put(_outpoint, Triple.of(eckey.getPubKey(), stowaway0.getFingerprintCollab(), path));
         }
 
         // destination output
@@ -199,7 +196,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
         }
         int nbIncomingInputs = transaction.getInputs().size();
 
-        List<UTXO> utxos = cahootsWallet.getCahootsUTXO(stowaway1.getAccount());
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway1.getAccount());
         // sort in ascending order by value
         Collections.sort(utxos, new UTXO.UTXOComparator());
         Collections.reverse(utxos);
@@ -208,47 +205,47 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
             log.debug("BIP84 utxos:" + utxos.size());
         }
 
-        List<UTXO> selectedUTXO = new ArrayList<UTXO>();
+        List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
         int nbTotalSelectedOutPoints = 0;
         long totalSelectedAmount = 0L;
-        List<UTXO> lowUTXO = new ArrayList<UTXO>();
-        for (UTXO utxo : utxos) {
+        List<CahootsUtxo> lowUTXO = new ArrayList<CahootsUtxo>();
+        for (CahootsUtxo utxo : utxos) {
             if(utxo.getValue() < stowaway1.getSpendAmount())    {
                 lowUTXO.add(utxo);
             }
         }
 
-        List<List<UTXO>> listOfLists = new ArrayList<List<UTXO>>();
+        List<List<CahootsUtxo>> listOfLists = new ArrayList<List<CahootsUtxo>>();
         Collections.shuffle(lowUTXO);
         listOfLists.add(lowUTXO);
         listOfLists.add(utxos);
-        for(List<UTXO> list : listOfLists)   {
+        for(List<CahootsUtxo> list : listOfLists)   {
 
             selectedUTXO.clear();
             totalSelectedAmount = 0L;
             nbTotalSelectedOutPoints = 0;
 
-            for (UTXO utxo : list) {
+            for (CahootsUtxo utxo : list) {
                 selectedUTXO.add(utxo);
                 totalSelectedAmount += utxo.getValue();
                 if (log.isDebugEnabled()) {
                     log.debug("BIP84 selected utxo:" + utxo.getValue());
                 }
-                nbTotalSelectedOutPoints += utxo.getOutpoints().size();
+                nbTotalSelectedOutPoints ++;
                 if (stowaway1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB))) {
 
                     // discard "extra" utxo, if any
-                    List<UTXO> _selectedUTXO = new ArrayList<UTXO>();
+                    List<CahootsUtxo> _selectedUTXO = new ArrayList<CahootsUtxo>();
                     Collections.reverse(selectedUTXO);
                     int _nbTotalSelectedOutPoints = 0;
                     long _totalSelectedAmount = 0L;
-                    for (UTXO utxoSel : selectedUTXO) {
+                    for (CahootsUtxo utxoSel : selectedUTXO) {
                         _selectedUTXO.add(utxoSel);
                         _totalSelectedAmount += utxoSel.getValue();
                         if (log.isDebugEnabled()) {
                             log.debug("BIP84 post selected utxo:" + utxoSel.getValue());
                         }
-                        _nbTotalSelectedOutPoints += utxoSel.getOutpoints().size();
+                        _nbTotalSelectedOutPoints ++;
                         if (stowaway1.isContributedAmountSufficient(_totalSelectedAmount, estimatedFee(_nbTotalSelectedOutPoints, nbIncomingInputs, feePerB))) {
                             selectedUTXO.clear();
                             selectedUTXO.addAll(_selectedUTXO);
@@ -288,16 +285,13 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
         //
 
         BIP84Wallet bip84Wallet = cahootsWallet.getBip84Wallet();
-        HashMap<_TransactionOutPoint, Triple<byte[], byte[], String>> inputsB = new HashMap<_TransactionOutPoint, Triple<byte[], byte[], String>>();
+        HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>> inputsB = new HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>>();
 
-        for (UTXO utxo : selectedUTXO) {
-            for (MyTransactionOutPoint outpoint : utxo.getOutpoints()) {
-                _TransactionOutPoint _outpoint = new _TransactionOutPoint(outpoint);
-
-                ECKey eckey = cahootsWallet.getPrivKey(_outpoint.getAddress(), stowaway1.getAccount());
-                String path = cahootsWallet.getUnspentPath(_outpoint.getAddress());
-                inputsB.put(_outpoint, Triple.of(eckey.getPubKey(), stowaway1.getFingerprint(), path));
-            }
+        for (CahootsUtxo utxo : selectedUTXO) {
+            MyTransactionOutPoint _outpoint = utxo.getOutpoint();
+            ECKey eckey = utxo.getKey();
+            String path = utxo.getPath();
+            inputsB.put(_outpoint, Triple.of(eckey.getPubKey(), stowaway1.getFingerprint(), path));
         }
 
         if (log.isDebugEnabled()) {
@@ -305,10 +299,10 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
         }
 
         // change output
-        SegwitAddress segwitAddress = null;
-        int idx = 0;
+        SegwitAddress segwitAddress;
+        int idx;
         if (stowaway1.getAccount() == WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT) {
-            idx = cahootsWallet.getHighestPostChangeIdx();
+            idx = cahootsWallet.fetchPostChangeIndex();
             HD_Address addr = bip84Wallet.getWallet().getAccountAt(stowaway1.getAccount()).getChange().getAddressAt(idx);
             segwitAddress = new SegwitAddress(addr.getPubKey(), params);
         } else {
@@ -339,7 +333,8 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     // receiver
     //
     public Stowaway doStowaway3(Stowaway stowaway2, CahootsWallet cahootsWallet) throws Exception {
-        HashMap<String, ECKey> keyBag_A = cahootsWallet.computeKeyBag(stowaway2, 0);
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(0);
+        HashMap<String, ECKey> keyBag_A = computeKeyBag(stowaway2, utxos);
 
         Stowaway stowaway3 = new Stowaway(stowaway2);
         stowaway3.doStep3(keyBag_A);
@@ -351,8 +346,8 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     // sender
     //
     public Stowaway doStowaway4(Stowaway stowaway3, CahootsWallet cahootsWallet) throws Exception {
-        int myAccount = stowaway3.getAccount();
-        HashMap<String, ECKey> keyBag_B = cahootsWallet.computeKeyBag(stowaway3, myAccount);
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway3.getAccount());
+        HashMap<String, ECKey> keyBag_B = computeKeyBag(stowaway3, utxos);
 
         Stowaway stowaway4 = new Stowaway(stowaway3);
         stowaway4.doStep4(keyBag_B);

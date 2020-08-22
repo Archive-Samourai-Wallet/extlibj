@@ -18,6 +18,7 @@ public class CahootsServiceTest extends AbstractCahootsTest {
 
     @Test
     public void Stowaway() throws Exception {
+        int account = 0;
         final String[] EXPECTED_PAYLOADS = {
                 "{\"cahoots\":{\"psbt\":\"\",\"cpty_account\":0,\"spend_amount\":5000,\"outpoints\":[],\"type\":1,\"dest\":\"\",\"params\":\"testnet\",\"version\":2,\"fee_amount\":0,\"fingerprint\":\"eed8a1cd\",\"step\":0,\"collabChange\":\"\",\"id\":\"testID\",\"account\":0,\"ts\":123456}}",
                 "{\"cahoots\":{\"fingerprint_collab\":\"f0d70870\",\"psbt\":\"\",\"cpty_account\":0,\"spend_amount\":5000,\"outpoints\":[{\"value\":10000,\"outpoint\":\"9407b31fd0159dc4dd3f5377e3b18e4b4aafef2977a52e76b95c3f899cbb05ad-1\"}],\"type\":1,\"dest\":\"tb1q9z5slgl572zlc6yl8zg32vndh7tfzltzz3pw8w\",\"params\":\"testnet\",\"version\":2,\"fee_amount\":0,\"fingerprint\":\"eed8a1cd\",\"step\":1,\"collabChange\":\"\",\"id\":\"testID\",\"account\":0,\"ts\":123456}}",
@@ -29,22 +30,20 @@ public class CahootsServiceTest extends AbstractCahootsTest {
         // mock sender wallet
         final BIP84Wallet bip84WalletSender = computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
         TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(bip84WalletSender, params);
-        cahootsWalletSender.mockUTXO("senderTx1", 1, 10000, "senderAddress1");
+        cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "senderAddress1");
 
         // mock receiver wallet
         final BIP84Wallet bip84WalletCounterparty = computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
         TestCahootsWallet cahootsWalletCounterparty = new TestCahootsWallet(bip84WalletCounterparty, params);
-        cahootsWalletCounterparty.mockUTXO("counterpartyTx1", 1, 10000, "counterpartyAddress1");
+        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "counterpartyAddress1");
 
         // instanciate sender
         long senderFeePerB = 1;
-        int senderAccount = 0;
-        CahootsService cahootsSender = new CahootsService(params, cahootsWalletSender, senderFeePerB, senderAccount);
+        CahootsService cahootsSender = new CahootsService(params, cahootsWalletSender, senderFeePerB, account);
 
         // instanciate receiver
         long receiverFeePerB = 1;
-        int receiverAccount = 0; //TODO
-        CahootsService cahootsReceiver = new CahootsService(params, cahootsWalletCounterparty, receiverFeePerB, receiverAccount);
+        CahootsService cahootsReceiver = new CahootsService(params, cahootsWalletCounterparty, receiverFeePerB, account);
 
         // sender => start Stowaway
         long spendAmount = 5000;
@@ -70,6 +69,7 @@ public class CahootsServiceTest extends AbstractCahootsTest {
 
     @Test
     public void Stonewallx2() throws Exception {
+        int account = 0;
         final String[] EXPECTED_PAYLOADS = {
                 "{\"cahoots\":{\"psbt\":\"\",\"cpty_account\":0,\"spend_amount\":5000,\"outpoints\":[],\"type\":0,\"dest\":\"tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4\",\"params\":\"testnet\",\"version\":2,\"fee_amount\":0,\"fingerprint\":\"eed8a1cd\",\"step\":0,\"collabChange\":\"\",\"id\":\"testID\",\"account\":0,\"ts\":123456}}",
                 "{\"cahoots\":{\"fingerprint_collab\":\"f0d70870\",\"psbt\":\"\",\"cpty_account\":0,\"spend_amount\":5000,\"outpoints\":[{\"value\":10000,\"outpoint\":\"9407b31fd0159dc4dd3f5377e3b18e4b4aafef2977a52e76b95c3f899cbb05ad-1\"}],\"type\":0,\"dest\":\"tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4\",\"params\":\"testnet\",\"version\":2,\"fee_amount\":0,\"fingerprint\":\"eed8a1cd\",\"step\":1,\"collabChange\":\"tb1qv4ak4l0w76qflk4uulavu22kxtaajnltkzxyq5\",\"id\":\"testID\",\"account\":0,\"ts\":123456}}",
@@ -81,22 +81,20 @@ public class CahootsServiceTest extends AbstractCahootsTest {
         // mock sender wallet
         final BIP84Wallet bip84WalletSender = computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
         TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(bip84WalletSender, params);
-        cahootsWalletSender.mockUTXO("senderTx1", 1, 10000, "senderAddress1");
+        cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "senderAddress1");
 
         // mock counterparty wallet
         final BIP84Wallet bip84WalletCounterparty = computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
         TestCahootsWallet cahootsWalletCounterparty = new TestCahootsWallet(bip84WalletCounterparty, params);
-        cahootsWalletCounterparty.mockUTXO("counterpartyTx1", 1, 10000, "counterpartyAddress1");
+        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "counterpartyAddress1");
 
         // instanciate sender
         long senderFeePerB = 1;
-        int senderAccount = 0;
-        CahootsService cahootsSender = new CahootsService(params, cahootsWalletSender, senderFeePerB, senderAccount);
+        CahootsService cahootsSender = new CahootsService(params, cahootsWalletSender, senderFeePerB, account);
 
         // instanciate counterparty
         long receiverFeePerB = 1;
-        int receiverAccount = 0; //TODO
-        CahootsService cahootsCounterparty = new CahootsService(params, cahootsWalletCounterparty, receiverFeePerB, receiverAccount);
+        CahootsService cahootsCounterparty = new CahootsService(params, cahootsWalletCounterparty, receiverFeePerB, account);
 
         // sender => start Stonewallx2
         long spendAmount = 5000;

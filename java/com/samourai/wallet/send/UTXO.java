@@ -13,11 +13,12 @@ public class UTXO {
     private List<MyTransactionOutPoint> outpoints = null;
 
     public UTXO() {
-        this.outpoints = new ArrayList<MyTransactionOutPoint>();
+        this(new ArrayList<MyTransactionOutPoint>(), null);
     }
 
-    public UTXO(List<MyTransactionOutPoint> outpoints) {
+    public UTXO(List<MyTransactionOutPoint> outpoints, String path) {
         this.outpoints = outpoints;
+        this.path = path;
     }
 
     public List<MyTransactionOutPoint> getOutpoints() {

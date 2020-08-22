@@ -27,19 +27,12 @@ public class StowawayExample {
 
         // STEP 0: sender
         long spendAmount = 5000;
-        CahootsMessage message0 = cahootsSender.newStowaway(spendAmount);
+        CahootsMessage message = cahootsSender.newStowaway(spendAmount);
 
-        // STEP 1: receiver
-        CahootsMessage message1 = cahootsReceiver.reply(message0);
-
-        // STEP 2: sender
-        CahootsMessage message2 = cahootsSender.reply(message1);
-
-        // STEP 3: receiver
-        CahootsMessage message3 = cahootsReceiver.reply(message2);
-
-        // STEP 4: sender
-        cahootsSender.reply(message3);
+        // STEP 1-4
+        while(message != null) {
+            message = cahootsSender.reply(message);
+        }
 
         // SUCCESS
     }

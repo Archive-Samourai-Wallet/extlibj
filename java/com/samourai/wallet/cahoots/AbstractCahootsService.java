@@ -1,9 +1,12 @@
 package com.samourai.wallet.cahoots;
 
-import org.bitcoinj.core.NetworkParameters;
-import org.json.JSONObject;
+import com.samourai.wallet.send.MyTransactionOutPoint;
+import org.bitcoinj.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.List;
 
 public abstract class AbstractCahootsService<T extends Cahoots> {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahootsService.class);
@@ -17,4 +20,27 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
     public abstract T startCollaborator(T payload0, CahootsWallet cahootsWallet, int account) throws Exception;
 
     public abstract T reply(T payload, CahootsWallet cahootsWallet, long feePerB) throws Exception;
+
+
+    public HashMap<String, ECKey> computeKeyBag(Cahoots cahoots, List<CahootsUtxo> utxos) {
+        // utxos by hash
+        HashMap<String, CahootsUtxo> utxosByHash = new HashMap<String, CahootsUtxo>();
+        for (CahootsUtxo utxo : utxos) {
+            MyTransactionOutPoint outpoint = utxo.getOutpoint();
+            utxosByHash.put(outpoint.getTxHash().toString() + "-" + outpoint.getTxOutputN(), utxo);
+        }
+
+        Transaction transaction = cahoots.getTransaction();
+        HashMap<String, ECKey> keyBag = new HashMap<String, ECKey>();
+        for (TransactionInput input : transaction.getInputs()) {
+            TransactionOutPoint outpoint = input.getOutpoint();
+            String key = outpoint.getHash().toString() + "-" + outpoint.getIndex();
+            if (utxosByHash.containsKey(key)) {
+                CahootsUtxo utxo = utxosByHash.get(key);
+                ECKey eckey = utxo.getKey();
+                keyBag.put(outpoint.toString(), eckey);
+            }
+        }
+        return keyBag;
+    }
 }

@@ -1,12 +1,11 @@
 package com.samourai.wallet.cahoots;
 
-import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bip69.BIP69InputComparator;
 import com.samourai.wallet.bip69.BIP69OutputComparator;
 import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.cahoots.psbt.PSBTEntry;
 import com.samourai.wallet.segwit.SegwitAddress;
-import com.samourai.wallet.util.FeeUtil;
+import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.JavaUtil;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.*;
@@ -63,7 +62,7 @@ public class Stowaway extends Cahoots {
     //
     // receiver
     //
-    public void doStep1(HashMap<_TransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
+    public void doStep1(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
         if(this.getStep() != 0 || this.getSpendAmount() == 0L)   {
             throw new Exception("Invalid step/amount");
@@ -73,7 +72,7 @@ public class Stowaway extends Cahoots {
         }
 
         Transaction transaction = new Transaction(params);
-        for(_TransactionOutPoint outpoint : inputs.keySet())   {
+        for(MyTransactionOutPoint outpoint : inputs.keySet())   {
             TransactionInput input = new TransactionInput(params, null, new byte[0], outpoint, outpoint.getValue());
             if (log.isDebugEnabled()) {
                 log.debug("input value:" + input.getValue().longValue());
@@ -86,7 +85,7 @@ public class Stowaway extends Cahoots {
         }
 
         PSBT psbt = new PSBT(transaction);
-        for(_TransactionOutPoint outpoint : inputs.keySet())   {
+        for(MyTransactionOutPoint outpoint : inputs.keySet())   {
             Triple triple = inputs.get(outpoint);
             // input type 1
             SegwitAddress segwitAddress = new SegwitAddress((byte[])triple.getLeft(), params);
@@ -118,7 +117,7 @@ public class Stowaway extends Cahoots {
     //
     // sender
     //
-    public void doStep2(HashMap<_TransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
+    public void doStep2(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
         Transaction transaction = psbt.getTransaction();
         if (log.isDebugEnabled()) {
@@ -143,7 +142,7 @@ public class Stowaway extends Cahoots {
         transaction.clearOutputs();
         transaction.addOutput(spendOutput);
 
-        for(_TransactionOutPoint outpoint : inputs.keySet())   {
+        for(MyTransactionOutPoint outpoint : inputs.keySet())   {
             if (log.isDebugEnabled()) {
                 log.debug("outpoint value:" + outpoint.getValue().longValue());
             }
@@ -168,7 +167,7 @@ public class Stowaway extends Cahoots {
         }
         psbt.setPsbtInputs(updatedEntries);
 
-        for(_TransactionOutPoint outpoint : inputs.keySet())   {
+        for(MyTransactionOutPoint outpoint : inputs.keySet())   {
             Triple triple = inputs.get(outpoint);
             // input type 1
             SegwitAddress segwitAddress = new SegwitAddress((byte[])triple.getLeft(), params);

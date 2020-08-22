@@ -1,44 +1,49 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.wallet.segwit.BIP84Wallet;
-import com.samourai.wallet.send.MyTransactionOutPoint;
-import com.samourai.wallet.send.UTXO;
-import com.samourai.wallet.whirlpool.WhirlpoolConst;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.Transaction;
-import org.bitcoinj.core.TransactionInput;
-import org.bitcoinj.core.TransactionOutPoint;
+import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
+import org.bitcoinj.core.NetworkParameters;
+import org.bouncycastle.util.encoders.Hex;
 
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public abstract class CahootsWallet {
-    public abstract ECKey getPrivKey(String address, int account);
-    public abstract String getUnspentPath(String address);
-    public abstract List<UTXO> getCahootsUTXO(int account);
-    public abstract int getHighestPostChangeIdx();
-    public abstract BIP84Wallet getBip84Wallet();
+    private static final Bech32UtilGeneric bech32Util = Bech32UtilGeneric.getInstance();
 
-    public HashMap<String, ECKey> computeKeyBag(Cahoots cahoots, int myAccount) {
-        HashMap<String, String> utxo2Address = new HashMap<String, String>();
-        List<UTXO> utxos = getCahootsUTXO(myAccount);
-        for (UTXO utxo : utxos) {
-            for (MyTransactionOutPoint outpoint : utxo.getOutpoints()) {
-                utxo2Address.put(outpoint.getTxHash().toString() + "-" + outpoint.getTxOutputN(), outpoint.getAddress());
+    private BIP84Wallet bip84Wallet;
+    private NetworkParameters params;
+
+    public CahootsWallet(BIP84Wallet bip84Wallet, NetworkParameters params) {
+        this.bip84Wallet = bip84Wallet;
+        this.params = params;
+    }
+
+    public abstract int fetchPostChangeIndex();
+
+    protected abstract List<CahootsUtxo> fetchUtxos(int account);
+
+    public NetworkParameters getParams() {
+        return params;
+    }
+
+    public BIP84Wallet getBip84Wallet() {
+        return bip84Wallet;
+    }
+
+    public List<CahootsUtxo> getUtxosWpkhByAccount(int account) {
+        return filterUtxosWpkh(fetchUtxos(account));
+    }
+
+    protected static List<CahootsUtxo> filterUtxosWpkh(List<CahootsUtxo> utxos) {
+        List<CahootsUtxo> filteredUtxos = new LinkedList<CahootsUtxo>();
+        for(CahootsUtxo utxo : utxos)   {
+            // filter wpkh
+            String script = Hex.toHexString(utxo.getOutpoint().getScriptBytes());
+            if (bech32Util.isP2WPKHScript(script)) {
+                filteredUtxos.add(utxo);
             }
         }
-
-        Transaction transaction = cahoots.getTransaction();
-        HashMap<String, ECKey> keyBag = new HashMap<String, ECKey>();
-        for (TransactionInput input : transaction.getInputs()) {
-            TransactionOutPoint outpoint = input.getOutpoint();
-            String key = outpoint.getHash().toString() + "-" + outpoint.getIndex();
-            if (utxo2Address.containsKey(key)) {
-                String address = utxo2Address.get(key);
-                ECKey eckey = getPrivKey(address, myAccount);
-                keyBag.put(outpoint.toString(), eckey);
-            }
-        }
-        return keyBag;
+        return filteredUtxos;
     }
 }

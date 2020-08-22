@@ -1,10 +1,11 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.wallet.soroban.client.SorobanMessageService;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CahootsService {
+public class CahootsService extends SorobanMessageService<CahootsMessage> {
     private static final Logger log = LoggerFactory.getLogger(CahootsService.class);
 
     private NetworkParameters params;
@@ -17,6 +18,11 @@ public class CahootsService {
         this.cahootsWallet = cahootsWallet;
         this.feePerB = feePerB;
         this.account = account;
+    }
+
+    @Override
+    public CahootsMessage parse(String payload) throws Exception{
+        return CahootsMessage.parse(payload);
     }
 
     public CahootsMessage newStonewallx2(long amount, String address) {
@@ -33,12 +39,7 @@ public class CahootsService {
         return cahootsMessage;
     }
 
-    public CahootsMessage reply(String request) throws Exception {
-        Cahoots cahoots = Cahoots.parse(request);
-        CahootsMessage cahootsMessage = new CahootsMessage(cahoots);
-        return reply(cahootsMessage);
-    }
-
+    @Override
     public CahootsMessage reply(CahootsMessage request) throws Exception {
         Cahoots payload = request.getCahoots();
         AbstractCahootsService cahootsService = newCahootsService(request.getType());
