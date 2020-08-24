@@ -44,20 +44,19 @@ public class STONEWALLx2ServiceTest extends AbstractCahootsTest {
         verify(EXPECTED_PAYLOADS[0], payload0);
 
         // counterparty => doSTONEWALLx2_1
-        long feePerB = 1;
         STONEWALLx2 payload1 = stonewallx2Service.startCollaborator(payload0, cahootsWalletCounterparty, account);
         verify(EXPECTED_PAYLOADS[1], payload1);
 
         // sender => doSTONEWALLx2_2
-        STONEWALLx2 payload2 = stonewallx2Service.reply(payload1, cahootsWalletSender, feePerB);
+        STONEWALLx2 payload2 = stonewallx2Service.reply(payload1, cahootsWalletSender);
         verify(EXPECTED_PAYLOADS[2], payload2);
 
         // counterparty => doSTONEWALLx2_3
-        STONEWALLx2 payload3 = stonewallx2Service.reply(payload2, cahootsWalletCounterparty, feePerB);
+        STONEWALLx2 payload3 = stonewallx2Service.reply(payload2, cahootsWalletCounterparty);
         verify(EXPECTED_PAYLOADS[3], payload3);
 
         // sender => doSTONEWALLx2_4
-        STONEWALLx2 payload4 = stonewallx2Service.reply(payload3, cahootsWalletSender, feePerB);
+        STONEWALLx2 payload4 = stonewallx2Service.reply(payload3, cahootsWalletSender);
         verify(EXPECTED_PAYLOADS[4], payload4);
     }
 }

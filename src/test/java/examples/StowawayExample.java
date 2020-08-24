@@ -16,23 +16,28 @@ public class StowawayExample {
     public void Stowaway() throws Exception {
 
         // instanciate sender
-        long senderFeePerB = 1;
         int senderAccount = 0;
-        CahootsService cahootsSender = new CahootsService(params, cahootsWalletSender, senderFeePerB, senderAccount);
+        CahootsService cahootsSender = new CahootsService(params, cahootsWalletSender, senderAccount);
 
         // instanciate receiver
-        long receiverFeePerB = 1;
         int receiverAccount = 0; //TODO
-        CahootsService cahootsReceiver = new CahootsService(params, cahootsWalletCounterparty, receiverFeePerB, receiverAccount);
+        CahootsService cahootsReceiver = new CahootsService(params, cahootsWalletCounterparty, receiverAccount);
 
         // STEP 0: sender
         long spendAmount = 5000;
-        CahootsMessage message = cahootsSender.newStowaway(spendAmount);
+        CahootsMessage message0 = cahootsSender.newStowaway(spendAmount);
 
-        // STEP 1-4
-        while(message != null) {
-            message = cahootsSender.reply(message);
-        }
+        // STEP 1: receiver
+        CahootsMessage message1 = cahootsReceiver.reply(message0);
+
+        // STEP 2: sender
+        CahootsMessage message2 = cahootsSender.reply(message1);
+
+        // STEP 3: receiver
+        CahootsMessage message3 = cahootsReceiver.reply(message2);
+
+        // STEP 4: sender
+        cahootsSender.reply(message3);
 
         // SUCCESS
     }

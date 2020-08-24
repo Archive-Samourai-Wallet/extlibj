@@ -10,12 +10,19 @@ import java.util.Map;
 
 public class SimpleCahootsWallet extends CahootsWallet {
     private int postChangeIndex;
+    private long feePerB;
     private Map<Integer,List<CahootsUtxo>> utxosByAccount;
 
-    public SimpleCahootsWallet(BIP84Wallet bip84Wallet, NetworkParameters params, int postChangeIndex) {
+    public SimpleCahootsWallet(BIP84Wallet bip84Wallet, NetworkParameters params, int postChangeIndex, long feePerB) {
         super(bip84Wallet, params);
         this.postChangeIndex = postChangeIndex;
+        this.feePerB = feePerB;
         this.utxosByAccount = new HashMap<Integer, List<CahootsUtxo>>();
+    }
+
+    @Override
+    public long fetchFeePerB() {
+        return feePerB;
     }
 
     @Override

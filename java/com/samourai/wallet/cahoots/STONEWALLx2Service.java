@@ -45,7 +45,7 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
     }
 
     @Override
-    public STONEWALLx2 reply(STONEWALLx2 stonewall, CahootsWallet cahootsWallet, long feePerB) throws Exception {
+    public STONEWALLx2 reply(STONEWALLx2 stonewall, CahootsWallet cahootsWallet) throws Exception {
         int step = stonewall.getStep();
         if (log.isDebugEnabled()) {
             log.debug("# STONEWALLx2 <= step="+step);
@@ -53,7 +53,7 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
         STONEWALLx2 payload;
         switch (step) {
             case 1:
-                payload = doSTONEWALLx2_2(stonewall, cahootsWallet, feePerB);
+                payload = doSTONEWALLx2_2(stonewall, cahootsWallet);
                 break;
             case 2:
                 payload = doSTONEWALLx2_3(stonewall, cahootsWallet);
@@ -224,7 +224,7 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
     //
     // sender
     //
-    public STONEWALLx2 doSTONEWALLx2_2(STONEWALLx2 stonewall1, CahootsWallet cahootsWallet, long feePerB) throws Exception {
+    public STONEWALLx2 doSTONEWALLx2_2(STONEWALLx2 stonewall1, CahootsWallet cahootsWallet) throws Exception {
 
         Transaction transaction = stonewall1.getTransaction();
         if (log.isDebugEnabled()) {
@@ -246,6 +246,8 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
                 seenTxs.add(input.getOutpoint().getHash().toString());
             }
         }
+
+        long feePerB = cahootsWallet.fetchFeePerB();
 
         List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
         long totalSelectedAmount = 0L;

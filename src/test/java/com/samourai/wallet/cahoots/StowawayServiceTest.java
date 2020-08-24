@@ -44,20 +44,19 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         verify(EXPECTED_PAYLOADS[0], payload0);
 
         // receiver => doStowaway1
-        long feePerB = 1;
         Stowaway payload1 = stowawayService.startCollaborator(payload0, cahootsWalletCounterparty, account);
         verify(EXPECTED_PAYLOADS[1], payload1);
 
         // sender => doStowaway2
-        Stowaway payload2 = stowawayService.reply(payload1, cahootsWalletSender, feePerB);
+        Stowaway payload2 = stowawayService.reply(payload1, cahootsWalletSender);
         verify(EXPECTED_PAYLOADS[2], payload2);
 
         // receiver => doStowaway3
-        Stowaway payload3 = stowawayService.reply(payload2, cahootsWalletCounterparty, feePerB);
+        Stowaway payload3 = stowawayService.reply(payload2, cahootsWalletCounterparty);
         verify(EXPECTED_PAYLOADS[3], payload3);
 
         // sender => doStowaway4
-        Stowaway payload4 = stowawayService.reply(payload3, cahootsWalletSender, feePerB);
+        Stowaway payload4 = stowawayService.reply(payload3, cahootsWalletSender);
         verify(EXPECTED_PAYLOADS[4], payload4);
     }
 }

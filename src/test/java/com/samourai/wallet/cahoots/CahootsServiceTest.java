@@ -38,12 +38,10 @@ public class CahootsServiceTest extends AbstractCahootsTest {
         cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "counterpartyAddress1");
 
         // instanciate sender
-        long senderFeePerB = 1;
-        CahootsService cahootsSender = new CahootsService(params, cahootsWalletSender, senderFeePerB, account);
+        CahootsService cahootsSender = new CahootsService(params, cahootsWalletSender, account);
 
         // instanciate receiver
-        long receiverFeePerB = 1;
-        CahootsService cahootsReceiver = new CahootsService(params, cahootsWalletCounterparty, receiverFeePerB, account);
+        CahootsService cahootsReceiver = new CahootsService(params, cahootsWalletCounterparty, account);
 
         // sender => start Stowaway
         long spendAmount = 5000;
@@ -89,12 +87,10 @@ public class CahootsServiceTest extends AbstractCahootsTest {
         cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "counterpartyAddress1");
 
         // instanciate sender
-        long senderFeePerB = 1;
-        CahootsService cahootsSender = new CahootsService(params, cahootsWalletSender, senderFeePerB, account);
+        CahootsService cahootsSender = new CahootsService(params, cahootsWalletSender, account);
 
         // instanciate counterparty
-        long receiverFeePerB = 1;
-        CahootsService cahootsCounterparty = new CahootsService(params, cahootsWalletCounterparty, receiverFeePerB, account);
+        CahootsService cahootsCounterparty = new CahootsService(params, cahootsWalletCounterparty, account);
 
         // sender => start Stonewallx2
         long spendAmount = 5000;

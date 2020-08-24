@@ -19,6 +19,8 @@ public abstract class CahootsWallet {
         this.params = params;
     }
 
+    public abstract long fetchFeePerB();
+
     public abstract int fetchPostChangeIndex();
 
     protected abstract List<CahootsUtxo> fetchUtxos(int account);

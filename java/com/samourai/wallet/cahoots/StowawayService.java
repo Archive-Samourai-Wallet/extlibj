@@ -50,7 +50,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     }
 
     @Override
-    public Stowaway reply(Stowaway stowaway, CahootsWallet cahootsWallet, long feePerB) throws Exception {
+    public Stowaway reply(Stowaway stowaway, CahootsWallet cahootsWallet) throws Exception {
         int step = stowaway.getStep();
         if (log.isDebugEnabled()) {
             log.debug("# Stowaway <= step="+step);
@@ -58,7 +58,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
         Stowaway payload;
         switch (step) {
             case 1:
-                payload = doStowaway2(stowaway, cahootsWallet, feePerB);
+                payload = doStowaway2(stowaway, cahootsWallet);
                 break;
             case 2:
                 payload = doStowaway3(stowaway, cahootsWallet);
@@ -184,7 +184,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     //
     // sender
     //
-    public Stowaway doStowaway2(Stowaway stowaway1, CahootsWallet cahootsWallet, long feePerB) throws Exception {
+    public Stowaway doStowaway2(Stowaway stowaway1, CahootsWallet cahootsWallet) throws Exception {
 
         if (log.isDebugEnabled()) {
             log.debug("sender account (2):" + stowaway1.getAccount());
@@ -214,6 +214,8 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
                 lowUTXO.add(utxo);
             }
         }
+
+        long feePerB = cahootsWallet.fetchFeePerB();
 
         List<List<CahootsUtxo>> listOfLists = new ArrayList<List<CahootsUtxo>>();
         Collections.shuffle(lowUTXO);

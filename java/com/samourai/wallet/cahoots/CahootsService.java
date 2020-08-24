@@ -10,13 +10,11 @@ public class CahootsService extends SorobanMessageService<CahootsMessage> {
 
     private NetworkParameters params;
     private CahootsWallet cahootsWallet;
-    private long feePerB;
     private int account;
 
-    public CahootsService(NetworkParameters params, CahootsWallet cahootsWallet, long feePerB, int account) {
+    public CahootsService(NetworkParameters params, CahootsWallet cahootsWallet, int account) {
         this.params = params;
         this.cahootsWallet = cahootsWallet;
-        this.feePerB = feePerB;
         this.account = account;
     }
 
@@ -50,7 +48,7 @@ public class CahootsService extends SorobanMessageService<CahootsMessage> {
             responsePayload = cahootsService.startCollaborator(payload, cahootsWallet, account);
         } else {
             // continue existing Cahoots
-            responsePayload = cahootsService.reply(payload, cahootsWallet, feePerB);
+            responsePayload = cahootsService.reply(payload, cahootsWallet);
         }
         CahootsMessage cahootsMessage = new CahootsMessage(responsePayload);
         return cahootsMessage;
