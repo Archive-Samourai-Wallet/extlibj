@@ -20,6 +20,10 @@ public class CahootsMessage implements SorobanMessage {
         return cahoots.getStep();
     }
 
+    public int getNbSteps() {
+        return NB_STEPS;
+    }
+
     @Override
     public boolean isLastMessage() {
         return getStep() == LAST_STEP;
