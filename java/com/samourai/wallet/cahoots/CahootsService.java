@@ -10,12 +10,10 @@ public class CahootsService extends SorobanMessageService<CahootsMessage> {
 
     private NetworkParameters params;
     private CahootsWallet cahootsWallet;
-    private int account;
 
-    public CahootsService(NetworkParameters params, CahootsWallet cahootsWallet, int account) {
+    public CahootsService(NetworkParameters params, CahootsWallet cahootsWallet) {
         this.params = params;
         this.cahootsWallet = cahootsWallet;
-        this.account = account;
     }
 
     @Override
@@ -23,14 +21,14 @@ public class CahootsService extends SorobanMessageService<CahootsMessage> {
         return CahootsMessage.parse(payload);
     }
 
-    public CahootsMessage newStonewallx2(long amount, String address) {
+    public CahootsMessage newStonewallx2(int account, long amount, String address) throws Exception {
         STONEWALLx2Service stonewallx2Service = new STONEWALLx2Service(params);
         STONEWALLx2 payload0 = stonewallx2Service.startInitiator(cahootsWallet, amount, account, address);
         CahootsMessage cahootsMessage = new CahootsMessage(payload0);
         return cahootsMessage;
     }
 
-    public CahootsMessage newStowaway(long amount) {
+    public CahootsMessage newStowaway(int account, long amount) throws Exception {
         StowawayService stowawayService = new StowawayService(params);
         Stowaway payload0 = stowawayService.startInitiator(cahootsWallet, amount, account);
         CahootsMessage cahootsMessage = new CahootsMessage(payload0);
@@ -38,7 +36,7 @@ public class CahootsService extends SorobanMessageService<CahootsMessage> {
     }
 
     @Override
-    public CahootsMessage reply(CahootsMessage request) throws Exception {
+    public CahootsMessage reply(int account, CahootsMessage request) throws Exception {
         Cahoots payload = request.getCahoots();
         AbstractCahootsService cahootsService = newCahootsService(request.getType());
 

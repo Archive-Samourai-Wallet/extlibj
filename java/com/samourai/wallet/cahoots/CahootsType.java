@@ -4,13 +4,15 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Optional;
 
 public enum CahootsType {
-    STONEWALLX2(0),
-    STOWAWAY(1);
+    STONEWALLX2(0, CahootsTypeUser.COUNTERPARTY),
+    STOWAWAY(1, CahootsTypeUser.RECEIVER);
 
     private int value;
+    private CahootsTypeUser typeUserCounterparty;
 
-    CahootsType(int value) {
+    CahootsType(int value, CahootsTypeUser typeUserCounterparty) {
         this.value = value;
+        this.typeUserCounterparty = typeUserCounterparty;
     }
 
     public static Optional<CahootsType> find(int value) {
@@ -25,5 +27,9 @@ public enum CahootsType {
     @JsonValue
     public int getValue() {
         return value;
+    }
+
+    public CahootsTypeUser getTypeUserCounterparty() {
+        return typeUserCounterparty;
     }
 }

@@ -28,7 +28,10 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
         super(params);
     }
 
-    public Stowaway startInitiator(CahootsWallet cahootsWallet, long amount, int account) {
+    public Stowaway startInitiator(CahootsWallet cahootsWallet, long amount, int account) throws Exception {
+        if (amount <= 0) {
+            throw new Exception("Invalid amount");
+        }
         byte[] fingerprint = cahootsWallet.getBip84Wallet().getWallet().getFingerprint();
         Stowaway stowaway0 = doStowaway0(amount, account, fingerprint);
         if (log.isDebugEnabled()) {

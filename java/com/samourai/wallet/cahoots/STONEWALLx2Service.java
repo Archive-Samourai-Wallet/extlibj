@@ -7,6 +7,7 @@ import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.whirlpool.WhirlpoolConst;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.*;
 import org.bitcoinj.script.Script;
@@ -26,7 +27,13 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
         super(params);
     }
 
-    public STONEWALLx2 startInitiator(CahootsWallet cahootsWallet, long amount, int account, String address) {
+    public STONEWALLx2 startInitiator(CahootsWallet cahootsWallet, long amount, int account, String address) throws Exception {
+        if (amount <= 0) {
+            throw new Exception("Invalid amount");
+        }
+        if (StringUtils.isEmpty(address)) {
+            throw new Exception("Invalid address");
+        }
         byte[] fingerprint = cahootsWallet.getBip84Wallet().getWallet().getFingerprint();
         STONEWALLx2 stonewall0 = doSTONEWALLx2_0(amount, address, account, fingerprint);
         if (log.isDebugEnabled()) {
