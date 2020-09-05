@@ -20,13 +20,23 @@ import java.security.spec.InvalidKeySpecException;
 public abstract class BIP47UtilGeneric {
 
     private static ISecretPointFactory secretPointFactory;
+    private static boolean secretPointFactoryForced;
 
-    protected BIP47UtilGeneric(ISecretPointFactory secretPointFactory) {
+    protected BIP47UtilGeneric(ISecretPointFactory secretPointFactory, boolean secretPointFactoryForced) {
         setSecretPointFactory(secretPointFactory);
+        if (secretPointFactoryForced) {
+            // avoids Android impl getting overriden by Java impl
+            BIP47UtilGeneric.secretPointFactoryForced = true;
+        }
+    }
+    protected BIP47UtilGeneric(ISecretPointFactory secretPointFactory) {
+        this(secretPointFactory, false);
     }
 
-    protected static void setSecretPointFactory(ISecretPointFactory secretPointFactory) {
-        BIP47UtilGeneric.secretPointFactory = secretPointFactory;
+    private static void setSecretPointFactory(ISecretPointFactory secretPointFactory) {
+        if (!BIP47UtilGeneric.secretPointFactoryForced) {
+            BIP47UtilGeneric.secretPointFactory = secretPointFactory;
+        }
     }
 
     public HD_Address getNotificationAddress(BIP47Wallet wallet) {
