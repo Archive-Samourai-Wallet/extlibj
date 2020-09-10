@@ -5,8 +5,7 @@ import com.google.common.base.Optional;
 
 public enum CahootsTypeUser {
     SENDER(0),
-    COUNTERPARTY(1),
-    RECEIVER(2);
+    COUNTERPARTY(1);
 
     private int value;
 
@@ -26,5 +25,9 @@ public enum CahootsTypeUser {
     @JsonValue
     public int getValue() {
         return value;
+    }
+
+    public CahootsTypeUser getPartner() {
+        return SENDER.equals(this) ? COUNTERPARTY : SENDER;
     }
 }

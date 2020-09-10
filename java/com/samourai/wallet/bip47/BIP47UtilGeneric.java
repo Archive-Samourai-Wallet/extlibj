@@ -23,7 +23,9 @@ public abstract class BIP47UtilGeneric {
     private static boolean secretPointFactoryForced;
 
     protected BIP47UtilGeneric(ISecretPointFactory secretPointFactory, boolean secretPointFactoryForced) {
-        setSecretPointFactory(secretPointFactory);
+        if (BIP47UtilGeneric.secretPointFactory == null || !BIP47UtilGeneric.secretPointFactoryForced) {
+            BIP47UtilGeneric.secretPointFactory = secretPointFactory;
+        }
         if (secretPointFactoryForced) {
             // avoids Android impl getting overriden by Java impl
             BIP47UtilGeneric.secretPointFactoryForced = true;
@@ -31,12 +33,6 @@ public abstract class BIP47UtilGeneric {
     }
     protected BIP47UtilGeneric(ISecretPointFactory secretPointFactory) {
         this(secretPointFactory, false);
-    }
-
-    private static void setSecretPointFactory(ISecretPointFactory secretPointFactory) {
-        if (!BIP47UtilGeneric.secretPointFactoryForced) {
-            BIP47UtilGeneric.secretPointFactory = secretPointFactory;
-        }
     }
 
     public HD_Address getNotificationAddress(BIP47Wallet wallet) {

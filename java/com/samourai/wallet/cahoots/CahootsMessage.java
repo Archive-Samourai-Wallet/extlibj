@@ -37,10 +37,7 @@ public class CahootsMessage implements SorobanMessage {
         if (getStep()%2 == 0) {
             return CahootsTypeUser.SENDER;
         }
-        if (CahootsType.STONEWALLX2.equals(getType())) {
-            return CahootsTypeUser.COUNTERPARTY;
-        }
-        return CahootsTypeUser.RECEIVER;
+        return CahootsTypeUser.COUNTERPARTY;
     }
 
     @Override

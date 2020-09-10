@@ -50,7 +50,7 @@ public class CahootsServiceTest extends AbstractCahootsTest {
 
         // receiver => doStowaway1
         CahootsMessage payload1 = cahootsReceiver.reply(account, payload0);
-        verify(EXPECTED_PAYLOADS[1], payload1, false, CahootsType.STOWAWAY, CahootsTypeUser.RECEIVER);
+        verify(EXPECTED_PAYLOADS[1], payload1, false, CahootsType.STOWAWAY, CahootsTypeUser.COUNTERPARTY);
 
         // sender => doStowaway2
         CahootsMessage payload2 = cahootsSender.reply(account, payload1);
@@ -58,7 +58,7 @@ public class CahootsServiceTest extends AbstractCahootsTest {
 
         // receiver => doStowaway3
         CahootsMessage payload3 = cahootsReceiver.reply(account, payload2);
-        verify(EXPECTED_PAYLOADS[3], payload3, false, CahootsType.STOWAWAY, CahootsTypeUser.RECEIVER);
+        verify(EXPECTED_PAYLOADS[3], payload3, false, CahootsType.STOWAWAY, CahootsTypeUser.COUNTERPARTY);
 
         // sender => doStowaway4
         CahootsMessage payload4 = cahootsSender.reply(account, payload3);
