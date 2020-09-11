@@ -1,32 +1,40 @@
 package com.samourai.wallet.crypto;
 
-import com.samourai.wallet.crypto.impl.ECDH;
 import com.samourai.wallet.crypto.impl.ECDHKeySet;
 import com.samourai.wallet.crypto.impl.EncryptedMessage;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
+import org.bouncycastle.jce.provider.JCEECPrivateKey;
+import org.bouncycastle.jce.provider.JCEECPublicKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import java.security.*;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.*;
 
 public class CryptoUtil {
     private static final Logger log = LoggerFactory.getLogger(CryptoUtil.class);
 
     private static CryptoUtil instance;
+    private String provider;
 
-    public static CryptoUtil getInstance() {
+    public static CryptoUtil getInstance(String provider) {
         if (instance == null) {
-            instance = new CryptoUtil();
+            instance = new CryptoUtil(provider);
         }
         return instance;
+    }
+
+    public CryptoUtil(String provider) {
+        this.provider = provider;
     }
 
     public byte[] encrypt (byte[] data, ECDHKeySet keySet) throws Exception {
@@ -51,8 +59,27 @@ public class CryptoUtil {
         return new String(data, "UTF-8");
     }
 
-    public ECDHKeySet getSharedSecret (ECKey keyServer, ECKey keyClient) {
-        return ECDH.getSharedSecret(keyServer, keyClient);
+    public ECDHKeySet getSharedSecret (ECKey keyServer, ECKey keyClient) throws Exception {
+        AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC", provider);
+        parameters.init(new ECGenParameterSpec("secp256k1"));
+        ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
+
+        ECPrivateKeySpec specPrivate = new ECPrivateKeySpec(keyServer.getPrivKey(), ecParameters);
+        ECPublicKeySpec specPublic = new ECPublicKeySpec(new ECPoint(keyClient.getPubKeyPoint().getXCoord().toBigInteger(), keyClient.getPubKeyPoint()
+                .getYCoord().toBigInteger()), ecParameters);
+
+        KeyFactory kf = KeyFactory.getInstance("EC", provider);
+        ECPrivateKey privateKey = (ECPrivateKey) kf.generatePrivate(specPrivate);
+        ECPublicKey publicKey = (ECPublicKey) kf.generatePublic(specPublic);
+
+        JCEECPrivateKey ecPrivKey = new JCEECPrivateKey(privateKey);
+        JCEECPublicKey ecPubKey = new JCEECPublicKey(publicKey);
+
+        KeyAgreement aKeyAgree = KeyAgreement.getInstance("ECDH");
+        aKeyAgree.init(ecPrivKey);
+        aKeyAgree.doPhase(ecPubKey, true);
+
+        return new ECDHKeySet(aKeyAgree.generateSecret(), keyServer.getPubKey(), keyClient.getPubKey(), provider);
     }
 
     public byte[] createSignature (ECKey pubkey, byte[] data) throws NoSuchProviderException, NoSuchAlgorithmException {
@@ -61,7 +88,7 @@ public class CryptoUtil {
 
     public boolean verifySignature (ECKey pubkey, byte[] data, byte[] signature) throws NoSuchProviderException, NoSuchAlgorithmException {
         try {
-            MessageDigest hashHandler = MessageDigest.getInstance("SHA256", "BC");
+            MessageDigest hashHandler = MessageDigest.getInstance("SHA256", provider);
             hashHandler.update(data);
             byte[] hash = hashHandler.digest();
             return pubkey.verify(hash, signature);
@@ -120,7 +147,6 @@ public class CryptoUtil {
         Mac mac = Mac.getInstance("HmacSHA1");
         mac.init(keySpec);
         byte[] result = mac.doFinal(rest);
-
 
         if (!MessageDigest.isEqual(result, hmac)){
             throw new RuntimeException("HMAC does not match..");

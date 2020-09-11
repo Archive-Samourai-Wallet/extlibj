@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 
 public class CryptoUtilTest {
-  private CryptoUtil cryptoUtil = CryptoUtil.getInstance();
+  private CryptoUtil cryptoUtil = CryptoUtil.getInstance("BC");
 
   @Test
   public void encryptDecrypt() throws Exception {

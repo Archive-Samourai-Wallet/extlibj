@@ -15,9 +15,9 @@ public class ECDHKeySet {
     public long counterIn;
     public long counterOut;
 
-    public ECDHKeySet (byte[] masterKey, byte[] serverPubkey, byte[] clientPubkey) throws NoSuchProviderException, NoSuchAlgorithmException {
+    public ECDHKeySet (byte[] masterKey, byte[] serverPubkey, byte[] clientPubkey, String provider) throws NoSuchProviderException, NoSuchAlgorithmException {
         this.masterKey = masterKey;
-        MessageDigest hash = MessageDigest.getInstance("RIPEMD128", "BC");
+        MessageDigest hash = MessageDigest.getInstance("RIPEMD128", provider);
         byte[] t = new byte[masterKey.length + 1];
         System.arraycopy(masterKey, 0, t, 0, masterKey.length);
         t[t.length - 1] = 0x00;
