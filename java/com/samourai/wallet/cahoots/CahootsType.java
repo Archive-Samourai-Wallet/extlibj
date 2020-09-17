@@ -4,15 +4,17 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Optional;
 
 public enum CahootsType {
-    STONEWALLX2(0, "StonewallX2"),
-    STOWAWAY(1, "Stowaway");
+    STONEWALLX2(0, "StonewallX2", true),
+    STOWAWAY(1, "Stowaway", false);
 
     private int value;
     private String label;
+    private boolean minerFeeShared;
 
-    CahootsType(int value, String label) {
+    CahootsType(int value, String label, boolean minerFeeShared) {
         this.value = value;
         this.label = label;
+        this.minerFeeShared = minerFeeShared;
     }
 
     public static Optional<CahootsType> find(int value) {
@@ -31,5 +33,9 @@ public enum CahootsType {
 
     public String getLabel() {
         return label;
+    }
+
+    public boolean isMinerFeeShared() {
+        return minerFeeShared;
     }
 }

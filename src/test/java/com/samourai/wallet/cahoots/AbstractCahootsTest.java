@@ -24,15 +24,8 @@ public abstract class AbstractCahootsTest {
 
     protected Cahoots cleanPayload(Cahoots payload) throws Exception {
         Cahoots copy = Cahoots.parse(payload.toJSONString());
-        doCleanPayload(copy);
+        CahootsTestUtil.cleanPayload(copy);
         return copy;
-    }
-
-    private void doCleanPayload(Cahoots copy) {
-        // TODO static values for test
-        copy.strID = "testID";
-        copy.ts = 123456;
-        copy.psbt = null;
     }
 
     protected void verify(String expectedPayload, Cahoots cahoots) throws Exception {
@@ -41,9 +34,9 @@ public abstract class AbstractCahootsTest {
         Assertions.assertEquals(expectedPayload, payloadStr);
     }
 
-    protected void verify(String expectedPayload, CahootsMessage cahootsMessage, boolean lastStep, CahootsType type, CahootsTypeUser typeUser) throws Exception {
+    protected void verify(String expectedPayload, ManualCahootsMessage cahootsMessage, boolean lastStep, CahootsType type, CahootsTypeUser typeUser) throws Exception {
         verify(expectedPayload, cahootsMessage.getCahoots());
-        Assertions.assertEquals(lastStep, cahootsMessage.isLastMessage());
+        Assertions.assertEquals(lastStep, cahootsMessage.isDone());
         Assertions.assertEquals(type, cahootsMessage.getType());
         Assertions.assertEquals(typeUser, cahootsMessage.getTypeUser());
     }

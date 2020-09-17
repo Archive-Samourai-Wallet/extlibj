@@ -1,8 +1,8 @@
 package examples;
 
-import com.samourai.wallet.cahoots.CahootsMessage;
-import com.samourai.wallet.cahoots.CahootsService;
 import com.samourai.wallet.cahoots.CahootsWallet;
+import com.samourai.wallet.cahoots.ManualCahootsMessage;
+import com.samourai.wallet.cahoots.ManualCahootsService;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.TestNet3Params;
 
@@ -17,24 +17,24 @@ public class StowawayExample {
 
         // instanciate sender
         int senderAccount = 0;
-        CahootsService cahootsSender = new CahootsService(params, cahootsWalletSender);
+        ManualCahootsService cahootsSender = new ManualCahootsService(params, cahootsWalletSender);
 
         // instanciate receiver
         int receiverAccount = 0; //TODO
-        CahootsService cahootsReceiver = new CahootsService(params, cahootsWalletCounterparty);
+        ManualCahootsService cahootsReceiver = new ManualCahootsService(params, cahootsWalletCounterparty);
 
         // STEP 0: sender
         long spendAmount = 5000;
-        CahootsMessage message0 = cahootsSender.newStowaway(senderAccount, spendAmount);
+        ManualCahootsMessage message0 = cahootsSender.newStowaway(senderAccount, spendAmount);
 
         // STEP 1: receiver
-        CahootsMessage message1 = cahootsReceiver.reply(receiverAccount, message0);
+        ManualCahootsMessage message1 = cahootsReceiver.reply(receiverAccount, message0);
 
         // STEP 2: sender
-        CahootsMessage message2 = cahootsSender.reply(senderAccount, message1);
+        ManualCahootsMessage message2 = cahootsSender.reply(senderAccount, message1);
 
         // STEP 3: receiver
-        CahootsMessage message3 = cahootsReceiver.reply(receiverAccount, message2);
+        ManualCahootsMessage message3 = cahootsReceiver.reply(receiverAccount, message2);
 
         // STEP 4: sender
         cahootsSender.reply(senderAccount, message3);

@@ -5,38 +5,38 @@ import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CahootsService extends SorobanMessageService<CahootsMessage> {
-    private static final Logger log = LoggerFactory.getLogger(CahootsService.class);
+public class ManualCahootsService extends SorobanMessageService<ManualCahootsMessage> {
+    private static final Logger log = LoggerFactory.getLogger(ManualCahootsService.class);
 
     private NetworkParameters params;
     private CahootsWallet cahootsWallet;
 
-    public CahootsService(NetworkParameters params, CahootsWallet cahootsWallet) {
+    public ManualCahootsService(NetworkParameters params, CahootsWallet cahootsWallet) {
         this.params = params;
         this.cahootsWallet = cahootsWallet;
     }
 
     @Override
-    public CahootsMessage parse(String payload) throws Exception{
-        return CahootsMessage.parse(payload);
+    public ManualCahootsMessage parse(String payload) throws Exception{
+        return ManualCahootsMessage.parse(payload);
     }
 
-    public CahootsMessage newStonewallx2(int account, long amount, String address) throws Exception {
+    public ManualCahootsMessage newStonewallx2(int account, long amount, String address) throws Exception {
         STONEWALLx2Service stonewallx2Service = new STONEWALLx2Service(params);
         STONEWALLx2 payload0 = stonewallx2Service.startInitiator(cahootsWallet, amount, account, address);
-        CahootsMessage cahootsMessage = new CahootsMessage(payload0);
+        ManualCahootsMessage cahootsMessage = new ManualCahootsMessage(payload0);
         return cahootsMessage;
     }
 
-    public CahootsMessage newStowaway(int account, long amount) throws Exception {
+    public ManualCahootsMessage newStowaway(int account, long amount) throws Exception {
         StowawayService stowawayService = new StowawayService(params);
         Stowaway payload0 = stowawayService.startInitiator(cahootsWallet, amount, account);
-        CahootsMessage cahootsMessage = new CahootsMessage(payload0);
+        ManualCahootsMessage cahootsMessage = new ManualCahootsMessage(payload0);
         return cahootsMessage;
     }
 
     @Override
-    public CahootsMessage reply(int account, CahootsMessage request) throws Exception {
+    public ManualCahootsMessage reply(int account, ManualCahootsMessage request) throws Exception {
         Cahoots payload = request.getCahoots();
         AbstractCahootsService cahootsService = newCahootsService(request.getType());
 
@@ -48,7 +48,7 @@ public class CahootsService extends SorobanMessageService<CahootsMessage> {
             // continue existing Cahoots
             responsePayload = cahootsService.reply(payload, cahootsWallet);
         }
-        CahootsMessage cahootsMessage = new CahootsMessage(responsePayload);
+        ManualCahootsMessage cahootsMessage = new ManualCahootsMessage(responsePayload);
         return cahootsMessage;
     }
 
