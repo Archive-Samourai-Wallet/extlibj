@@ -2,6 +2,8 @@ package com.samourai.wallet.cahoots;
 
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.cahoots.psbt.PSBT;
+import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
+import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.util.Z85;
 import org.bitcoinj.core.*;

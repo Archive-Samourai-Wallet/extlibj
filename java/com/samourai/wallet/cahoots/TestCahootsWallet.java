@@ -15,7 +15,7 @@ public class TestCahootsWallet extends SimpleCahootsWallet {
     public static final int POST_CHANGE_INDEX = 123;
     public static final int FEE_PER_B = 1;
 
-    public TestCahootsWallet(BIP84Wallet bip84Wallet, NetworkParameters params) {
+    public TestCahootsWallet(BIP84Wallet bip84Wallet, NetworkParameters params) throws Exception {
         super(bip84Wallet, params, POST_CHANGE_INDEX, FEE_PER_B);
     }
 

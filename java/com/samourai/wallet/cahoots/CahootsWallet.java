@@ -1,5 +1,7 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.wallet.bip47.rpc.BIP47Wallet;
+import com.samourai.wallet.cahoots.CahootsUtxo;
 import com.samourai.wallet.segwit.BIP84Wallet;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import org.bitcoinj.core.NetworkParameters;
@@ -12,10 +14,12 @@ public abstract class CahootsWallet {
     private static final Bech32UtilGeneric bech32Util = Bech32UtilGeneric.getInstance();
 
     private BIP84Wallet bip84Wallet;
+    private BIP47Wallet bip47Wallet;
     private NetworkParameters params;
 
     public CahootsWallet(BIP84Wallet bip84Wallet, NetworkParameters params) {
         this.bip84Wallet = bip84Wallet;
+        this.bip47Wallet = new BIP47Wallet(bip84Wallet.getWallet());
         this.params = params;
     }
 
@@ -31,6 +35,10 @@ public abstract class CahootsWallet {
 
     public BIP84Wallet getBip84Wallet() {
         return bip84Wallet;
+    }
+
+    public BIP47Wallet getBip47Wallet() {
+        return bip47Wallet;
     }
 
     public List<CahootsUtxo> getUtxosWpkhByAccount(int account) {

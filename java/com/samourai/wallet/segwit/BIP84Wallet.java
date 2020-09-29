@@ -29,4 +29,7 @@ public class BIP84Wallet {
         return segwitAddress;
     }
 
+    public NetworkParameters getParams() {
+        return params;
+    }
 }

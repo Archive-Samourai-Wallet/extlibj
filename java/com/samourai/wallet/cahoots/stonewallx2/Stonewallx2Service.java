@@ -1,5 +1,9 @@
-package com.samourai.wallet.cahoots;
+package com.samourai.wallet.cahoots.stonewallx2;
 
+import com.samourai.wallet.cahoots.AbstractCahootsService;
+import com.samourai.wallet.cahoots.CahootsUtxo;
+import com.samourai.wallet.cahoots.CahootsWallet;
+import com.samourai.wallet.cahoots._TransactionOutput;
 import com.samourai.wallet.segwit.BIP84Wallet;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
@@ -20,10 +24,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
-    private static final Logger log = LoggerFactory.getLogger(STONEWALLx2Service.class);
+public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
+    private static final Logger log = LoggerFactory.getLogger(Stonewallx2Service.class);
 
-    public STONEWALLx2Service(NetworkParameters params) {
+    public Stonewallx2Service(NetworkParameters params) {
         super(params);
     }
 
@@ -43,7 +47,7 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
     }
 
     @Override
-    public STONEWALLx2 startCollaborator(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, int account) throws Exception {
+    public STONEWALLx2 startCollaborator(CahootsWallet cahootsWallet, int account, STONEWALLx2 stonewall0) throws Exception {
         STONEWALLx2 stonewall1 = doSTONEWALLx2_1(stonewall0, cahootsWallet, account);
         if (log.isDebugEnabled()) {
             log.debug("# STONEWALLx2 => step="+stonewall1.getStep());
@@ -52,7 +56,7 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
     }
 
     @Override
-    public STONEWALLx2 reply(STONEWALLx2 stonewall, CahootsWallet cahootsWallet) throws Exception {
+    public STONEWALLx2 reply(CahootsWallet cahootsWallet, STONEWALLx2 stonewall) throws Exception {
         int step = stonewall.getStep();
         if (log.isDebugEnabled()) {
             log.debug("# STONEWALLx2 <= step="+step);
@@ -83,7 +87,7 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
     //
     // sender
     //
-    public STONEWALLx2 doSTONEWALLx2_0(long spendAmount, String address, int account, byte[] fingerprint) {
+    private STONEWALLx2 doSTONEWALLx2_0(long spendAmount, String address, int account, byte[] fingerprint) {
         //
         //
         // step0: B sends spend amount to A,  creates step0
@@ -100,7 +104,7 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
     //
     // counterparty
     //
-    public STONEWALLx2 doSTONEWALLx2_1(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, int account) throws Exception {
+    private STONEWALLx2 doSTONEWALLx2_1(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, int account) throws Exception {
         BIP84Wallet bip84Wallet = cahootsWallet.getBip84Wallet();
 
         stonewall0.setCounterpartyAccount(account);
@@ -231,7 +235,7 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
     //
     // sender
     //
-    public STONEWALLx2 doSTONEWALLx2_2(STONEWALLx2 stonewall1, CahootsWallet cahootsWallet) throws Exception {
+    private STONEWALLx2 doSTONEWALLx2_2(STONEWALLx2 stonewall1, CahootsWallet cahootsWallet) throws Exception {
 
         Transaction transaction = stonewall1.getTransaction();
         if (log.isDebugEnabled()) {
@@ -413,7 +417,7 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
     //
     // counterparty
     //
-    public STONEWALLx2 doSTONEWALLx2_3(STONEWALLx2 stonewall2, CahootsWallet cahootsWallet) throws Exception {
+    private STONEWALLx2 doSTONEWALLx2_3(STONEWALLx2 stonewall2, CahootsWallet cahootsWallet) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall2.getCounterpartyAccount());
         HashMap<String, ECKey> keyBag_A = computeKeyBag(stonewall2, utxos);
 
@@ -426,7 +430,7 @@ public class STONEWALLx2Service extends AbstractCahootsService<STONEWALLx2> {
     //
     // sender
     //
-    public STONEWALLx2 doSTONEWALLx2_4(STONEWALLx2 stonewall3, CahootsWallet cahootsWallet) throws Exception {
+    private STONEWALLx2 doSTONEWALLx2_4(STONEWALLx2 stonewall3, CahootsWallet cahootsWallet) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall3.getAccount());
         HashMap<String, ECKey> keyBag_B = computeKeyBag(stonewall3, utxos);
 

@@ -1,5 +1,8 @@
-package com.samourai.wallet.cahoots;
+package com.samourai.wallet.soroban.cahoots;
 
+import com.samourai.wallet.cahoots.Cahoots;
+import com.samourai.wallet.cahoots.CahootsType;
+import com.samourai.wallet.cahoots.CahootsTypeUser;
 import com.samourai.wallet.soroban.client.SorobanMessage;
 
 public class ManualCahootsMessage implements SorobanMessage {
@@ -9,7 +12,7 @@ public class ManualCahootsMessage implements SorobanMessage {
     public static final int NB_STEPS = LAST_STEP+1; // starting from 0
 
     public ManualCahootsMessage(Cahoots cahoots) {
-       this.cahoots = cahoots;
+        this.cahoots = cahoots;
     }
 
     public static ManualCahootsMessage parse(String payload) throws Exception {
@@ -27,11 +30,6 @@ public class ManualCahootsMessage implements SorobanMessage {
     @Override
     public boolean isDone() {
         return getStep() == LAST_STEP;
-    }
-
-    @Override
-    public boolean isInteraction() {
-        return false;
     }
 
     public CahootsType getType() {
@@ -56,6 +54,6 @@ public class ManualCahootsMessage implements SorobanMessage {
 
     @Override
     public String toString() {
-        return "step="+getStep()+"/"+NB_STEPS+", type="+getType()+", typeUser="+getTypeUser()+", payload="+toPayload();
+        return "(ManualCahootsMessage)step="+getStep()+"/"+NB_STEPS+", type="+getType()+", typeUser="+getTypeUser()+", payload="+toPayload();
     }
 }

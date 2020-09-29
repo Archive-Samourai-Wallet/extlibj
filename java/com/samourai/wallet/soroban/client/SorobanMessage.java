@@ -1,9 +1,7 @@
 package com.samourai.wallet.soroban.client;
 
-public interface SorobanMessage {
+public interface SorobanMessage extends SorobanReply {
     String toPayload();
 
     boolean isDone();
-
-    boolean isInteraction();
 }

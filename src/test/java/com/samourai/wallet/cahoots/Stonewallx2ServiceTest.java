@@ -1,15 +1,17 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
+import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.segwit.BIP84Wallet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class STONEWALLx2ServiceTest extends AbstractCahootsTest {
-    private static final Logger log = LoggerFactory.getLogger(STONEWALLx2ServiceTest.class);
+public class Stonewallx2ServiceTest extends AbstractCahootsTest {
+    private static final Logger log = LoggerFactory.getLogger(Stonewallx2ServiceTest.class);
 
-    private STONEWALLx2Service stonewallx2Service = new STONEWALLx2Service(params);
+    private Stonewallx2Service stonewallx2Service = new Stonewallx2Service(params);
 
     private static final String SEED_WORDS = "all all all all all all all all all all all all";
     private static final String SEED_PASSPHRASE_INITIATOR = "initiator";
@@ -44,19 +46,19 @@ public class STONEWALLx2ServiceTest extends AbstractCahootsTest {
         verify(EXPECTED_PAYLOADS[0], payload0);
 
         // counterparty => doSTONEWALLx2_1
-        STONEWALLx2 payload1 = stonewallx2Service.startCollaborator(payload0, cahootsWalletCounterparty, account);
+        STONEWALLx2 payload1 = stonewallx2Service.startCollaborator(cahootsWalletCounterparty, account, payload0);
         verify(EXPECTED_PAYLOADS[1], payload1);
 
         // sender => doSTONEWALLx2_2
-        STONEWALLx2 payload2 = stonewallx2Service.reply(payload1, cahootsWalletSender);
+        STONEWALLx2 payload2 = stonewallx2Service.reply(cahootsWalletSender, payload1);
         verify(EXPECTED_PAYLOADS[2], payload2);
 
         // counterparty => doSTONEWALLx2_3
-        STONEWALLx2 payload3 = stonewallx2Service.reply(payload2, cahootsWalletCounterparty);
+        STONEWALLx2 payload3 = stonewallx2Service.reply(cahootsWalletCounterparty, payload2);
         verify(EXPECTED_PAYLOADS[3], payload3);
 
         // sender => doSTONEWALLx2_4
-        STONEWALLx2 payload4 = stonewallx2Service.reply(payload3, cahootsWalletSender);
+        STONEWALLx2 payload4 = stonewallx2Service.reply(cahootsWalletSender, payload3);
         verify(EXPECTED_PAYLOADS[4], payload4);
     }
 }

@@ -1,15 +1,17 @@
 package examples;
 
+import com.samourai.wallet.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.cahoots.CahootsWallet;
-import com.samourai.wallet.cahoots.ManualCahootsMessage;
-import com.samourai.wallet.cahoots.ManualCahootsService;
+import com.samourai.wallet.soroban.cahoots.ManualCahootsMessage;
+import com.samourai.wallet.soroban.cahoots.ManualCahootsService;
+import com.samourai.wallet.soroban.client.SorobanInteraction;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.TestNet3Params;
 
 public class StowawayExample {
     private static final NetworkParameters params = TestNet3Params.get();
 
-    // TODO instanciate real wallets here!
+    // instanciate real wallets here!
     private static final CahootsWallet cahootsWalletSender = null;
     private static final CahootsWallet cahootsWalletCounterparty = null;
 
@@ -17,27 +19,30 @@ public class StowawayExample {
 
         // instanciate sender
         int senderAccount = 0;
-        ManualCahootsService cahootsSender = new ManualCahootsService(params, cahootsWalletSender);
+        ManualCahootsService cahootsSender = new ManualCahootsService(cahootsWalletSender);
 
         // instanciate receiver
-        int receiverAccount = 0; //TODO
-        ManualCahootsService cahootsReceiver = new ManualCahootsService(params, cahootsWalletCounterparty);
+        int receiverAccount = 0;
+        ManualCahootsService cahootsReceiver = new ManualCahootsService(cahootsWalletCounterparty);
 
         // STEP 0: sender
         long spendAmount = 5000;
-        ManualCahootsMessage message0 = cahootsSender.newStowaway(senderAccount, spendAmount);
+        CahootsContext contextSender = CahootsContext.newInitiatorStowaway(spendAmount);
+        ManualCahootsMessage message0 = cahootsSender.initiate(senderAccount, contextSender);
 
         // STEP 1: receiver
-        ManualCahootsMessage message1 = cahootsReceiver.reply(receiverAccount, message0);
+        CahootsContext contextReceiver = CahootsContext.newCounterpartyStowaway();
+        ManualCahootsMessage message1 = (ManualCahootsMessage)cahootsReceiver.reply(receiverAccount, contextReceiver, message0);
 
         // STEP 2: sender
-        ManualCahootsMessage message2 = cahootsSender.reply(senderAccount, message1);
+        ManualCahootsMessage message2 = (ManualCahootsMessage)cahootsSender.reply(senderAccount, contextSender, message1);
 
         // STEP 3: receiver
-        ManualCahootsMessage message3 = cahootsReceiver.reply(receiverAccount, message2);
+        ManualCahootsMessage message3 = (ManualCahootsMessage)cahootsReceiver.reply(receiverAccount, contextReceiver, message2);
 
         // STEP 4: sender
-        cahootsSender.reply(senderAccount, message3);
+        SorobanInteraction confirmTx = (SorobanInteraction)cahootsSender.reply(senderAccount, contextSender, message3);
+        ManualCahootsMessage message4 = (ManualCahootsMessage)confirmTx.accept();
 
         // SUCCESS
     }

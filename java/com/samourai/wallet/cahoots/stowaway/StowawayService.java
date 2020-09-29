@@ -1,6 +1,10 @@
-package com.samourai.wallet.cahoots;
+package com.samourai.wallet.cahoots.stowaway;
 
 import com.samourai.wallet.SamouraiWalletConst;
+import com.samourai.wallet.cahoots.AbstractCahootsService;
+import com.samourai.wallet.cahoots.CahootsUtxo;
+import com.samourai.wallet.cahoots.CahootsWallet;
+import com.samourai.wallet.cahoots._TransactionOutput;
 import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.segwit.BIP84Wallet;
 import com.samourai.wallet.segwit.SegwitAddress;
@@ -41,7 +45,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     }
 
     @Override
-    public Stowaway startCollaborator(Stowaway stowaway0, CahootsWallet cahootsWallet, int account) throws Exception {
+    public Stowaway startCollaborator(CahootsWallet cahootsWallet, int account, Stowaway stowaway0) throws Exception {
         if (account != 0) {
             throw new Exception("Invalid Stowaway collaborator account");
         }
@@ -53,7 +57,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     }
 
     @Override
-    public Stowaway reply(Stowaway stowaway, CahootsWallet cahootsWallet) throws Exception {
+    public Stowaway reply(CahootsWallet cahootsWallet, Stowaway stowaway) throws Exception {
         int step = stowaway.getStep();
         if (log.isDebugEnabled()) {
             log.debug("# Stowaway <= step="+step);
@@ -84,7 +88,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     //
     // sender
     //
-    public Stowaway doStowaway0(long spendAmount, int account, byte[] fingerprint) {
+    private Stowaway doStowaway0(long spendAmount, int account, byte[] fingerprint) {
         //
         //
         // step0: B sends spend amount to A,  creates step0
@@ -101,7 +105,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     //
     // receiver
     //
-    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet) throws Exception {
+    private Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet) throws Exception {
         BIP84Wallet bip84Wallet = cahootsWallet.getBip84Wallet();
 
         byte[] fingerprint = bip84Wallet.getWallet().getFingerprint();
@@ -187,7 +191,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     //
     // sender
     //
-    public Stowaway doStowaway2(Stowaway stowaway1, CahootsWallet cahootsWallet) throws Exception {
+    private Stowaway doStowaway2(Stowaway stowaway1, CahootsWallet cahootsWallet) throws Exception {
 
         if (log.isDebugEnabled()) {
             log.debug("sender account (2):" + stowaway1.getAccount());
@@ -337,7 +341,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     //
     // receiver
     //
-    public Stowaway doStowaway3(Stowaway stowaway2, CahootsWallet cahootsWallet) throws Exception {
+    private Stowaway doStowaway3(Stowaway stowaway2, CahootsWallet cahootsWallet) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(0);
         HashMap<String, ECKey> keyBag_A = computeKeyBag(stowaway2, utxos);
 
@@ -350,7 +354,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     //
     // sender
     //
-    public Stowaway doStowaway4(Stowaway stowaway3, CahootsWallet cahootsWallet) throws Exception {
+    private Stowaway doStowaway4(Stowaway stowaway3, CahootsWallet cahootsWallet) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway3.getAccount());
         HashMap<String, ECKey> keyBag_B = computeKeyBag(stowaway3, utxos);
 

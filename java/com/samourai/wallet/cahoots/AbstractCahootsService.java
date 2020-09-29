@@ -17,12 +17,11 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
         this.params = params;
     }
 
-    public abstract T startCollaborator(T payload0, CahootsWallet cahootsWallet, int account) throws Exception;
+    public abstract T startCollaborator(CahootsWallet cahootsWallet, int account, T payload0) throws Exception;
 
-    public abstract T reply(T payload, CahootsWallet cahootsWallet) throws Exception;
+    public abstract T reply(CahootsWallet cahootsWallet, T payload) throws Exception;
 
-
-    public HashMap<String, ECKey> computeKeyBag(Cahoots cahoots, List<CahootsUtxo> utxos) {
+    protected HashMap<String, ECKey> computeKeyBag(Cahoots cahoots, List<CahootsUtxo> utxos) {
         // utxos by hash
         HashMap<String, CahootsUtxo> utxosByHash = new HashMap<String, CahootsUtxo>();
         for (CahootsUtxo utxo : utxos) {

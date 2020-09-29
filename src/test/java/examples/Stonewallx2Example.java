@@ -1,6 +1,11 @@
 package examples;
 
-import com.samourai.wallet.cahoots.*;
+import com.samourai.wallet.soroban.cahoots.CahootsContext;
+import com.samourai.wallet.cahoots.CahootsWallet;
+import com.samourai.wallet.soroban.cahoots.ManualCahootsMessage;
+import com.samourai.wallet.soroban.cahoots.ManualCahootsService;
+import com.samourai.wallet.soroban.client.SorobanInteraction;
+import com.samourai.wallet.soroban.client.SorobanMessage;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.TestNet3Params;
 
@@ -15,28 +20,31 @@ public class Stonewallx2Example {
 
         // instanciate sender
         int senderAccount = 0;
-        ManualCahootsService cahootsSender = new ManualCahootsService(params, cahootsWalletSender);
+        ManualCahootsService cahootsSender = new ManualCahootsService(cahootsWalletSender);
 
         // instanciate counterparty
         int receiverAccount = 0;
-        ManualCahootsService cahootsCounterparty = new ManualCahootsService(params, cahootsWalletCounterparty);
+        ManualCahootsService cahootsCounterparty = new ManualCahootsService(cahootsWalletCounterparty);
 
         // STEP 0: sender
         long spendAmount = 5000;
         String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
-        ManualCahootsMessage message0 = cahootsSender.newStonewallx2(senderAccount, spendAmount, address);
+        CahootsContext contextSender = CahootsContext.newInitiatorStonewallx2(spendAmount, address);
+        ManualCahootsMessage message0 = cahootsSender.initiate(senderAccount, contextSender);
 
         // STEP 1: counterparty
-        ManualCahootsMessage message1 = cahootsCounterparty.reply(receiverAccount, message0);
+        CahootsContext contextReceiver = CahootsContext.newCounterpartyStonewallx2();
+        ManualCahootsMessage message1 = (ManualCahootsMessage)cahootsCounterparty.reply(receiverAccount, contextReceiver, message0);
 
         // STEP 2: sender
-        ManualCahootsMessage message2 = cahootsSender.reply(senderAccount, message1);
+        ManualCahootsMessage message2 = (ManualCahootsMessage)cahootsSender.reply(senderAccount, contextSender, message1);
 
         // STEP 3: counterparty
-        ManualCahootsMessage message3 = cahootsCounterparty.reply(receiverAccount, message2);
+        ManualCahootsMessage message3 = (ManualCahootsMessage)cahootsCounterparty.reply(receiverAccount, contextReceiver, message2);
 
-        // STEP 4: sender
-        cahootsSender.reply(senderAccount, message3);
+        // STEP 4: sender confirm TX_BROADCAST
+        SorobanInteraction confirmTx = (SorobanInteraction)cahootsSender.reply(senderAccount, contextSender, message3);
+        ManualCahootsMessage message4 = (ManualCahootsMessage)confirmTx.accept();
 
         // SUCCESS
     }
