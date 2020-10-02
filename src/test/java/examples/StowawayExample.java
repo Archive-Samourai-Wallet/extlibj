@@ -1,10 +1,10 @@
 package examples;
 
-import com.samourai.wallet.soroban.cahoots.CahootsContext;
+import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.cahoots.CahootsWallet;
-import com.samourai.wallet.soroban.cahoots.ManualCahootsMessage;
-import com.samourai.wallet.soroban.cahoots.ManualCahootsService;
-import com.samourai.wallet.soroban.client.SorobanInteraction;
+import com.samourai.soroban.cahoots.ManualCahootsMessage;
+import com.samourai.soroban.cahoots.ManualCahootsService;
+import com.samourai.soroban.client.SorobanInteraction;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.TestNet3Params;
 
@@ -42,7 +42,7 @@ public class StowawayExample {
 
         // STEP 4: sender
         SorobanInteraction confirmTx = (SorobanInteraction)cahootsSender.reply(senderAccount, contextSender, message3);
-        ManualCahootsMessage message4 = (ManualCahootsMessage)confirmTx.accept();
+        ManualCahootsMessage message4 = (ManualCahootsMessage)confirmTx.getReplyAccept();
 
         // SUCCESS
     }

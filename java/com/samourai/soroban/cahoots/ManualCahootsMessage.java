@@ -1,9 +1,9 @@
-package com.samourai.wallet.soroban.cahoots;
+package com.samourai.soroban.cahoots;
 
 import com.samourai.wallet.cahoots.Cahoots;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsTypeUser;
-import com.samourai.wallet.soroban.client.SorobanMessage;
+import com.samourai.soroban.client.SorobanMessage;
 
 public class ManualCahootsMessage implements SorobanMessage {
     private Cahoots cahoots;

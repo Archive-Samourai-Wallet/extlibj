@@ -1,11 +1,10 @@
 package examples;
 
-import com.samourai.wallet.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.cahoots.CahootsWallet;
-import com.samourai.wallet.soroban.cahoots.ManualCahootsMessage;
-import com.samourai.wallet.soroban.cahoots.ManualCahootsService;
-import com.samourai.wallet.soroban.client.SorobanInteraction;
-import com.samourai.wallet.soroban.client.SorobanMessage;
+import com.samourai.soroban.cahoots.CahootsContext;
+import com.samourai.soroban.cahoots.ManualCahootsMessage;
+import com.samourai.soroban.cahoots.ManualCahootsService;
+import com.samourai.soroban.cahoots.TxBroadcastInteraction;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.TestNet3Params;
 
@@ -43,8 +42,8 @@ public class Stonewallx2Example {
         ManualCahootsMessage message3 = (ManualCahootsMessage)cahootsCounterparty.reply(receiverAccount, contextReceiver, message2);
 
         // STEP 4: sender confirm TX_BROADCAST
-        SorobanInteraction confirmTx = (SorobanInteraction)cahootsSender.reply(senderAccount, contextSender, message3);
-        ManualCahootsMessage message4 = (ManualCahootsMessage)confirmTx.accept();
+        TxBroadcastInteraction txBroadcastInteraction = (TxBroadcastInteraction)cahootsSender.reply(senderAccount, contextSender, message3);
+        ManualCahootsMessage message4 = (ManualCahootsMessage)txBroadcastInteraction.getReplyAccept();
 
         // SUCCESS
     }

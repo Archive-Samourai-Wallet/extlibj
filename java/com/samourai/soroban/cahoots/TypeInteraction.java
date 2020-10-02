@@ -1,4 +1,4 @@
-package com.samourai.wallet.soroban.cahoots;
+package com.samourai.soroban.cahoots;
 
 import com.samourai.wallet.cahoots.CahootsTypeUser;
 import java8.util.Optional;
@@ -21,5 +21,9 @@ public enum TypeInteraction {
       }
     }
     return Optional.empty();
+  }
+
+  public int getStep() {
+    return step;
   }
 }

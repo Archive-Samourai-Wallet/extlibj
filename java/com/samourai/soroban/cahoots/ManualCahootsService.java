@@ -1,20 +1,17 @@
-package com.samourai.wallet.soroban.cahoots;
+package com.samourai.soroban.cahoots;
 
 import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
-import com.samourai.wallet.soroban.client.SorobanInteraction;
-import com.samourai.wallet.soroban.client.SorobanMessage;
-import com.samourai.wallet.soroban.client.SorobanMessageService;
-import com.samourai.wallet.soroban.client.SorobanReply;
+import com.samourai.soroban.client.SorobanInteraction;
+import com.samourai.soroban.client.SorobanMessageService;
+import com.samourai.soroban.client.SorobanReply;
 import java8.util.Optional;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.Callable;
 
 public class ManualCahootsService extends SorobanMessageService<ManualCahootsMessage, CahootsContext> {
     private static final Logger log = LoggerFactory.getLogger(ManualCahootsService.class);
@@ -67,19 +64,18 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
             Optional<TypeInteraction> optInteraction =
                     TypeInteraction.find(request.getTypeUser().getPartner(), request.getStep() + 1);
             if (optInteraction.isPresent()) {
-                final TypeInteraction typeInteraction = optInteraction.get();
                 // reply interaction
-                Callable<SorobanMessage> onAccept =
-                    new Callable<SorobanMessage>() {
-                        @Override
-                        public SorobanMessage call() throws Exception {
-                            Cahoots cahootsResponse = cahootsService.reply(cahootsWallet, payload);
-                            return new ManualCahootsMessage(cahootsResponse);
-                        }
-                    };
-                response = new SorobanInteraction(request, typeInteraction, onAccept);
+                final TypeInteraction typeInteraction = optInteraction.get();
+                switch (typeInteraction) {
+                    case TX_BROADCAST:
+                        Cahoots signedCahoots = cahootsService.reply(cahootsWallet, payload);
+                        response = new TxBroadcastInteraction(signedCahoots);
+                        break;
+                    default:
+                        throw new Exception("Unknown typeInteraction: "+typeInteraction);
+                }
             } else {
-                // direct reply
+                // standard reply
                 Cahoots cahootsResponse = cahootsService.reply(cahootsWallet, payload);
                 response = new ManualCahootsMessage(cahootsResponse);
             }

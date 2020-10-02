@@ -1,8 +1,8 @@
-package com.samourai.wallet.soroban.cahoots;
+package com.samourai.soroban.cahoots;
 
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsTypeUser;
-import com.samourai.wallet.soroban.client.SorobanContext;
+import com.samourai.soroban.client.SorobanContext;
 
 public class CahootsContext implements SorobanContext {
     private CahootsTypeUser typeUser;

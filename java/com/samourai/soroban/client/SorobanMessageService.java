@@ -1,4 +1,4 @@
-package com.samourai.wallet.soroban.client;
+package com.samourai.soroban.client;
 
 public abstract class SorobanMessageService<M extends SorobanMessage, C extends SorobanContext> {
     public abstract M parse(String payload) throws Exception;

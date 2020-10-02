@@ -1,4 +1,4 @@
-package com.samourai.wallet.soroban.client;
+package com.samourai.soroban.client;
 
 public enum SorobanServer {
   MAINNET("http://sorob4sg7yiopktgz4eom7hl5mcodr6quvhmdpljl5qqhmt6po7oebid.onion"),
