@@ -1,9 +1,10 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
-import com.samourai.wallet.cahoots.CahootsUtxo;
 import com.samourai.wallet.segwit.BIP84Wallet;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
+import com.samourai.wallet.whirlpool.WhirlpoolConst;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.NetworkParameters;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -25,7 +26,42 @@ public abstract class CahootsWallet {
 
     public abstract long fetchFeePerB();
 
-    public abstract int fetchPostChangeIndex();
+    protected abstract int fetchPostChangeIndex();
+
+    public Pair<Integer,Integer> fetchReceiveIndex(int account) throws Exception {
+        int idx;
+        int chain;
+        if (account == 0) {
+            idx = bip84Wallet.getWallet().getAccount(0).getReceive().getAddrIdx();
+            chain = 0;
+        }
+        else if (account == WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT) {
+            // force change chain
+            idx = fetchPostChangeIndex();
+            chain = 1;
+        }
+        else {
+            throw new Exception("Invalid account: "+account);
+        }
+        return Pair.of(idx,chain);
+    }
+
+    public Pair<Integer,Integer> fetchChangeIndex(int account) throws Exception {
+        int idx;
+        int chain;
+        if (account == 0) {
+            idx = bip84Wallet.getWallet().getAccount(0).getChange().getAddrIdx();
+            chain = 1;
+        }
+        else if (account == WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT) {
+            idx = fetchPostChangeIndex();
+            chain = 1;
+        }
+        else {
+            throw new Exception("Invalid account: "+account);
+        }
+        return Pair.of(idx,chain);
+    }
 
     protected abstract List<CahootsUtxo> fetchUtxos(int account);
 

@@ -1,15 +1,23 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.wallet.segwit.SegwitAddress;
+import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.MyTransactionOutPoint;
+import com.samourai.wallet.whirlpool.WhirlpoolConst;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.*;
+import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public abstract class AbstractCahootsService<T extends Cahoots> {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahootsService.class);
+
+    private static final Bech32UtilGeneric bech32Util = Bech32UtilGeneric.getInstance();
 
     protected NetworkParameters params;
 
@@ -41,5 +49,89 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
             }
         }
         return keyBag;
+    }
+
+    // verify
+
+    protected long computeSpendAmount(HashMap<String,ECKey> keyBag, CahootsWallet cahootsWallet, Cahoots cahoots, CahootsTypeUser typeUser) throws Exception {
+        long spendAmount = 0;
+
+        Transaction transaction = cahoots.getTransaction();
+        for(TransactionInput input : transaction.getInputs()) {
+            TransactionOutPoint outpoint = input.getOutpoint();
+            if (keyBag.containsKey(outpoint.toString())) {
+                if (input.getValue() != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("computeSpendAmount: +input "+input.getValue().longValue());
+                    }
+                    spendAmount += input.getValue().longValue();
+                }
+            }
+        }
+
+        int myAccount = typeUser.equals(CahootsTypeUser.SENDER) ? cahoots.getAccount() : cahoots.getCounterpartyAccount();
+        List<String> myOutputAddresses = computeMyOutputAddresses(cahootsWallet, myAccount);
+
+        for(TransactionOutput output : transaction.getOutputs()) {
+            String outputAddress = getToAddress(output);
+            if (outputAddress != null && myOutputAddresses.contains(outputAddress)) {
+                if (output.getValue() != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("computeSpendAmount: -output " + output.getValue().longValue());
+                    }
+                    spendAmount -= output.getValue().longValue();
+                }
+            }
+        }
+        return spendAmount;
+    }
+
+    private String getToAddress(TransactionOutput output) {
+        String outputScript = Hex.toHexString(output.getScriptBytes());
+        if (bech32Util.isBech32Script(outputScript)) {
+            try {
+                String outputAddress = bech32Util.getAddressFromScript(outputScript, output.getParams());
+                return outputAddress;
+            } catch (Exception e) {
+                log.error("", e);
+            }
+        } else {
+            try {
+                return output.getAddressFromP2PKHScript(output.getParams()).toString();
+            } catch (Exception e) {}
+            try {
+                return output.getAddressFromP2SH(output.getParams()).toString();
+            } catch (Exception e) {}
+        }
+        return null;
+    }
+
+    private List<String> computeMyOutputAddresses(CahootsWallet cahootsWallet, int myAccount) throws Exception {
+        List<String> addresses = new LinkedList<String>();
+
+        // compute change addresses
+        Pair<Integer,Integer> idxAndChain = cahootsWallet.fetchChangeIndex(myAccount);
+        int idx = idxAndChain.getLeft();
+        int chain = idxAndChain.getRight();
+        addresses.addAll(computeMyOutputAddresses(cahootsWallet, myAccount, chain, idx));
+
+        // compute receive addresses
+        if (myAccount != WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT) {
+            idxAndChain = cahootsWallet.fetchReceiveIndex(myAccount);
+            idx = idxAndChain.getLeft();
+            chain = idxAndChain.getRight();
+            addresses.addAll(computeMyOutputAddresses(cahootsWallet, myAccount, chain, idx));
+        }
+        return addresses;
+    }
+
+    private List<String> computeMyOutputAddresses(CahootsWallet cahootsWallet, int account, int chain, int idx) throws Exception {
+        List<String> addresses = new LinkedList<String>();
+        for (int i=0; i<2; i++) {
+            SegwitAddress segwitAddress = cahootsWallet.getBip84Wallet().getAddressAt(account, chain, idx+i);
+            addresses.add(segwitAddress.getBech32AsString());
+            //System.err.println("+"+account+":m/"+chain+"/"+(idx+i)+" = "+segwitAddress.getBech32AsString());
+        }
+        return addresses;
     }
 }

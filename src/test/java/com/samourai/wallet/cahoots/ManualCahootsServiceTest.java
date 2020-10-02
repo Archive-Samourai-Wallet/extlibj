@@ -1,8 +1,8 @@
 package com.samourai.wallet.cahoots;
 
-import com.samourai.wallet.segwit.BIP84Wallet;
 import com.samourai.soroban.cahoots.*;
 import com.samourai.soroban.client.SorobanInteraction;
+import com.samourai.wallet.segwit.BIP84Wallet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,6 +63,7 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
 
         // receiver => doStowaway3
         ManualCahootsMessage payload3 = (ManualCahootsMessage)cahootsReceiver.reply(account, contextReceiver, payload2);
+        Assertions.assertEquals(-5000, payload3.getCahoots().getVerifiedSpendAmount());
         verify(EXPECTED_PAYLOADS[3], payload3, false, CahootsType.STOWAWAY, CahootsTypeUser.COUNTERPARTY);
 
         // sender => interaction TX_BROADCAST
@@ -71,6 +72,7 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
 
         // sender => doStowaway4
         ManualCahootsMessage payload4 = (ManualCahootsMessage)txBroadcastInteraction.getReplyAccept();
+        Assertions.assertEquals(5248, payload4.getCahoots().getVerifiedSpendAmount());
         verify(EXPECTED_PAYLOADS[4], payload4, true, CahootsType.STOWAWAY, CahootsTypeUser.SENDER);
     }
 
@@ -119,6 +121,7 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
 
         // counterparty => doSTONEWALLx2_3
         ManualCahootsMessage payload3 = (ManualCahootsMessage)cahootsCounterparty.reply(account, contextCounterparty, payload2);
+        Assertions.assertEquals(157, payload3.getCahoots().getVerifiedSpendAmount());
         verify(EXPECTED_PAYLOADS[3], payload3, false, CahootsType.STONEWALLX2, CahootsTypeUser.COUNTERPARTY);
 
         // sender => interaction TX_BROADCAST
@@ -126,6 +129,7 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
 
         // sender => doSTONEWALLx2_4
         ManualCahootsMessage payload4 = (ManualCahootsMessage)payload4Interaction.getReplyAccept();
+        Assertions.assertEquals(5157, payload4.getCahoots().getVerifiedSpendAmount());
         verify(EXPECTED_PAYLOADS[4], payload4, true, CahootsType.STONEWALLX2, CahootsTypeUser.SENDER);
     }
 }

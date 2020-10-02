@@ -1,13 +1,14 @@
 package com.samourai.soroban.cahoots;
 
+import com.samourai.soroban.client.SorobanInteraction;
+import com.samourai.soroban.client.SorobanMessageService;
+import com.samourai.soroban.client.SorobanReply;
+import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
-import com.samourai.soroban.client.SorobanInteraction;
-import com.samourai.soroban.client.SorobanMessageService;
-import com.samourai.soroban.client.SorobanReply;
 import java8.util.Optional;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
@@ -69,6 +70,7 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
                 switch (typeInteraction) {
                     case TX_BROADCAST:
                         Cahoots signedCahoots = cahootsService.reply(cahootsWallet, payload);
+                        verifyResponse(cahootsContext, signedCahoots);
                         response = new TxBroadcastInteraction(signedCahoots);
                         break;
                     default:
@@ -91,17 +93,39 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
         doVerify(sorobanContext, message, typeUserExpected);
     }
 
-    private void verifyResponse(CahootsContext sorobanContext, ManualCahootsMessage message) throws Exception {
-        CahootsTypeUser typeUserExpected = sorobanContext.getTypeUser();
-        doVerify(sorobanContext, message, typeUserExpected);
+    private void verifyResponse(CahootsContext cahootsContext, ManualCahootsMessage message) throws Exception {
+        CahootsTypeUser typeUserExpected = cahootsContext.getTypeUser();
+        doVerify(cahootsContext, message, typeUserExpected);
+
+        verifyResponse(cahootsContext, message.getCahoots());
     }
 
-    private void doVerify(CahootsContext sorobanContext, ManualCahootsMessage message, CahootsTypeUser typeUserExpected) throws Exception {
+    private void verifyResponse(CahootsContext cahootsContext, Cahoots cahoots) throws Exception {
+        if (cahoots.getStep() >= 3) {
+            // check fee
+            long minerFee = cahoots.getTransaction().getFee() != null ? cahoots.getTransaction().getFee().longValue() : 0;
+            if (minerFee > SamouraiWalletConst.MAX_ACCEPTABLE_FEES) {
+                throw new Exception("Cahoots fee too high: " + cahoots.getTransaction().getFee().longValue());
+            }
+
+            // check verifiedSpendAmount
+            long maxSpendAmount = computeMaxSpendAmount(minerFee, cahootsContext);
+            long verifiedSpendAmount = cahoots.getVerifiedSpendAmount();
+            if (log.isDebugEnabled()) {
+                log.debug(cahootsContext.getTypeUser()+" verifiedSpendAmount="+verifiedSpendAmount+", maxSpendAmount="+maxSpendAmount);
+            }
+            if (verifiedSpendAmount > maxSpendAmount) {
+                throw new Exception("Cahoots verifiedSpendAmount mismatch: " + verifiedSpendAmount);
+            }
+        }
+    }
+
+    private void doVerify(CahootsContext cahootsContext, ManualCahootsMessage message, CahootsTypeUser typeUserExpected) throws Exception {
         Cahoots cahoots = message.getCahoots();
 
         // check type
         CahootsType cahootsType = CahootsType.find(cahoots.getType()).get();
-        if (!cahootsType.equals(sorobanContext.getCahootsType())) {
+        if (!cahootsType.equals(cahootsContext.getCahootsType())) {
             throw new Exception("Cahoots type mismatch");
         }
         switch (cahootsType) {
@@ -126,6 +150,45 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
         if (!message.getTypeUser().equals(typeUserExpected)) {
             throw new Exception("Cahoots typeUser mismatch");
         }
+    }
+
+    private long computeMaxSpendAmount(long minerFee, CahootsContext cahootsContext) throws Exception {
+        long maxSpendAmount;
+        switch (cahootsContext.getCahootsType()) {
+            case STONEWALLX2:
+                // shares minerFee
+                long sharedMinerFee = minerFee / 2;
+                switch (cahootsContext.getTypeUser()) {
+                    case SENDER:
+                        // spends amount + minerFee
+                        maxSpendAmount = cahootsContext.getAmount()+sharedMinerFee;
+                        break;
+                    case COUNTERPARTY:
+                        // receives money (maxSpendAmount < 0)
+                        maxSpendAmount = sharedMinerFee;
+                        break;
+                    default:
+                        throw new Exception("Unknown typeUser");
+                }
+                break;
+            case STOWAWAY:
+                switch (cahootsContext.getTypeUser()) {
+                    case SENDER:
+                        // spends amount + minerFee
+                        maxSpendAmount = cahootsContext.getAmount()+minerFee;
+                        break;
+                    case COUNTERPARTY:
+                        // receives money (<0)
+                        maxSpendAmount = 0;
+                        break;
+                    default:
+                        throw new Exception("Unknown typeUser");
+                }
+                break;
+            default:
+                throw new Exception("Unknown Cahoots type");
+        }
+        return maxSpendAmount;
     }
 
     private AbstractCahootsService newCahootsService(CahootsType cahootsType) throws Exception {

@@ -41,6 +41,7 @@ public abstract class Cahoots {
     protected byte[] fingerprint = null;
     protected byte[] fingerprintCollab = null;
     protected String strCollabChange = null;
+    protected long verifiedSpendAmount = 0;
 
     public Cahoots()    { outpoints = new HashMap<String,Long>(); }
 
@@ -96,6 +97,9 @@ public abstract class Cahoots {
     }
 
     public Transaction getTransaction() {
+        if (psbt == null) {
+            return null;
+        }
         return psbt.getTransaction();
     }
 
@@ -175,6 +179,14 @@ public abstract class Cahoots {
         this.strCollabChange = strCollabChange;
     }
 
+    public long getVerifiedSpendAmount() {
+        return verifiedSpendAmount;
+    }
+
+    public void setVerifiedSpendAmount(long verifiedSpendAmount) {
+        this.verifiedSpendAmount = verifiedSpendAmount;
+    }
+
     public static boolean isCahoots(JSONObject obj)   {
         try {
             return obj.has("cahoots") && obj.getJSONObject("cahoots").has("type");
@@ -232,6 +244,7 @@ public abstract class Cahoots {
             obj.put("collabChange", strCollabChange == null ? "" : strCollabChange);
 
             cObj.put("cahoots", obj);
+            // skip verifiedSpendAmount
         }
         catch(JSONException je) {
             je.printStackTrace();
@@ -295,6 +308,7 @@ public abstract class Cahoots {
                     fingerprintCollab = Hex.decode(obj.getString("fingerprint_collab"));
                 }
                 this.psbt = obj.getString("psbt").equals("") ? null : PSBT.fromBytes(Z85.getInstance().decode(obj.getString("psbt")));
+                this.verifiedSpendAmount = 0; // skip verifiedSpendAmount
             }
         }
         catch(JSONException je) {
