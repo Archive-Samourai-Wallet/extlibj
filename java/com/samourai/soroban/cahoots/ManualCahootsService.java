@@ -103,7 +103,7 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
     private void verifyResponse(CahootsContext cahootsContext, Cahoots cahoots) throws Exception {
         if (cahoots.getStep() >= 3) {
             // check fee
-            long minerFee = cahoots.getTransaction().getFee() != null ? cahoots.getTransaction().getFee().longValue() : 0;
+            long minerFee = cahoots.getFeeAmount();
             if (minerFee > SamouraiWalletConst.MAX_ACCEPTABLE_FEES) {
                 throw new Exception("Cahoots fee too high: " + cahoots.getTransaction().getFee().longValue());
             }
@@ -111,6 +111,9 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
             // check verifiedSpendAmount
             long maxSpendAmount = computeMaxSpendAmount(minerFee, cahootsContext);
             long verifiedSpendAmount = cahoots.getVerifiedSpendAmount();
+            if (verifiedSpendAmount == 0) {
+                throw new Exception("Cahoots spendAmount verification failed");
+            }
             if (log.isDebugEnabled()) {
                 log.debug(cahootsContext.getTypeUser()+" verifiedSpendAmount="+verifiedSpendAmount+", maxSpendAmount="+maxSpendAmount);
             }

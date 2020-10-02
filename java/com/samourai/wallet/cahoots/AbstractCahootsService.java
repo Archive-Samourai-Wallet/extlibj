@@ -60,11 +60,12 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
         for(TransactionInput input : transaction.getInputs()) {
             TransactionOutPoint outpoint = input.getOutpoint();
             if (keyBag.containsKey(outpoint.toString())) {
-                if (input.getValue() != null) {
+                Long inputValue = cahoots.getOutpoints().get(outpoint.getHash().toString() + "-" + outpoint.getIndex());
+                if (inputValue != null) {
                     if (log.isDebugEnabled()) {
-                        log.debug("computeSpendAmount: +input "+input.getValue().longValue());
+                        log.debug("computeSpendAmount: +input "+inputValue);
                     }
-                    spendAmount += input.getValue().longValue();
+                    spendAmount += inputValue;
                 }
             }
         }
@@ -82,6 +83,9 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
                     spendAmount -= output.getValue().longValue();
                 }
             }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("computeSpendAmount = " + spendAmount);
         }
         return spendAmount;
     }
@@ -130,7 +134,9 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
         for (int i=0; i<2; i++) {
             SegwitAddress segwitAddress = cahootsWallet.getBip84Wallet().getAddressAt(account, chain, idx+i);
             addresses.add(segwitAddress.getBech32AsString());
-            //System.err.println("+"+account+":m/"+chain+"/"+(idx+i)+" = "+segwitAddress.getBech32AsString());
+            if (log.isDebugEnabled()) {
+                log.debug("myOutputAddress " + account + ":m/" + chain + "/" + (idx + i) + " = " + segwitAddress.getBech32AsString());
+            }
         }
         return addresses;
     }

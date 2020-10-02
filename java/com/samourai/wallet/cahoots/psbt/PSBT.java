@@ -69,6 +69,7 @@ public class PSBT {
     private String strPSBT = null;
     private byte[] psbtBytes = null;
     private ByteBuffer psbtByteBuffer = null;
+    private NetworkParameters params = null;
     private Transaction transaction = null;
     private List<PSBTEntry> psbtInputs = null;
     private List<PSBTEntry> psbtOutputs = null;
@@ -79,11 +80,11 @@ public class PSBT {
     public PSBT(Transaction transaction)   {
         psbtInputs = new ArrayList<PSBTEntry>();
         psbtOutputs = new ArrayList<PSBTEntry>();
-        this.transaction = transaction;
+        setTransaction(transaction);
         sbLog = new StringBuilder();
     }
 
-    private PSBT(String strPSBT)   {
+    private PSBT(String strPSBT, NetworkParameters params)   {
 
         if(!FormatsUtilGeneric.getInstance().isPSBT(strPSBT))    {
             return;
@@ -106,13 +107,14 @@ public class PSBT {
         psbtByteBuffer = ByteBuffer.wrap(psbtBytes);
 
         sbLog = new StringBuilder();
+        this.params = params;
     }
 
     private PSBT()   {
         ;
     }
 
-    public static PSBT fromBytes(byte[] psbt) throws Exception    {
+    public static PSBT fromBytes(byte[] psbt, NetworkParameters params) throws Exception    {
 
         PSBT ret = null;
 
@@ -150,7 +152,7 @@ public class PSBT {
             ;
         }
 
-        ret = new PSBT(strPSBT);
+        ret = new PSBT(strPSBT, params);
         ret.read();
         /*
         if(ret.isParseOK())    {
@@ -256,7 +258,7 @@ public class PSBT {
                 switch(entry.getKeyType()[0])    {
                     case PSBT.PSBT_GLOBAL_UNSIGNED_TX:
                         Log("transaction", true);
-                        transaction = new Transaction(getNetParams(), entry.getData());
+                        transaction = new Transaction(params, entry.getData());
                         inputs = transaction.getInputs().size();
                         outputs = transaction.getOutputs().size();
                         Log("inputs:" + inputs, true);
@@ -469,15 +471,6 @@ public class PSBT {
         }
     }
 
-    public NetworkParameters getNetParams() {
-        if(transaction != null)    {
-            return transaction.getParams();
-        }
-        else    {
-            return MainNetParams.get();
-        }
-    }
-
     public List<PSBTEntry> getPsbtInputs() {
         return psbtInputs;
     }
@@ -500,6 +493,7 @@ public class PSBT {
 
     public void setTransaction(Transaction transaction) {
         this.transaction = transaction;
+        this.params = transaction.getParams();
     }
 
     public int getInputCount() {
@@ -511,7 +505,7 @@ public class PSBT {
     }
 
     public void clear()  {
-        transaction = new Transaction(getNetParams());
+        transaction = new Transaction(params);
         psbtInputs.clear();
         psbtOutputs.clear();
         strPSBT = null;
