@@ -73,6 +73,12 @@ public class Bech32UtilGeneric {
         return Bech32Segwit.encode(hrp, (byte)0x00, scriptBytes);
     }
 
+    public String getAddressFromScript(TransactionOutput output) throws Exception    {
+        String script = new String(Hex.encode(output.getScriptBytes()));
+        String outputAddressBech32 = getAddressFromScript(script, output.getParams());
+        return outputAddressBech32;
+    }
+
     public TransactionOutput getTransactionOutput(String address, long value, NetworkParameters params) throws Exception {
         byte[] scriptPubKey = computeScriptPubKey(address, params);
         return new TransactionOutput(params, null, Coin.valueOf(value), scriptPubKey);
