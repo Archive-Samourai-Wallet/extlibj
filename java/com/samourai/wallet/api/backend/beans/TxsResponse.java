@@ -31,7 +31,7 @@ public class TxsResponse {
     public String txid;
     public int vout;
     public long value;
-    public UnspentResponse.UnspentOutput.Xpub xpub;
+    public UnspentOutput.Xpub xpub;
     public String addr;
     public String pubkey;
   }
@@ -41,7 +41,7 @@ public class TxsResponse {
     public long value;
     public String addr;
     public String pubkey;
-    public UnspentResponse.UnspentOutput.Xpub xpub;
+    public UnspentOutput.Xpub xpub;
   }
 
 }

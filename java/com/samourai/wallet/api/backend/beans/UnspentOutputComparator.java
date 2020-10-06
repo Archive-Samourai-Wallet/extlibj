@@ -1,7 +1,5 @@
 package com.samourai.wallet.api.backend.beans;
 
-import com.samourai.wallet.api.backend.beans.UnspentResponse.UnspentOutput;
-
 import java.util.Comparator;
 
 public class UnspentOutputComparator implements Comparator<UnspentOutput> {

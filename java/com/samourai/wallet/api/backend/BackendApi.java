@@ -15,6 +15,7 @@ public class BackendApi implements OAuthApi {
 
   private static final String URL_UNSPENT = "/unspent?active=";
   private static final String URL_MULTIADDR = "/multiaddr?active=";
+  private static final String URL_WALLET = "/wallet?active=";
   private static final String URL_TXS = "/txs?active=";
   private static final String URL_INIT_BIP84 = "/xpub";
   private static final String URL_MINER_FEES = "/fees";
@@ -46,11 +47,17 @@ public class BackendApi implements OAuthApi {
     return zpubStr;
   }
 
-  public List<UnspentResponse.UnspentOutput> fetchUtxos(String zpub) throws Exception {
+  /**
+   * @deprecated use fetchWallet()
+   */
+  public List<UnspentOutput> fetchUtxos(String zpub) throws Exception {
     return fetchUtxos(new String[]{zpub});
   }
 
-  public List<UnspentResponse.UnspentOutput> fetchUtxos(String[] zpubs) throws Exception {
+  /**
+   * @deprecated use fetchWallet()
+   */
+  public List<UnspentOutput> fetchUtxos(String[] zpubs) throws Exception {
     String zpubStr = computeZpubStr(zpubs);
     String url = computeAuthUrl(urlBackend + URL_UNSPENT + zpubStr);
     if (log.isDebugEnabled()) {
@@ -58,14 +65,17 @@ public class BackendApi implements OAuthApi {
     }
     Map<String,String> headers = computeHeaders();
     UnspentResponse unspentResponse = httpClient.getJson(url, UnspentResponse.class, headers);
-    List<UnspentResponse.UnspentOutput> unspentOutputs =
-        new ArrayList<UnspentResponse.UnspentOutput>();
+    List<UnspentOutput> unspentOutputs =
+            new ArrayList<UnspentOutput>();
     if (unspentResponse.unspent_outputs != null) {
       unspentOutputs = Arrays.asList(unspentResponse.unspent_outputs);
     }
     return unspentOutputs;
   }
 
+  /**
+   * @deprecated use fetchWallet()
+   */
   public Map<String,MultiAddrResponse.Address> fetchAddresses(String[] zpubs) throws Exception {
     String zpubStr = computeZpubStr(zpubs);
     String url = computeAuthUrl(urlBackend + URL_MULTIADDR + zpubStr);
@@ -83,6 +93,9 @@ public class BackendApi implements OAuthApi {
     return addressesByZpub;
   }
 
+  /**
+   * @deprecated use fetchWallet()
+   */
   public MultiAddrResponse.Address fetchAddress(String zpub) throws Exception {
     Collection<MultiAddrResponse.Address> addresses = fetchAddresses(new String[]{zpub}).values();
     if (addresses.size() != 1) {
@@ -102,6 +115,9 @@ public class BackendApi implements OAuthApi {
     return address;
   }
 
+  /**
+   * @deprecated use fetchWallet()
+   */
   public TxsResponse fetchTxs(String[] zpubs, int page, int count) throws Exception {
     String zpubStr = computeZpubStr(zpubs);
 
@@ -111,6 +127,21 @@ public class BackendApi implements OAuthApi {
     }
     Map<String,String> headers = computeHeaders();
     return httpClient.getJson(url, TxsResponse.class, headers);
+  }
+
+  public WalletResponse fetchWallet(String zpub) throws Exception {
+    return fetchWallet(new String[]{zpub});
+  }
+
+  public WalletResponse fetchWallet(String[] zpubs) throws Exception {
+    String zpubStr = computeZpubStr(zpubs);
+    String url = computeAuthUrl(urlBackend + URL_WALLET + zpubStr);
+    if (log.isDebugEnabled()) {
+      log.debug("fetchWallet");
+    }
+    Map<String,String> headers = computeHeaders();
+    WalletResponse walletResponse = httpClient.getJson(url, WalletResponse.class, headers);
+    return walletResponse;
   }
 
   public void initBip84(String zpub) throws Exception {
