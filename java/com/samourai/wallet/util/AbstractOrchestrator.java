@@ -72,7 +72,7 @@ public abstract class AbstractOrchestrator {
                 // thread exiting
                 myThread = null;
                 if (log.isDebugEnabled()) {
-                  log.debug("Ended. started=" + started);
+                  log.debug("Ended.");
                 }
                 resetOrchestrator();
               }
