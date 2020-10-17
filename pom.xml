@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.samourai.code.wallet</groupId>
 	<artifactId>extlibj</artifactId>
-	<version>fetchWallet-SNAPSHOT</version>
+	<version>0.0.15-soroban</version>
 	<name>extlibj</name>
 	<properties>
 		<maven.compiler.source>1.6</maven.compiler.source>
@@ -108,6 +108,6 @@
 	</repositories>
   <scm>
     <connection>scm:git:git@code.samourai.io:wallet/ExtLibJ.git</connection>
-    <tag>0.0.14-soroban3</tag>
+    <tag>0.0.15-soroban</tag>
   </scm>
 </project>
