@@ -192,6 +192,7 @@ public abstract class Cahoots {
             return obj.has("cahoots") && obj.getJSONObject("cahoots").has("type");
         }
         catch(JSONException je) {
+            log.error("", je);
             return false;
         }
     }
@@ -202,6 +203,7 @@ public abstract class Cahoots {
             return isCahoots(obj);
         }
         catch(JSONException je) {
+            log.error("", je);
             return false;
         }
     }
@@ -247,7 +249,7 @@ public abstract class Cahoots {
             // skip verifiedSpendAmount
         }
         catch(JSONException je) {
-            je.printStackTrace();
+            log.error("", je);
         }
         catch(Exception e) {
             throw new RuntimeException(e);
@@ -312,9 +314,10 @@ public abstract class Cahoots {
             }
         }
         catch(JSONException je) {
-            je.printStackTrace();
+            log.error("", je);
         }
         catch(Exception e) {
+            log.error("", e);
 //            throw new RuntimeException(e);
         }
     }

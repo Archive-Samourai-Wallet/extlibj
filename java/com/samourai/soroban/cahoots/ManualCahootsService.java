@@ -47,9 +47,15 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
         return ManualCahootsMessage.parse(payload);
     }
 
+    public SorobanReply reply(int account, ManualCahootsMessage request) throws Exception {
+        return reply(account, null, request);
+    }
+
     @Override
     public SorobanReply reply(int account, CahootsContext cahootsContext, ManualCahootsMessage request) throws Exception {
-        verifyRequest(cahootsContext, request);
+        if (cahootsContext != null) {
+            verifyRequest(cahootsContext, request);
+        }
 
         final AbstractCahootsService cahootsService = newCahootsService(request.getType());
         final Cahoots payload = request.getCahoots();
@@ -70,7 +76,9 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
                 switch (typeInteraction) {
                     case TX_BROADCAST:
                         Cahoots signedCahoots = cahootsService.reply(cahootsWallet, payload);
-                        verifyResponse(cahootsContext, signedCahoots);
+                        if (cahootsContext != null) {
+                            verifyResponse(cahootsContext, signedCahoots);
+                        }
                         response = new TxBroadcastInteraction(signedCahoots);
                         break;
                     default:
@@ -82,7 +90,7 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
                 response = new ManualCahootsMessage(cahootsResponse);
             }
         }
-        if (!(response instanceof SorobanInteraction)) {
+        if (cahootsContext != null && !(response instanceof SorobanInteraction)) {
             verifyResponse(cahootsContext, (ManualCahootsMessage)response);
         }
         return response;
