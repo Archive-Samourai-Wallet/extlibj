@@ -38,4 +38,8 @@ public class XPubUtil {
     String addressBech32 = Bech32UtilGeneric.getInstance().toBech32(ecKey.getPubKey(), params);
     return addressBech32;
   }
+
+  public String getPath(int x, int chainIndex) {
+    return "m/84'/"+chainIndex+"'/"+x+"'";
+  }
 }
