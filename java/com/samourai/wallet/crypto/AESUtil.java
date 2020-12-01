@@ -54,10 +54,12 @@ public class AESUtil {
         return decrypt(ciphertext, password, DefaultPBKDF2Iterations);
     }
 
+    @Deprecated
     public static String decrypt(String ciphertext, CharSequenceX password, int iterations) throws UnsupportedEncodingException, InvalidCipherTextException, DecryptionException {
         return decryptWithSetMode(ciphertext, password, iterations, MODE_CBC, new ISO10126d2Padding());
     }
 
+    @Deprecated
     public static String decryptWithSetMode(String ciphertext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws InvalidCipherTextException, UnsupportedEncodingException, DecryptionException {
         final int AESBlockSize = 4;
 
@@ -112,14 +114,17 @@ public class AESUtil {
 
     // AES 256 PBKDF2 CBC iso10126 encryption
 
+    @Deprecated
     public static String encrypt(String cleartext, CharSequenceX password) throws DecryptionException, UnsupportedEncodingException {
         return encrypt(cleartext, password, AESUtil.DefaultPBKDF2Iterations);
     }
 
+    @Deprecated
     public static String encrypt(String cleartext, CharSequenceX password, int iterations) throws DecryptionException, UnsupportedEncodingException {
         return encryptWithSetMode(cleartext, password, iterations, MODE_CBC, new ISO10126d2Padding());
     }
 
+    @Deprecated
     public static String encryptWithSetMode(String cleartext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws DecryptionException, UnsupportedEncodingException {
 
         final int AESBlockSize = 4;
