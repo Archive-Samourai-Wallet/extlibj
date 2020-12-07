@@ -6,7 +6,11 @@ import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.*;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class HD_Wallet {
@@ -115,5 +119,23 @@ public class HD_Wallet {
         }
 
         return ret;
+    }
+
+    public byte[] getFingerprint() {
+
+        List<String> wordList = Arrays.asList(getMnemonic().split("\\s+"));
+        String passphrase = getPassphrase();
+
+        byte[] hd_seed = MnemonicCode.toSeed(wordList, passphrase.toString());
+        DeterministicKey mKey = HDKeyDerivation.createMasterPrivateKey(hd_seed);
+        int fp = mKey.getFingerprint();
+
+        ByteBuffer bb = ByteBuffer.allocate(4);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+        bb.putInt(fp);
+        byte[] buf = bb.array();
+
+        return buf;
+
     }
 }

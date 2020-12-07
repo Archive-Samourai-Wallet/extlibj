@@ -13,6 +13,10 @@ import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.script.Script;
 
 public class Bech32UtilGeneric {
+    public static final String SCRIPT_P2WPKH = "0014";
+    public static final String SCRIPT_P2WSH = "0020";
+    public static final int SCRIPT_P2WPKH_LEN = 20 * 2 + 2 * 2;
+    public static final int SCRIPT_P2WSH_LEN = 32 * 2 + 2 * 2;
 
     private static Bech32UtilGeneric instance = null;
 
@@ -32,11 +36,11 @@ public class Bech32UtilGeneric {
     }
 
     public boolean isP2WPKHScript(String script) {
-        return script.startsWith("0014") && script.length() == (20 * 2 + 2 * 2);
+        return script.startsWith(SCRIPT_P2WPKH) && script.length() == SCRIPT_P2WPKH_LEN;
     }
 
     public boolean isP2WSHScript(String script) {
-        return script.startsWith("0020") && script.length() == (32 * 2 + 2 * 2);
+        return script.startsWith(SCRIPT_P2WSH) && script.length() == SCRIPT_P2WSH_LEN;
     }
 
     public String getAddressFromScript(String script, NetworkParameters params) throws Exception    {
@@ -67,6 +71,12 @@ public class Bech32UtilGeneric {
         System.arraycopy(buf, 2, scriptBytes, 0, scriptBytes.length);
 
         return Bech32Segwit.encode(hrp, (byte)0x00, scriptBytes);
+    }
+
+    public String getAddressFromScript(TransactionOutput output) throws Exception    {
+        String script = new String(Hex.encode(output.getScriptBytes()));
+        String outputAddressBech32 = getAddressFromScript(script, output.getParams());
+        return outputAddressBech32;
     }
 
     public TransactionOutput getTransactionOutput(String address, long value, NetworkParameters params) throws Exception {

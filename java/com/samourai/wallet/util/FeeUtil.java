@@ -1,7 +1,13 @@
 package com.samourai.wallet.util;
 
+import com.samourai.wallet.send.MyTransactionOutPoint;
+import org.apache.commons.lang3.tuple.Triple;
+import org.bitcoinj.core.Address;
+import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Vector;
 
 public class FeeUtil {
   private static final Logger log = LoggerFactory.getLogger(FeeUtil.class);
@@ -89,5 +95,26 @@ public class FeeUtil {
     } else {
       return fee;
     }
+  }
+
+  public Triple<Integer,Integer,Integer> getOutpointCount(Vector<MyTransactionOutPoint> outpoints, NetworkParameters params) {
+
+    int p2wpkh = 0;
+    int p2sh_p2wpkh = 0;
+    int p2pkh = 0;
+
+    for(MyTransactionOutPoint out : outpoints)   {
+      if(FormatsUtilGeneric.getInstance().isValidBech32(out.getAddress()))    {
+        p2wpkh++;
+      }
+      else if(Address.fromBase58(params, out.getAddress()).isP2SHAddress())    {
+        p2sh_p2wpkh++;
+      }
+      else   {
+        p2pkh++;
+      }
+    }
+
+    return Triple.of(p2pkh, p2sh_p2wpkh, p2wpkh);
   }
 }

@@ -5,8 +5,6 @@ import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.crypto.MnemonicException;
 
-import java.util.List;
-
 /**
  *
  * BIP47Wallet.java : BIP47 wallet
@@ -33,6 +31,14 @@ public class BIP47Wallet extends HD_Wallet {
 
         mAccount = new BIP47Account(params, mRoot, 0);
 
+    }
+
+    /**
+     * Constructor for wallet.
+     * @param hdWallet
+     */
+    public BIP47Wallet(HD_Wallet hdWallet) {
+        this(47, hdWallet, 1);
     }
 
     /**

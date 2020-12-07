@@ -1,18 +1,20 @@
 package com.samourai.wallet.util;
 
 import com.samourai.wallet.segwit.SegwitAddress;
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Transaction;
-import org.bitcoinj.core.TransactionInput;
-import org.bitcoinj.core.TransactionOutPoint;
-import org.bitcoinj.core.TransactionWitness;
+import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
+import org.bitcoinj.core.*;
 import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.script.Script;
+import org.bouncycastle.util.encoders.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TxUtil {
+  private static final Logger log = LoggerFactory.getLogger(TxUtil.class);
+
   private static TxUtil instance = null;
+
+  private static final Bech32UtilGeneric bech32Util = Bech32UtilGeneric.getInstance();
 
   public static TxUtil getInstance() {
     if(instance == null) {
@@ -89,4 +91,26 @@ public class TxUtil {
     return inputPubkey;
   }
 
+  public String getToAddress(TransactionOutput output) {
+    String outputScript = Hex.toHexString(output.getScriptBytes());
+    if (bech32Util.isBech32Script(outputScript)) {
+      // bech32
+      try {
+        String outputAddress = bech32Util.getAddressFromScript(outputScript, output.getParams());
+        return outputAddress;
+      } catch (Exception e) {
+        log.error("", e);
+      }
+    } else {
+      // P2PKH
+      try {
+        return output.getAddressFromP2PKHScript(output.getParams()).toString();
+      } catch (Exception e) {}
+      // P2SH
+      try {
+        return output.getAddressFromP2SH(output.getParams()).toString();
+      } catch (Exception e) {}
+    }
+    return null;
+  }
 }
