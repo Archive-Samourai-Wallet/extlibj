@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.samourai.code.wallet</groupId>
 	<artifactId>extlibj</artifactId>
-	<version>develop-SNAPSHOT</version>
+	<version>0.0.14-soroban4</version>
 	<name>extlibj</name>
 	<properties>
 		<maven.compiler.source>1.6</maven.compiler.source>
@@ -50,6 +50,11 @@
 			<groupId>net.sourceforge.streamsupport</groupId>
 			<artifactId>streamsupport</artifactId>
 			<version>1.7.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.reactivex.rxjava2</groupId>
+			<artifactId>rxjava</artifactId>
+			<version>2.2.15</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.platform</groupId>
@@ -103,6 +108,6 @@
 	</repositories>
   <scm>
     <connection>scm:git:git@code.samourai.io:wallet/ExtLibJ.git</connection>
-    <tag>0.0.13</tag>
+    <tag>0.0.14-soroban4</tag>
   </scm>
 </project>
