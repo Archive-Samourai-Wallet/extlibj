@@ -6,9 +6,15 @@ import org.bitcoinj.core.ECKey;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.security.Security;
+
 
 public class CryptoUtilTest {
   private CryptoUtil cryptoUtil = CryptoUtil.getInstance("BC");
+
+  static {
+    Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+  }
 
   @Test
   public void encryptDecrypt() throws Exception {
