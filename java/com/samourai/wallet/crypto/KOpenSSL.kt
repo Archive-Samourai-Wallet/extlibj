@@ -17,6 +17,8 @@
 * */
 package com.samourai.wallet.crypto
 
+import org.bouncycastle.crypto.digests.SHA256Digest
+import org.bouncycastle.crypto.params.KeyParameter
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import java.security.InvalidAlgorithmParameterException
@@ -26,8 +28,10 @@ import java.security.SecureRandom
 import java.security.spec.InvalidKeySpecException
 import javax.crypto.*
 import javax.crypto.spec.IvParameterSpec
-import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
+import org.bouncycastle.util.encoders.Base64
+import org.bouncycastle.util.encoders.DecoderException
+import org.bouncycastle.util.encoders.EncoderException
 
 /**
  * Methods for encrypting/decrypting data in a manner compliant with OpenSSL such that
@@ -55,7 +59,7 @@ class KOpenSSL {
         @JvmStatic
         fun isSalted(chars: CharSequence): Boolean {
             return try {
-                Base64()
+                Base64
                         .decode(chars.lines().joinToString(""))
                         .copyOfRange(0, 8)
                         .contentEquals(SALTED.toByteArray())
@@ -80,6 +84,7 @@ class KOpenSSL {
      *
      * @throws [ArrayIndexOutOfBoundsException] IvParameterSpec argument passed has negative length
      * @throws [BadPaddingException]
+     * @throws [CancellationException] if coroutine is cancelled
      * @throws [CharacterCodingException] if decryption failed and bytes were not valid UTF-8,
      *   most probably due to a bad password or incorrect hash iterations
      * @throws [IllegalArgumentException] if the input is not a valid Base64 encoded string,
@@ -99,6 +104,7 @@ class KOpenSSL {
             ArrayIndexOutOfBoundsException::class,
             BadPaddingException::class,
             CharacterCodingException::class,
+            DecoderException::class,
             IllegalArgumentException::class,
             IllegalBlockSizeException::class,
             IndexOutOfBoundsException::class,
@@ -113,52 +119,48 @@ class KOpenSSL {
             password: String,
             hashIterations: Int,
             stringToDecrypt: String,
-            printDetails: Boolean = false
+            printDetails: Boolean = false,
     ): String {
-        val encryptedBytes = Base64().decode(stringToDecrypt.lines().joinToString(""))
+        val encryptedBytes = Base64.decode(stringToDecrypt.lines().joinToString(""))
 
         // Salt is bytes 8 - 15
         val salt = encryptedBytes.copyOfRange(8, 16)
-        if (printDetails)
+        if (printDetails) {
             println("Salt: ${salt.joinToString("") { "%02X".format(it) }}")
+        }
 
         // Derive 48 byte key
-        val keySpec = try {
-            PBEKeySpec(password.toCharArray(), salt, hashIterations, 48 * 8)
-        } catch (e: NullPointerException) {
-            throw IllegalArgumentException(e)
+        val components = getSecretKeyComponents(password, salt, hashIterations)
+        if (printDetails) {
+            println("Key: ${components.key.joinToString("") { "%02X".format(it) }}")
+            println("IV: ${components.iv.joinToString("") { "%02X".format(it) }}")
         }
-        val keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
-        val secretKey = keyFactory.generateSecret(keySpec)
-
-        // Decryption Key is bytes 0 - 31 of the derived key
-        val key = secretKey.encoded.copyOfRange(0, 32)
-        if (printDetails)
-            println("Key: ${key.joinToString("") { "%02X".format(it) }}")
-
-        // Input Vector is bytes 32 - 47 of the derived key
-        val iv = secretKey.encoded.copyOfRange(32, secretKey.encoded.size)
-        if (printDetails)
-            println("IV: ${iv.joinToString("") { "%02X".format(it) }}")
 
         // Cipher Text is bytes 16 - end of the encrypted bytes
         val cipherText = encryptedBytes.copyOfRange(16, encryptedBytes.size)
 
         // Decrypt the Cipher Text and manually remove padding after
         val cipher = Cipher.getInstance("AES/CBC/NoPadding")
-        cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(key, "AES"), IvParameterSpec(iv))
-        val decrypted = cipher.doFinal(cipherText)
+        cipher.init(Cipher.DECRYPT_MODE, components.getSecretKeySpec(), components.getIvParameterSpec())
+        val decrypted = try {
+            cipher.doFinal(cipherText)
+        } finally {
+            components.clearValues()
+        }
 
-        if (!isValidUTF8(decrypted))
+        if (!isValidUTF8(decrypted)) {
             throw CharacterCodingException()
+        }
 
         // Last byte of the decrypted text is the number of padding bytes needed to remove
         val plaintext = decrypted.copyOfRange(0, decrypted.size - decrypted.last().toInt())
 
-        return plaintext.toString(Charsets.UTF_8).trim().also {
-            if (printDetails)
-                println(it)
-        }
+        return plaintext.toString(Charsets.UTF_8).trim()
+                .also {
+                    if (printDetails) {
+                        println(it)
+                    }
+                }
     }
 
     /**
@@ -167,6 +169,7 @@ class KOpenSSL {
      * @throws [ArrayIndexOutOfBoundsException] IvParameterSpec argument passed has negative length
      * @throws [AssertionError] there is an error encoding to Base64
      * @throws [BadPaddingException]
+     * @throws [CancellationException] if coroutine is cancelled
      * @throws [IllegalArgumentException] there is an error encoding to Base64, there is an error
      *   copying byte ranges, parameters for obtaining the KeySpec were not met, parameters for
      *   obtaining the IvParameterSpec were not met, parameters for obtaining the SecretKeySpec
@@ -184,6 +187,7 @@ class KOpenSSL {
             ArrayIndexOutOfBoundsException::class,
             AssertionError::class,
             BadPaddingException::class,
+            EncoderException::class,
             IllegalArgumentException::class,
             IllegalBlockSizeException::class,
             IndexOutOfBoundsException::class,
@@ -198,42 +202,73 @@ class KOpenSSL {
             password: String,
             hashIterations: Int,
             stringToEncrypt: String,
-            printDetails: Boolean = false
+            printDetails: Boolean = false,
     ): String {
         val salt = SecureRandom().generateSeed(8)
-        if (printDetails)
+        if (printDetails) {
             println("Salt: ${salt.joinToString("") { "%02X".format(it) }}")
+        }
 
         // Derive 48 byte key
-        val keySpec = try {
-            PBEKeySpec(password.toCharArray(), salt, hashIterations, 48 * 8)
-        } catch (e: NullPointerException) {
-            throw IllegalArgumentException(e)
+        val components = getSecretKeyComponents(password, salt, hashIterations)
+        if (printDetails) {
+            println("Key: ${components.key.joinToString("") { "%02X".format(it) }}")
+            println("IV: ${components.iv.joinToString("") { "%02X".format(it) }}")
         }
-        val keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
-        val secretKey = keyFactory.generateSecret(keySpec)
-
-        // Encryption Key is bytes 0 - 31 of the derived key
-        val key = secretKey.encoded.copyOfRange(0, 32)
-        if (printDetails)
-            println("Key: ${key.joinToString("") { "%02X".format(it) }}")
-
-        // Input Vector is bytes 32 - 47 of the derived key
-        val iv = secretKey.encoded.copyOfRange(32, secretKey.encoded.size)
-        if (printDetails)
-            println("IV: ${iv.joinToString("") { "%02X".format(it) }}")
 
         val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-        cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(key, "AES"), IvParameterSpec(iv))
-        val cipherText = cipher.doFinal(stringToEncrypt.toByteArray())
+        cipher.init(Cipher.ENCRYPT_MODE, components.getSecretKeySpec(), components.getIvParameterSpec())
+        val cipherText = try {
+            cipher.doFinal(stringToEncrypt.toByteArray())
+        } finally {
+            components.clearValues()
+        }
 
-        return Base64()
-                .encode(SALTED.toByteArray() + salt + cipherText)
-                .replace("(.{64})".toRegex(), "$1\n").also {
-                    if (printDetails)
+        return Base64.encode(SALTED.toByteArray() + salt + cipherText)
+                .decodeToString()
+                .replace("(.{64})".toRegex(), "$1\n")
+                .also {
+                    if (printDetails) {
                         println(it)
+                    }
                 }
     }
+
+    private class SecretKeyComponents(val key: ByteArray, val iv: ByteArray) {
+
+        fun getSecretKeySpec(): SecretKeySpec =
+                SecretKeySpec(key, "AES")
+
+        fun getIvParameterSpec(): IvParameterSpec =
+                IvParameterSpec(iv)
+
+        fun clearValues() {
+            key.fill('*'.toByte())
+            iv.fill('*'.toByte())
+        }
+    }
+
+    private fun getSecretKeyComponents(
+            password: String,
+            salt: ByteArray,
+            hashIterations: Int
+    ): SecretKeyComponents =
+            PKCS5S2ParametersGeneratorKtx(SHA256Digest()).let { generator ->
+                generator.init(password.toByteArray(), salt, hashIterations)
+                (generator.generateDerivedMacParametersKtx(48 * 8) as KeyParameter).key.let { secretKey ->
+                    SecretKeyComponents(
+                            // Decryption Key is bytes 0 - 31 of the derived secret key
+                            key = secretKey.copyOfRange(0, 32),
+
+                            // Input Vector is bytes 32 - 47 of the derived secret key
+                            iv = secretKey.copyOfRange(32, secretKey.size)
+                    ).also {
+                        generator.password.fill('*'.toByte())
+                        secretKey.fill('*'.toByte())
+                    }
+                }
+            }
+
 }
 
 
