@@ -162,7 +162,7 @@ public class AESUtil {
 
 //      String ret = Base64.encodeBase64String(ivAppended);
         byte[] raw = Base64.encodeBase64(ivAppended);
-        return new String(raw);
+        return new String(raw, "UTF-8");
     }
 
     private static byte[] cipherData(BufferedBlockCipher cipher, byte[] data) {
