@@ -26,14 +26,19 @@ public class CryptoUtil {
     private static CryptoUtil instance;
     private String provider;
 
-    public static CryptoUtil getInstance(String provider) {
+    public static CryptoUtil getInstance(Provider provider) {
         if (instance == null) {
-            instance = new CryptoUtil(provider);
+            try {
+                Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            } catch (Exception e) {
+                log.error("", e);
+            }
+            instance = new CryptoUtil(provider.getName());
         }
         return instance;
     }
 
-    public CryptoUtil(String provider) {
+    protected CryptoUtil(String provider) {
         this.provider = provider;
     }
 

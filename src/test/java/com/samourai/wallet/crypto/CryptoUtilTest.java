@@ -1,14 +1,14 @@
 package com.samourai.wallet.crypto;
 
 import com.samourai.wallet.crypto.impl.ECDHKeySet;
-import com.samourai.wallet.crypto.impl.EncryptedMessage;
 import org.bitcoinj.core.ECKey;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 
 public class CryptoUtilTest {
-  private CryptoUtil cryptoUtil = CryptoUtil.getInstance("BC");
+  private CryptoUtil cryptoUtil = CryptoUtil.getInstance(new BouncyCastleProvider());
 
   @Test
   public void encryptDecrypt() throws Exception {
