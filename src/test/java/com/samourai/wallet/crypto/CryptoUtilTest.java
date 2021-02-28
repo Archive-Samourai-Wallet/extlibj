@@ -3,24 +3,45 @@ package com.samourai.wallet.crypto;
 import com.samourai.wallet.crypto.impl.ECDHKeySet;
 import org.bitcoinj.core.ECKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Base64;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigInteger;
 
 
 public class CryptoUtilTest {
   private CryptoUtil cryptoUtil = CryptoUtil.getInstance(new BouncyCastleProvider());
 
+  private ECKey keySender = ECKey.fromPrivate(new BigInteger("45292090369707310635285627500870691371399357286012942906204494584441273561412"));
+  private ECKey keyReceiver = ECKey.fromPrivate(new BigInteger("15746563759639979716567498468827168096964808533808569971664267146066160930713"));
+
   @Test
-  public void encryptDecrypt() throws Exception {
-    doEncryptDecrypt("encryption test ...", new ECKey(), new ECKey());
+  public void getSharedSecret() throws Exception {
+    ECDHKeySet ecdhKeySet = cryptoUtil.getSharedSecret(keySender, keyReceiver);
+    Assertions.assertEquals("uV6eEsBiCfd+G5SLlpglmy38B0xHyTMl0NWlzSdbHxA=", Base64.toBase64String(ecdhKeySet.masterKey));
+    Assertions.assertEquals("gosl2XGC3TJDfoW7d0olcK3OrR+MtJabPEYI7C5miW0=", Base64.toBase64String(ecdhKeySet.encryptionKey));
+    Assertions.assertEquals("0oeJi1vpoH3MGzbNTfvrrmA2QrDFIT1XyiIciAMWeCI=", Base64.toBase64String(ecdhKeySet.hmacKey));
   }
 
-  private void doEncryptDecrypt(String data, ECKey keySender, ECKey keyReceiver) throws Exception {
+  @Test
+  public void decrypt() throws Exception {
+    String data = "all all all all all all all all all all all all";
+    byte[] encrypted = Base64.decode("cvEt4UpQSDLYFhQXxd491TFB9rJVviZQkeK1NLWR6w9OTOSjXd4ZCsrWCv1cCTYX6uFwdD+SN5RfQ+NkoBCOlKzQeNFLjWsj3hsJUG8u7yXLYCnT6nea9ac6GPJUUV0fMSQfytZU0Bw12Ks0b0hMjj543Zu2mrc55NBkTs6Ptw==");
+
+    ECDHKeySet ecdhKeySet = cryptoUtil.getSharedSecret(keySender, keyReceiver);
+    Assertions.assertEquals(data, cryptoUtil.decryptString(encrypted, ecdhKeySet));
+  }
+
+  @Test
+  public void encrypt() throws Exception {
+    String data = "all all all all all all all all all all all all";
+
     // encrypt
     ECDHKeySet ecdhKeySet1 = cryptoUtil.getSharedSecret(keySender, keyReceiver);
     byte[] encrypted = cryptoUtil.encrypt(data, ecdhKeySet1);
 
-    // decrypt
+    // verify
     ECDHKeySet ecdhKeySet2 = cryptoUtil.getSharedSecret(keyReceiver, keySender);
     String decrypted = cryptoUtil.decryptString(encrypted, ecdhKeySet2);
 
@@ -28,18 +49,26 @@ public class CryptoUtilTest {
   }
 
   @Test
-  public void createSignatureVerify() throws Exception {
-    doCreateSignatureVerify("signature test ...".getBytes(), new ECKey());
-  }
+  public void createSignature() throws Exception {
+    byte[] data = "all all all all all all all all all all all all".getBytes();
 
-  private void doCreateSignatureVerify(byte[] data, ECKey key) throws Exception {
-    // sign
-    byte[] signature = cryptoUtil.createSignature(key, data);
+    // create signature
+    byte[] signature = cryptoUtil.createSignature(keySender, data);
 
     // verify
-    Assertions.assertTrue(cryptoUtil.verifySignature(key, data, signature));
-    Assertions.assertFalse(cryptoUtil.verifySignature(key, "wrong data".getBytes(), signature));
-    Assertions.assertFalse(cryptoUtil.verifySignature(key, data, "wrong signature".getBytes()));
+    Assertions.assertTrue(cryptoUtil.verifySignature(keySender, data, signature));
+    Assertions.assertFalse(cryptoUtil.verifySignature(keySender, "wrong data".getBytes(), signature));
+    Assertions.assertFalse(cryptoUtil.verifySignature(keySender, data, "wrong signature".getBytes()));
     Assertions.assertFalse(cryptoUtil.verifySignature(new ECKey(), data, signature));
+  }
+
+  @Test
+  public void verifySignature() throws Exception {
+      byte[] data = "all all all all all all all all all all all all".getBytes();
+      byte[] signature = Base64.decode("MEQCIHpTPcLRu4L5VN3eZkceM/kT+8xRBkmLXBx5lp9gufiaAiB8mlghCtv4P5yS8MerigNp6d0YK37fHSkclGqOuGmUbg==");
+
+      Assertions.assertTrue(cryptoUtil.verifySignature(keySender, data, signature));
+      Assertions.assertFalse(cryptoUtil.verifySignature(keySender, "wrong data".getBytes(), signature));
+      Assertions.assertFalse(cryptoUtil.verifySignature(keySender, data, "wrong signature".getBytes()));
   }
 }

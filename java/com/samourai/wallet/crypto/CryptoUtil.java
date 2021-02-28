@@ -2,6 +2,7 @@ package com.samourai.wallet.crypto;
 
 import com.samourai.wallet.crypto.impl.ECDHKeySet;
 import com.samourai.wallet.crypto.impl.EncryptedMessage;
+import com.samourai.wallet.util.RandomUtil;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bouncycastle.jce.provider.JCEECPrivateKey;
@@ -14,7 +15,6 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.ByteBuffer;
 import java.security.*;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
@@ -23,7 +23,13 @@ import java.security.spec.*;
 public class CryptoUtil {
     private static final Logger log = LoggerFactory.getLogger(CryptoUtil.class);
 
+    private static final String ALGO_HMAC = "HmacSHA512";
+    private static final String ALGO_HASH = "SHA256";
+    private static final String ALGO_CRYPTO = "AES";
+    private static final String CYPHER = "AES/CTR/NoPadding";
+
     private static CryptoUtil instance;
+    private final RandomUtil randomUtil = RandomUtil.getInstance();
     private String provider;
 
     public static CryptoUtil getInstance(Provider provider) {
@@ -43,9 +49,10 @@ public class CryptoUtil {
     }
 
     public byte[] encrypt (byte[] data, ECDHKeySet keySet) throws Exception {
-        byte[] enc = encryptAES_CTR(data, keySet.encryptionKey, keySet.ivServer, keySet.counterOut);
+        byte[] iv = randomUtil.nextBytes(16);
+        byte[] enc = encryptAES_CTR(data, keySet.encryptionKey, iv);
         byte[] hmac = getHMAC(enc, keySet.hmacKey);
-        return new EncryptedMessage(hmac, enc).serialize();
+        return new EncryptedMessage(iv, hmac, enc).serialize();
     }
 
     public byte[] encrypt (String data, ECDHKeySet keySet) throws Exception {
@@ -55,7 +62,7 @@ public class CryptoUtil {
     public byte[] decrypt (byte[] encrypted, ECDHKeySet ecdhKeySet) throws Exception {
         EncryptedMessage message = EncryptedMessage.unserialize(encrypted);
         checkHMAC(message.hmac, message.payload, ecdhKeySet.hmacKey);
-        byte[] data = decryptAES_CTR(message.payload, ecdhKeySet.encryptionKey, ecdhKeySet.ivClient, ecdhKeySet.counterIn);
+        byte[] data = decryptAES_CTR(message.payload, ecdhKeySet.encryptionKey, message.iv);
         return data;
     }
 
@@ -84,7 +91,7 @@ public class CryptoUtil {
         aKeyAgree.init(ecPrivKey);
         aKeyAgree.doPhase(ecPubKey, true);
 
-        return new ECDHKeySet(aKeyAgree.generateSecret(), keyServer.getPubKey(), keyClient.getPubKey(), provider);
+        return new ECDHKeySet(aKeyAgree.generateSecret(), provider);
     }
 
     public byte[] createSignature (ECKey pubkey, byte[] data) throws NoSuchProviderException, NoSuchAlgorithmException {
@@ -93,7 +100,7 @@ public class CryptoUtil {
 
     public boolean verifySignature (ECKey pubkey, byte[] data, byte[] signature) throws NoSuchProviderException, NoSuchAlgorithmException {
         try {
-            MessageDigest hashHandler = MessageDigest.getInstance("SHA256", provider);
+            MessageDigest hashHandler = MessageDigest.getInstance(ALGO_HASH, provider);
             hashHandler.update(data);
             byte[] hash = hashHandler.digest();
             return pubkey.verify(hash, signature);
@@ -105,51 +112,34 @@ public class CryptoUtil {
 
     //
 
-    private byte[] decryptAES_CTR (byte[] data, byte[] keyBytes, byte[] ivBytes, long counter) throws Exception {
-        byte[] ivWithCounter = new byte[16];
-        System.arraycopy(ivBytes, 0, ivWithCounter, 0, ivBytes.length);
-        byte[] counterBytes = ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(counter).array();
-        System.arraycopy(counterBytes, 0, ivWithCounter, ivBytes.length, counterBytes.length);
+    private byte[] decryptAES_CTR (byte[] data, byte[] keyBytes, byte[] ivBytes) throws Exception {
+        SecretKeySpec key = new SecretKeySpec(keyBytes, ALGO_CRYPTO);
+        IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
 
-        //Initialisation
-        SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
-        IvParameterSpec ivSpec = new IvParameterSpec(ivWithCounter);
-
-        //Mode
-        Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
-
+        Cipher cipher = Cipher.getInstance(CYPHER);
         cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
-
         return cipher.doFinal(data);
     }
 
-    private byte[] encryptAES_CTR (byte[] data, byte[] keyBytes, byte[] ivBytes, long counter) throws Exception {
-        byte[] ivWithCounter = new byte[16];
-        System.arraycopy(ivBytes, 0, ivWithCounter, 0, ivBytes.length);
-        byte[] counterBytes = ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(counter).array();
-        System.arraycopy(counterBytes, 0, ivWithCounter, ivBytes.length, counterBytes.length);
+    private byte[] encryptAES_CTR (byte[] data, byte[] keyBytes, byte[] ivBytes) throws Exception {
+        SecretKeySpec key = new SecretKeySpec(keyBytes, ALGO_CRYPTO);
+        IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
 
-        //Initialisation
-        SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
-        IvParameterSpec ivSpec = new IvParameterSpec(ivWithCounter);
-
-        //Mode
-        Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
-
+        Cipher cipher = Cipher.getInstance(CYPHER);
         cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
         return cipher.doFinal(data);
     }
 
     private byte[] getHMAC (byte[] data, byte[] keyBytes) throws Exception {
-        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "HmacSHA1");
-        Mac mac = Mac.getInstance("HmacSHA1");
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ALGO_HMAC);
+        Mac mac = Mac.getInstance(ALGO_HMAC);
         mac.init(keySpec);
         return mac.doFinal(data);
     }
 
     private void checkHMAC (byte[] hmac, byte[] rest, byte[] keyBytes) throws Exception {
-        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "HmacSHA1");
-        Mac mac = Mac.getInstance("HmacSHA1");
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ALGO_HMAC);
+        Mac mac = Mac.getInstance(ALGO_HMAC);
         mac.init(keySpec);
         byte[] result = mac.doFinal(rest);
 
