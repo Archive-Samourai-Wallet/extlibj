@@ -2,6 +2,7 @@ package com.samourai.wallet.crypto;
 
 import com.samourai.wallet.util.CharSequenceX;
 
+import com.samourai.wallet.util.RandomUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.BufferedBlockCipher;
@@ -27,6 +28,7 @@ public class AESUtil {
 
 //    private static Logger mLogger = LoggerFactory.getLogger(AESUtil.class);
 
+    private static final RandomUtil randomUtil = RandomUtil.getInstance();
     public static final int DefaultPBKDF2Iterations = 5000;
 
     public static final int MODE_CBC = 0;
@@ -119,10 +121,8 @@ public class AESUtil {
             throw new DecryptionException("Password null");
         }
 
-        // Use secure random to generate a 16 byte iv
-        SecureRandom random = new SecureRandom();
-        byte iv[] = new byte[AESBlockSize * 4];
-        random.nextBytes(iv);
+        // generate a 16 byte iv
+        byte iv[] = randomUtil.nextBytes(AESBlockSize * 4);
 
         byte[] clearbytes = cleartext.getBytes("UTF-8");
 

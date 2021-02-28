@@ -8,6 +8,7 @@ import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.util.FeeUtil;
+import com.samourai.wallet.util.RandomUtil;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.Coin;
@@ -127,7 +128,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
             }
         }
         if(highUTXO.size() > 0)    {
-            SecureRandom random = new SecureRandom();
+            SecureRandom random = RandomUtil.getSecureRandom();
             CahootsUtxo utxo = highUTXO.get(random.nextInt(highUTXO.size()));
             if (log.isDebugEnabled()) {
                 log.debug("BIP84 selected random utxo:" + utxo.getValue());
