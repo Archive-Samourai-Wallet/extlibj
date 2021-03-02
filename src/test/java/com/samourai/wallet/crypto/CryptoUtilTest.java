@@ -27,8 +27,7 @@ public class CryptoUtilTest {
   @Test
   public void decrypt() throws Exception {
     String data = "all all all all all all all all all all all all";
-    byte[] encrypted = Base64.decode("cvEt4UpQSDLYFhQXxd491TFB9rJVviZQkeK1NLWR6w9OTOSjXd4ZCsrWCv1cCTYX6uFwdD+SN5RfQ+NkoBCOlKzQeNFLjWsj3hsJUG8u7yXLYCnT6nea9ac6GPJUUV0fMSQfytZU0Bw12Ks0b0hMjj543Zu2mrc55NBkTs6Ptw==");
-
+    byte[] encrypted = Base64.decode("2+IUANM7zrR/fyw+bBoPPFNXbJetSo5MKVtcZR48o46yEkoByLyxqhkwr0yz+lDb4eT5IgeriUYCgxN6+Yq9nHFC3k4hM/6j+++v5FrWwFQNkFz32Opf1aDUKmpL2WzC/ALY7FVEwB2Mh1J8j7t/L1j1AC3WhWVpJMvZ1H638w==");
     ECDHKeySet ecdhKeySet = cryptoUtil.getSharedSecret(keySender, keyReceiver);
     Assertions.assertEquals(data, cryptoUtil.decryptString(encrypted, ecdhKeySet));
   }

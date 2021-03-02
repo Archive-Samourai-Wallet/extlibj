@@ -3,6 +3,7 @@ package com.samourai.wallet.crypto;
 import com.samourai.wallet.crypto.impl.ECDHKeySet;
 import com.samourai.wallet.crypto.impl.EncryptedMessage;
 import com.samourai.wallet.util.RandomUtil;
+import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bouncycastle.jce.provider.JCEECPrivateKey;
@@ -51,7 +52,7 @@ public class CryptoUtil {
     public byte[] encrypt (byte[] data, ECDHKeySet keySet) throws Exception {
         byte[] iv = randomUtil.nextBytes(16);
         byte[] enc = encryptAES_CTR(data, keySet.encryptionKey, iv);
-        byte[] hmac = getHMAC(enc, keySet.hmacKey);
+        byte[] hmac = getHMAC(enc, keySet.hmacKey, iv);
         return new EncryptedMessage(iv, hmac, enc).serialize();
     }
 
@@ -61,7 +62,7 @@ public class CryptoUtil {
 
     public byte[] decrypt (byte[] encrypted, ECDHKeySet ecdhKeySet) throws Exception {
         EncryptedMessage message = EncryptedMessage.unserialize(encrypted);
-        checkHMAC(message.hmac, message.payload, ecdhKeySet.hmacKey);
+        checkHMAC(message.hmac, message.payload, ecdhKeySet.hmacKey, message.iv);
         byte[] data = decryptAES_CTR(message.payload, ecdhKeySet.encryptionKey, message.iv);
         return data;
     }
@@ -130,18 +131,20 @@ public class CryptoUtil {
         return cipher.doFinal(data);
     }
 
-    private byte[] getHMAC (byte[] data, byte[] keyBytes) throws Exception {
+    private byte[] getHMAC (byte[] data, byte[] keyBytes, byte[] iv) throws Exception {
         SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ALGO_HMAC);
         Mac mac = Mac.getInstance(ALGO_HMAC);
         mac.init(keySpec);
-        return mac.doFinal(data);
+        byte[] ivData = ArrayUtils.addAll(iv, data);
+        return mac.doFinal(ivData);
     }
 
-    private void checkHMAC (byte[] hmac, byte[] rest, byte[] keyBytes) throws Exception {
+    private void checkHMAC (byte[] hmac, byte[] data, byte[] keyBytes, byte[] iv) throws Exception {
         SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ALGO_HMAC);
         Mac mac = Mac.getInstance(ALGO_HMAC);
         mac.init(keySpec);
-        byte[] result = mac.doFinal(rest);
+        byte[] ivData = ArrayUtils.addAll(iv, data);
+        byte[] result = mac.doFinal(ivData);
 
         if (!MessageDigest.isEqual(result, hmac)){
             throw new RuntimeException("HMAC does not match..");
