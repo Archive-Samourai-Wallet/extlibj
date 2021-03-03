@@ -13,7 +13,6 @@ public class XORUtilTest {
     // encode
     String[] encoded = xorUtil.encode(data);
     Assertions.assertEquals(2, encoded.length);
-    System.out.println(encoded[0]+"\n"+encoded[1]);
 
     // decode
     Assertions.assertEquals(data, xorUtil.decodeAsString(encoded[0], encoded[1]));

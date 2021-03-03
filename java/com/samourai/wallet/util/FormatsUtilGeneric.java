@@ -12,6 +12,7 @@ import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.encoders.Base64;
 
@@ -260,6 +261,15 @@ public class FormatsUtilGeneric {
 	}
 
 	public boolean isValidXpub(String xpub){
+		return isValidXpub(xpub, MAGIC_XPUB, MAGIC_TPUB, MAGIC_YPUB, MAGIC_UPUB, MAGIC_ZPUB, MAGIC_VPUB);
+	}
+
+	public boolean isValidXpubBip84(String xpub, NetworkParameters params){
+		int magic = isTestNet(params) ? MAGIC_VPUB : MAGIC_ZPUB;
+		return isValidXpub(xpub, magic);
+	}
+
+	private boolean isValidXpub(String xpub, int... versions){
 
 		try {
 			byte[] xpubBytes = Base58.decodeChecked(xpub);
@@ -270,7 +280,7 @@ public class FormatsUtilGeneric {
 
 			ByteBuffer byteBuffer = ByteBuffer.wrap(xpubBytes);
 			int version = byteBuffer.getInt();
-			if(version != MAGIC_XPUB && version != MAGIC_TPUB && version != MAGIC_YPUB && version != MAGIC_UPUB && version != MAGIC_ZPUB && version != MAGIC_VPUB)   {
+			if (!Arrays.contains(versions, version)) {
 				throw new AddressFormatException("invalid version: " + xpub);
 			}
 			else	{

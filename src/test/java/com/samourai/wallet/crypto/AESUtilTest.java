@@ -1,7 +1,6 @@
 package com.samourai.wallet.crypto;
 
 import com.samourai.wallet.util.CharSequenceX;
-import com.samourai.wallet.util.FeeUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -14,10 +13,20 @@ public class AESUtilTest {
 
   @Test
   public void decrypt() throws Exception {
+    String password = "secret";
+    String expected = "all all all all all all all all all all all all";
+
     String encrypted = "t6MNj4oCb9T54lKWNAF274Hg72E0q0uJooUwKjzGD+ysWsFv8Ib47ubdnjStkeJ/G9UltiERHAm1tKRtHbaJiA==";
-    CharSequenceX passwordx = new CharSequenceX("secret");
+    doDecrypt(encrypted, password, expected);
+
+    encrypted = "DLXJBb7/Kbn6LrUESX/wASjbM3Xh7+ENDe/GaxcI6j/3Rid5qJwYSwo0MKGJR5eUD4BAkw9Y4nhMDPe6wNldIQ==:";
+    doDecrypt(encrypted, password, expected);
+  }
+
+  private void doDecrypt(String encrypted, String password, String expected) throws Exception {
+    CharSequenceX passwordx = new CharSequenceX(password);
     String decrypted = AESUtil.decrypt(encrypted, passwordx);
-    Assertions.assertEquals("all all all all all all all all all all all all", decrypted);
+    Assertions.assertEquals(expected, decrypted);
   }
 
   private void doEncryptDecrypt(String cleartext, String password) throws Exception {
@@ -26,8 +35,6 @@ public class AESUtilTest {
     String encrypted = AESUtil.encrypt(cleartext, passwordx);
     String decrypted = AESUtil.decrypt(encrypted, passwordx);
 
-    System.out.println("encrypted: :" +encrypted+":");
-    System.out.println("decrypted: " +decrypted);
     Assertions.assertEquals(cleartext, decrypted);
     Assertions.assertNotEquals(cleartext, encrypted);
 
