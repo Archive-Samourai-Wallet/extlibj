@@ -20,9 +20,17 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.CharacterCodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 
 import javax.annotation.Nullable;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 public class AESUtil {
 
@@ -30,6 +38,7 @@ public class AESUtil {
 
     private static final RandomUtil randomUtil = RandomUtil.getInstance();
     public static final int DefaultPBKDF2Iterations = 5000;
+    public static final int DefaultPBKDF2HMACSHA256Iterations = 15000;
 
     public static final int MODE_CBC = 0;
     public static final int MODE_OFB = 1;
@@ -47,10 +56,12 @@ public class AESUtil {
         return decrypt(ciphertext, password, DefaultPBKDF2Iterations);
     }
 
+    @Deprecated
     public static String decrypt(String ciphertext, CharSequenceX password, int iterations) throws UnsupportedEncodingException, InvalidCipherTextException, DecryptionException {
         return decryptWithSetMode(ciphertext, password, iterations, MODE_CBC, new ISO10126d2Padding());
     }
 
+    @Deprecated
     public static String decryptWithSetMode(String ciphertext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws InvalidCipherTextException, UnsupportedEncodingException, DecryptionException {
         final int AESBlockSize = 4;
 
@@ -105,14 +116,17 @@ public class AESUtil {
 
     // AES 256 PBKDF2 CBC iso10126 encryption
 
+    @Deprecated
     public static String encrypt(String cleartext, CharSequenceX password) throws DecryptionException, UnsupportedEncodingException {
         return encrypt(cleartext, password, AESUtil.DefaultPBKDF2Iterations);
     }
 
+    @Deprecated
     public static String encrypt(String cleartext, CharSequenceX password, int iterations) throws DecryptionException, UnsupportedEncodingException {
         return encryptWithSetMode(cleartext, password, iterations, MODE_CBC, new ISO10126d2Padding());
     }
 
+    @Deprecated
     public static String encryptWithSetMode(String cleartext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws DecryptionException, UnsupportedEncodingException {
 
         final int AESBlockSize = 4;
@@ -181,5 +195,26 @@ public class AESUtil {
         System.arraycopy(outBuf, 0, result, 0, result.length);
         return result;
     }
+
+
+    public static String decryptSHA256(String ciphertext, CharSequenceX password) throws BadPaddingException, CharacterCodingException, NoSuchAlgorithmException, IllegalBlockSizeException, InvalidAlgorithmParameterException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException {
+        return decryptSHA256(ciphertext, password, DefaultPBKDF2HMACSHA256Iterations);
+    }
+
+    public static String decryptSHA256(String ciphertext, CharSequenceX password, int iterations) throws BadPaddingException, CharacterCodingException, NoSuchAlgorithmException, IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+        KOpenSSL openSSL = new KOpenSSL();
+        return openSSL.decrypt_AES256CBC_PBKDF2_HMAC_SHA256(password.toString(), iterations, ciphertext, false);
+    }
+
+
+    public static String encryptSHA256(String cleartext, CharSequenceX password) throws BadPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+        return encryptSHA256(cleartext, password, DefaultPBKDF2HMACSHA256Iterations);
+    }
+
+    public static String encryptSHA256(String cleartext, CharSequenceX password, int iterations) throws BadPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+        KOpenSSL openSSL = new KOpenSSL();
+        return openSSL.encrypt_AES256CBC_PBKDF2_HMAC_SHA256(password.toString(), iterations, cleartext, false);
+    }
+
 
 }

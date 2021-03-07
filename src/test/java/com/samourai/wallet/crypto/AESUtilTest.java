@@ -4,6 +4,15 @@ import com.samourai.wallet.util.CharSequenceX;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.nio.charset.CharacterCodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
 public class AESUtilTest {
 
   @Test
@@ -47,4 +56,32 @@ public class AESUtilTest {
       // ok
     }
   }
+
+    @Test
+    public void encryptDecryptSHA256() throws Exception {
+        doEncryptDecryptSHA256("all all all all all all all all all all all all", "secret");
+    }
+
+
+    private void doEncryptDecryptSHA256(String cleartext, String password) throws Exception {
+        // valid for password
+        CharSequenceX passwordx = new CharSequenceX(password);
+        String encrypted = AESUtil.encryptSHA256(cleartext, passwordx);
+        String decrypted = AESUtil.decryptSHA256(encrypted, passwordx);
+
+        System.out.println("encrypted: :" + encrypted + ":");
+        System.out.println("decrypted: " + decrypted);
+
+        Assertions.assertEquals(cleartext, decrypted);
+        Assertions.assertNotEquals(cleartext, encrypted);
+
+        // invalid for wrong password
+        String encryptedWrong = AESUtil.encryptSHA256(cleartext, passwordx);
+        try {
+            String decryptedWrong = AESUtil.decryptSHA256(encryptedWrong, new CharSequenceX("wrong"));
+            Assertions.assertNotEquals(cleartext, decryptedWrong);
+        } catch (Exception e) {
+        }
+        // ok
+    }
 }
