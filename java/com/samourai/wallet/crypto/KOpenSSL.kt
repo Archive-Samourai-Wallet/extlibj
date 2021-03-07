@@ -32,6 +32,7 @@ import javax.crypto.spec.SecretKeySpec
 import org.bouncycastle.util.encoders.Base64
 import org.bouncycastle.util.encoders.DecoderException
 import org.bouncycastle.util.encoders.EncoderException
+import java.nio.charset.CharacterCodingException
 
 /**
  * Methods for encrypting/decrypting data in a manner compliant with OpenSSL such that
@@ -112,14 +113,14 @@ class KOpenSSL {
             InvalidKeyException::class,
             InvalidKeySpecException::class,
             NoSuchAlgorithmException::class,
-            NoSuchPaddingException::class,
+            NoSuchPaddingException::class
     )
     @JvmOverloads
     fun decrypt_AES256CBC_PBKDF2_HMAC_SHA256(
             password: String,
             hashIterations: Int,
             stringToDecrypt: String,
-            printDetails: Boolean = false,
+            printDetails: Boolean = false
     ): String {
         val encryptedBytes = Base64.decode(stringToDecrypt.lines().joinToString(""))
 
@@ -202,7 +203,7 @@ class KOpenSSL {
             password: String,
             hashIterations: Int,
             stringToEncrypt: String,
-            printDetails: Boolean = false,
+            printDetails: Boolean = false
     ): String {
         val salt = SecureRandom().generateSeed(8)
         if (printDetails) {
@@ -224,8 +225,7 @@ class KOpenSSL {
             components.clearValues()
         }
 
-        return Base64.encode(SALTED.toByteArray() + salt + cipherText)
-                .decodeToString()
+        return String(Base64.encode(SALTED.toByteArray() + salt + cipherText))
                 .replace("(.{64})".toRegex(), "$1\n")
                 .also {
                     if (printDetails) {
