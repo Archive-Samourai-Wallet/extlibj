@@ -21,7 +21,7 @@ public abstract class JacksonHttpClient implements IHttpClient {
     objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
   }
 
-  protected abstract String requestJsonGet(String urlStr, Map<String, String> headers)
+  protected abstract String requestJsonGet(String urlStr, Map<String, String> headers, boolean async)
       throws Exception;
 
   protected abstract String requestJsonPost(
@@ -35,8 +35,14 @@ public abstract class JacksonHttpClient implements IHttpClient {
   @Override
   public <T> T getJson(String urlStr, Class<T> responseType, Map<String, String> headers)
       throws HttpException {
+    return getJson(urlStr, responseType, headers, false);
+  }
+
+  @Override
+  public <T> T getJson(String urlStr, Class<T> responseType, Map<String, String> headers, boolean async)
+          throws HttpException {
     try {
-      String responseContent = requestJsonGet(urlStr, headers);
+      String responseContent = requestJsonGet(urlStr, headers, async);
       T result = parseJson(responseContent, responseType);
       return result;
     } catch (Exception e) {

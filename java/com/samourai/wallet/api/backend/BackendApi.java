@@ -140,7 +140,8 @@ public class BackendApi implements OAuthApi {
       log.debug("fetchWallet");
     }
     Map<String,String> headers = computeHeaders();
-    WalletResponse walletResponse = httpClient.getJson(url, WalletResponse.class, headers);
+    // use async to avoid Jetty's buffer exceeded exception on large responses
+    WalletResponse walletResponse = httpClient.getJson(url, WalletResponse.class, headers, true);
     return walletResponse;
   }
 
