@@ -1,9 +1,8 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.soroban.cahoots.ManualCahootsMessage;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.hd.java.HD_WalletFactoryJava;
-import com.samourai.wallet.segwit.BIP84Wallet;
-import com.samourai.soroban.cahoots.ManualCahootsMessage;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.TestNet3Params;
 import org.junit.jupiter.api.Assertions;
@@ -16,11 +15,10 @@ public abstract class AbstractCahootsTest {
     protected HD_WalletFactoryJava hdWalletFactory = HD_WalletFactoryJava.getInstance();
     protected NetworkParameters params = TestNet3Params.get();
 
-    protected BIP84Wallet computeBip84wallet(String seedWords, String passphrase) throws Exception {
+    protected HD_Wallet computeBip84wallet(String seedWords, String passphrase) throws Exception {
         byte[] seed = hdWalletFactory.computeSeedFromWords(seedWords);
         HD_Wallet bip84w = hdWalletFactory.getBIP84(seed, passphrase, params);
-        BIP84Wallet bip84Wallet = new BIP84Wallet(bip84w, params);
-        return bip84Wallet;
+        return bip84w;
     }
 
     protected Cahoots cleanPayload(Cahoots payload) throws Exception {

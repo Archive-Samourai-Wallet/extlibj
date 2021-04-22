@@ -15,7 +15,8 @@ public class HD_Account {
 
     protected DeterministicKey aKey = null;
     private String strLabel = null;
-    protected int mAID;
+    protected int purpose;
+    protected int mAID; // accountIndex
 
     private HD_Chain mReceive = null;
     private HD_Chain mChange = null;
@@ -28,10 +29,11 @@ public class HD_Account {
 
     protected HD_Account() { ; }
 
-    public HD_Account(NetworkParameters params, DeterministicKey mKey, String label, int child) {
+    public HD_Account(NetworkParameters params, DeterministicKey mKey, String label, int purpose, int child) {
 
         mParams = params;
         strLabel = label;
+        this.purpose = purpose;
         mAID = child;
 
         // L0PRV & STDVx: private derivation.
@@ -43,15 +45,16 @@ public class HD_Account {
         strYPUB = aKey.serializePubB58(params, 49);
         strZPUB = aKey.serializePubB58(params, 84);
 
-        mReceive = new HD_Chain(mParams, aKey, true);
-        mChange = new HD_Chain(mParams, aKey, false);
+        mReceive = new HD_Chain(mParams, aKey, purpose, mAID,true);
+        mChange = new HD_Chain(mParams, aKey, purpose, mAID,false);
 
     }
 
-    public HD_Account(NetworkParameters params, String xpub, String label, int child) throws AddressFormatException {
+    public HD_Account(NetworkParameters params, String xpub, String label, int purpose, int child) throws AddressFormatException {
 
         mParams = params;
         strLabel = label;
+        this.purpose = purpose;
         mAID = child;
 
         // assign master key to account key
@@ -59,8 +62,8 @@ public class HD_Account {
 
         strXPUB = strYPUB = strZPUB = xpub;
 
-        mReceive = new HD_Chain(mParams, aKey, true);
-        mChange = new HD_Chain(mParams, aKey, false);
+        mReceive = new HD_Chain(mParams, aKey, purpose, mAID,true);
+        mChange = new HD_Chain(mParams, aKey, purpose, mAID,false);
 
     }
 

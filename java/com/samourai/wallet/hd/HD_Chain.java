@@ -3,17 +3,16 @@ package com.samourai.wallet.hd;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 public class HD_Chain {
 
     private DeterministicKey cKey = null;
+    private int purpose;
+    private int accountIndex;
     private boolean isReceive;
+    private int chainIndex;
     private String strPath = null;
 
     private int addrIdx = 0;
@@ -22,22 +21,36 @@ public class HD_Chain {
     
     private HD_Chain() { ; }
 
-    public HD_Chain(NetworkParameters params, DeterministicKey aKey, boolean isReceive) {
+    public HD_Chain(NetworkParameters params, DeterministicKey aKey, int purpose, int accountIndex, boolean isReceive) {
 
         mParams = params;
+        this.purpose = purpose;
+        this.accountIndex = accountIndex;
         this.isReceive = isReceive;
-        int chain = isReceive ? 0 : 1;
-        cKey = HDKeyDerivation.deriveChildKey(aKey, chain);
+        this.chainIndex = isReceive ? 0 : 1;
+        cKey = HDKeyDerivation.deriveChildKey(aKey, chainIndex);
 
         strPath = cKey.getPath().toString();
+    }
+
+    public int getPurpose() {
+        return purpose;
+    }
+
+    public int getAccountIndex() {
+        return accountIndex;
     }
 
     public boolean isReceive() {
         return isReceive;
     }
 
+    public int getChainIndex() {
+        return chainIndex;
+    }
+
     public HD_Address getAddressAt(int addrIdx) {
-    	return new HD_Address(mParams, cKey, addrIdx);
+    	return new HD_Address(mParams, cKey, purpose, accountIndex, chainIndex, addrIdx);
     }
 
     public int getAddrIdx() {

@@ -40,7 +40,7 @@ public class HD_WalletFactoryGeneric {
 
     if (data.matches(FormatsUtilGeneric.XPUB)) {
       String[] xpub = data.split(":");
-      hdw = new HD_Wallet(params, xpub);
+      hdw = new HD_Wallet(44, params, xpub);
     } else if (data.matches(FormatsUtilGeneric.HEX) && data.length() % 4 == 0) {
       byte[] seed = Hex.decodeHex(data.toCharArray());
       hdw = new HD_Wallet(44, mc, params, seed, passphrase, nbAccounts);
