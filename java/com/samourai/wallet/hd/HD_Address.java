@@ -15,7 +15,6 @@ import org.json.JSONObject;
 
 public class HD_Address {
 
-    private int purpose;
     private int accountIndex;
     private int chainIndex;
     private int mChildNum; // addressIndex
@@ -27,10 +26,9 @@ public class HD_Address {
 
     private HD_Address() { ; }
 
-    public HD_Address(NetworkParameters params, DeterministicKey cKey, int purpose, int accountIndex, int chainIndex, int child) {
+    public HD_Address(NetworkParameters params, DeterministicKey cKey, int accountIndex, int chainIndex, int child) {
 
         mParams = params;
-        this.purpose = purpose;
         this.accountIndex = accountIndex;
         this.chainIndex = chainIndex;
         mChildNum = child;
@@ -54,7 +52,7 @@ public class HD_Address {
         return ecKey.toAddress(mParams).toString();
     }
 
-    public String getAddressString(AddressType addressType) throws Exception {
+    public String getAddressString(AddressType addressType) {
         switch (addressType) {
             case LEGACY:
                 return getAddressString();
@@ -63,7 +61,7 @@ public class HD_Address {
             case SEGWIT_NATIVE:
                 return Bech32UtilGeneric.getInstance().toBech32(getPubKey(), mParams);
         }
-        throw new Exception("Unknown addressType");
+        return null;
     }
 
     public String getPrivateKeyString() {
@@ -77,16 +75,16 @@ public class HD_Address {
 
     }
 
-    public int getPurpose() {
-        return purpose;
-    }
-
     public int getAccountIndex() {
         return accountIndex;
     }
 
     public int getChainIndex() {
         return chainIndex;
+    }
+
+    public int getAddressIndex() {
+        return mChildNum;
     }
 
     public byte[] getPubKey() {
@@ -115,7 +113,7 @@ public class HD_Address {
         }
     }
 
-    public String getPathString() {
-        return "m/"+purpose+"' /"+accountIndex+"' /"+chainIndex+"' /"+mChildNum;
+    public String getPathString(AddressType addressType) {
+        return "m/"+addressType.getPurpose()+"' /"+accountIndex+"' /"+chainIndex+"' /"+mChildNum;
     }
 }

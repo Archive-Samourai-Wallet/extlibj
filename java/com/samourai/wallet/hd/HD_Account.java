@@ -45,8 +45,8 @@ public class HD_Account {
         strYPUB = aKey.serializePubB58(params, 49);
         strZPUB = aKey.serializePubB58(params, 84);
 
-        mReceive = new HD_Chain(mParams, aKey, purpose, mAID,true);
-        mChange = new HD_Chain(mParams, aKey, purpose, mAID,false);
+        mReceive = new HD_Chain(mParams, aKey, mAID,true);
+        mChange = new HD_Chain(mParams, aKey, mAID,false);
 
     }
 
@@ -62,8 +62,8 @@ public class HD_Account {
 
         strXPUB = strYPUB = strZPUB = xpub;
 
-        mReceive = new HD_Chain(mParams, aKey, purpose, mAID,true);
-        mChange = new HD_Chain(mParams, aKey, purpose, mAID,false);
+        mReceive = new HD_Chain(mParams, aKey, mAID,true);
+        mChange = new HD_Chain(mParams, aKey, mAID,false);
 
     }
 
