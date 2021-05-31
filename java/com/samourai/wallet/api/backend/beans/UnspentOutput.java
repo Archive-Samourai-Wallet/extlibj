@@ -4,6 +4,7 @@ import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.TransactionOutPoint;
+import org.bitcoinj.script.Script;
 import org.bouncycastle.util.encoders.Hex;
 
 public class UnspentOutput {
@@ -50,6 +51,14 @@ public class UnspentOutput {
     public TransactionOutPoint computeOutpoint(NetworkParameters params) {
       Sha256Hash sha256Hash = Sha256Hash.wrap(Hex.decode(tx_hash));
       return new TransactionOutPoint(params, tx_output_n, sha256Hash, Coin.valueOf(value));
+    }
+
+    public byte[] getScriptBytes() {
+        return Hex.decode(script);
+    }
+
+    public Script computeScript() {
+        return new Script(getScriptBytes());
     }
 
     public static class Xpub {

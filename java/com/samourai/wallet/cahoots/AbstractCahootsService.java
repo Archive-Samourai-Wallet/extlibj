@@ -33,7 +33,7 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
         HashMap<String, CahootsUtxo> utxosByHash = new HashMap<String, CahootsUtxo>();
         for (CahootsUtxo utxo : utxos) {
             MyTransactionOutPoint outpoint = utxo.getOutpoint();
-            utxosByHash.put(outpoint.getTxHash().toString() + "-" + outpoint.getTxOutputN(), utxo);
+            utxosByHash.put(outpoint.getHash().toString() + "-" + outpoint.getIndex(), utxo);
         }
 
         Transaction transaction = cahoots.getTransaction();

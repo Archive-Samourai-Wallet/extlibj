@@ -15,8 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class HD_Wallet {
-
-    private int purpose;
     private byte[] mSeed = null;
     private String strPassphrase = null;
     private List<String> mWordList = null;
@@ -37,7 +35,7 @@ public class HD_Wallet {
     }
 
     protected HD_Wallet(int purpose, List<String> wordList, NetworkParameters mParams, byte[] mSeed, String strPassphrase, int nbAccounts) {
-        this(purpose, mSeed, strPassphrase, wordList, mParams);
+        this(mSeed, strPassphrase, wordList, mParams);
 
         // compute rootKey for accounts
         this.mRoot = computeRootKey(purpose, mWordList, strPassphrase, mParams);
@@ -46,7 +44,7 @@ public class HD_Wallet {
         mAccounts = new ArrayList<HD_Account>();
         for(int i = 0; i < nbAccounts; i++) {
             String acctName = String.format("account %02d", i);
-            mAccounts.add(new HD_Account(mParams, mRoot, acctName, purpose, i));
+            mAccounts.add(new HD_Account(mParams, mRoot, acctName, i));
         }
     }
 
@@ -57,18 +55,17 @@ public class HD_Wallet {
     /*
     create from account xpub key(s)
      */
-    public HD_Wallet(int purpose, NetworkParameters params, String[] xpub) throws AddressFormatException {
+    public HD_Wallet(NetworkParameters params, String[] xpub) throws AddressFormatException {
 
         mParams = params;
         mAccounts = new ArrayList<HD_Account>();
         for(int i = 0; i < xpub.length; i++) {
-            mAccounts.add(new HD_Account(mParams, xpub[i], "", purpose, i));
+            mAccounts.add(new HD_Account(mParams, xpub[i], "", i));
         }
 
     }
 
-    protected HD_Wallet(int purpose, byte[] mSeed, String strPassphrase, List<String> mWordList, NetworkParameters mParams) {
-        this.purpose = purpose;
+    protected HD_Wallet(byte[] mSeed, String strPassphrase, List<String> mWordList, NetworkParameters mParams) {
         this.mSeed = mSeed;
         this.strPassphrase = strPassphrase;
         this.mWordList = mWordList;
@@ -109,12 +106,12 @@ public class HD_Wallet {
     }
 
     public HD_Account getAccountAt(int accountIdx) {
-        return new HD_Account(mParams, mRoot, "", purpose, accountIdx);
+        return new HD_Account(mParams, mRoot, "", accountIdx);
     }
 
     public void addAccount() {
         String strName = String.format("Account %d", mAccounts.size());
-        mAccounts.add(new HD_Account(mParams, mRoot, strName, purpose, mAccounts.size()));
+        mAccounts.add(new HD_Account(mParams, mRoot, strName, mAccounts.size()));
     }
 
     public String[] getXPUBs() {

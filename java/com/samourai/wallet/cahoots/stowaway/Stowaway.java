@@ -84,7 +84,7 @@ public class Stowaway extends Cahoots {
                 log.debug("input value:" + input.getValue().longValue());
             }
             transaction.addInput(input);
-            outpoints.put(outpoint.getTxHash().toString() + "-" + outpoint.getTxOutputN(), outpoint.getValue().longValue());
+            outpoints.put(outpoint.getHash().toString() + "-" + outpoint.getIndex(), outpoint.getValue().longValue());
         }
         for(_TransactionOutput output : outputs.keySet())   {
             transaction.addOutput(output);
@@ -154,7 +154,7 @@ public class Stowaway extends Cahoots {
             }
             TransactionInput input = new TransactionInput(params, null, new byte[0], outpoint, outpoint.getValue());
             transaction.addInput(input);
-            outpoints.put(outpoint.getTxHash().toString() + "-" + outpoint.getTxOutputN(), outpoint.getValue().longValue());
+            outpoints.put(outpoint.getHash().toString() + "-" + outpoint.getIndex(), outpoint.getValue().longValue());
         }
         for(_TransactionOutput output : outputs.keySet())   {
             transaction.addOutput(output);

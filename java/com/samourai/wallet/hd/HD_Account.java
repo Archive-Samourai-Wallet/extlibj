@@ -15,7 +15,6 @@ public class HD_Account {
 
     protected DeterministicKey aKey = null;
     private String strLabel = null;
-    protected int purpose;
     protected int mAID; // accountIndex
 
     private HD_Chain mReceive = null;
@@ -29,11 +28,10 @@ public class HD_Account {
 
     protected HD_Account() { ; }
 
-    public HD_Account(NetworkParameters params, DeterministicKey mKey, String label, int purpose, int child) {
+    public HD_Account(NetworkParameters params, DeterministicKey mKey, String label, int child) {
 
         mParams = params;
         strLabel = label;
-        this.purpose = purpose;
         mAID = child;
 
         // L0PRV & STDVx: private derivation.
@@ -50,11 +48,10 @@ public class HD_Account {
 
     }
 
-    public HD_Account(NetworkParameters params, String xpub, String label, int purpose, int child) throws AddressFormatException {
+    public HD_Account(NetworkParameters params, String xpub, String label, int child) throws AddressFormatException {
 
         mParams = params;
         strLabel = label;
-        this.purpose = purpose;
         mAID = child;
 
         // assign master key to account key

@@ -146,8 +146,8 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
                 }
 
                 MyTransactionOutPoint outpoint = utxo.getOutpoint();
-                if (!seenTxs.contains(outpoint.getTxHash().toString())) {
-                    seenTxs.add(outpoint.getTxHash().toString());
+                if (!seenTxs.contains(outpoint.getHash().toString())) {
+                    seenTxs.add(outpoint.getHash().toString());
 
                     selectedUTXO.add(utxo);
                     totalContributedAmount += utxo.getValue();
@@ -285,8 +285,8 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
                         break;
                 }
 
-                if (!_seenTxs.contains(utxo.getOutpoint().getTxHash().toString())) {
-                    _seenTxs.add(utxo.getOutpoint().getTxHash().toString());
+                if (!_seenTxs.contains(utxo.getOutpoint().getHash().toString())) {
+                    _seenTxs.add(utxo.getOutpoint().getHash().toString());
 
                     selectedUTXO.add(utxo);
                     totalSelectedAmount += utxo.getValue();

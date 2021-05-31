@@ -113,4 +113,13 @@ public class TxUtil {
     }
     return null;
   }
+
+  public String getToAddress(byte[] scriptBytes, NetworkParameters params) throws Exception {
+    Script script = new Script(scriptBytes);
+    if (Bech32UtilGeneric.getInstance().isP2WPKHScript(Hex.toHexString(scriptBytes))) {
+      return Bech32UtilGeneric.getInstance().getAddressFromScript(script, params);
+    } else {
+      return script.getToAddress(params).toString();
+    }
+  }
 }

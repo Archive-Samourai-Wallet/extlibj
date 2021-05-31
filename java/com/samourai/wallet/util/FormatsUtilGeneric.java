@@ -4,7 +4,6 @@ import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.segwit.bech32.Bech32;
 import com.samourai.wallet.segwit.bech32.Bech32Segwit;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.*;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -13,8 +12,8 @@ import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
 import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.nio.ByteBuffer;
 import java.util.regex.Matcher;
