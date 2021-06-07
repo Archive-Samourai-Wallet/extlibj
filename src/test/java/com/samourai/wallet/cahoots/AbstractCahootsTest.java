@@ -12,14 +12,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractCahootsTest {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahootsTest.class);
 
-    protected HD_WalletFactoryJava hdWalletFactory = HD_WalletFactoryJava.getInstance();
     protected NetworkParameters params = TestNet3Params.get();
-
-    protected HD_Wallet computeBip84wallet(String seedWords, String passphrase) throws Exception {
-        byte[] seed = hdWalletFactory.computeSeedFromWords(seedWords);
-        HD_Wallet bip84w = hdWalletFactory.getBIP84(seed, passphrase, params);
-        return bip84w;
-    }
 
     protected Cahoots cleanPayload(Cahoots payload) throws Exception {
         Cahoots copy = Cahoots.parse(payload.toJSONString());

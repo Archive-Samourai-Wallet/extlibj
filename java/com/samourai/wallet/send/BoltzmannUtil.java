@@ -2,6 +2,7 @@ package com.samourai.wallet.send;
 
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.hd.AddressType;
+import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.send.spend.SpendBuilder;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
@@ -113,10 +114,7 @@ public class BoltzmannUtil {
             firstPassOutpointTypes = Triple.of(0, 0, 0);
         }
 
-        long totalOutpointsAmount = 0L;
-        for(UTXO utxo : utxos)   {
-            totalOutpointsAmount += utxo.getValue();
-        }
+        long totalOutpointsAmount = UTXO.sumValue(utxos);
         if (log.isDebugEnabled()) {
             log.debug("total outputs amount:" + totalOutpointsAmount);
             log.debug("spend amount:" + spendAmount.toString());
@@ -129,6 +127,9 @@ public class BoltzmannUtil {
             }
             return null;
         }
+
+
+
 
         List<MyTransactionOutPoint> selectedOutpoints = new ArrayList<MyTransactionOutPoint>();
         BigInteger selectedValue = BigInteger.ZERO;

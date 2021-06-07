@@ -4,18 +4,22 @@ import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.hd.AddressType;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
-import com.samourai.wallet.send.UtxoProvider;
+import com.samourai.wallet.send.provider.UtxoProvider;
+import com.samourai.wallet.send.beans.SpendError;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
-import com.samourai.wallet.send.exceptions.DustChangeException;
+import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.bitcoinj.core.NetworkParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class SpendSelection {
+    private static final Logger log = LoggerFactory.getLogger(SpendSelection.class);
     private SpendType spendType;
     private List<UTXO> selectedUTXO;
 
@@ -44,12 +48,13 @@ public abstract class SpendSelection {
         return UTXO.sumValue(selectedUTXO);
     }
 
-    public abstract SpendTx spendTx(long amount, String address, AddressType changeType, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider) throws Exception ;
+    public abstract SpendTx spendTx(long amount, String address, AddressType changeType, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider) throws SpendException ;
 
-    protected long computeChange(long amount, BigInteger fee) throws DustChangeException {
+    protected long computeChange(long amount, BigInteger fee) throws SpendException {
         long change = getTotalValueSelected() - (amount + fee.longValue());
         if (change > 0L && change < SamouraiWalletConst.bDust.longValue()) {
-            throw new DustChangeException();
+            log.warn("SpendError.DUST_CHANGE: change="+change);
+            throw new SpendException(SpendError.DUST_CHANGE);
         }
         return change;
     }

@@ -113,7 +113,11 @@ public class HD_Address {
         }
     }
 
-    public String getPathString(AddressType addressType) {
-        return "m/"+addressType.getPurpose()+"' /"+accountIndex+"' /"+chainIndex+"' /"+mChildNum;
+    public String getPathFull(AddressType addressType) {
+        return getPathFull(addressType.getPurpose(), 0, accountIndex, chainIndex, mChildNum);
+    }
+
+    public static String getPathFull(int purpose, int coinType, int account, int chain, int address) {
+        return "m/"+purpose+"'/"+coinType+"'/"+account+"'/"+chain+"/"+address;
     }
 }

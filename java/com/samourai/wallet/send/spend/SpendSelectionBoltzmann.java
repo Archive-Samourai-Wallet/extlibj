@@ -4,10 +4,11 @@ import com.samourai.wallet.hd.AddressType;
 import com.samourai.wallet.send.BoltzmannUtil;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
-import com.samourai.wallet.send.UtxoProvider;
+import com.samourai.wallet.send.provider.UtxoProvider;
+import com.samourai.wallet.send.beans.SpendError;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
-import com.samourai.wallet.send.exceptions.Bip126OutputException;
+import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.util.TxUtil;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.apache.commons.lang3.tuple.Pair;
@@ -21,10 +22,11 @@ import java.util.*;
 
 public class SpendSelectionBoltzmann extends SpendSelection {
     private static final Logger log = LoggerFactory.getLogger(SpendSelectionBoltzmann.class);
+    private static boolean TEST_MODE = false;
     private Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair;
 
     public SpendSelectionBoltzmann(Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair) {
-        super(SpendType.BOLTZMANN);
+        super(SpendType.STONEWALL);
         this.pair = pair;
     }
 
@@ -154,11 +156,15 @@ public class SpendSelectionBoltzmann extends SpendSelection {
         }
 
         List<UTXO> _utxos1Shuffled = new ArrayList<>(_utxos1);
-        Collections.shuffle(_utxos1Shuffled);
+        if (!TEST_MODE) {
+            Collections.shuffle(_utxos1Shuffled);
+        }
         List<UTXO> _utxos2Shuffled = null;
         if (_utxos2 != null && _utxos2.size() > 0) {
             _utxos2Shuffled = new ArrayList<>(_utxos2);
-            Collections.shuffle(_utxos2Shuffled);
+            if (!TEST_MODE) {
+                Collections.shuffle(_utxos2Shuffled);
+            }
         }
 
         // boltzmann spend (STONEWALL)
@@ -176,7 +182,7 @@ public class SpendSelectionBoltzmann extends SpendSelection {
     }
 
     @Override
-    public SpendTx spendTx(long amount, String address, AddressType changeType, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider) throws Exception {
+    public SpendTx spendTx(long amount, String address, AddressType changeType, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider) throws SpendException {
         // select utxos for boltzmann
         long inputAmount = 0L;
         long outputAmount = 0L;
@@ -193,19 +199,20 @@ public class SpendSelectionBoltzmann extends SpendSelection {
         Map<String, Long> receivers = new HashMap<>();
         for (TransactionOutput output : pair.getRight()) {
             try {
-                String outputAddress = TxUtil.getInstance().getToAddress(output.getScriptBytes(), params);
+                String outputAddress = TxUtil.getInstance().getToAddress(output);
                 receivers.put(outputAddress, output.getValue().longValue());
                 outputAmount += output.getValue().longValue();
             } catch (Exception e) {
-                throw new Bip126OutputException();
+                throw new SpendException(SpendError.BIP126_OUTPUT);
             }
         }
 
         BigInteger fee = BigInteger.valueOf(inputAmount - outputAmount);
-
-        // compute change
         long change = computeChange(amount, fee);
+        return new SpendTx(changeType, amount, fee.longValue(), change, this, receivers, rbfOptIn, utxoProvider, params);
+    }
 
-        return new SpendTx(account, changeType, amount, fee.longValue(), change, this, receivers, rbfOptIn);
+    public static void _setTestMode(boolean testMode) {
+        TEST_MODE = testMode;
     }
 }

@@ -4,10 +4,10 @@ import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.hd.AddressType;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
-import com.samourai.wallet.send.UtxoProvider;
+import com.samourai.wallet.send.provider.UtxoProvider;
+import com.samourai.wallet.send.beans.SpendError;
 import com.samourai.wallet.send.beans.SpendTx;
-import com.samourai.wallet.send.exceptions.InsufficientFundsException;
-import com.samourai.wallet.send.exceptions.UtxoSelectionException;
+import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.bitcoinj.core.NetworkParameters;
@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 public class SpendBuilder {
@@ -53,16 +54,11 @@ public class SpendBuilder {
                 log.debug("spend type:" + spendSelection.getSpendType());
                 log.debug("amount:" + amount);
                 log.debug("total value selected:" + spendSelection.getTotalValueSelected());
-                log.debug("fee:" + spendTx.getFee().longValue());
+                log.debug("fee:" + spendTx.getFee());
                 log.debug("nb inputs:" + spendTx.getSpendFrom().size());
             }
         }
         return spendTx;
-    }
-
-    public Transaction sign(SpendTx spendTx) throws Exception {
-        Transaction tx = spendTx.sign(params, utxoProvider);
-        return tx;
     }
 
     private Collection<UTXO> findUtxos(long neededAmount, WhirlpoolAccount account, AddressType addressType, Collection<MyTransactionOutPoint> preselectedInputs) {
@@ -77,47 +73,49 @@ public class SpendBuilder {
                 u.setOutpoints(outs);
                 utxos.add(u);
             }
-            return UTXO.sumValue(utxos) >= neededAmount ? utxos : null;
+            return UTXO.sumValue(utxos) >= neededAmount ? utxos : new LinkedList<>();
         }
 
         Collection<UTXO> utxos = utxoProvider.getUtxos(account, addressType);
 
-        // spend from postmix
-        if (account == WhirlpoolAccount.POSTMIX) {
-            // TODO zeroleak why filter out only for postmix?
-            /*
-            //Filtering out do not spends
-            for (String key : postmix.keySet()) {
-                UTXO u = new UTXO();
-                for (MyTransactionOutPoint out : postmix.get(key).getOutpoints()) {
-                    if (!BlockedUTXO.getInstance().contains(out.getTxHash().toString(), out.getTxOutputN())) {
-                        u.getOutpoints().add(out);
-                        u.setPath(postmix.get(key).getPath());
-                    }
+        // TODO filter-out do-not-spends
+        /*
+        //Filtering out do not spends
+        for (String key : postmix.keySet()) {
+            UTXO u = new UTXO();
+            for (MyTransactionOutPoint out : postmix.get(key).getOutpoints()) {
+                if (!BlockedUTXO.getInstance().contains(out.getTxHash().toString(), out.getTxOutputN())) {
+                    u.getOutpoints().add(out);
+                    u.setPath(postmix.get(key).getPath());
                 }
-                if (u.getOutpoints().size() > 0) {
-                    utxos.add(u);
-                }
-            }*/
-            return UTXO.sumValue(utxos) >= neededAmount ? utxos : null;
-        }
+            }
+            if (u.getOutpoints().size() > 0) {
+                utxos.add(u);
+            }
+        }*/
 
         // spend by addressType
         if (UTXO.sumValue(utxos) >= neededAmount) {
             return utxos;
         }
 
+        // do not mix AddressTypes for postmix
+        if (account == WhirlpoolAccount.POSTMIX) {
+            return new LinkedList<>(); // not enough postmix
+        }
+
         // fallback by mixed type
         utxos = utxoProvider.getUtxos(account);
-        return UTXO.sumValue(utxos) >= neededAmount ? utxos : null;
+        return UTXO.sumValue(utxos) >= neededAmount ? utxos : new LinkedList<>();
     }
 
-    private SpendSelection computeUtxoSelection(WhirlpoolAccount account, String address, boolean boltzmann, long amount, long neededAmount, Collection<UTXO> utxos, AddressType addressType, NetworkParameters params, BigInteger feePerKb, AddressType forcedChangeType) throws Exception {
+    private SpendSelection computeUtxoSelection(WhirlpoolAccount account, String address, boolean boltzmann, long amount, long neededAmount, Collection<UTXO> utxos, AddressType addressType, NetworkParameters params, BigInteger feePerKb, AddressType forcedChangeType) throws SpendException {
         long balance = UTXO.sumValue(utxos);
 
         // insufficient balance
         if (amount > balance) {
-            throw new InsufficientFundsException();
+            log.warn("InsufficientFundsException: amount="+amount+", balance="+balance);
+            throw new SpendException(SpendError.INSUFFICIENT_FUNDS);
         }
 
         // entire balance (can only be simple spend)
@@ -158,7 +156,7 @@ public class SpendBuilder {
         }
 
         // no selection found
-        throw new UtxoSelectionException();
+        throw new SpendException(SpendError.MAKING);
     }
 
     private long computeNeededAmount(WhirlpoolAccount account, long amount, AddressType changeType, BigInteger feePerKb) {

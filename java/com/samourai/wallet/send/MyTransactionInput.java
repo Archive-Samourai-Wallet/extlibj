@@ -47,6 +47,7 @@ public class MyTransactionInput extends TransactionInput {
         return null;
     }
 
+    @Override
     public Coin getValue() {
         if(value == null)    {
             return null;

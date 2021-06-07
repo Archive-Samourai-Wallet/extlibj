@@ -1,11 +1,12 @@
 package com.samourai.wallet.api.backend.beans;
 
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Sha256Hash;
-import org.bitcoinj.core.TransactionOutPoint;
+import com.samourai.wallet.hd.HD_Address;
+import com.samourai.wallet.send.MyTransactionOutPoint;
+import org.bitcoinj.core.*;
 import org.bitcoinj.script.Script;
 import org.bouncycastle.util.encoders.Hex;
+
+import java.math.BigInteger;
 
 public class UnspentOutput {
     private static final String PATH_SEPARATOR = "/";
@@ -45,16 +46,30 @@ public class UnspentOutput {
     }
 
     public String getPath() {
+        if (xpub == null) {
+            return null;
+        }
       return xpub.path;
     }
 
-    public TransactionOutPoint computeOutpoint(NetworkParameters params) {
-      Sha256Hash sha256Hash = Sha256Hash.wrap(Hex.decode(tx_hash));
-      return new TransactionOutPoint(params, tx_output_n, sha256Hash, Coin.valueOf(value));
+    public String getPathFull(int purpose, int accountIndex) {
+        return HD_Address.getPathFull(purpose, 0, accountIndex, computePathChainIndex(), computePathAddressIndex());
+    }
+
+    public MyTransactionOutPoint computeOutpoint(NetworkParameters params) {
+        Sha256Hash sha256Hash = Sha256Hash.wrap(Hex.decode(tx_hash));
+        // use MyTransactionOutPoint to forward scriptBytes + address
+        return new MyTransactionOutPoint(params, sha256Hash, tx_output_n, BigInteger.valueOf(value), getScriptBytes(), addr);
+    }
+
+    public TransactionInput computeSpendInput(NetworkParameters params) {
+        return new TransactionInput(
+                        params, null, new byte[] {}, computeOutpoint(params), Coin.valueOf(value));
+
     }
 
     public byte[] getScriptBytes() {
-        return Hex.decode(script);
+        return script != null ? Hex.decode(script) : null;
     }
 
     public Script computeScript() {

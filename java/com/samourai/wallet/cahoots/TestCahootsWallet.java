@@ -26,7 +26,6 @@ public class TestCahootsWallet extends SimpleCahootsWallet {
         byte[] scriptBytes = mockScriptBytes();
         MyTransactionOutPoint outpoint = new MyTransactionOutPoint(getParams(), Sha256Hash.of(txid.getBytes()), n, BigInteger.valueOf(value), scriptBytes, address);
         CahootsUtxo utxo = new CahootsUtxo(outpoint, path, key);
-        outpoint.setConfirmations(999);
         addUtxo(account, utxo);
     }
 

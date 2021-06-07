@@ -3,17 +3,22 @@ package com.samourai.wallet.send.beans;
 import com.samourai.wallet.hd.AddressType;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.SendFactoryGeneric;
-import com.samourai.wallet.send.UtxoProvider;
+import com.samourai.wallet.send.provider.UtxoKeyProvider;
+import com.samourai.wallet.send.exceptions.MakeTxException;
+import com.samourai.wallet.send.exceptions.SignTxException;
+import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.spend.SpendSelection;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
+import com.samourai.wallet.send.spend.SpendSelectionBoltzmann;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
 public class SpendTx {
-    private WhirlpoolAccount account;
+    private static final Logger log = LoggerFactory.getLogger(SpendTx.class);
     private AddressType changeType;
     private long amount;
     private long fee;
@@ -21,9 +26,11 @@ public class SpendTx {
     private SpendSelection spendSelection;
     private Map<String, Long> receivers;
     private boolean rbfOptIn;
+    private int vSize;
+    private int weight;
+    private Transaction tx;
 
-    public SpendTx(WhirlpoolAccount account, AddressType changeType, long amount, long fee, long change, SpendSelection spendSelection, Map<String, Long> receivers, boolean rbfOptIn) {
-        this.account = account;
+    public SpendTx(AddressType changeType, long amount, long fee, long change, SpendSelection spendSelection, Map<String, Long> receivers, boolean rbfOptIn, UtxoKeyProvider keyProvider, NetworkParameters params) throws SpendException {
         this.changeType = changeType;
         this.amount = amount;
         this.fee = fee;
@@ -31,13 +38,42 @@ public class SpendTx {
         this.receivers = receivers;
         this.change = change;
         this.rbfOptIn = rbfOptIn;
+
+        this.tx = this.computeTx(keyProvider, params);
+        this.vSize = tx.getVirtualTransactionSize();
+        this.weight = tx.getWeight();
     }
 
-    public Transaction sign(NetworkParameters params, UtxoProvider utxoProvider) throws Exception {
-        // make tx
-        final Transaction tx = SendFactoryGeneric.getInstance().makeTransaction(getSpendTo(), getSpendFrom(), rbfOptIn, params);
-        if (tx == null) {
-            throw new Exception("makeTransaction failed");
+    private Transaction computeTx(UtxoKeyProvider keyProvider, NetworkParameters params) throws SpendException {
+        // spend tx
+        Transaction tx;
+        try {
+            tx = SendFactoryGeneric.getInstance().makeTransaction(receivers, getSpendFrom(), rbfOptIn, params);
+        } catch (MakeTxException e) {
+            log.error("MakeTxException", e);
+            throw new SpendException(SpendError.MAKING);
+        }
+        try {
+            tx = SendFactoryGeneric.getInstance().signTransaction(tx, keyProvider);
+        } catch (SignTxException e) {
+            log.error("spendTx failed", e);
+            throw new SpendException(SpendError.SIGNING);
+        }
+        byte[] serialized = tx.bitcoinSerialize();
+
+        // check fee
+        if (fee != tx.getFee().value) {
+            log.error("fee check failed: "+fee+" vs "+tx.getFee().value);
+            throw new SpendException(SpendError.MAKING);
+        }
+        if ((tx.hasWitness() && (fee < tx.getVirtualTransactionSize())) || (!tx.hasWitness() && (fee < serialized.length))) {
+            throw new SpendException(SpendError.INSUFFICIENT_FEE);
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("size:" + serialized.length);
+            log.debug("vsize:" + tx.getVirtualTransactionSize());
+            log.debug("fee:" + tx.getFee().value);
         }
 
         /*final RBFSpend rbf;
@@ -75,9 +111,7 @@ public class SpendTx {
                 }
             }
         }*/
-
-        // sign
-        return SendFactoryGeneric.getInstance().signTransaction(tx, account, utxoProvider);
+        return tx;
     }
 
     public AddressType getChangeType() {
@@ -88,7 +122,7 @@ public class SpendTx {
         return amount;
     }
 
-    public Long getFee() {
+    public long getFee() {
         return fee;
     }
 
@@ -106,5 +140,17 @@ public class SpendTx {
 
     public SpendType getSpendType() {
         return spendSelection.getSpendType();
+    }
+
+    public int getvSize() {
+        return vSize;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+
+    public Transaction getTx() {
+        return tx;
     }
 }

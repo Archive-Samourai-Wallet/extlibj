@@ -5,10 +5,13 @@ import com.samourai.wallet.hd.AddressType;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.SendFactoryGeneric;
 import com.samourai.wallet.send.UTXO;
-import com.samourai.wallet.send.UtxoProvider;
+import com.samourai.wallet.send.provider.UtxoProvider;
+import com.samourai.wallet.send.beans.SpendError;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
-import com.samourai.wallet.send.exceptions.InsufficientFeeException;
+import com.samourai.wallet.send.exceptions.MakeTxException;
+import com.samourai.wallet.send.exceptions.SignTxException;
+import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import java8.util.Lists;
@@ -96,7 +99,7 @@ public class SpendSelectionSimple extends SpendSelection {
     }
 
     @Override
-    public SpendTx spendTx(long amount, String address, AddressType addressType, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider) throws Exception {
+    public SpendTx spendTx(long amount, String address, AddressType addressType, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider) throws SpendException {
         List<MyTransactionOutPoint> outpoints = getSpendFrom();
         Triple<Integer, Integer, Integer> outpointTypes = FeeUtil.getInstance().getOutpointCount(new Vector(outpoints), params);
         BigInteger fee;
@@ -137,19 +140,6 @@ public class SpendSelectionSimple extends SpendSelection {
         if (restoreChangeIndexes != null) {
             restoreChangeIndexes.run(); // TODO zeroleak
         }
-
-        // spend tx
-        Transaction tx = SendFactoryGeneric.getInstance().makeTransaction(receivers, outpoints, rbfOptIn, params);
-        tx = SendFactoryGeneric.getInstance().signTransaction(tx, account, utxoProvider);
-        byte[] serialized = tx.bitcoinSerialize();
-        if (log.isDebugEnabled()) {
-            log.debug("size:" + serialized.length);
-            log.debug("vsize:" + tx.getVirtualTransactionSize());
-            log.debug("fee:" + fee.longValue());
-        }
-        if ((tx.hasWitness() && (fee.longValue() < tx.getVirtualTransactionSize())) || (!tx.hasWitness() && (fee.longValue() < serialized.length))) {
-            throw new InsufficientFeeException();
-        }
-        return new SpendTx(account, addressType, amount, fee.longValue(), change, this, receivers, rbfOptIn);
+        return new SpendTx(addressType, amount, fee.longValue(), change, this, receivers, rbfOptIn, utxoProvider, params);
     }
 }

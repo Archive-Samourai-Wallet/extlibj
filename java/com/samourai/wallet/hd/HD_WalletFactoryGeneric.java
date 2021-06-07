@@ -61,14 +61,14 @@ public class HD_WalletFactoryGeneric {
     return seed;
   }
 
-  public BIP47Wallet getBIP47(String seed, String passphrase, NetworkParameters params) throws MnemonicException.MnemonicLengthException {
-    BIP47Wallet hdw47 = new BIP47Wallet(47, mc, params, org.bouncycastle.util.encoders.Hex.decode(seed), passphrase, 1);
-    return hdw47;
-  }
-
   public HD_Wallet getHD(int purpose, byte[] seed, String passphrase, NetworkParameters params) throws MnemonicException.MnemonicLengthException {
     HD_Wallet hdw = new HD_Wallet(purpose, mc, params, seed, passphrase, 1);
     return hdw;
+  }
+
+  public BIP47Wallet getBIP47(String seed, String passphrase, NetworkParameters params) throws MnemonicException.MnemonicLengthException {
+    BIP47Wallet hdw47 = new BIP47Wallet(47, mc, params, org.bouncycastle.util.encoders.Hex.decode(seed), passphrase, 1);
+    return hdw47;
   }
 
   public HD_Wallet getBIP49(byte[] seed, String passphrase, NetworkParameters params) throws MnemonicException.MnemonicLengthException {
@@ -77,5 +77,9 @@ public class HD_WalletFactoryGeneric {
 
   public HD_Wallet getBIP84(byte[] seed, String passphrase, NetworkParameters params) throws MnemonicException.MnemonicLengthException {
     return getHD(84, seed, passphrase, params);
+  }
+
+  public HD_Wallet getBIP44(byte[] seed, String passphrase, NetworkParameters params) throws MnemonicException.MnemonicLengthException {
+    return getHD(44, seed, passphrase, params);
   }
 }

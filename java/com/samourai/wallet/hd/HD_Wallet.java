@@ -51,6 +51,9 @@ public class HD_Wallet {
     protected HD_Wallet(int purpose, HD_Wallet inputWallet, int nbAccounts) {
         this(purpose, inputWallet.mWordList, inputWallet.mParams, inputWallet.mSeed, inputWallet.strPassphrase, nbAccounts);
     }
+    public HD_Wallet(int purpose, HD_Wallet inputWallet) {
+        this(purpose, inputWallet, 1);
+    }
 
     /*
     create from account xpub key(s)
