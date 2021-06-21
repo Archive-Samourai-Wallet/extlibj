@@ -1,7 +1,6 @@
 package com.samourai.wallet.api.backend;
 
 import com.samourai.wallet.api.backend.beans.*;
-import com.samourai.wallet.util.oauth.OAuthApi;
 import com.samourai.wallet.util.oauth.OAuthManager;
 import java8.util.Optional;
 import org.apache.commons.lang3.StringUtils;
@@ -10,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class BackendApi implements OAuthApi {
+public class BackendApi {
   private Logger log = LoggerFactory.getLogger(BackendApi.class);
 
   private static final String URL_UNSPENT = "/unspent?active=";
@@ -20,8 +19,6 @@ public class BackendApi implements OAuthApi {
   private static final String URL_INIT_BIP84 = "/xpub";
   private static final String URL_MINER_FEES = "/fees";
   private static final String URL_PUSHTX = "/pushtx/";
-  private static final String URL_GET_AUTH_LOGIN = "/auth/login";
-  private static final String URL_GET_AUTH_REFRESH = "/auth/refresh";
   private static final String ZPUB_SEPARATOR = "%7C";
 
   private IBackendClient httpClient;
@@ -210,7 +207,7 @@ public class BackendApi implements OAuthApi {
     Map<String,String> headers = new HashMap<String, String>();
     if (oAuthManager.isPresent()) {
       // add auth token
-      headers.put("Authorization", "Bearer " + oAuthManager.get().getOAuthAccessToken(this));
+      headers.put("Authorization", "Bearer " + oAuthManager.get().getOAuthAccessToken());
     }
     return headers;
   }
@@ -228,39 +225,4 @@ public class BackendApi implements OAuthApi {
     return urlBackend;
   }
 
-  // OAuthAPI
-
-  @Override
-  public RefreshTokenResponse.Authorization oAuthAuthenticate(String apiKey) throws Exception {
-    String url = getUrlBackend() + URL_GET_AUTH_LOGIN;
-    if (log.isDebugEnabled()) {
-      log.debug("tokenAuthenticate");
-    }
-    Map<String, String> postBody = new HashMap<String, String>();
-    postBody.put("apikey", apiKey);
-    RefreshTokenResponse response =
-            getHttpClient().postUrlEncoded(url, RefreshTokenResponse.class, null, postBody);
-
-    if (response.authorizations == null|| StringUtils.isEmpty(response.authorizations.access_token)) {
-      throw new Exception("Authorization refused. Invalid apiKey?");
-    }
-    return response.authorizations;
-  }
-
-  @Override
-  public String oAuthRefresh(String refreshTokenStr) throws Exception {
-    String url = getUrlBackend() + URL_GET_AUTH_REFRESH;
-    if (log.isDebugEnabled()) {
-      log.debug("tokenRefresh");
-    }
-    Map<String, String> postBody = new HashMap<String, String>();
-    postBody.put("rt", refreshTokenStr);
-    RefreshTokenResponse response =
-            getHttpClient().postUrlEncoded(url, RefreshTokenResponse.class, null, postBody);
-
-    if (response.authorizations == null || StringUtils.isEmpty(response.authorizations.access_token)) {
-      throw new Exception("Authorization refused. Invalid apiKey?");
-    }
-    return response.authorizations.access_token;
-  }
 }
