@@ -188,13 +188,12 @@ public class SendFactoryGeneric {
             case SEGWIT_NATIVE: case SEGWIT_COMPAT:
                 SegwitAddress segwitAddress = new SegwitAddress(key.getPubKey(), params);
                 final Script redeemScript = segwitAddress.segWitRedeemScript();
-                final Script scriptCode = redeemScript.scriptCode();
 
                 TransactionSignature sig =
                         tx.calculateWitnessSignature(
                                 inputIndex,
                                 key,
-                                scriptCode,
+                                redeemScript.scriptCode(),
                                 value,
                                 Transaction.SigHash.ALL,
                                 false);
