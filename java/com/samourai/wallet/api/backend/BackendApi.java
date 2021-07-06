@@ -16,6 +16,7 @@ public class BackendApi {
   private static final String URL_MULTIADDR = "/multiaddr?active=";
   private static final String URL_WALLET = "/wallet?active=";
   private static final String URL_TXS = "/txs?active=";
+  private static final String URL_TX = "/tx/";
   private static final String URL_INIT_BIP84 = "/xpub";
   private static final String URL_MINER_FEES = "/fees";
   private static final String URL_PUSHTX = "/pushtx/";
@@ -124,6 +125,15 @@ public class BackendApi {
     }
     Map<String,String> headers = computeHeaders();
     return httpClient.getJson(url, TxsResponse.class, headers);
+  }
+
+  public TxDetail fetchTx(String txid, boolean fees) throws Exception {
+    String url = computeAuthUrl(urlBackend + URL_TX + txid + (fees ? "?fees=1" : ""));
+    if (log.isDebugEnabled()) {
+      log.debug("fetchTx: "+txid);
+    }
+    Map<String,String> headers = computeHeaders();
+    return httpClient.getJson(url, TxDetail.class, headers);
   }
 
   public WalletResponse fetchWallet(String zpub) throws Exception {
