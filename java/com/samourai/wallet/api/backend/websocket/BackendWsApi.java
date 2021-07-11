@@ -24,6 +24,7 @@ public class BackendWsApi {
 
   private MessageListener<WSResponseBlock> blockListener;
   private MessageListener<WSResponseUtxo> addressListener;
+  private boolean terminated;
 
   public BackendWsApi(IWebsocketClient wsClient, String urlBackend, Optional<OAuthManager> oAuthManager) {
     this.connected = false;
@@ -37,6 +38,7 @@ public class BackendWsApi {
 
     this.blockListener = null;
     this.addressListener = null;
+    this.terminated = false;
   }
 
   public synchronized void connect(MessageListener onConnect, boolean autoReconnect) throws Exception {
@@ -61,20 +63,39 @@ public class BackendWsApi {
     return httpUrl.replace("https://","wss://").replace("http://","ws://");
   }
 
-  public synchronized void disconnect() {
+  public void disconnect() {
+    if (log.isDebugEnabled()) {
+      log.debug("disconnect");
+    }
+    disconnect(true);
+  }
+
+  private synchronized void disconnect(boolean terminate) {
+    if (terminate) {
+      terminated = true;
+    }
     if (!connected) {
       return;
     }
     connected = false;
-    wsClient.disconnect();
+
+    // stop
+    Thread stopThread =
+            new Thread(
+                    () -> {
+                      wsClient.disconnect();
+                    },
+                    "BackendWsApi-stop");
+    stopThread.setDaemon(true);
+    stopThread.start();
   }
 
   public void subscribeBlock(MessageListener<WSResponseBlock> blockListener) throws Exception {
+    this.blockListener = blockListener;
     String accessToken = getAccessToken();
     WSSubscribeRequest request = new WSSubscribeBlockRequest(accessToken);
     String json = jsonUtils.getObjectMapper().writeValueAsString(request);
     wsClient.send(json);
-    this.blockListener = blockListener;
   }
 
   public void subscribeAddress(String[] addresses, MessageListener<WSResponseUtxo> addressListener) throws Exception {
@@ -90,28 +111,36 @@ public class BackendWsApi {
   }
 
   private void onClose(MessageListener<Void> onConnect, boolean autoReconnect) {
-    disconnect();
+    disconnect(false);
 
     // auto-reconnect
-    if (autoReconnect) {
-      // wait for reconnect-delay
-      int randomDelaySeconds = RandomUtil.random(10, 300);
-      if (log.isDebugEnabled()) {
-        log.debug("Reconnecting in "+randomDelaySeconds+"s");
-      }
-      try {
-        synchronized (this) {
-          wait(randomDelaySeconds * 1000);
+    if (!terminated && autoReconnect) {
+      // wait & auto-reconnect in a non-blocking thread
+      Thread t = new Thread(new Runnable() {
+        @Override
+        public void run() {
+          // wait for reconnect-delay
+          int randomDelaySeconds = RandomUtil.random(10, 300);
+          if (log.isDebugEnabled()) {
+            log.debug("Reconnecting in "+randomDelaySeconds+"s");
+          }
+          try {
+            synchronized (this) {
+              wait(randomDelaySeconds * 1000);
+            }
+          } catch (InterruptedException e) {}
+          if (log.isDebugEnabled()) {
+            log.debug("Reconnecting after "+randomDelaySeconds+"s");
+          }
+          try {
+            connect(onConnect, autoReconnect);
+          } catch (Exception e) {
+            log.error("auto-reconnect failed", e);
+          }
         }
-      } catch (InterruptedException e) {}
-      if (log.isDebugEnabled()) {
-        log.debug("Reconnecting after "+randomDelaySeconds+"s");
-      }
-      try {
-        connect(onConnect, autoReconnect);
-      } catch (Exception e) {
-        log.error("auto-reconnect failed", e);
-      }
+      }, "BackendWsApi-autoreconnect");
+      t.setDaemon(true);
+      t.start();
     }
   }
 

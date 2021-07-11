@@ -7,6 +7,7 @@ import org.bitcoinj.script.Script;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
+import java.util.Collection;
 
 public class UnspentOutput {
     private static final String PATH_SEPARATOR = "/";
@@ -74,6 +75,14 @@ public class UnspentOutput {
 
     public Script computeScript() {
         return new Script(getScriptBytes());
+    }
+
+    public static long sumValue(Collection<UnspentOutput> utxos) {
+        long sumValue = 0;
+        for (UnspentOutput utxo : utxos) {
+            sumValue += utxo.value;
+        }
+        return sumValue;
     }
 
     public static class Xpub {
