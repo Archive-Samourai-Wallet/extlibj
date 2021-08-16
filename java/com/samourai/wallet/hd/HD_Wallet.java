@@ -84,6 +84,10 @@ public class HD_Wallet {
         return rootKey;
     }
 
+    public byte[] getSeed() {
+        return mSeed;
+    }
+
     public String getSeedHex() {
         return org.bouncycastle.util.encoders.Hex.toHexString(mSeed);
     }

@@ -176,6 +176,10 @@ public class BackendApi {
   }
 
   public void pushTx(String txHex) throws Exception {
+    pushTx(txHex, null);
+  }
+
+  public void pushTx(String txHex, List<Integer> strictModeVouts) throws Exception {
     if (log.isDebugEnabled()) {
       log.debug("pushTx... " + txHex);
     } else {
@@ -185,8 +189,21 @@ public class BackendApi {
     Map<String,String> headers = computeHeaders();
     Map<String, String> postBody = new HashMap<String, String>();
     postBody.put("tx", txHex);
+
+    if(strictModeVouts != null && !strictModeVouts.isEmpty()) {
+      String strStrictVouts = "";
+      for(int i = 0; i < strictModeVouts.size(); i++) {
+        strStrictVouts += strictModeVouts.get(i);
+        if(i < (strictModeVouts.size() - 1)) {
+          strStrictVouts += "|";
+        }
+      }
+      postBody.put("strict_mode_vouts", strStrictVouts);
+    }
+
     try {
-      httpClient.postUrlEncoded(url, Void.class, headers, postBody);
+      PushTxResponse pushTxResponse = httpClient.postUrlEncoded(url, PushTxResponse.class, headers, postBody);
+      checkPushTxResponse(pushTxResponse);
     } catch (HttpException e) {
       if (log.isDebugEnabled()) {
         log.error("pushTx failed", e);
@@ -198,9 +215,27 @@ public class BackendApi {
               + e.getMessage()
               + " for txHex="
               + txHex);
-      throw new Exception(
-          "PushTx failed (" + e.getResponseBody() + ") for txHex=" + txHex);
+      throw new Exception("PushTx failed (" + e.getResponseBody() + ") for txHex=" + txHex);
     }
+  }
+
+  protected void checkPushTxResponse(PushTxResponse pushTxResponse) throws Exception {
+    if (pushTxResponse.status == PushTxResponse.PushTxStatus.ok) {
+      // success
+      return;
+    }
+
+    if (log.isDebugEnabled()) {
+      log.error("pushTx failed: "+pushTxResponse.toString());
+    }
+
+    // address reuse
+    if (pushTxResponse.error != null && PushTxResponse.PushTxError.CODE_VIOLATION_STRICT_MODE_VOUTS.equals(pushTxResponse.error.code)) {
+      throw new PushTxAddressReuseException();
+    }
+
+    // other error
+    throw new Exception("PushTx failed: "+pushTxResponse.toString());
   }
 
   public boolean testConnectivity() {
