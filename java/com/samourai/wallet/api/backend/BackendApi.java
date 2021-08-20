@@ -2,7 +2,6 @@ package com.samourai.wallet.api.backend;
 
 import com.samourai.wallet.api.backend.beans.*;
 import com.samourai.wallet.util.oauth.OAuthManager;
-import java8.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,18 +23,19 @@ public class BackendApi {
 
   private IBackendClient httpClient;
   private String urlBackend;
-  private Optional<OAuthManager> oAuthManager;
+  private OAuthManager oAuthManager; // may be null
 
-  public BackendApi(IBackendClient httpClient, String urlBackend, Optional<OAuthManager> oAuthManager) {
+  public BackendApi(IBackendClient httpClient, String urlBackend) {
+    this(httpClient, urlBackend, null);
+  }
+
+  public BackendApi(IBackendClient httpClient, String urlBackend, OAuthManager oAuthManager) {
     this.httpClient = httpClient;
     this.urlBackend = urlBackend;
 
-    if (oAuthManager == null) {
-      oAuthManager = Optional.empty();
-    }
     this.oAuthManager = oAuthManager;
     if (log.isDebugEnabled()) {
-      String oAuthStr = oAuthManager.isPresent() ? "yes" : "no";
+      String oAuthStr = oAuthManager != null ? "yes" : "no";
       log.debug("urlBackend=" + urlBackend + ", oAuth=" + oAuthStr);
     }
   }
@@ -250,9 +250,9 @@ public class BackendApi {
 
   protected Map<String,String> computeHeaders() throws Exception {
     Map<String,String> headers = new HashMap<String, String>();
-    if (oAuthManager.isPresent()) {
+    if (oAuthManager != null) {
       // add auth token
-      headers.put("Authorization", "Bearer " + oAuthManager.get().getOAuthAccessToken());
+      headers.put("Authorization", "Bearer " + oAuthManager.getOAuthAccessToken());
     }
     return headers;
   }

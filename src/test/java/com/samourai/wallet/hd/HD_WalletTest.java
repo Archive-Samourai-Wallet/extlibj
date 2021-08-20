@@ -1,6 +1,5 @@
 package com.samourai.wallet.hd;
 
-import com.samourai.wallet.hd.java.HD_WalletFactoryJava;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
@@ -8,7 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class HD_WalletTest {
-    private HD_WalletFactoryJava hdWalletFactory = HD_WalletFactoryJava.getInstance();
+    private HD_WalletFactoryGeneric hdWalletFactory = HD_WalletFactoryGeneric.getInstance();
 
     @Test
     public void testHdWalletTestnet() throws Exception {
