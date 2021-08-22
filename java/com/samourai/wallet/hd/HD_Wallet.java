@@ -68,7 +68,8 @@ public class HD_Wallet {
 
     }
 
-    protected HD_Wallet(byte[] mSeed, String strPassphrase, List<String> mWordList, NetworkParameters mParams) {
+    // used by Sparrow
+    public HD_Wallet(byte[] mSeed, String strPassphrase, List<String> mWordList, NetworkParameters mParams) {
         this.mSeed = mSeed;
         this.strPassphrase = strPassphrase;
         this.mWordList = mWordList;
