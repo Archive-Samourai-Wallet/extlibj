@@ -45,16 +45,10 @@ public class BackendApi {
     return zpubStr;
   }
 
-  /**
-   * @deprecated use fetchWallet()
-   */
   public List<UnspentOutput> fetchUtxos(String zpub) throws Exception {
     return fetchUtxos(new String[]{zpub});
   }
 
-  /**
-   * @deprecated use fetchWallet()
-   */
   public List<UnspentOutput> fetchUtxos(String[] zpubs) throws Exception {
     String zpubStr = computeZpubStr(zpubs);
     String url = computeAuthUrl(urlBackend + URL_UNSPENT + zpubStr);
@@ -71,9 +65,6 @@ public class BackendApi {
     return unspentOutputs;
   }
 
-  /**
-   * @deprecated use fetchWallet()
-   */
   public Map<String,MultiAddrResponse.Address> fetchAddresses(String[] zpubs) throws Exception {
     String zpubStr = computeZpubStr(zpubs);
     String url = computeAuthUrl(urlBackend + URL_MULTIADDR + zpubStr);
@@ -91,9 +82,6 @@ public class BackendApi {
     return addressesByZpub;
   }
 
-  /**
-   * @deprecated use fetchWallet()
-   */
   public MultiAddrResponse.Address fetchAddress(String zpub) throws Exception {
     Collection<MultiAddrResponse.Address> addresses = fetchAddresses(new String[]{zpub}).values();
     if (addresses.size() != 1) {
@@ -113,9 +101,6 @@ public class BackendApi {
     return address;
   }
 
-  /**
-   * @deprecated use fetchWallet()
-   */
   public TxsResponse fetchTxs(String[] zpubs, int page, int count) throws Exception {
     String zpubStr = computeZpubStr(zpubs);
 
