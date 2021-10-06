@@ -69,9 +69,9 @@ public class STONEWALLx2 extends Cahoots {
 
         Transaction transaction = new Transaction(params);
         for(MyTransactionOutPoint outpoint : inputs.keySet())   {
-            TransactionInput input = new TransactionInput(params, null, new byte[0], outpoint, outpoint.getValue());
+            TransactionInput input = outpoint.computeSpendInput();
             transaction.addInput(input);
-            outpoints.put(outpoint.getTxHash().toString() + "-" + outpoint.getTxOutputN(), outpoint.getValue().longValue());
+            outpoints.put(outpoint.getHash().toString() + "-" + outpoint.getIndex(), outpoint.getValue().longValue());
         }
         for(_TransactionOutput output : outputs.keySet())   {
             transaction.addOutput(output);
@@ -118,9 +118,9 @@ public class STONEWALLx2 extends Cahoots {
             if (log.isDebugEnabled()) {
                 log.debug("outpoint value:" + outpoint.getValue().longValue());
             }
-            TransactionInput input = new TransactionInput(params, null, new byte[0], outpoint, outpoint.getValue());
+            TransactionInput input = outpoint.computeSpendInput();
             transaction.addInput(input);
-            outpoints.put(outpoint.getTxHash().toString() + "-" + outpoint.getTxOutputN(), outpoint.getValue().longValue());
+            outpoints.put(outpoint.getHash().toString() + "-" + outpoint.getIndex(), outpoint.getValue().longValue());
         }
         for(_TransactionOutput output : outputs.keySet())   {
             transaction.addOutput(output);

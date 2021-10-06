@@ -1,43 +1,41 @@
 package com.samourai.wallet.api.backend;
 
 import com.samourai.wallet.api.backend.beans.*;
-import com.samourai.wallet.util.oauth.OAuthApi;
 import com.samourai.wallet.util.oauth.OAuthManager;
-import java8.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class BackendApi implements OAuthApi {
+public class BackendApi {
   private Logger log = LoggerFactory.getLogger(BackendApi.class);
 
   private static final String URL_UNSPENT = "/unspent?active=";
   private static final String URL_MULTIADDR = "/multiaddr?active=";
   private static final String URL_WALLET = "/wallet?active=";
   private static final String URL_TXS = "/txs?active=";
+  private static final String URL_TX = "/tx/";
   private static final String URL_INIT_BIP84 = "/xpub";
   private static final String URL_MINER_FEES = "/fees";
   private static final String URL_PUSHTX = "/pushtx/";
-  private static final String URL_GET_AUTH_LOGIN = "/auth/login";
-  private static final String URL_GET_AUTH_REFRESH = "/auth/refresh";
   private static final String ZPUB_SEPARATOR = "%7C";
 
   private IBackendClient httpClient;
   private String urlBackend;
-  private Optional<OAuthManager> oAuthManager;
+  private OAuthManager oAuthManager; // may be null
 
-  public BackendApi(IBackendClient httpClient, String urlBackend, Optional<OAuthManager> oAuthManager) {
+  public BackendApi(IBackendClient httpClient, String urlBackend) {
+    this(httpClient, urlBackend, null);
+  }
+
+  public BackendApi(IBackendClient httpClient, String urlBackend, OAuthManager oAuthManager) {
     this.httpClient = httpClient;
     this.urlBackend = urlBackend;
 
-    if (oAuthManager == null) {
-      oAuthManager = Optional.empty();
-    }
     this.oAuthManager = oAuthManager;
     if (log.isDebugEnabled()) {
-      String oAuthStr = oAuthManager.isPresent() ? "yes" : "no";
+      String oAuthStr = oAuthManager != null ? "yes" : "no";
       log.debug("urlBackend=" + urlBackend + ", oAuth=" + oAuthStr);
     }
   }
@@ -47,16 +45,10 @@ public class BackendApi implements OAuthApi {
     return zpubStr;
   }
 
-  /**
-   * @deprecated use fetchWallet()
-   */
   public List<UnspentOutput> fetchUtxos(String zpub) throws Exception {
     return fetchUtxos(new String[]{zpub});
   }
 
-  /**
-   * @deprecated use fetchWallet()
-   */
   public List<UnspentOutput> fetchUtxos(String[] zpubs) throws Exception {
     String zpubStr = computeZpubStr(zpubs);
     String url = computeAuthUrl(urlBackend + URL_UNSPENT + zpubStr);
@@ -73,9 +65,6 @@ public class BackendApi implements OAuthApi {
     return unspentOutputs;
   }
 
-  /**
-   * @deprecated use fetchWallet()
-   */
   public Map<String,MultiAddrResponse.Address> fetchAddresses(String[] zpubs) throws Exception {
     String zpubStr = computeZpubStr(zpubs);
     String url = computeAuthUrl(urlBackend + URL_MULTIADDR + zpubStr);
@@ -93,9 +82,6 @@ public class BackendApi implements OAuthApi {
     return addressesByZpub;
   }
 
-  /**
-   * @deprecated use fetchWallet()
-   */
   public MultiAddrResponse.Address fetchAddress(String zpub) throws Exception {
     Collection<MultiAddrResponse.Address> addresses = fetchAddresses(new String[]{zpub}).values();
     if (addresses.size() != 1) {
@@ -115,9 +101,6 @@ public class BackendApi implements OAuthApi {
     return address;
   }
 
-  /**
-   * @deprecated use fetchWallet()
-   */
   public TxsResponse fetchTxs(String[] zpubs, int page, int count) throws Exception {
     String zpubStr = computeZpubStr(zpubs);
 
@@ -127,6 +110,15 @@ public class BackendApi implements OAuthApi {
     }
     Map<String,String> headers = computeHeaders();
     return httpClient.getJson(url, TxsResponse.class, headers);
+  }
+
+  public TxDetail fetchTx(String txid, boolean fees) throws Exception {
+    String url = computeAuthUrl(urlBackend + URL_TX + txid + (fees ? "?fees=1" : ""));
+    if (log.isDebugEnabled()) {
+      log.debug("fetchTx: "+txid);
+    }
+    Map<String,String> headers = computeHeaders();
+    return httpClient.getJson(url, TxDetail.class, headers);
   }
 
   public WalletResponse fetchWallet(String zpub) throws Exception {
@@ -243,9 +235,9 @@ public class BackendApi implements OAuthApi {
 
   protected Map<String,String> computeHeaders() throws Exception {
     Map<String,String> headers = new HashMap<String, String>();
-    if (oAuthManager.isPresent()) {
+    if (oAuthManager != null) {
       // add auth token
-      headers.put("Authorization", "Bearer " + oAuthManager.get().getOAuthAccessToken(this));
+      headers.put("Authorization", "Bearer " + oAuthManager.getOAuthAccessToken());
     }
     return headers;
   }
@@ -263,39 +255,4 @@ public class BackendApi implements OAuthApi {
     return urlBackend;
   }
 
-  // OAuthAPI
-
-  @Override
-  public RefreshTokenResponse.Authorization oAuthAuthenticate(String apiKey) throws Exception {
-    String url = getUrlBackend() + URL_GET_AUTH_LOGIN;
-    if (log.isDebugEnabled()) {
-      log.debug("tokenAuthenticate");
-    }
-    Map<String, String> postBody = new HashMap<String, String>();
-    postBody.put("apikey", apiKey);
-    RefreshTokenResponse response =
-            getHttpClient().postUrlEncoded(url, RefreshTokenResponse.class, null, postBody);
-
-    if (response.authorizations == null|| StringUtils.isEmpty(response.authorizations.access_token)) {
-      throw new Exception("Authorization refused. Invalid apiKey?");
-    }
-    return response.authorizations;
-  }
-
-  @Override
-  public String oAuthRefresh(String refreshTokenStr) throws Exception {
-    String url = getUrlBackend() + URL_GET_AUTH_REFRESH;
-    if (log.isDebugEnabled()) {
-      log.debug("tokenRefresh");
-    }
-    Map<String, String> postBody = new HashMap<String, String>();
-    postBody.put("rt", refreshTokenStr);
-    RefreshTokenResponse response =
-            getHttpClient().postUrlEncoded(url, RefreshTokenResponse.class, null, postBody);
-
-    if (response.authorizations == null || StringUtils.isEmpty(response.authorizations.access_token)) {
-      throw new Exception("Authorization refused. Invalid apiKey?");
-    }
-    return response.authorizations.access_token;
-  }
 }

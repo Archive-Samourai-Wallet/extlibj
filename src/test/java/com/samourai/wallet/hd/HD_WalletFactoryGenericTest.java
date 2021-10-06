@@ -1,6 +1,5 @@
 package com.samourai.wallet.hd;
 
-import com.samourai.wallet.hd.java.HD_WalletFactoryJava;
 import java.math.BigInteger;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.MainNetParams;
@@ -8,7 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class HD_WalletFactoryGenericTest {
-    private HD_WalletFactoryJava hdWalletFactory = HD_WalletFactoryJava.getInstance();
+    private HD_WalletFactoryGeneric hdWalletFactory = HD_WalletFactoryGeneric.getInstance();
 
     @Test
     public void restoreWallet_words() throws Exception {

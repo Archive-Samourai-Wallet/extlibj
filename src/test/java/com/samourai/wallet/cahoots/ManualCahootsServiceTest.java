@@ -3,6 +3,7 @@ package com.samourai.wallet.cahoots;
 import com.samourai.soroban.cahoots.*;
 import com.samourai.soroban.client.SorobanInteraction;
 import com.samourai.wallet.hd.HD_Wallet;
+import com.samourai.wallet.util.TestUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,12 +32,12 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
         };
 
         // mock sender wallet
-        final HD_Wallet bip84WalletSender = computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
+        final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
         TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(bip84WalletSender, params);
         cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "senderAddress1");
 
         // mock receiver wallet
-        final HD_Wallet bip84WalletCounterparty = computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
+        final HD_Wallet bip84WalletCounterparty = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
         TestCahootsWallet cahootsWalletCounterparty = new TestCahootsWallet(bip84WalletCounterparty, params);
         cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "counterpartyAddress1");
 
@@ -88,12 +89,12 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
         };
 
         // mock sender wallet
-        final HD_Wallet bip84WalletSender = computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
+        final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
         TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(bip84WalletSender, params);
         cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "senderAddress1");
 
         // mock counterparty wallet
-        final HD_Wallet bip84WalletCounterparty = computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
+        final HD_Wallet bip84WalletCounterparty = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
         TestCahootsWallet cahootsWalletCounterparty = new TestCahootsWallet(bip84WalletCounterparty, params);
         cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "counterpartyAddress1");
 

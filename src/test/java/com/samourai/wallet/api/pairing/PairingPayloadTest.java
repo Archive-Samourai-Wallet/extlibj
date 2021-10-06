@@ -2,16 +2,14 @@ package com.samourai.wallet.api.pairing;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.samourai.wallet.util.JSONUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class PairingPayloadTest {
-    private static ObjectMapper objectMapper;
 
     public PairingPayloadTest() {
-        objectMapper = new ObjectMapper();
-        objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
     @Test
@@ -154,7 +152,7 @@ public class PairingPayloadTest {
     }
 
     private PairingPayload parse(String json) throws Exception {
-        PairingPayload pairingPayload = objectMapper.readValue(json, PairingPayload.class);
+        PairingPayload pairingPayload = JSONUtils.getInstance().getObjectMapper().readValue(json, PairingPayload.class);
         pairingPayload.validate();
         return pairingPayload;
     }

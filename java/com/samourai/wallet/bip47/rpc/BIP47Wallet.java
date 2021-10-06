@@ -22,12 +22,11 @@ public class BIP47Wallet extends HD_Wallet {
      * @param NetworkParameters params
      * @param byte[] seed seed for this wallet
      * @param String passphrase optional BIP39 passphrase
-     * @param int nbAccounts number of accounts to create
      *
      */
-    public BIP47Wallet(int purpose, MnemonicCode mc, NetworkParameters params, byte[] seed, String passphrase, int nbAccounts) throws MnemonicException.MnemonicLengthException {
+    public BIP47Wallet(int purpose, MnemonicCode mc, NetworkParameters params, byte[] seed, String passphrase) throws MnemonicException.MnemonicLengthException {
 
-        super(purpose, mc, params, seed, passphrase, nbAccounts);
+        super(purpose, mc, params, seed, passphrase);
 
         mAccount = new BIP47Account(params, mRoot, 0);
 
@@ -38,7 +37,7 @@ public class BIP47Wallet extends HD_Wallet {
      * @param hdWallet
      */
     public BIP47Wallet(HD_Wallet hdWallet) {
-        this(47, hdWallet, 1);
+        this(47, hdWallet);
     }
 
     /**
@@ -46,12 +45,11 @@ public class BIP47Wallet extends HD_Wallet {
      *
      * @param int purpose
      * @param HD_Wallet hdWallet to copy from
-     * @param int nbAccounts
      *
      */
-    public BIP47Wallet(int purpose, HD_Wallet hdWallet, int nbAccounts) {
+    public BIP47Wallet(int purpose, HD_Wallet hdWallet) {
 
-        super(purpose, hdWallet, nbAccounts);
+        super(purpose, hdWallet);
 
         mAccount = new BIP47Account(mParams, mRoot, 0);
 

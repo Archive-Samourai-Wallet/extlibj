@@ -9,7 +9,6 @@ import org.json.JSONObject;
 public class HD_Chain {
 
     private DeterministicKey cKey = null;
-    private int purpose;
     private int accountIndex;
     private boolean isReceive;
     private int chainIndex;
@@ -21,20 +20,15 @@ public class HD_Chain {
     
     private HD_Chain() { ; }
 
-    public HD_Chain(NetworkParameters params, DeterministicKey aKey, int purpose, int accountIndex, boolean isReceive) {
+    public HD_Chain(NetworkParameters params, DeterministicKey aKey, int accountIndex, boolean isReceive) {
 
         mParams = params;
-        this.purpose = purpose;
         this.accountIndex = accountIndex;
         this.isReceive = isReceive;
         this.chainIndex = isReceive ? 0 : 1;
         cKey = HDKeyDerivation.deriveChildKey(aKey, chainIndex);
 
         strPath = cKey.getPath().toString();
-    }
-
-    public int getPurpose() {
-        return purpose;
     }
 
     public int getAccountIndex() {
@@ -50,7 +44,7 @@ public class HD_Chain {
     }
 
     public HD_Address getAddressAt(int addrIdx) {
-    	return new HD_Address(mParams, cKey, purpose, accountIndex, chainIndex, addrIdx);
+    	return new HD_Address(mParams, cKey, accountIndex, chainIndex, addrIdx);
     }
 
     public int getAddrIdx() {

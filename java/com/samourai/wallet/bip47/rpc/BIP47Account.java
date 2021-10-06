@@ -29,7 +29,7 @@ public class BIP47Account extends HD_Account {
      *
      */
     public BIP47Account(NetworkParameters params, DeterministicKey wKey, int child) {
-        super(params, wKey, "", 47, child);
+        super(params, wKey, child);
         strPaymentCode = createPaymentCodeFromAccountKey();
     }
 
@@ -43,7 +43,6 @@ public class BIP47Account extends HD_Account {
     public BIP47Account(NetworkParameters params, String data) throws AddressFormatException {
 
         mParams = params;
-        this.purpose = 47;
         mAID = -1;
 
         // assign master key to account key
@@ -80,7 +79,7 @@ public class BIP47Account extends HD_Account {
      *
      */
     public HD_Address addressAt(int idx) {
-        return new HD_Address(mParams, aKey, purpose, mAID,0, idx);
+        return new HD_Address(mParams, aKey, mAID,0, idx);
     }
 
     private String createPaymentCodeFromAccountKey() {

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.samourai.code.wallet</groupId>
 	<artifactId>extlibj</artifactId>
-	<version>0.0.19-SNAPSHOT</version>
+	<version>0.0.20-SNAPSHOT</version>
 	<name>extlibj</name>
 	<properties>
 		<maven.compiler.source>1.6</maven.compiler.source>
@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
-			<version>2.9.0</version>
+			<version>2.12.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.auth0</groupId>
@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.9.10.4</version>
+			<version>2.12.3</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.streamsupport</groupId>
@@ -208,6 +208,6 @@
 
 	<scm>
     <connection>scm:git:git@code.samourai.io:wallet/ExtLibJ.git</connection>
-    <tag>0.0.18-fetchWallet</tag>
+    <tag>0.0.19</tag>
   </scm>
 </project>
