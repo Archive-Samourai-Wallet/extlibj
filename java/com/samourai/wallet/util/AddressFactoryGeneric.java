@@ -2,6 +2,7 @@ package com.samourai.wallet.util;
 
 import com.samourai.wallet.hd.*;
 import com.samourai.wallet.segwit.SegwitAddress;
+import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
@@ -34,6 +35,9 @@ public class AddressFactoryGeneric {
     }
 
     public void reset(HD_Wallet bip44Wallet, HD_Wallet bip49Wallet, HD_Wallet bip84Wallet, NetworkParameters params) {
+        if (log.isDebugEnabled()) {
+            log.debug("reset");
+        }
         if (bip44Wallet == null) {
             throw new RuntimeException("bip44Wallet is null");
         }
@@ -172,7 +176,7 @@ public class AddressFactoryGeneric {
             // may happen on wallet startup
             return null;
         }
-        return hdWallet.getAccountAt(account).getChain(chain);
+        return hdWallet.getAccount(account).getChain(chain);
     }
 
     protected int getWalletIdx(WALLET_INDEX walletIndex) {
@@ -281,18 +285,30 @@ public class AddressFactoryGeneric {
         int walletIdx = walletIdxMap.get(walletIndex);
         int hdIdx = getHdIdx(walletIndex);
         int index = getIndex(walletIndex);
-        return highestIdx+" ; "+walletIdx+" ; "+hdIdx+" => "+index;
+        String debugStr = highestIdx+" ; "+walletIdx+" ; "+hdIdx+" => "+index;
+        if (log.isDebugEnabled()) {
+            log.debug(walletIndex+": "+debugStr);
+        }
+        return debugStr;
     }
 
     public void wipe() {
-        int nbAccounts = bip44Wallet.getAccounts().size();
-        for(int i = 0; i < nbAccounts; i++)	{
-            bip44Wallet.getAccount(i).getReceive().setAddrIdx(0);
-            bip44Wallet.getAccount(i).getChange().setAddrIdx(0);
+        if (log.isDebugEnabled()) {
+            log.debug("wipe");
         }
+        bip44Wallet.wipe();
         for (WALLET_INDEX walletIndex : WALLET_INDEX.values()) {
             setHighestIdx(walletIndex, 0);
             setWalletIdx(walletIndex, 0, true);
         }
+    }
+
+    public String getPub(AddressType addressType, WhirlpoolAccount account) {
+        HD_Wallet hdWallet = getHdWallet(addressType);
+        if (hdWallet == null) {
+            // may happen on wallet startup
+            throw new RuntimeException("getPub("+addressType+","+account+") failed: wallet is null");
+        }
+        return hdWallet.getAccount(account.getAccountIndex()).xpubstr();
     }
 }
