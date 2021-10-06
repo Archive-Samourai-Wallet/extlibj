@@ -32,21 +32,18 @@ public class HD_Wallet {
         this(purpose, mc.toMnemonic(mSeed), mParams, mSeed, strPassphrase);
     }
 
-    // used by Sparrow
-    public HD_Wallet(byte[] mSeed, String strPassphrase, List<String> mWordList, NetworkParameters mParams) {
+    protected HD_Wallet(int purpose, List<String> mWordList, NetworkParameters mParams, byte[] mSeed, String strPassphrase) {
         this.mSeed = mSeed;
         this.strPassphrase = strPassphrase;
         this.mWordList = mWordList;
         this.mParams = mParams;
-        this.mAccounts = new LinkedHashMap<>();
-    }
-
-    protected HD_Wallet(int purpose, List<String> wordList, NetworkParameters mParams, byte[] mSeed, String strPassphrase) {
-        this(mSeed, strPassphrase, wordList, mParams);
 
         // compute rootKey for accounts
         this.mRoot = computeRootKey(purpose, mWordList, strPassphrase, mParams);
+
+        // initialize accounts
         mAccounts = new LinkedHashMap<>();
+        getAccount(0);
     }
 
     public HD_Wallet(int purpose, HD_Wallet inputWallet) {
@@ -58,6 +55,8 @@ public class HD_Wallet {
      */
     public HD_Wallet(NetworkParameters params, String[] xpub) throws AddressFormatException {
         mParams = params;
+
+        // initialize accounts
         mAccounts = new LinkedHashMap<>();
         for(int i = 0; i < xpub.length; i++) {
             mAccounts.put(i, new HD_Account(mParams, xpub[i], i));
