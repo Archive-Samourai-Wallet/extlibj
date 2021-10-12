@@ -28,11 +28,13 @@ public class Bech32Test {
             new String[] { "bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0", "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"},
             // BIP49 test vector :
             new String[] { "tb1q8zt37uunpakpg8vh0tz06jnj0jz5jddn5mlts3", "001438971f73930f6c141d977ac4fd4a727c854935b3"},
+            // Sipa testnet P2TR address, bitcoin dev mailing list, Oct 9, 2021
+            new String[] { "tb1p84x2ryuyfevgnlpnxt9f39gm7r68gwtvllxqe5w2n5ru00s9aquslzggwq", "51203d4ca193844e5889fc3332ca98951bf0f474396cffcc0cd1ca9d07c7be05e839"},
 
     };
 
     //
-    // P2TR addresses on mainnet before Taproot activation, encoded as v0 using v1 scriptpubkeys
+    // P2TR addresses on mainnet before Taproot activation, encoded as bech32 v0 (old checksum) using v1 scriptpubkeys
     //
     private static String[][] INVALID_MAINNET_P2TR = {
             // https://b10c.me/blog/007-spending-p2tr-pre-activation/?tw :
