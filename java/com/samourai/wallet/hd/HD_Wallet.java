@@ -19,6 +19,7 @@ public class HD_Wallet {
 
     protected DeterministicKey mRoot = null; // null when created from xpub
 
+    protected ArrayList<HD_Account> mXpubAccounts = null;
     protected Map<Integer,HD_Account> mAccounts = null;
 
     protected NetworkParameters mParams = null;
@@ -40,6 +41,7 @@ public class HD_Wallet {
 
         // compute rootKey for accounts
         this.mRoot = computeRootKey(purpose, mWordList, strPassphrase, mParams);
+        this.mXpubAccounts = new ArrayList<>();
 
         // initialize accounts
         mAccounts = new LinkedHashMap<>();
@@ -55,11 +57,12 @@ public class HD_Wallet {
      */
     public HD_Wallet(NetworkParameters params, String[] xpub) throws AddressFormatException {
         mParams = params;
-
-        // initialize accounts
         mAccounts = new LinkedHashMap<>();
+
+        // initialize xpubAccounts
+        this.mXpubAccounts = new ArrayList<>();
         for(int i = 0; i < xpub.length; i++) {
-            mAccounts.put(i, new HD_Account(mParams, xpub[i], i));
+            mXpubAccounts.add(new HD_Account(mParams, xpub[i], i));
         }
     }
 
@@ -102,13 +105,10 @@ public class HD_Wallet {
     }
 
     public String[] getXPUBs() {
-
-        String[] ret = new String[mAccounts.size()];
-
-        for(int i = 0; i < mAccounts.size(); i++) {
-            ret[i] = mAccounts.get(i).xpubstr();
+        String[] ret = new String[mXpubAccounts.size()];
+        for(int i = 0; i < mXpubAccounts.size(); i++) {
+            ret[i] = mXpubAccounts.get(i).xpubstr();
         }
-
         return ret;
     }
 
