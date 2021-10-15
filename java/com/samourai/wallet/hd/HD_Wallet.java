@@ -10,7 +10,10 @@ import org.bitcoinj.crypto.*;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class HD_Wallet {
     private byte[] mSeed = null;
@@ -19,8 +22,10 @@ public class HD_Wallet {
 
     protected DeterministicKey mRoot = null; // null when created from xpub
 
-    protected ArrayList<HD_Account> mXpubAccounts = null;
     protected Map<Integer,HD_Account> mAccounts = null;
+
+    // contains xpub of #account0, or all xpubs from constructor
+    protected String[] xpubs = null;
 
     protected NetworkParameters mParams = null;
 
@@ -41,11 +46,13 @@ public class HD_Wallet {
 
         // compute rootKey for accounts
         this.mRoot = computeRootKey(purpose, mWordList, strPassphrase, mParams);
-        this.mXpubAccounts = new ArrayList<>();
 
-        // initialize accounts
+        // initialize mAccounts with account #0
         mAccounts = new LinkedHashMap<>();
-        getAccount(0);
+        HD_Account hdAccount = getAccount(0);
+
+        // xpubs will only contain account #0 (even if mAccounts contains more accounts)
+        xpubs = new String[]{hdAccount.xpubstr()};
     }
 
     public HD_Wallet(int purpose, HD_Wallet inputWallet) {
@@ -57,12 +64,14 @@ public class HD_Wallet {
      */
     public HD_Wallet(NetworkParameters params, String[] xpub) throws AddressFormatException {
         mParams = params;
-        mAccounts = new LinkedHashMap<>();
 
-        // initialize xpubAccounts
-        this.mXpubAccounts = new ArrayList<>();
+        // initialize mAccounts and xpubs
+        mAccounts = new LinkedHashMap<>();
+        xpubs = new String[xpub.length];
         for(int i = 0; i < xpub.length; i++) {
-            mXpubAccounts.add(new HD_Account(mParams, xpub[i], i));
+            HD_Account account = new HD_Account(mParams, xpub[i], i);
+            mAccounts.put(i, account);
+            xpubs[i] = account.xpubstr();
         }
     }
 
@@ -105,11 +114,7 @@ public class HD_Wallet {
     }
 
     public String[] getXPUBs() {
-        String[] ret = new String[mXpubAccounts.size()];
-        for(int i = 0; i < mXpubAccounts.size(); i++) {
-            ret[i] = mXpubAccounts.get(i).xpubstr();
-        }
-        return ret;
+        return xpubs;
     }
 
     public byte[] getFingerprint() {

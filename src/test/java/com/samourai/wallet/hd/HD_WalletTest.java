@@ -112,8 +112,19 @@ public class HD_WalletTest {
         Assertions.assertEquals("bc1qhy6dh6c67q8uwshffrs2rjs85x4wyhx9k45rha", hdWallet2.getAddressAt(0, 0, 0).getAddressString(AddressType.SEGWIT_NATIVE));
     }
 
+    @Test
+    public void testHdWalletMainnetXpub() throws Exception {
+        NetworkParameters params = MainNetParams.get();
+
+        HD_Wallet hdWallet1 = new HD_Wallet(params, new String[]{"xpub6By39V6HgpxbtuBVMpGDWPDFaBpMqEewX1KV45eXUZkvoV5TVgr9dvi5MkxtRrdovbngSAJtHR3mau3a2b9hmnTR9G7zjXozwqDBaHFPT5j"});
+
+        // verify
+        verifyWallet1Mainnet(hdWallet1);
+    }
+
     private void verifyWallet1Mainnet(HD_Wallet hdWallet1) {
         Assertions.assertArrayEquals(new String[]{"xpub6By39V6HgpxbtuBVMpGDWPDFaBpMqEewX1KV45eXUZkvoV5TVgr9dvi5MkxtRrdovbngSAJtHR3mau3a2b9hmnTR9G7zjXozwqDBaHFPT5j"}, hdWallet1.getXPUBs());
+        Assertions.assertEquals("xpub6By39V6HgpxbtuBVMpGDWPDFaBpMqEewX1KV45eXUZkvoV5TVgr9dvi5MkxtRrdovbngSAJtHR3mau3a2b9hmnTR9G7zjXozwqDBaHFPT5j", hdWallet1.getAccount(0).xpubstr());
         Assertions.assertEquals("1C36vErfBHdZPnrB5vMh6fRxnZ3RfRr8eW", hdWallet1.getAccount(0).getChain(0).getAddressAt(0).getAddressString());
         Assertions.assertEquals("19pAMZjGAy3C4uVREZKK959jhRynUJ6hhD", hdWallet1.getAccount(0).getChain(1).getAddressAt(0).getAddressString());
         Assertions.assertEquals("1b1C6KHtjXb5Ln2UFMwxNpuZbuQsmdrGv", hdWallet1.getAccount(0).getChain(1).getAddressAt(1).getAddressString());
