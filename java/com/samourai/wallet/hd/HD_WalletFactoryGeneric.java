@@ -9,6 +9,8 @@ import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.crypto.MnemonicException;
 
+import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,8 +33,34 @@ public class HD_WalletFactoryGeneric {
     this.mc = mc;
   }
 
+  public HD_Wallet newWallet(String passphrase, NetworkParameters params) throws Exception {
+    return newWallet(12, passphrase, params);
+  }
+
+  public HD_Wallet newWallet(int nbWords, String passphrase, NetworkParameters params) throws IOException, MnemonicException.MnemonicLengthException   {
+
+    if((nbWords % 3 != 0) || (nbWords < 12 || nbWords > 24)) {
+      nbWords = 12;
+    }
+
+    // len == 16 (12 words), len == 24 (18 words), len == 32 (24 words)
+    int len = (nbWords / 3) * 4;
+
+    if(passphrase == null) {
+      passphrase = "";
+    }
+
+    SecureRandom random = new SecureRandom();
+    byte seed[] = new byte[len];
+    random.nextBytes(seed);
+
+    HD_Wallet hdw = new HD_Wallet(44, mc, params, seed, passphrase);
+
+    return hdw;
+  }
+
   public HD_Wallet restoreWallet(String data, String passphrase, NetworkParameters params)
-      throws AddressFormatException, DecoderException,
+          throws AddressFormatException, DecoderException,
           MnemonicException.MnemonicLengthException, MnemonicException.MnemonicWordException,
           MnemonicException.MnemonicChecksumException {
 

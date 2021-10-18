@@ -1,12 +1,16 @@
 package com.samourai.wallet.hd;
 
-import java.math.BigInteger;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.MainNetParams;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigInteger;
 
 public class HD_WalletFactoryGenericTest {
+    private static final Logger log = LoggerFactory.getLogger(HD_WalletFactoryGenericTest.class);
     private HD_WalletFactoryGeneric hdWalletFactory = HD_WalletFactoryGeneric.getInstance();
 
     @Test
@@ -40,10 +44,7 @@ public class HD_WalletFactoryGenericTest {
 
     @Test
     public void computeSeedFromWords() throws Exception {
-        NetworkParameters params = MainNetParams.get();
-        HD_Wallet hdWallet;
         byte[] mSeed;
-        String passphrase = "TREZOR";
 
         // https://github.com/trezor/python-mnemonic/blob/master/vectors.json
 
@@ -58,5 +59,28 @@ public class HD_WalletFactoryGenericTest {
 
         mSeed = hdWalletFactory.computeSeedFromWords("void come effort suffer camp survey warrior heavy shoot primary clutch crush open amazing screen patrol group space point ten exist slush involve unfold");
         Assertions.assertEquals("f585c11aec520db57dd353c69554b21a89b20fb0650966fa0a9d6f74fd989d8f", org.bouncycastle.util.encoders.Hex.toHexString(mSeed));
+    }
+
+    @Test
+    public void newWallet() throws Exception {
+        NetworkParameters params = MainNetParams.get();
+        String passphrase = "test";
+
+        HD_Wallet hdw1 = hdWalletFactory.newWallet(passphrase, params);
+        verifyNewWallet(hdw1, passphrase);
+
+        HD_Wallet hdw2 = hdWalletFactory.newWallet(passphrase, params);
+        verifyNewWallet(hdw2, passphrase);
+
+        Assertions.assertNotEquals(hdw1.getSeedHex(), hdw2.getSeedHex());
+        Assertions.assertNotEquals(hdw1.getMnemonic(), hdw2.getMnemonic());
+    }
+
+    private void verifyNewWallet(HD_Wallet hdw, String passphrase) {
+        if (log.isDebugEnabled()) {
+            log.debug("verifyNewWallet: "+hdw.getMnemonic());
+        }
+        Assertions.assertEquals(12, hdw.getMnemonic().split(" ").length);
+        Assertions.assertEquals(passphrase, hdw.getPassphrase());
     }
 }
