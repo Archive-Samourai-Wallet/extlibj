@@ -46,8 +46,8 @@ public class SimpleUtxoProvider extends SimpleUtxoKeyProvider implements UtxoPro
   }
 
   public void clear() {
-    indexHandler.set(0);
-    indexChangeHandler.set(0);
+    indexHandler.set(0, true);
+    indexChangeHandler.set(0, true);
 
     // clear utxos
     nbUtxos=0;
@@ -58,8 +58,8 @@ public class SimpleUtxoProvider extends SimpleUtxoKeyProvider implements UtxoPro
     // reset indexs
     for (WhirlpoolAccount account : WhirlpoolAccount.values()) {
       for (AddressType addressType : account.getAddressTypes()) {
-        walletsByAccount.get(account).get(addressType).getIndexHandler().set(0);
-        walletsByAccount.get(account).get(addressType).getIndexChangeHandler().set(0);
+        walletsByAccount.get(account).get(addressType).getIndexHandler().set(0, true);
+        walletsByAccount.get(account).get(addressType).getIndexChangeHandler().set(0, true);
       }
     }
   }
