@@ -38,7 +38,8 @@ public class HD_Wallet {
         this(purpose, mc.toMnemonic(mSeed), mParams, mSeed, strPassphrase);
     }
 
-    protected HD_Wallet(int purpose, List<String> mWordList, NetworkParameters mParams, byte[] mSeed, String strPassphrase) {
+    // used by Sparrow
+    public HD_Wallet(int purpose, List<String> mWordList, NetworkParameters mParams, byte[] mSeed, String strPassphrase) {
         this.mSeed = mSeed;
         this.strPassphrase = strPassphrase;
         this.mWordList = mWordList;
