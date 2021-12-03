@@ -9,6 +9,7 @@ import org.bitcoinj.core.*;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
 import org.bouncycastle.util.Arrays;
@@ -188,6 +189,10 @@ public class FormatsUtilGeneric {
 
 	public boolean isTestNet(NetworkParameters params) {
 		return params != null && !(params instanceof MainNetParams);
+	}
+
+	public NetworkParameters getNetworkParams(boolean testnet) {
+		return testnet ? TestNet3Params.get() : MainNetParams.get();
 	}
 
 	public boolean isValidBitcoinAddress(final String address, NetworkParameters params) {

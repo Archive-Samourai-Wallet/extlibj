@@ -20,7 +20,6 @@ public abstract class AbstractCahootsTest {
 
     protected void verify(String expectedPayload, Cahoots cahoots) throws Exception {
         String payloadStr = cleanPayload(cahoots).toJSONString();
-        log.info("### payload="+payloadStr);
         Assertions.assertEquals(expectedPayload, payloadStr);
     }
 
