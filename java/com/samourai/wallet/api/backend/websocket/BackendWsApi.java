@@ -7,7 +7,7 @@ import com.samourai.wallet.util.RandomUtil;
 import com.samourai.wallet.util.oauth.OAuthManager;
 import com.samourai.websocket.client.IWebsocketClient;
 import com.samourai.websocket.client.IWebsocketClientListener;
-import java8.util.Optional;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,35 +173,38 @@ public class BackendWsApi {
   }
 
   private void onMessage(String msg) {
+    if (addressListener == null) {
+      if (log.isDebugEnabled()) {
+        log.debug("ws: IGNORED: "+msg);
+      }
+      return;
+    }
     if (log.isDebugEnabled()) {
-      log.debug("ws: onResponse: "+msg);
+      log.debug("ws: onMessage: "+msg);
     }
     try {
-      // tx?
-      WSResponseUtxo utxo = jsonUtils.getObjectMapper().readValue(msg, WSResponseUtxo.class);
-      if (addressListener != null) {
+      JSONObject jsonObject = new JSONObject(msg);
+      String op = jsonObject.getJSONObject("x").getString("op");
+      if (WSResponseOperator.BLOCK.equals(op)) {
+        // block
+        WSResponseBlock block = jsonUtils.getObjectMapper().readValue(msg, WSResponseBlock.class);
         if (log.isDebugEnabled()) {
-          log.debug("new tx detected: "+utxo.x.hash);
+          log.debug("new block detected: #" + block.x.height);
+        }
+        blockListener.onMessage(block);
+      }
+      else if (WSResponseOperator.UTXO.equals(op)) {
+        // tx
+        WSResponseUtxo utxo = jsonUtils.getObjectMapper().readValue(msg, WSResponseUtxo.class);
+        if (log.isDebugEnabled()) {
+          log.debug("new tx detected: " + utxo.x.hash);
         }
         addressListener.onMessage(utxo);
       } else {
-        log.warn("new tx detected IGNORED");
+        log.error("Unknown message: "+msg);
       }
     } catch(Exception e) {
-      try {
-        // block?
-        WSResponseBlock block = jsonUtils.getObjectMapper().readValue(msg, WSResponseBlock.class);
-        if (blockListener != null) {
-          if (log.isDebugEnabled()) {
-            log.debug("new block detected: #" + block.x.height);
-          }
-          blockListener.onMessage(block);
-        } else {
-          log.warn("new block detected IGNORED");
-        }
-      } catch(Exception ee) {
-        log.error("Unknown response: "+msg);
-      }
+      log.error("", e);
     }
   }
 

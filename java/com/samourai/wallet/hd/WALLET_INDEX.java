@@ -24,7 +24,7 @@ public enum WALLET_INDEX {
   BADBANK_RECEIVE(WhirlpoolAccount.BADBANK, AddressType.SEGWIT_NATIVE, Chain.RECEIVE),
   BADBANK_CHANGE(WhirlpoolAccount.BADBANK, AddressType.SEGWIT_NATIVE, Chain.CHANGE);
 
-  private static final Logger log = LoggerFactory.getLogger(WALLET_INDEX.class.getSimpleName());
+  private static final Logger log = LoggerFactory.getLogger(WALLET_INDEX.class);
   private WhirlpoolAccount account;
   private AddressType addressType;
   private Chain chain;
