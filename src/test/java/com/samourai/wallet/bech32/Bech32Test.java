@@ -30,6 +30,7 @@ public class Bech32Test {
             new String[] { "tb1q8zt37uunpakpg8vh0tz06jnj0jz5jddn5mlts3", "001438971f73930f6c141d977ac4fd4a727c854935b3"},
             // Sipa testnet P2TR address, bitcoin dev mailing list, Oct 9, 2021
             new String[] { "tb1p84x2ryuyfevgnlpnxt9f39gm7r68gwtvllxqe5w2n5ru00s9aquslzggwq", "51203d4ca193844e5889fc3332ca98951bf0f474396cffcc0cd1ca9d07c7be05e839"},
+            new String[] { "tb1puu0gl3x9qm0l9xq0ajdepz326n66j702ecw5x7w3lk3knws3pmfq26386t", "5120e71e8fc4c506dff2980fec9b908a2ad4f5a979eace1d4379d1fda369ba110ed2"},
 
     };
 
@@ -98,6 +99,7 @@ public class Bech32Test {
         "11llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllludsr8",
         "split1checkupstagehandshakeupstreamerranterredcaperredlc445v",
         "?1v759aa",
+        "tb1puu0gl3x9qm0l9xq0ajdepz326n66j702ecw5x7w3lk3knws3pmfq26386t",
       };
 
     private static String[] INVALID_BECH32 = {
@@ -132,6 +134,7 @@ public class Bech32Test {
         "M1VUXWEZ",          // Checksum calculated with uppercase form of HRP
         "16plkw9",           // Empty HRP
         "1p2gdwpf",          // Empty HRP
+        "tb1puu0gl3x9qm0l9xq0ajdepz326n66j702ecw5x7w3lk3knws3pmfq26385t", // bad checksum
       };
 
       private Triple<String, byte[], Integer> p = null;
@@ -141,7 +144,7 @@ public class Bech32Test {
         for(String s : VALID_BECH32)   {
             p = null;
             p = Bech32.bech32Decode(s);
-            assert(p != null && p.getLeft() != null);
+            assert(p != null && p.getLeft() != null && p.getRight() == Bech32.BECH32);
         }
       }
 
@@ -150,7 +153,7 @@ public class Bech32Test {
         for(String s : VALID_BECH32M)   {
             p = null;
             p = Bech32.bech32Decode(s);
-            assert(p != null && p.getLeft() != null);
+            assert(p != null && p.getLeft() != null && p.getRight() == Bech32.BECH32M);
         }
       }
 
@@ -159,7 +162,7 @@ public class Bech32Test {
         for(String s : INVALID_BECH32)   {
             p = null;
             p = Bech32.bech32Decode(s);
-            assert(p == null);
+            assert(p == null || p.getRight() != Bech32.BECH32);
         }
       }
 
@@ -168,7 +171,7 @@ public class Bech32Test {
         for(String s : INVALID_BECH32M)   {
             p = null;
             p = Bech32.bech32Decode(s);
-            assert(p == null);
+            assert(p == null || p.getRight() != Bech32.BECH32M);
         }
       }
 
