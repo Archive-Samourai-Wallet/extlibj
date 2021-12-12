@@ -78,8 +78,10 @@ public class Stowaway extends Cahoots {
         }
 
         Transaction transaction = new Transaction(params);
+        transaction.setVersion(2);
         for(MyTransactionOutPoint outpoint : inputs.keySet())   {
             TransactionInput input = outpoint.computeSpendInput();
+            input.setSequenceNumber(SEQUENCE_RBF_ENABLED);
             if (log.isDebugEnabled()) {
                 log.debug("input value:" + input.getValue().longValue());
             }
@@ -88,6 +90,12 @@ public class Stowaway extends Cahoots {
         }
         for(_TransactionOutput output : outputs.keySet())   {
             transaction.addOutput(output);
+        }
+
+        // used by Sparrow
+        String strBlockHeight = System.getProperty(BLOCK_HEIGHT_PROPERTY);
+        if(strBlockHeight != null) {
+            transaction.setLockTime(Long.parseLong(strBlockHeight));
         }
 
         PSBT psbt = new PSBT(transaction);
@@ -153,6 +161,7 @@ public class Stowaway extends Cahoots {
                 log.debug("outpoint value:" + outpoint.getValue().longValue());
             }
             TransactionInput input = outpoint.computeSpendInput();
+            input.setSequenceNumber(SEQUENCE_RBF_ENABLED);
             transaction.addInput(input);
             outpoints.put(outpoint.getHash().toString() + "-" + outpoint.getIndex(), outpoint.getValue().longValue());
         }
