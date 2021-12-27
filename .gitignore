@@ -6,3 +6,6 @@ target
 *.iml
 *.chain
 *.spvchain
+# OSX files
+.DS_Store
+
