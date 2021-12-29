@@ -26,12 +26,11 @@ public class AddressFactoryGeneric {
     private Map<WALLET_INDEX,Integer> walletIdxMap = null; // mirrored with HDWallets instances
 
     public AddressFactoryGeneric() {
-        this.bip44Wallet = null;
-        this.bip49Wallet = null;
-        this.bip84Wallet = null;
-        this.params = null;
-        highestIdxMap = initMap();
-        walletIdxMap = initMap();
+        reset();
+    }
+
+    public void reset() {
+        reset(null, null, null, null);
     }
 
     public void reset(HD_Wallet bip44Wallet, HD_Wallet bip49Wallet, HD_Wallet bip84Wallet, NetworkParameters params) {
@@ -39,13 +38,19 @@ public class AddressFactoryGeneric {
             log.debug("reset");
         }
         if (bip44Wallet == null) {
-            throw new RuntimeException("bip44Wallet is null");
+            if (log.isDebugEnabled()) {
+                log.debug("reset: bip44Wallet=null");
+            }
         }
         if (bip49Wallet == null) {
-            throw new RuntimeException("bip49Wallet is null");
+            if (log.isDebugEnabled()) {
+                log.debug("reset: bip49Wallet=null");
+            }
         }
         if (bip84Wallet == null) {
-            throw new RuntimeException("bip84Wallet is null");
+            if (log.isDebugEnabled()) {
+                log.debug("reset: bip84Wallet=null");
+            }
         }
         this.bip44Wallet = bip44Wallet;
         this.bip49Wallet = bip49Wallet;
