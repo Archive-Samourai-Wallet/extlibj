@@ -148,11 +148,4 @@ public class HD_Wallet {
     public HD_Address getAddressAt(int account, UnspentOutput utxo) {
         return getAddressAt(account, utxo.computePathChainIndex(), utxo.computePathAddressIndex());
     }
-
-    public void wipe() {
-        for(HD_Account hdAccount : mAccounts.values())	{
-            hdAccount.getReceive().setAddrIdx(0);
-            hdAccount.getChange().setAddrIdx(0);
-        }
-    }
 }
