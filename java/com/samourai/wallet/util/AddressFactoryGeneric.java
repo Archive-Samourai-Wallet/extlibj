@@ -297,17 +297,6 @@ public class AddressFactoryGeneric {
         return debugStr;
     }
 
-    public void wipe() {
-        if (log.isDebugEnabled()) {
-            log.debug("wipe");
-        }
-        bip44Wallet.wipe();
-        for (WALLET_INDEX walletIndex : WALLET_INDEX.values()) {
-            setHighestIdx(walletIndex, 0);
-            setWalletIdx(walletIndex, 0, true);
-        }
-    }
-
     public String getPub(AddressType addressType, WhirlpoolAccount account) {
         HD_Wallet hdWallet = getHdWallet(addressType);
         if (hdWallet == null) {
