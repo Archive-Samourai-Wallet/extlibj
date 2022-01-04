@@ -120,4 +120,8 @@ public class HD_Address {
     public static String getPathFull(int purpose, int coinType, int account, int chain, int address) {
         return "m/"+purpose+"'/"+coinType+"'/"+account+"'/"+chain+"/"+address;
     }
+
+    public static String getPathFullBip47(int purpose, int coinType, int account) {
+        return "m/"+purpose+"'/"+coinType+"'/"+account+"'/bip47/bip47";
+    }
 }

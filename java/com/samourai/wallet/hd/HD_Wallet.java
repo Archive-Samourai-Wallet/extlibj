@@ -147,6 +147,9 @@ public class HD_Wallet {
     }
 
     public HD_Address getAddressAt(int account, UnspentOutput utxo) {
+        if (!utxo.hasPath()) {
+            return null; // bip47
+        }
         return getAddressAt(account, utxo.computePathChainIndex(), utxo.computePathAddressIndex());
     }
 }
