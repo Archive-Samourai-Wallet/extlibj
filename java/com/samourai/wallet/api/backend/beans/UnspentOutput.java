@@ -2,6 +2,7 @@ package com.samourai.wallet.api.backend.beans;
 
 import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.send.MyTransactionOutPoint;
+import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.*;
 import org.bitcoinj.script.Script;
 import org.bouncycastle.util.encoders.Hex;
@@ -53,12 +54,16 @@ public class UnspentOutput {
         this.xpub.m = xpub;
     }
 
+    public boolean hasPath() {
+        return xpub != null && !StringUtils.isEmpty(xpub.path);
+    }
+
     public int computePathChainIndex() {
-      return Integer.parseInt(xpub.path.split(PATH_SEPARATOR)[1]);
+        return Integer.parseInt(xpub.path.split(PATH_SEPARATOR)[1]);
     }
 
     public int computePathAddressIndex() {
-      return Integer.parseInt(xpub.path.split(PATH_SEPARATOR)[2]);
+        return Integer.parseInt(xpub.path.split(PATH_SEPARATOR)[2]);
     }
 
     public String getPath() {
@@ -69,6 +74,10 @@ public class UnspentOutput {
     }
 
     public String getPathFull(int purpose, int accountIndex) {
+        if (!hasPath()) {
+            // bip47
+            return HD_Address.getPathFullBip47(purpose, 0, accountIndex);
+        }
         return HD_Address.getPathFull(purpose, 0, accountIndex, computePathChainIndex(), computePathAddressIndex());
     }
 

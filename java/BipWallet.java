@@ -65,6 +65,9 @@ public class BipWallet {
   }
 
   public HD_Address getAddressAt(UnspentOutput utxo) {
+    if (!utxo.hasPath()) {
+      return null; // bip47
+    }
     return getAddressAt(utxo.computePathChainIndex(), utxo.computePathAddressIndex());
   }
 
