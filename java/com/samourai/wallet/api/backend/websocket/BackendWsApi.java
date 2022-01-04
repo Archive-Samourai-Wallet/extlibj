@@ -184,8 +184,8 @@ public class BackendWsApi {
     }
     try {
       JSONObject jsonObject = new JSONObject(msg);
-      String op = jsonObject.getJSONObject("x").getString("op");
-      if (WSResponseOperator.BLOCK.equals(op)) {
+      String op = jsonObject.getString("op");
+      if (WSResponseOperator.BLOCK.getValue().equals(op)) {
         // block
         WSResponseBlock block = jsonUtils.getObjectMapper().readValue(msg, WSResponseBlock.class);
         if (log.isDebugEnabled()) {
@@ -193,7 +193,7 @@ public class BackendWsApi {
         }
         blockListener.onMessage(block);
       }
-      else if (WSResponseOperator.UTXO.equals(op)) {
+      else if (WSResponseOperator.UTXO.getValue().equals(op)) {
         // tx
         WSResponseUtxo utxo = jsonUtils.getObjectMapper().readValue(msg, WSResponseUtxo.class);
         if (log.isDebugEnabled()) {
