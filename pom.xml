@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.samourai.code.wallet</groupId>
 	<artifactId>extlibj</artifactId>
-	<version>0.0.28-SNAPSHOT</version>
+	<version>0.0.28</version>
 	<name>extlibj</name>
 	<properties>
 		<maven.compiler.source>1.6</maven.compiler.source>
@@ -209,6 +209,6 @@
 
 	<scm>
     <connection>scm:git:git@code.samourai.io:wallet/ExtLibJ.git</connection>
-    <tag>0.0.27</tag>
+    <tag>0.0.28</tag>
   </scm>
 </project>
