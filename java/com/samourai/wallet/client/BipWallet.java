@@ -16,11 +16,11 @@ public class BipWallet {
   private IIndexHandler indexChangeHandler;
 
   public BipWallet(
-      HD_Wallet bip44w,
-      WhirlpoolAccount account,
-      IIndexHandler indexHandler,
-      IIndexHandler indexChangeHandler,
-      AddressType addressType) {
+          HD_Wallet bip44w,
+          WhirlpoolAccount account,
+          IIndexHandler indexHandler,
+          IIndexHandler indexChangeHandler,
+          AddressType addressType) {
     this.account = account;
     this.bipWallet = new HD_Wallet(addressType.getPurpose(), bip44w);
     this.indexHandler = indexHandler;
@@ -56,7 +56,7 @@ public class BipWallet {
 
   public HD_Address getNextChangeAddress(boolean increment) {
     int nextAddressIndex =
-        increment ? indexChangeHandler.getAndIncrement() : indexChangeHandler.get();
+            increment ? indexChangeHandler.getAndIncrement() : indexChangeHandler.get();
     return getAddressAt(Chain.CHANGE.getIndex(), nextAddressIndex);
   }
 
