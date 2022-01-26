@@ -37,9 +37,37 @@ public class BIP340Util {
         return oPoint;
       }
 
-      public static String getP2TRAdress(NetworkParameters params, Point opoint) {
-        String address = Bech32Segwit.encode(params instanceof TestNet3Params ? "tb" : "bc", (byte)0x01, BigIntegers.asUnsignedByteArray(opoint.getX()));
-        return address;
+      public static String getP2TRAddress(NetworkParameters params, Point opoint) {
+        if(Point.isSecp256k1(opoint.toBytes())) {
+          String address = Bech32Segwit.encode(params instanceof TestNet3Params ? "tb" : "bc", (byte)0x01, BigIntegers.asUnsignedByteArray(opoint.getX()));
+          return address;
+        }
+        else {
+          return null;
+        }
+      }
+
+      public static String getP2TRAddress(NetworkParameters params, ECKey eckey) {
+        Point iPoint = getInternalPubkey(eckey);
+        Point oPoint = getOutputPubkey(iPoint);
+        if(Point.isSecp256k1(oPoint.toBytes())) {
+          String address = Bech32Segwit.encode(params instanceof TestNet3Params ? "tb" : "bc", (byte)0x01, BigIntegers.asUnsignedByteArray(oPoint.getX()));
+          return address;
+        }
+        else {
+          return null;
+        }
+      }
+
+      public static byte[] getOutputPubkey(ECKey eckey) {
+        Point iPoint = getInternalPubkey(eckey);
+        Point oPoint = getOutputPubkey(iPoint);
+        if(Point.isSecp256k1(oPoint.toBytes())) {
+          return oPoint.toBytes();
+        }
+        else {
+          return null;
+        }
       }
 
 }
