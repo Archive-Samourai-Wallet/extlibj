@@ -1,76 +1,39 @@
 package com.samourai.wallet.hd;
 
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public enum WALLET_INDEX {
 
-  BIP44_RECEIVE(WhirlpoolAccount.DEPOSIT, AddressType.LEGACY, Chain.RECEIVE),
-  BIP44_CHANGE(WhirlpoolAccount.DEPOSIT, AddressType.LEGACY, Chain.CHANGE),
+  BIP44_RECEIVE(BIP_WALLET.DEPOSIT_BIP44, Chain.RECEIVE),
+  BIP44_CHANGE(BIP_WALLET.DEPOSIT_BIP44, Chain.CHANGE),
 
-  BIP49_RECEIVE(WhirlpoolAccount.DEPOSIT, AddressType.SEGWIT_COMPAT, Chain.RECEIVE),
-  BIP49_CHANGE(WhirlpoolAccount.DEPOSIT, AddressType.SEGWIT_COMPAT, Chain.CHANGE),
+  BIP49_RECEIVE(BIP_WALLET.DEPOSIT_BIP49, Chain.RECEIVE),
+  BIP49_CHANGE(BIP_WALLET.DEPOSIT_BIP49, Chain.CHANGE),
 
-  BIP84_RECEIVE(WhirlpoolAccount.DEPOSIT, AddressType.SEGWIT_NATIVE, Chain.RECEIVE),
-  BIP84_CHANGE(WhirlpoolAccount.DEPOSIT, AddressType.SEGWIT_NATIVE, Chain.CHANGE),
+  BIP84_RECEIVE(BIP_WALLET.DEPOSIT_BIP84, Chain.RECEIVE),
+  BIP84_CHANGE(BIP_WALLET.DEPOSIT_BIP84, Chain.CHANGE),
 
-  PREMIX_RECEIVE(WhirlpoolAccount.PREMIX, AddressType.SEGWIT_NATIVE, Chain.RECEIVE),
-  PREMIX_CHANGE(WhirlpoolAccount.PREMIX, AddressType.SEGWIT_NATIVE, Chain.CHANGE),
+  PREMIX_RECEIVE(BIP_WALLET.PREMIX_BIP84, Chain.RECEIVE),
+  PREMIX_CHANGE(BIP_WALLET.PREMIX_BIP84, Chain.CHANGE),
 
-  POSTMIX_RECEIVE(WhirlpoolAccount.POSTMIX, AddressType.SEGWIT_NATIVE, Chain.RECEIVE),
-  POSTMIX_CHANGE(WhirlpoolAccount.POSTMIX, AddressType.SEGWIT_NATIVE, Chain.CHANGE),
+  POSTMIX_RECEIVE(BIP_WALLET.POSTMIX_BIP84, Chain.RECEIVE),
+  POSTMIX_CHANGE(BIP_WALLET.POSTMIX_BIP84, Chain.CHANGE),
 
-  BADBANK_RECEIVE(WhirlpoolAccount.BADBANK, AddressType.SEGWIT_NATIVE, Chain.RECEIVE),
-  BADBANK_CHANGE(WhirlpoolAccount.BADBANK, AddressType.SEGWIT_NATIVE, Chain.CHANGE);
+  BADBANK_RECEIVE(BIP_WALLET.BADBANK_BIP84, Chain.RECEIVE),
+  BADBANK_CHANGE(BIP_WALLET.BADBANK_BIP84, Chain.CHANGE);
 
   private static final Logger log = LoggerFactory.getLogger(WALLET_INDEX.class);
-  private WhirlpoolAccount account;
-  private AddressType addressType;
+  private BIP_WALLET bipWallet;
   private Chain chain;
 
-  WALLET_INDEX(WhirlpoolAccount account, AddressType addressType, Chain chain) {
-    this.account = account;
-    this.addressType = addressType;
+  WALLET_INDEX(BIP_WALLET bipWallet, Chain chain) {
+    this.bipWallet = bipWallet;
     this.chain = chain;
   }
 
-  public static WALLET_INDEX find(WhirlpoolAccount account, AddressType addressType, Chain chain) {
-    for (WALLET_INDEX walletIndex : WALLET_INDEX.values()) {
-      if (walletIndex.account == account && walletIndex.addressType == addressType && walletIndex.chain == chain) {
-        return walletIndex;
-      }
-    }
-    log.error("WALLET_INDEX not found: "+account+"/"+addressType+"/"+chain);
-    return null;
-  }
-
-  public static WALLET_INDEX findChangeIndex(int account, int addressType) {
-    if (account == WhirlpoolAccount.POSTMIX.getAccountIndex()) {
-      return WALLET_INDEX.POSTMIX_CHANGE;
-    }
-    /* if (account == WhirlpoolAccount.PREMIX.getAccountIndex()) {
-      return WALLET_INDEX.PREMIX_CHANGE;
-    } */
-    if (addressType == 84) {
-      return WALLET_INDEX.BIP84_CHANGE;
-    } else if (addressType == 49) {
-      return WALLET_INDEX.BIP49_CHANGE;
-    } else {
-      return WALLET_INDEX.BIP44_CHANGE;
-    }
-  }
-
-  public WhirlpoolAccount getAccount() {
-    return account;
-  }
-
-  public int getAccountIndex() {
-    return account.getAccountIndex();
-  }
-
-  public AddressType getAddressType() {
-    return addressType;
+  public BIP_WALLET getBipWallet() {
+    return bipWallet;
   }
 
   public Chain getChain() {

@@ -1,17 +1,18 @@
 package com.samourai.wallet.send.spend;
 
 import com.samourai.wallet.SamouraiWalletConst;
-import com.samourai.wallet.hd.AddressType;
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
+import com.samourai.wallet.bipFormat.BipFormat;
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
-import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.send.beans.SpendError;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.exceptions.SpendException;
+import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,17 +36,17 @@ public class SpendBuilder {
     }
 
     // forcedChangeType may be null
-    public SpendTx preview(WhirlpoolAccount account, String address, long amount, boolean boltzmann, boolean rbfOptIn, BigInteger feePerKb, AddressType forcedChangeType, List<MyTransactionOutPoint> preselectedInputs) throws Exception {
-        AddressType addressType = computeAddressType(forcedChangeType, address, params);
+    public SpendTx preview(WhirlpoolAccount account, String address, long amount, boolean boltzmann, boolean rbfOptIn, BigInteger feePerKb, BipFormat forcedChangeFormat, List<MyTransactionOutPoint> preselectedInputs) throws Exception {
+        BipFormat addressFormat = computeAddressFormat(forcedChangeFormat, address, utxoProvider.getBipFormatSupplier(), params);
 
         // if possible, get UTXO by input 'type': p2pkh, p2sh-p2wpkh or p2wpkh, else get all UTXO
-        long neededAmount = computeNeededAmount(account, amount, addressType, feePerKb);
+        long neededAmount = computeNeededAmount(account, amount, addressFormat, feePerKb);
 
         // get all UTXO
-        Collection<UTXO> utxos = findUtxos(neededAmount, account, addressType, preselectedInputs);
+        Collection<UTXO> utxos = findUtxos(neededAmount, account, addressFormat, preselectedInputs);
 
-        SpendSelection spendSelection = computeUtxoSelection(account, address, boltzmann, amount, neededAmount, utxos, addressType, params, feePerKb, forcedChangeType);
-        SpendTx spendTx = spendSelection.spendTx(amount, address, addressType, account, rbfOptIn, params, feePerKb, restoreChangeIndexes, utxoProvider);
+        SpendSelection spendSelection = computeUtxoSelection(account, address, boltzmann, amount, neededAmount, utxos, addressFormat, params, feePerKb, forcedChangeFormat);
+        SpendTx spendTx = spendSelection.spendTx(amount, address, addressFormat, account, rbfOptIn, params, feePerKb, restoreChangeIndexes, utxoProvider);
         if (spendTx != null) {
             if (log.isDebugEnabled()) {
                 log.debug("spend type:" + spendSelection.getSpendType());
@@ -58,7 +59,7 @@ public class SpendBuilder {
         return spendTx;
     }
 
-    private Collection<UTXO> findUtxos(long neededAmount, WhirlpoolAccount account, AddressType addressType, Collection<MyTransactionOutPoint> preselectedInputs) {
+    private Collection<UTXO> findUtxos(long neededAmount, WhirlpoolAccount account, BipFormat addressFormat, Collection<MyTransactionOutPoint> preselectedInputs) {
         // spend from preselected inputs
         if (preselectedInputs != null && preselectedInputs.size() > 0) {
             Collection<UTXO> utxos = new ArrayList<>();
@@ -73,7 +74,7 @@ public class SpendBuilder {
             return UTXO.sumValue(utxos) >= neededAmount ? utxos : new LinkedList<>();
         }
 
-        Collection<UTXO> utxos = utxoProvider.getUtxos(account, addressType);
+        Collection<UTXO> utxos = utxoProvider.getUtxos(account, addressFormat);
 
         // TODO filter-out do-not-spends
         /*
@@ -106,7 +107,7 @@ public class SpendBuilder {
         return UTXO.sumValue(utxos) >= neededAmount ? utxos : new LinkedList<>();
     }
 
-    private SpendSelection computeUtxoSelection(WhirlpoolAccount account, String address, boolean boltzmann, long amount, long neededAmount, Collection<UTXO> utxos, AddressType addressType, NetworkParameters params, BigInteger feePerKb, AddressType forcedChangeType) throws SpendException {
+    private SpendSelection computeUtxoSelection(WhirlpoolAccount account, String address, boolean boltzmann, long amount, long neededAmount, Collection<UTXO> utxos, BipFormat addressFormat, NetworkParameters params, BigInteger feePerKb, BipFormat forcedChangeFormat) throws SpendException {
         long balance = UTXO.sumValue(utxos);
 
         // insufficient balance
@@ -126,7 +127,7 @@ public class SpendBuilder {
 
         // boltzmann spend
         if (boltzmann) {
-            SpendSelection spendSelection = SpendSelectionBoltzmann.compute(neededAmount, utxoProvider, addressType, amount, address, account, forcedChangeType, params, feePerKb, restoreChangeIndexes);
+            SpendSelection spendSelection = SpendSelectionBoltzmann.compute(neededAmount, utxoProvider, addressFormat, amount, address, account, forcedChangeFormat, params, feePerKb, restoreChangeIndexes);
             if (spendSelection != null) {
                 return spendSelection;
             }
@@ -156,16 +157,16 @@ public class SpendBuilder {
         throw new SpendException(SpendError.MAKING);
     }
 
-    private long computeNeededAmount(WhirlpoolAccount account, long amount, AddressType changeType, BigInteger feePerKb) {
+    private long computeNeededAmount(WhirlpoolAccount account, long amount, BipFormat changeFormat, BigInteger feePerKb) {
         long neededAmount = 0L;
-        if (changeType == AddressType.SEGWIT_NATIVE) {
-            neededAmount += FeeUtil.getInstance().estimatedFeeSegwit(0, 0, UTXO.countOutpoints(utxoProvider.getUtxos(account, AddressType.SEGWIT_NATIVE)), 4, feePerKb).longValue();
+        if (changeFormat == BIP_FORMAT.SEGWIT_NATIVE) {
+            neededAmount += FeeUtil.getInstance().estimatedFeeSegwit(0, 0, UTXO.countOutpoints(utxoProvider.getUtxos(account, BIP_FORMAT.SEGWIT_NATIVE)), 4, feePerKb).longValue();
 //                    Log.d("segwit:" + neededAmount);
-        } else if (changeType == AddressType.SEGWIT_COMPAT) {
-            neededAmount += FeeUtil.getInstance().estimatedFeeSegwit(0, UTXO.countOutpoints(utxoProvider.getUtxos(account, AddressType.SEGWIT_COMPAT)), 0, 4, feePerKb).longValue();
+        } else if (changeFormat == BIP_FORMAT.SEGWIT_COMPAT) {
+            neededAmount += FeeUtil.getInstance().estimatedFeeSegwit(0, UTXO.countOutpoints(utxoProvider.getUtxos(account, BIP_FORMAT.SEGWIT_COMPAT)), 0, 4, feePerKb).longValue();
 //                    Log.d("segwit:" + neededAmount);
         } else {
-            neededAmount += FeeUtil.getInstance().estimatedFeeSegwit(UTXO.countOutpoints(utxoProvider.getUtxos(account, AddressType.LEGACY)), 0, 0, 4, feePerKb).longValue();
+            neededAmount += FeeUtil.getInstance().estimatedFeeSegwit(UTXO.countOutpoints(utxoProvider.getUtxos(account, BIP_FORMAT.LEGACY)), 0, 0, 4, feePerKb).longValue();
 //                    Log.d("p2pkh:" + neededAmount);
         }
         neededAmount += amount;
@@ -173,10 +174,10 @@ public class SpendBuilder {
         return neededAmount;
     }
 
-    public static AddressType computeAddressType(AddressType forcedChangeType, String address, NetworkParameters params) {
-        if (forcedChangeType != null) {
-            return forcedChangeType;
+    public static BipFormat computeAddressFormat(BipFormat forcedChangeFormat, String address, BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
+        if (forcedChangeFormat != null) {
+            return forcedChangeFormat;
         }
-        return AddressType.findByAddress(address, params);
+        return bipFormatSupplier.findByAddress(address, params);
     }
 }

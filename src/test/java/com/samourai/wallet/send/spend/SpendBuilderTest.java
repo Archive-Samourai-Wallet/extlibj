@@ -1,6 +1,11 @@
 package com.samourai.wallet.send.spend;
 
-import com.samourai.wallet.hd.AddressType;
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
+import com.samourai.wallet.bipFormat.BipFormat;
+import com.samourai.wallet.bipWallet.BipWallet;
+import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
+import com.samourai.wallet.bipWallet.WalletSupplierImpl;
+import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
@@ -27,6 +32,7 @@ public class SpendBuilderTest {
     private static final NetworkParameters params = TestNet3Params.get();
     private final SpendBuilder spendBuilder;
     private final SimpleUtxoProvider utxoProvider;
+    private BipWallet depositWallet84;
 
     private static final String ADDRESS_RECEIVER_84 = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
     private static String[] ADDRESS_CHANGE_84;
@@ -34,8 +40,11 @@ public class SpendBuilderTest {
     private static final String SEED_PASSPHRASE = "test";
 
     public SpendBuilderTest() throws Exception {
-        final HD_Wallet hdWallet = TestUtil.computeBip44wallet(SEED_WORDS, SEED_PASSPHRASE);
-        utxoProvider = new SimpleUtxoProvider(hdWallet);
+        final HD_Wallet bip44w = TestUtil.computeBip44wallet(SEED_WORDS, SEED_PASSPHRASE);
+        WalletSupplierImpl walletSupplier = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip44w);
+        utxoProvider = new SimpleUtxoProvider(bip44w.getParams(), walletSupplier);
+        depositWallet84 = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84);
+        Assertions.assertNotNull(depositWallet84);
         spendBuilder = new SpendBuilder(params, utxoProvider, new Runnable() {
             @Override
             public void run() {}
@@ -43,7 +52,7 @@ public class SpendBuilderTest {
         
         ADDRESS_CHANGE_84 = new String[4];
         for (int i=0; i<4; i++) {
-            ADDRESS_CHANGE_84[i] = utxoProvider.getChangeAddress(WhirlpoolAccount.DEPOSIT, AddressType.SEGWIT_NATIVE);
+            ADDRESS_CHANGE_84[i] = utxoProvider.getChangeAddress(WhirlpoolAccount.DEPOSIT, BIP_FORMAT.SEGWIT_NATIVE);
         }
 
         SpendSelectionBoltzmann._setTestMode(true);
@@ -58,9 +67,9 @@ public class SpendBuilderTest {
         // spend
         String addressReceiver = ADDRESS_RECEIVER_84;
         BigInteger feePerKb = BigInteger.valueOf(50);
-        AddressType forcedChangeType = null;
+        BipFormat forcedChangeFormat = null;
         List<MyTransactionOutPoint> preselectedInputs = null;
-        return spendBuilder.preview(account, addressReceiver, amount, stonewall, true, feePerKb, forcedChangeType, preselectedInputs);
+        return spendBuilder.preview(account, addressReceiver, amount, stonewall, true, feePerKb, forcedChangeFormat, preselectedInputs);
     }
 
     @Test
@@ -84,7 +93,7 @@ public class SpendBuilderTest {
         long amount = 10000;
 
         // set utxos
-        utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 9000);
+        utxoProvider.addUtxo(depositWallet84, 9000);
 
         // spend
         try {
@@ -100,13 +109,13 @@ public class SpendBuilderTest {
         long amount = 10000;
 
         // set utxos
-        UTXO utxo1 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 10000);
-        UTXO utxo2 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 20000);
+        UTXO utxo1 = utxoProvider.addUtxo(depositWallet84, 10000);
+        UTXO utxo2 = utxoProvider.addUtxo(depositWallet84, 20000);
 
         // should select smallest single utxo
         SpendTx spendTx = spend84(account, amount, true);
         long changeExpected = 9830;
-        verify(spendTx, SpendType.SIMPLE, Lists.of(utxo2), 170, amount, changeExpected, AddressType.SEGWIT_NATIVE, 141, 561,
+        verify(spendTx, SpendType.SIMPLE, Lists.of(utxo2), 170, amount, changeExpected, BIP_FORMAT.SEGWIT_NATIVE, 141, 561,
                 Lists.of(ADDRESS_RECEIVER_84, ADDRESS_CHANGE_84[1]),
                 Lists.of(amount,changeExpected));
     }
@@ -117,15 +126,15 @@ public class SpendBuilderTest {
         long amount = 40000;
 
         // set utxos
-        UTXO utxo1 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 10000);
-        UTXO utxo2 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 20000);
-        UTXO utxo3 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 30000);
-        UTXO utxo4 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 500);
+        UTXO utxo1 = utxoProvider.addUtxo(depositWallet84, 10000);
+        UTXO utxo2 = utxoProvider.addUtxo(depositWallet84, 20000);
+        UTXO utxo3 = utxoProvider.addUtxo(depositWallet84, 30000);
+        UTXO utxo4 = utxoProvider.addUtxo(depositWallet84, 500);
 
         // should select largest Utxos
         SpendTx spendTx = spend84(account, amount, true);
         long changeExpected = 9740;
-        verify(spendTx, SpendType.SIMPLE, Lists.of(utxo3, utxo2), 260, amount, changeExpected, AddressType.SEGWIT_NATIVE, 209, 833,
+        verify(spendTx, SpendType.SIMPLE, Lists.of(utxo3, utxo2), 260, amount, changeExpected, BIP_FORMAT.SEGWIT_NATIVE, 209, 833,
                 Lists.of(ADDRESS_RECEIVER_84, ADDRESS_CHANGE_84[1]),
                 Lists.of(amount,changeExpected));
     }
@@ -136,15 +145,15 @@ public class SpendBuilderTest {
         long amount = 50000;
 
         // set utxos
-        UTXO utxo1 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 10000);
-        UTXO utxo2 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 20000);
-        UTXO utxo3 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 30000);
-        UTXO utxo4 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 500);
+        UTXO utxo1 = utxoProvider.addUtxo(depositWallet84, 10000);
+        UTXO utxo2 = utxoProvider.addUtxo(depositWallet84, 20000);
+        UTXO utxo3 = utxoProvider.addUtxo(depositWallet84, 30000);
+        UTXO utxo4 = utxoProvider.addUtxo(depositWallet84, 500);
 
         // should select largest Utxos
         SpendTx spendTx = spend84(account, amount, true);
         long changeExpected = 9650;
-        verify(spendTx, SpendType.SIMPLE, Lists.of(utxo3, utxo2, utxo1), 350, amount, changeExpected, AddressType.SEGWIT_NATIVE, 277, 1106,
+        verify(spendTx, SpendType.SIMPLE, Lists.of(utxo3, utxo2, utxo1), 350, amount, changeExpected, BIP_FORMAT.SEGWIT_NATIVE, 277, 1106,
                 Lists.of(ADDRESS_RECEIVER_84, ADDRESS_CHANGE_84[1]),
                 Lists.of(amount,changeExpected));
     }
@@ -155,30 +164,30 @@ public class SpendBuilderTest {
         long amount = 40000;
 
         // set utxos
-        UTXO utxo1 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 10000);
-        UTXO utxo2 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 10000);
-        UTXO utxo3 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 20000);
-        UTXO utxo4 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 20000);
-        UTXO utxo5 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 30000);
-        UTXO utxo6 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 30000);
-        UTXO utxo7 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 40000);
-        UTXO utxo8 = utxoProvider.addUtxo(account, AddressType.SEGWIT_NATIVE, 40000);
+        UTXO utxo1 = utxoProvider.addUtxo(depositWallet84, 10000);
+        UTXO utxo2 = utxoProvider.addUtxo(depositWallet84, 10000);
+        UTXO utxo3 = utxoProvider.addUtxo(depositWallet84, 20000);
+        UTXO utxo4 = utxoProvider.addUtxo(depositWallet84, 20000);
+        UTXO utxo5 = utxoProvider.addUtxo(depositWallet84, 30000);
+        UTXO utxo6 = utxoProvider.addUtxo(depositWallet84, 30000);
+        UTXO utxo7 = utxoProvider.addUtxo(depositWallet84, 40000);
+        UTXO utxo8 = utxoProvider.addUtxo(depositWallet84, 40000);
 
         // should select Boltzmann
         SpendTx spendTx = spend84(account, amount, true);
         long changeExpected = 69400;
-        verify(spendTx, SpendType.STONEWALL, Lists.of(utxo3, utxo4, utxo2, utxo5, utxo6), 600, amount, changeExpected, AddressType.SEGWIT_NATIVE, 475, 1897,
+        verify(spendTx, SpendType.STONEWALL, Lists.of(utxo3, utxo4, utxo2, utxo5, utxo6), 600, amount, changeExpected, BIP_FORMAT.SEGWIT_NATIVE, 475, 1897,
                 Lists.of(ADDRESS_CHANGE_84[2], ADDRESS_CHANGE_84[1], ADDRESS_RECEIVER_84, ADDRESS_CHANGE_84[0]),
                 Lists.of(19700L, amount, amount, 9700L));
     }
 
-    private void verify(SpendTx spendTx, SpendType spendType, Collection<UTXO> utxos, long fee, long amount, long change, AddressType changeType, int vSize, int weight, Collection<String> spendToAdresses, Collection<Long> spendToAmounts) {
+    private void verify(SpendTx spendTx, SpendType spendType, Collection<UTXO> utxos, long fee, long amount, long change, BipFormat changeFormat, int vSize, int weight, Collection<String> spendToAdresses, Collection<Long> spendToAmounts) {
         Assertions.assertEquals(spendType, spendTx.getSpendType());
         assertEquals(utxos, spendTx.getSpendFrom());
         Assertions.assertEquals(fee, spendTx.getFee());
         Assertions.assertEquals(amount, spendTx.getAmount());
         Assertions.assertEquals(change, spendTx.getChange());
-        Assertions.assertEquals(changeType, spendTx.getChangeType());
+        Assertions.assertEquals(changeFormat, spendTx.getChangeFormat());
         Assertions.assertEquals(vSize, spendTx.getvSize());
         Assertions.assertEquals(weight, spendTx.getWeight());
         Assertions.assertArrayEquals(spendToAdresses.toArray(), spendTx.getSpendTo().keySet().toArray());

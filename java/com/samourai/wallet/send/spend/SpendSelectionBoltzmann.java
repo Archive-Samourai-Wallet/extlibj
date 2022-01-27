@@ -1,14 +1,15 @@
 package com.samourai.wallet.send.spend;
 
-import com.samourai.wallet.hd.AddressType;
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
+import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.send.BoltzmannUtil;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
-import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.send.beans.SpendError;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
 import com.samourai.wallet.send.exceptions.SpendException;
+import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.util.TxUtil;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.apache.commons.lang3.tuple.Pair;
@@ -30,7 +31,7 @@ public class SpendSelectionBoltzmann extends SpendSelection {
         this.pair = pair;
     }
 
-    public static SpendSelectionBoltzmann compute(long neededAmount, UtxoProvider utxoProvider, AddressType changeType, long amount, String address, WhirlpoolAccount account, AddressType forcedChangeType, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes) {
+    public static SpendSelectionBoltzmann compute(long neededAmount, UtxoProvider utxoProvider, BipFormat changeFormat, long amount, String address, WhirlpoolAccount account, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes) {
         if (log.isDebugEnabled()) {
             log.debug("needed amount:" + neededAmount);
         }
@@ -38,9 +39,9 @@ public class SpendSelectionBoltzmann extends SpendSelection {
         Collection<UTXO> _utxos1 = null;
         Collection<UTXO> _utxos2 = null;
 
-        Collection<UTXO> utxosP2WPKH = utxoProvider.getUtxos(account, AddressType.SEGWIT_NATIVE);
-        Collection<UTXO> utxosP2SH_P2WPKH = utxoProvider.getUtxos(account, AddressType.SEGWIT_COMPAT);
-        Collection<UTXO> utxosP2PKH = utxoProvider.getUtxos(account, AddressType.LEGACY);
+        Collection<UTXO> utxosP2WPKH = utxoProvider.getUtxos(account, BIP_FORMAT.SEGWIT_NATIVE);
+        Collection<UTXO> utxosP2SH_P2WPKH = utxoProvider.getUtxos(account, BIP_FORMAT.SEGWIT_COMPAT);
+        Collection<UTXO> utxosP2PKH = utxoProvider.getUtxos(account, BIP_FORMAT.LEGACY);
 
         long valueP2WPKH = UTXO.sumValue(utxosP2WPKH);
         long valueP2SH_P2WPKH = UTXO.sumValue(utxosP2SH_P2WPKH);
@@ -56,19 +57,19 @@ public class SpendSelectionBoltzmann extends SpendSelection {
         boolean selectedP2SH_P2WPKH = false;
         boolean selectedP2PKH = false;
 
-        if ((valueP2WPKH > (neededAmount * 2)) && changeType == AddressType.SEGWIT_NATIVE) {
+        if ((valueP2WPKH > (neededAmount * 2)) && changeFormat == BIP_FORMAT.SEGWIT_NATIVE) {
             if (log.isDebugEnabled()) {
                 log.debug("set 1 P2WPKH 2x");
             }
             _utxos1 = utxosP2WPKH;
             selectedP2WPKH = true;
-        } else if (changeType == AddressType.SEGWIT_COMPAT && (valueP2SH_P2WPKH > (neededAmount * 2))) {
+        } else if (changeFormat == BIP_FORMAT.SEGWIT_COMPAT && (valueP2SH_P2WPKH > (neededAmount * 2))) {
             if (log.isDebugEnabled()) {
                 log.debug("set 1 P2SH_P2WPKH 2x");
             }
             _utxos1 = utxosP2SH_P2WPKH;
             selectedP2SH_P2WPKH = true;
-        } else if (changeType == AddressType.LEGACY && (valueP2PKH > (neededAmount * 2))) {
+        } else if (changeFormat == BIP_FORMAT.LEGACY && (valueP2PKH > (neededAmount * 2))) {
             if (log.isDebugEnabled()) {
                 log.debug("set 1 P2PKH 2x");
             }
@@ -168,7 +169,7 @@ public class SpendSelectionBoltzmann extends SpendSelection {
         }
 
         // boltzmann spend (STONEWALL)
-        Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair = BoltzmannUtil.getInstance().boltzmann(_utxos1Shuffled, _utxos2Shuffled, BigInteger.valueOf(amount), address, account, utxoProvider, forcedChangeType, params, feePerKb);
+        Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair = BoltzmannUtil.getInstance().boltzmann(_utxos1Shuffled, _utxos2Shuffled, BigInteger.valueOf(amount), address, account, utxoProvider, forcedChangeFormat, params, feePerKb);
 
         if (pair == null) {
             // can't do boltzmann, revert to SPEND_SIMPLE
@@ -182,7 +183,7 @@ public class SpendSelectionBoltzmann extends SpendSelection {
     }
 
     @Override
-    public SpendTx spendTx(long amount, String address, AddressType changeType, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider) throws SpendException {
+    public SpendTx spendTx(long amount, String address, BipFormat changeFormat, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider) throws SpendException {
         // select utxos for boltzmann
         long inputAmount = 0L;
         long outputAmount = 0L;
@@ -209,7 +210,7 @@ public class SpendSelectionBoltzmann extends SpendSelection {
 
         BigInteger fee = BigInteger.valueOf(inputAmount - outputAmount);
         long change = computeChange(amount, fee);
-        return new SpendTx(changeType, amount, fee.longValue(), change, this, receivers, rbfOptIn, utxoProvider, params);
+        return new SpendTx(changeFormat, amount, fee.longValue(), change, this, receivers, rbfOptIn, utxoProvider, params);
     }
 
     public static void _setTestMode(boolean testMode) {

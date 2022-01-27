@@ -1,48 +1,25 @@
 package com.samourai.whirlpool.client.wallet.beans;
 
-import java.util.Arrays;
-
-import com.samourai.wallet.hd.AddressType;
-import java8.util.Optional;
 import java8.util.function.Predicate;
 import java8.util.stream.Collectors;
 import java8.util.stream.StreamSupport;
 
+import java.util.Arrays;
+
 public enum WhirlpoolAccount {
-  DEPOSIT(0, true, new AddressType[]{AddressType.LEGACY, AddressType.SEGWIT_COMPAT, AddressType.SEGWIT_NATIVE}),
-  PREMIX(Integer.MAX_VALUE - 2, true, new AddressType[]{AddressType.SEGWIT_NATIVE}),
-  POSTMIX(Integer.MAX_VALUE - 1, true, new AddressType[]{AddressType.SEGWIT_NATIVE}),
-  BADBANK(Integer.MAX_VALUE - 3, false, new AddressType[]{AddressType.SEGWIT_NATIVE});
+  DEPOSIT(true),
+  PREMIX(true),
+  POSTMIX(true),
+  BADBANK(false);
 
-  private int accountIndex;
   private boolean active;
-  private AddressType[] addressTypes;
 
-  WhirlpoolAccount(int accountIndex, boolean active, AddressType[] addressTypes) {
-    this.accountIndex = accountIndex;
+  WhirlpoolAccount(boolean active) {
     this.active = active;
-    this.addressTypes = addressTypes;
-  }
-
-  public int getAccountIndex() {
-    return accountIndex;
   }
 
   public boolean isActive() {
     return active;
-  }
-
-  public AddressType[] getAddressTypes() {
-    return addressTypes;
-  }
-
-  public static Optional<WhirlpoolAccount> find(int index) {
-    for (WhirlpoolAccount whirlpoolAccount : values()) {
-      if (whirlpoolAccount.getAccountIndex() == index) {
-        return Optional.of(whirlpoolAccount);
-      }
-    }
-    return Optional.empty();
   }
 
   public static WhirlpoolAccount[] getListByActive(final boolean active) {

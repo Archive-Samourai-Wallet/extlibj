@@ -1,14 +1,13 @@
 package com.samourai.wallet.send.beans;
 
-import com.samourai.wallet.hd.AddressType;
+import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.SendFactoryGeneric;
-import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.send.exceptions.MakeTxException;
 import com.samourai.wallet.send.exceptions.SignTxException;
 import com.samourai.wallet.send.exceptions.SpendException;
+import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.send.spend.SpendSelection;
-import com.samourai.wallet.send.spend.SpendSelectionBoltzmann;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
 import org.slf4j.Logger;
@@ -19,7 +18,7 @@ import java.util.Map;
 
 public class SpendTx {
     private static final Logger log = LoggerFactory.getLogger(SpendTx.class);
-    private AddressType changeType;
+    private BipFormat changeFormat;
     private long amount;
     private long fee;
     private long change;
@@ -30,7 +29,7 @@ public class SpendTx {
     private int weight;
     private Transaction tx;
 
-    public SpendTx(AddressType changeType, long amount, long fee, long change, SpendSelection spendSelection, Map<String, Long> receivers, boolean rbfOptIn, UtxoKeyProvider keyProvider, NetworkParameters params) throws SpendException {
+    public SpendTx(BipFormat changeFormat, long amount, long fee, long change, SpendSelection spendSelection, Map<String, Long> receivers, boolean rbfOptIn, UtxoKeyProvider keyProvider, NetworkParameters params) throws SpendException {
         // consistency check
         long totalValueSelected = spendSelection.getTotalValueSelected();
         if((amount+fee+change) > totalValueSelected){
@@ -39,7 +38,7 @@ public class SpendTx {
             throw new SpendException(SpendError.INSUFFICIENT_FUNDS);
         }
 
-        this.changeType = changeType;
+        this.changeFormat = changeFormat;
         this.amount = amount;
         this.fee = fee;
         this.spendSelection = spendSelection;
@@ -122,8 +121,8 @@ public class SpendTx {
         return tx;
     }
 
-    public AddressType getChangeType() {
-        return changeType;
+    public BipFormat getChangeFormat() {
+        return changeFormat;
     }
 
     public long getAmount() {

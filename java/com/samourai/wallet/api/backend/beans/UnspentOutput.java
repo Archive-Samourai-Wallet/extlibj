@@ -73,12 +73,12 @@ public class UnspentOutput {
       return xpub.path;
     }
 
-    public String getPathFull(int purpose, int accountIndex) {
+    public String getPathAddress(int purpose, int accountIndex) {
         if (!hasPath()) {
             // bip47
-            return HD_Address.getPathFullBip47(purpose, 0, accountIndex);
+            return HD_Address.getPathAddressBip47(purpose, 0, accountIndex);
         }
-        return HD_Address.getPathFull(purpose, 0, accountIndex, computePathChainIndex(), computePathAddressIndex());
+        return HD_Address.getPathAddress(purpose, 0, accountIndex, computePathChainIndex(), computePathAddressIndex());
     }
 
     public MyTransactionOutPoint computeOutpoint(NetworkParameters params) {

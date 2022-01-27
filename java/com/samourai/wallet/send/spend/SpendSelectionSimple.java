@@ -1,23 +1,18 @@
 package com.samourai.wallet.send.spend;
 
 import com.samourai.wallet.SamouraiWalletConst;
-import com.samourai.wallet.hd.AddressType;
+import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.send.MyTransactionOutPoint;
-import com.samourai.wallet.send.SendFactoryGeneric;
 import com.samourai.wallet.send.UTXO;
-import com.samourai.wallet.send.provider.UtxoProvider;
-import com.samourai.wallet.send.beans.SpendError;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
-import com.samourai.wallet.send.exceptions.MakeTxException;
-import com.samourai.wallet.send.exceptions.SignTxException;
 import com.samourai.wallet.send.exceptions.SpendException;
+import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import java8.util.Lists;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +94,7 @@ public class SpendSelectionSimple extends SpendSelection {
     }
 
     @Override
-    public SpendTx spendTx(long amount, String address, AddressType addressType, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider) throws SpendException {
+    public SpendTx spendTx(long amount, String address, BipFormat addressFormat, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider) throws SpendException {
         List<MyTransactionOutPoint> outpoints = getSpendFrom();
         Triple<Integer, Integer, Integer> outpointTypes = FeeUtil.getInstance().getOutpointCount(new Vector(outpoints), params);
         BigInteger fee;
@@ -130,7 +125,7 @@ public class SpendSelectionSimple extends SpendSelection {
             receivers.put(address, amount);
 
             // add change output
-            String changeAddress = utxoProvider.getChangeAddress(account, addressType);
+            String changeAddress = utxoProvider.getChangeAddress(account, addressFormat);
             receivers.put(changeAddress, change);
         }
 
@@ -140,6 +135,6 @@ public class SpendSelectionSimple extends SpendSelection {
         if (restoreChangeIndexes != null) {
             restoreChangeIndexes.run(); // TODO zeroleak
         }
-        return new SpendTx(addressType, amount, fee.longValue(), change, this, receivers, rbfOptIn, utxoProvider, params);
+        return new SpendTx(addressFormat, amount, fee.longValue(), change, this, receivers, rbfOptIn, utxoProvider, params);
     }
 }

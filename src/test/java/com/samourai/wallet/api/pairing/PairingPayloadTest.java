@@ -1,10 +1,7 @@
 package com.samourai.wallet.api.pairing;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.samourai.wallet.util.JSONUtils;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class PairingPayloadTest {

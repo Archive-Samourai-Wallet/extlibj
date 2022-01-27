@@ -3,8 +3,8 @@ package com.samourai.wallet.send;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bip69.BIP69InputComparator;
 import com.samourai.wallet.bip69.BIP69OutputComparator;
-import com.samourai.wallet.hd.AddressType;
-import com.samourai.wallet.segwit.SegwitAddress;
+import com.samourai.wallet.bipFormat.BipFormat;
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.exceptions.MakeTxException;
 import com.samourai.wallet.send.exceptions.SignTxException;
@@ -13,7 +13,6 @@ import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.TxUtil;
 import org.bitcoinj.core.*;
-import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
 import org.bitcoinj.script.ScriptOpCodes;
@@ -115,7 +114,6 @@ public class SendFactoryGeneric {
 
     public Transaction signTransaction(Transaction unsignedTx, UtxoKeyProvider utxoProvider) throws SignTxException {
         HashMap<String,ECKey> keyBag = new HashMap<String,ECKey>();
-
         for (TransactionInput input : unsignedTx.getInputs()) {
             try {
 //                Log.i("SendFactory", "connected pubkey script:" + Hex.toHexString(scriptBytes));
@@ -133,7 +131,7 @@ public class SendFactoryGeneric {
             }
         }
 
-        Transaction signedTx = signTransaction(unsignedTx, keyBag);
+        Transaction signedTx = signTransaction(unsignedTx, keyBag, utxoProvider.getBipFormatSupplier());
         if(signedTx == null)    {
             return null;
         }
@@ -149,15 +147,14 @@ public class SendFactoryGeneric {
         }
     }
 
-    public synchronized Transaction signTransaction(Transaction transaction, Map<String,ECKey> keyBag) throws SignTxException {
-        NetworkParameters params = transaction.getParams();
+    public synchronized Transaction signTransaction(Transaction transaction, Map<String,ECKey> keyBag, BipFormatSupplier bipFormatSupplier) throws SignTxException {
         List<TransactionInput> inputs = transaction.getInputs();
 
         for (int i = 0; i < inputs.size(); i++) {
             TransactionInput input = transaction.getInput(i);
             ECKey key = keyBag.get(input.getOutpoint().toString());
             try {
-                this.signInput(key, params, transaction, i);
+                this.signInput(key, transaction, i, bipFormatSupplier);
             } catch (Exception e) {
                 log.error("Signing input #"+i+" failed", e);
                 throw new SignTxException("Signing input #"+i+" failed", e);
@@ -166,72 +163,21 @@ public class SendFactoryGeneric {
         return transaction;
     }
 
-    public void signInput(ECKey key, NetworkParameters params, Transaction tx, int inputIndex) throws Exception {
+    public void signInput(ECKey key, Transaction tx, int inputIndex, BipFormatSupplier bipFormatSupplier) throws Exception {
         if (key == null) {
             throw new Exception("No key found for signing input #"+inputIndex);
         }
 
+        // sign input
         TransactionInput txInput = tx.getInput(inputIndex);
         TransactionOutput connectedOutput = txInput.getOutpoint().getConnectedOutput();
-        Script scriptPubKey = connectedOutput.getScriptPubKey();
-        Coin value = txInput.getValue();
-
-        // sign input
         String inputAddress = TxUtil.getInstance().getToAddress(connectedOutput);
-        AddressType addressType = AddressType.findByAddress(inputAddress, params);
+        BipFormat addressFormat = bipFormatSupplier.findByAddress(inputAddress, tx.getParams());
 
         if (log.isDebugEnabled()) {
-            log.debug("signInput #"+inputIndex+": value="+value+", addressType="+addressType+", address="+inputAddress);
+            log.debug("signInput #"+inputIndex+": value="+txInput.getValue()+", addressType="+addressFormat+", address="+inputAddress);
         }
-
-        switch(addressType) {
-            case SEGWIT_NATIVE: case SEGWIT_COMPAT:
-                SegwitAddress segwitAddress = new SegwitAddress(key.getPubKey(), params);
-                final Script redeemScript = segwitAddress.segWitRedeemScript();
-
-                TransactionSignature sig =
-                        tx.calculateWitnessSignature(
-                                inputIndex,
-                                key,
-                                redeemScript.scriptCode(),
-                                value,
-                                Transaction.SigHash.ALL,
-                                false);
-                final TransactionWitness witness = new TransactionWitness(2);
-                witness.setPush(0, sig.encodeToBitcoin());
-                witness.setPush(1, key.getPubKey());
-                tx.setWitness(inputIndex, witness);
-
-                if (addressType == AddressType.SEGWIT_COMPAT) {
-                    // P2SH
-                    final ScriptBuilder sigScript = new ScriptBuilder();
-                    sigScript.data(redeemScript.getProgram());
-                    txInput.setScriptSig(sigScript.build());
-                    tx.getInput(inputIndex).getScriptSig().correctlySpends(tx, inputIndex, scriptPubKey, value, Script.ALL_VERIFY_FLAGS);
-                }
-                break;
-
-            case LEGACY:
-                TransactionSignature signature;
-                if(key != null && (key.hasPrivKey() || key.isEncrypted())) {
-                    byte[] scriptBytes = connectedOutput.getScriptBytes();
-                    signature = tx.calculateSignature(inputIndex, key, scriptBytes, Transaction.SigHash.ALL, false);
-                }
-                else {
-                    signature = TransactionSignature.dummy();   // watch only ?
-                }
-
-                if(scriptPubKey.isSentToAddress()) {
-                    txInput.setScriptSig(ScriptBuilder.createInputScript(signature, key));
-                }
-                else if(scriptPubKey.isSentToRawPubKey()) {
-                    txInput.setScriptSig(ScriptBuilder.createInputScript(signature));
-                }
-                else {
-                    throw new RuntimeException("Unknown script type: " + scriptPubKey);
-                }
-                break;
-        }
+        addressFormat.sign(tx, inputIndex, key);
     }
 
     public TransactionOutput computeTransactionOutput(String address, long amount, NetworkParameters params) throws Exception {

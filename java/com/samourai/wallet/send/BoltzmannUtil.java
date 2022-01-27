@@ -1,7 +1,8 @@
 package com.samourai.wallet.send;
 
 import com.samourai.wallet.SamouraiWalletConst;
-import com.samourai.wallet.hd.AddressType;
+import com.samourai.wallet.bipFormat.BipFormat;
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.send.spend.SpendBuilder;
 import com.samourai.wallet.util.FeeUtil;
@@ -33,9 +34,9 @@ public class BoltzmannUtil {
         return instance;
     }
 
-    public Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> boltzmann(List<UTXO> utxos, List<UTXO> utxosBis, BigInteger spendAmount, String address, WhirlpoolAccount account, UtxoProvider utxoProvider, AddressType forcedChangeType, NetworkParameters params, BigInteger feePerKb) {
+    public Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> boltzmann(List<UTXO> utxos, List<UTXO> utxosBis, BigInteger spendAmount, String address, WhirlpoolAccount account, UtxoProvider utxoProvider, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb) {
 
-        Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> set0 = boltzmannSet(utxos, spendAmount, address, null, account, null, utxoProvider, forcedChangeType, params, feePerKb);
+        Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> set0 = boltzmannSet(utxos, spendAmount, address, null, account, null, utxoProvider, forcedChangeFormat, params, feePerKb);
         if(set0 == null)    {
             return null;
         }
@@ -76,7 +77,7 @@ public class BoltzmannUtil {
         else    {
             return null;
         }
-        Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> set1 = boltzmannSet(_utxo, spendAmount, address, set0.getLeft(), account, set0.getMiddle(), utxoProvider, forcedChangeType, params, feePerKb);
+        Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> set1 = boltzmannSet(_utxo, spendAmount, address, set0.getLeft(), account, set0.getMiddle(), utxoProvider, forcedChangeFormat, params, feePerKb);
         if(set1 == null)    {
             return null;
         }
@@ -91,7 +92,7 @@ public class BoltzmannUtil {
         return ret;
     }
 
-    public Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> boltzmannSet(List<UTXO> utxos, BigInteger spendAmount, String address, List<MyTransactionOutPoint> firstPassOutpoints, WhirlpoolAccount account, List<TransactionOutput> outputs0, UtxoProvider utxoProvider, AddressType forcedChangeType, NetworkParameters params, BigInteger feePerKb) {
+    public Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> boltzmannSet(List<UTXO> utxos, BigInteger spendAmount, String address, List<MyTransactionOutPoint> firstPassOutpoints, WhirlpoolAccount account, List<TransactionOutput> outputs0, UtxoProvider utxoProvider, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb) {
 
         if(utxos == null || utxos.size() == 0)    {
             return null;
@@ -283,7 +284,7 @@ public class BoltzmannUtil {
         }
 
         try {
-
+            BipFormatSupplier bipFormatSupplier = utxoProvider.getBipFormatSupplier();
             String _address = null;
             if(firstPassOutpoints == null)    {
                 _address = address;
@@ -292,8 +293,8 @@ public class BoltzmannUtil {
                 //
                 // type of address for 'mixed' amount must match type of address for destination
                 //
-                AddressType mixedType = SpendBuilder.computeAddressType(forcedChangeType, address, params);
-                _address = utxoProvider.getChangeAddress(account, mixedType);
+                BipFormat mixedFormat = SpendBuilder.computeAddressFormat(forcedChangeFormat, address, bipFormatSupplier, params);
+                _address = utxoProvider.getChangeAddress(account, mixedFormat);
             }
             txSpendOutput = SendFactoryGeneric.getInstance().computeTransactionOutput(_address, spendAmount.longValue(), params);
             txOutputs.add(txSpendOutput);
@@ -303,8 +304,8 @@ public class BoltzmannUtil {
             // type of address for change must match type of address for inputs
             //
             String utxoAddress = utxos.get(0).getOutpoints().get(0).getAddress();
-            AddressType changeType = SpendBuilder.computeAddressType(forcedChangeType, utxoAddress, params);
-            String changeAddress = utxoProvider.getChangeAddress(account, changeType);
+            BipFormat changeFormat = SpendBuilder.computeAddressFormat(forcedChangeFormat, utxoAddress, bipFormatSupplier, params);
+            String changeAddress = utxoProvider.getChangeAddress(account, changeFormat);
             txChangeOutput = SendFactoryGeneric.getInstance().computeTransactionOutput(changeAddress, changeDue.longValue(), params);
             txOutputs.add(txChangeOutput);
         }

@@ -9,7 +9,6 @@ import org.bitcoinj.core.Utils;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,16 +51,12 @@ public class HD_Address {
         return ecKey.toAddress(mParams).toString();
     }
 
-    public String getAddressString(AddressType addressType) {
-        switch (addressType) {
-            case LEGACY:
-                return getAddressString();
-            case SEGWIT_COMPAT:
-                return new SegwitAddress(getPubKey(), mParams).getAddressAsString();
-            case SEGWIT_NATIVE:
-                return Bech32UtilGeneric.getInstance().toBech32(getPubKey(), mParams);
-        }
-        return null;
+    public String getAddressStringSegwitCompat() {
+        return new SegwitAddress(getPubKey(), mParams).getAddressAsString();
+    }
+
+    public String getAddressStringSegwitNative() {
+        return Bech32UtilGeneric.getInstance().toBech32(getPubKey(), mParams);
     }
 
     public String getPrivateKeyString() {
@@ -99,6 +94,10 @@ public class HD_Address {
         return ecKey;
     }
 
+    public NetworkParameters getParams() {
+        return mParams;
+    }
+
     public JSONObject toJSON() {
         try {
             JSONObject obj = new JSONObject();
@@ -113,15 +112,23 @@ public class HD_Address {
         }
     }
 
-    public String getPathFull(AddressType addressType) {
-        return getPathFull(addressType.getPurpose(), 0, accountIndex, chainIndex, mChildNum);
+    public String getPathAddress(int purpose) {
+        return getPathAddress(purpose, 0, accountIndex, chainIndex, mChildNum);
     }
 
-    public static String getPathFull(int purpose, int coinType, int account, int chain, int address) {
-        return "m/"+purpose+"'/"+coinType+"'/"+account+"'/"+chain+"/"+address;
+    public static String getPathAccount(int purpose, int coinType, int account) {
+        return "m/"+purpose+"'/"+coinType+"'/"+account;
     }
 
-    public static String getPathFullBip47(int purpose, int coinType, int account) {
-        return "m/"+purpose+"'/"+coinType+"'/"+account+"'/bip47/bip47";
+    public static String getPathChain(int purpose, int coinType, int account, int chain) {
+        return getPathAccount(purpose, coinType, account)+"'/"+chain;
+    }
+
+    public static String getPathAddress(int purpose, int coinType, int account, int chain, int address) {
+        return getPathChain(purpose, coinType, account, chain)+"/"+address;
+    }
+
+    public static String getPathAddressBip47(int purpose, int coinType, int account) {
+        return getPathAccount(purpose, coinType, account)+"'/bip47/bip47";
     }
 }

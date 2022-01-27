@@ -1,8 +1,8 @@
 package com.samourai.wallet.util;
 
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
+import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.hd.*;
-import com.samourai.wallet.segwit.SegwitAddress;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
@@ -98,22 +98,22 @@ public class AddressFactoryGeneric {
     }
 
     public Pair<Integer, String> getAddress(WALLET_INDEX walletIndex) {
-        return getAddress(walletIndex, walletIndex.getAddressType(), false);
+        return getAddress(walletIndex, walletIndex.getBipWallet().getBipFormat(), false);
     }
 
-    public Pair<Integer, String> getAddress(WALLET_INDEX walletIndex, AddressType forcedAddressType) {
-        return getAddress(walletIndex, forcedAddressType, false);
+    public Pair<Integer, String> getAddress(WALLET_INDEX walletIndex, BipFormat bipFormat) {
+        return getAddress(walletIndex, bipFormat, false);
     }
 
     public Pair<Integer, String> getAddressAndIncrement(WALLET_INDEX walletIndex) {
-        return getAddress(walletIndex, walletIndex.getAddressType(), true);
+        return getAddress(walletIndex, walletIndex.getBipWallet().getBipFormat(), true);
     }
 
-    public Pair<Integer, String> getAddressAndIncrement(WALLET_INDEX walletIndex, AddressType forcedAddressType) {
-        return getAddress(walletIndex, forcedAddressType, true);
+    public Pair<Integer, String> getAddressAndIncrement(WALLET_INDEX walletIndex, BipFormat bipFormat) {
+        return getAddress(walletIndex, bipFormat, true);
     }
 
-    protected Pair<Integer, String> getAddress(WALLET_INDEX walletIndex, AddressType forcedAddressType, boolean increment)	{
+    protected Pair<Integer, String> getAddress(WALLET_INDEX walletIndex, BipFormat forcedFormat, boolean increment)	{
         int idx = increment ? getIndexAndIncrement(walletIndex) : getIndex(walletIndex);
         HD_Chain hdChain = getHdCHain(walletIndex);
         if (hdChain == null) {
@@ -122,22 +122,7 @@ public class AddressFactoryGeneric {
         }
         HD_Address hdAddress = hdChain.getAddressAt(idx);
 
-        String addr;
-        switch (forcedAddressType) {
-            case LEGACY:
-                addr = hdAddress.getAddressString();
-                break;
-
-            case SEGWIT_COMPAT:
-                SegwitAddress segwitAddress = new SegwitAddress(hdAddress.getPubKey(), params);
-                addr = segwitAddress.getAddressAsString();
-                break;
-
-            default:
-                SegwitAddress segwitAddressNative = new SegwitAddress(hdAddress.getPubKey(), params);
-                addr = segwitAddressNative.getBech32AsString();
-                break;
-        }
+        String addr = forcedFormat.getAddressString(hdAddress);
         return Pair.of(idx, addr);
     }
 
@@ -148,35 +133,27 @@ public class AddressFactoryGeneric {
         return addr;
     }
 
-    public HD_Wallet getHdWallet(AddressType addressType) {
+    public HD_Wallet getHdWallet(BipFormat bipFormat) {
         HD_Wallet hdWallet = null;
-        switch (addressType) {
-            case LEGACY:
-                hdWallet = bip44Wallet;
-                break;
-            case SEGWIT_COMPAT:
-                hdWallet = bip49Wallet;
-                break;
-            case SEGWIT_NATIVE:
-                hdWallet = bip84Wallet;
-                break;
-            default:
-                log.error("unknown AddressType: "+addressType);
-                break;
+        if (bipFormat == BIP_FORMAT.LEGACY) {
+            hdWallet = bip44Wallet;
+        } else if (bipFormat == BIP_FORMAT.SEGWIT_COMPAT) {
+            hdWallet = bip49Wallet;
+        } else if (bipFormat == BIP_FORMAT.SEGWIT_NATIVE) {
+            hdWallet = bip84Wallet;
         }
         if (hdWallet == null) {
             // may happen on wallet startup
-            log.warn("wallet is NULL for "+addressType);
+            log.warn("wallet is NULL for "+bipFormat.getId());
             return null;
         }
         return hdWallet;
     }
 
     protected HD_Chain getHdCHain(WALLET_INDEX walletIndex) {
-        int account = walletIndex.getAccountIndex();
+        int account = walletIndex.getBipWallet().getBipDerivation().getAccountIndex();
         int chain = walletIndex.getChainIndex();
-        AddressType addressType = walletIndex.getAddressType();
-        HD_Wallet hdWallet = getHdWallet(addressType);
+        HD_Wallet hdWallet = getHdWallet(walletIndex.getBipWallet().getBipFormat());
         if (hdWallet == null) {
             // may happen on wallet startup
             return null;
@@ -295,14 +272,5 @@ public class AddressFactoryGeneric {
             log.debug(walletIndex+": "+debugStr);
         }
         return debugStr;
-    }
-
-    public String getPub(AddressType addressType, WhirlpoolAccount account) {
-        HD_Wallet hdWallet = getHdWallet(addressType);
-        if (hdWallet == null) {
-            // may happen on wallet startup
-            throw new RuntimeException("getPub("+addressType+","+account+") failed: wallet is null");
-        }
-        return hdWallet.getAccount(account.getAccountIndex()).xpubstr();
     }
 }

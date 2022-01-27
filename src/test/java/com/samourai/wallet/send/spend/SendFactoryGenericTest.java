@@ -1,5 +1,7 @@
 package com.samourai.wallet.send.spend;
 
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.send.SendFactoryGeneric;
 import org.bitcoinj.core.*;
@@ -18,6 +20,7 @@ public class SendFactoryGenericTest {
     private static final NetworkParameters params = TestNet3Params.get();
     private ECKey inputKey = ECKey.fromPrivate(new BigInteger("45292090369707310635285627500870691371399357286012942906204494584441273561412"));
     private ECKey outputKey = ECKey.fromPrivate(new BigInteger("77292090369707310635285627500870691371399357286012942906204494584441273561412"));
+    private BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;
 
     private Transaction computeTxCoinbase(long value, Script outputScript) {
         Transaction tx = new Transaction(params);
@@ -67,7 +70,7 @@ public class SendFactoryGenericTest {
         // sign tx
         Map<String,ECKey> keyBag = new LinkedHashMap<>();
         keyBag.put(tx.getInput(0).getOutpoint().toString(), inputKey);
-        sendFactory.signTransaction(tx, keyBag);
+        sendFactory.signTransaction(tx, keyBag, bipFormatSupplier);
 
         tx.verify();
 
@@ -89,7 +92,7 @@ public class SendFactoryGenericTest {
         // sign tx
         Map<String,ECKey> keyBag = new LinkedHashMap<String, ECKey>();
         keyBag.put(tx.getInput(0).getOutpoint().toString(), inputKey);
-        sendFactory.signTransaction(tx, keyBag);
+        sendFactory.signTransaction(tx, keyBag, bipFormatSupplier);
 
         tx.verify();
 
@@ -111,7 +114,7 @@ public class SendFactoryGenericTest {
         // sign tx
         Map<String,ECKey> keyBag = new LinkedHashMap<String, ECKey>();
         keyBag.put(tx.getInput(0).getOutpoint().toString(), inputKey);
-        sendFactory.signTransaction(tx, keyBag);
+        sendFactory.signTransaction(tx, keyBag, bipFormatSupplier);
 
         tx.verify();
 
