@@ -60,9 +60,6 @@ public class AESUtilTest {
         String encrypted = AESUtil.encryptSHA256(cleartext, passwordx);
         String decrypted = AESUtil.decryptSHA256(encrypted, passwordx);
 
-        System.out.println("encrypted: :" + encrypted + ":");
-        System.out.println("decrypted: " + decrypted);
-
         Assertions.assertEquals(cleartext, decrypted);
         Assertions.assertNotEquals(cleartext, encrypted);
 

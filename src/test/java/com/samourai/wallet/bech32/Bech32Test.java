@@ -30,8 +30,9 @@ public class Bech32Test {
             new String[] { "tb1q8zt37uunpakpg8vh0tz06jnj0jz5jddn5mlts3", "001438971f73930f6c141d977ac4fd4a727c854935b3"},
             // Sipa testnet P2TR address, bitcoin dev mailing list, Oct 9, 2021
             new String[] { "tb1p84x2ryuyfevgnlpnxt9f39gm7r68gwtvllxqe5w2n5ru00s9aquslzggwq", "51203d4ca193844e5889fc3332ca98951bf0f474396cffcc0cd1ca9d07c7be05e839"},
-            new String[] { "tb1puu0gl3x9qm0l9xq0ajdepz326n66j702ecw5x7w3lk3knws3pmfq26386t", "5120e71e8fc4c506dff2980fec9b908a2ad4f5a979eace1d4379d1fda369ba110ed2"},
-
+            // mainnet addresses, unspent before activation
+            new String[] { "bc1pw2knldczhudzzydsns4lree0fafdfn4j4nw0e5xx82lhpfvuxmtqmr95g7", "512072ad3fb702bf1a2111b09c2bf1e72f4f52d4ceb2acdcfcd0c63abf70a59c36d6"},
+            new String[] { "bc1pv22mcnt30gwvk8g72szz700n4tkkx2qur2adj6pt8hl37hcf9dasd659sg", "51206295bc4d717a1ccb1d1e54042f3df3aaed63281c1abad9682b3dff1f5f092b7b"},
     };
 
     //
@@ -246,6 +247,30 @@ public class Bech32Test {
 
         byte[] pubkey = Bech32Segwit.getScriptPubkey(witVer, witProg);
         assert(Hex.toHexString(pubkey).equalsIgnoreCase("001438971f73930f6c141d977ac4fd4a727c854935b3"));
+      }
+
+      @Test
+      public void binance() throws Exception {
+        // https://bitcoin.stackexchange.com/questions/111440/is-it-possible-to-convert-a-taproot-address-into-a-native-segwit-address
+        String address = Bech32Segwit.encode("bc", (byte)0x01, Hex.decode("4b65fc5025504c267708c52779c5885ae95c94f5f289b32179977af5ada63fec"));
+        assert(address.equals("bc1pfdjlc5p92pxzvacgc5nhn3vgtt54e98472ymxgtejaa0ttdx8lkqzn304u"));
+
+        byte witVer;
+        String hrp = new String(Bech32.bech32Decode(address).getLeft());
+
+        byte[] witProg;
+        Pair<Byte, byte[]> segp = null;
+        segp = Bech32Segwit.decode(hrp, address);
+        witVer = segp.getLeft();
+        witProg = segp.getRight();
+
+        assert(witVer == (byte)0x01);
+
+        byte[] pubkey = Bech32Segwit.getScriptPubkey(witVer, witProg);
+        assert(Hex.toHexString(pubkey).equalsIgnoreCase("51204b65fc5025504c267708c52779c5885ae95c94f5f289b32179977af5ada63fec"));
+
+        address = Bech32Segwit.encode(hrp, witVer, witProg);
+        assert(address.equals("bc1pfdjlc5p92pxzvacgc5nhn3vgtt54e98472ymxgtejaa0ttdx8lkqzn304u"));
       }
 
       @Test
