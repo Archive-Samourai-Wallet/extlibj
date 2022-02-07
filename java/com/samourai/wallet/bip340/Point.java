@@ -8,7 +8,7 @@ import com.samourai.wallet.util.Pair;
 import com.samourai.wallet.util.Util;
 
 public class Point  {
-
+    private static final BigInteger BigInteger_TWO = BigInteger.valueOf(2); // jdk9
     final static private BigInteger p = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
     final static private BigInteger n = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
 
@@ -90,12 +90,12 @@ public class Point  {
 
         BigInteger lam = null;
         if(P1.equals(P2)) {
-            BigInteger base = P2.getY().multiply(BigInteger.TWO);
-            lam = (BigInteger.valueOf(3L).multiply(P1.getX()).multiply(P1.getX()).multiply(base.modPow(p.subtract(BigInteger.TWO), p))).mod(p);
+            BigInteger base = P2.getY().multiply(BigInteger_TWO);
+            lam = (BigInteger.valueOf(3L).multiply(P1.getX()).multiply(P1.getX()).multiply(base.modPow(p.subtract(BigInteger_TWO), p))).mod(p);
         }
         else {
             BigInteger base = P2.getX().subtract(P1.getX());
-            lam = ((P2.getY().subtract(P1.getY())).multiply(base.modPow(p.subtract(BigInteger.TWO), p))).mod(p);
+            lam = ((P2.getY().subtract(P1.getY())).multiply(base.modPow(p.subtract(BigInteger_TWO), p))).mod(p);
         }
 
         BigInteger x3 = (lam.multiply(lam).subtract(P1.getX()).subtract(P2.getX())).mod(p);
@@ -125,11 +125,11 @@ public class Point  {
     }
 
     public static boolean hasEvenY(Point P) {
-        return P.getY().mod(BigInteger.TWO).compareTo(BigInteger.ZERO) == 0;
+        return P.getY().mod(BigInteger_TWO).compareTo(BigInteger.ZERO) == 0;
     }
 
     public static boolean isSquare(BigInteger x) {
-        return x.modPow(p.subtract(BigInteger.ONE).mod(BigInteger.TWO), p).longValue() == 1L;
+        return x.modPow(p.subtract(BigInteger.ONE).mod(BigInteger_TWO), p).longValue() == 1L;
     }
 
     public boolean hasSquareY() {
@@ -182,7 +182,7 @@ public class Point  {
         BigInteger y_sq = x.modPow(BigInteger.valueOf(3L), p).add(BigInteger.valueOf(7L)).mod(p);
         BigInteger y = y_sq.modPow(p.add(BigInteger.ONE).divide(BigInteger.valueOf(4L)), p);
 
-        if(y.modPow(BigInteger.TWO, p).compareTo(y_sq) != 0) {
+        if(y.modPow(BigInteger_TWO, p).compareTo(y_sq) != 0) {
             return null;
         }
         else {
