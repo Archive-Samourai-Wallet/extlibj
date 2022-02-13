@@ -80,6 +80,17 @@
 			<artifactId>kotlin-stdlib</artifactId>
 			<version>${kotlin.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.samourai.code.wallet</groupId>
+			<artifactId>java-http-client</artifactId>
+			<version>1.0.5-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>io.samourai.code.wallet</groupId>
+					<artifactId>extlibj</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 	<build>
         <sourceDirectory>java</sourceDirectory>

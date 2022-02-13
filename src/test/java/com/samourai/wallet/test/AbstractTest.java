@@ -1,7 +1,9 @@
 package com.samourai.wallet.test;
 
+import com.samourai.http.client.IHttpClient;
+import com.samourai.http.client.JettyHttpClient;
 import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
-import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
+import java8.util.Optional;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.TestNet3Params;
 import org.slf4j.Logger;
@@ -15,9 +17,9 @@ public class AbstractTest {
 
   protected NetworkParameters params = TestNet3Params.get();
   protected HD_WalletFactoryGeneric hdWalletFactory = HD_WalletFactoryGeneric.getInstance();
-  protected Bech32UtilGeneric bech32Util = Bech32UtilGeneric.getInstance();
+  protected IHttpClient httpClient;
 
   public AbstractTest() {
-
+    httpClient = new JettyHttpClient(5000, Optional.empty(), "test");
   }
 }
