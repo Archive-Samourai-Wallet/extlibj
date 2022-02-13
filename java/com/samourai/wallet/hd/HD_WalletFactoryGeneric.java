@@ -77,10 +77,16 @@ public class HD_WalletFactoryGeneric {
       byte[] seed = Hex.decodeHex(data.toCharArray());
       hdw = new HD_Wallet(44, mc, params, seed, passphrase);
     } else {
-      byte[] seed = computeSeedFromWords(data);
-      hdw = new HD_Wallet(44, mc, params, seed, passphrase);
+      hdw = restoreWalletFromWords(data, passphrase, params);
     }
     return hdw;
+  }
+
+  public HD_Wallet restoreWalletFromWords(String words, String passphrase, NetworkParameters params) throws AddressFormatException, DecoderException,
+          MnemonicException.MnemonicLengthException, MnemonicException.MnemonicWordException,
+          MnemonicException.MnemonicChecksumException {
+    byte[] seed = computeSeedFromWords(words);
+    return new HD_Wallet(44, mc, params, seed, passphrase);
   }
 
   public byte[] computeSeedFromWords(String data) throws AddressFormatException,
