@@ -2,6 +2,7 @@ package com.samourai.wallet.api.backend.beans;
 
 import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.send.MyTransactionOutPoint;
+import com.samourai.wallet.util.FormatsUtilGeneric;
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.*;
 import org.bitcoinj.script.Script;
@@ -73,12 +74,13 @@ public class UnspentOutput {
       return xpub.path;
     }
 
-    public String getPathAddress(int purpose, int accountIndex) {
+    public String getPathAddress(int purpose, int accountIndex, NetworkParameters params) {
+        int coinType = FormatsUtilGeneric.getInstance().getCoinType(params);
         if (!hasPath()) {
             // bip47
-            return HD_Address.getPathAddressBip47(purpose, 0, accountIndex);
+            return HD_Address.getPathAddressBip47(purpose, coinType, accountIndex);
         }
-        return HD_Address.getPathAddress(purpose, 0, accountIndex, computePathChainIndex(), computePathAddressIndex());
+        return HD_Address.getPathAddress(purpose, coinType, accountIndex, computePathChainIndex(), computePathAddressIndex());
     }
 
     public MyTransactionOutPoint computeOutpoint(NetworkParameters params) {

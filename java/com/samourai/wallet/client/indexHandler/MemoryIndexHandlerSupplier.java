@@ -2,6 +2,7 @@ package com.samourai.wallet.client.indexHandler;
 
 import com.samourai.wallet.bipWallet.BipWallet;
 import com.samourai.wallet.hd.Chain;
+import org.bitcoinj.core.NetworkParameters;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -11,7 +12,8 @@ public class MemoryIndexHandlerSupplier implements IndexHandlerSupplier {
 
   @Override
   public IIndexHandler getIndexHandlerWallet(BipWallet bipWallet, Chain chain) {
-    String pathAccount = bipWallet.getDerivation().getPathChain(chain.getIndex());
+    NetworkParameters params = bipWallet.getParams();
+    String pathAccount = bipWallet.getDerivation().getPathChain(chain.getIndex(), params);
     if (!indexHandlers.containsKey(pathAccount)) {
       indexHandlers.put(pathAccount, new MemoryIndexHandler());
     }

@@ -46,17 +46,17 @@ public class BipAddressTest extends AbstractTest {
   @Test
   public void getPathAddress() throws Exception {
     Assertions.assertEquals(
-            "m/44'/0'/0'/0/0", bipWalletDeposit.getAddressAt(0, 0).getPathAddress());
+            "m/44'/1'/0'/0/0", bipWalletDeposit.getAddressAt(0, 0).getPathAddress());
     Assertions.assertEquals(
-            "m/44'/0'/0'/1/0", bipWalletDeposit.getAddressAt(1, 0).getPathAddress());
+            "m/44'/1'/0'/1/0", bipWalletDeposit.getAddressAt(1, 0).getPathAddress());
     Assertions.assertEquals(
-            "m/44'/0'/0'/1/1", bipWalletDeposit.getAddressAt(1, 1).getPathAddress());
+            "m/44'/1'/0'/1/1", bipWalletDeposit.getAddressAt(1, 1).getPathAddress());
 
     Assertions.assertEquals(
-            "m/84'/0'/2147483646'/0/0", bipWalletPremix.getAddressAt(0, 0).getPathAddress());
+            "m/84'/1'/2147483646'/0/0", bipWalletPremix.getAddressAt(0, 0).getPathAddress());
     Assertions.assertEquals(
-            "m/84'/0'/2147483646'/1/0", bipWalletPremix.getAddressAt(1, 0).getPathAddress());
+            "m/84'/1'/2147483646'/1/0", bipWalletPremix.getAddressAt(1, 0).getPathAddress());
     Assertions.assertEquals(
-            "m/84'/0'/2147483646'/1/1", bipWalletPremix.getAddressAt(1, 1).getPathAddress());
+            "m/84'/1'/2147483646'/1/1", bipWalletPremix.getAddressAt(1, 1).getPathAddress());
   }
 }

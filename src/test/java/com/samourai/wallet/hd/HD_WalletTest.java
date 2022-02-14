@@ -135,24 +135,24 @@ public class HD_WalletTest {
         NetworkParameters params = TestNet3Params.get();
 
         HD_Wallet hdw44 = hdWalletFactory.getHD(44, "foo1".getBytes(), "test1", params);
-        Assertions.assertEquals("m/44'/0'/0'/0/0", hdw44.getAddressAt(0, 0, 0).getPathAddress(Purpose.PURPOSE_44));
-        Assertions.assertEquals("m/44'/0'/0'/1/0", hdw44.getAddressAt(0, 1, 0).getPathAddress(Purpose.PURPOSE_44));
-        Assertions.assertEquals("m/44'/0'/0'/1/1", hdw44.getAddressAt(0, 1, 1).getPathAddress(Purpose.PURPOSE_44));
-        Assertions.assertEquals("m/44'/0'/3'/1/1", hdw44.getAddressAt(3, 1, 1).getPathAddress(Purpose.PURPOSE_44));
+        Assertions.assertEquals("m/44'/1'/0'/0/0", hdw44.getAddressAt(0, 0, 0).getPathAddress(Purpose.PURPOSE_44));
+        Assertions.assertEquals("m/44'/1'/0'/1/0", hdw44.getAddressAt(0, 1, 0).getPathAddress(Purpose.PURPOSE_44));
+        Assertions.assertEquals("m/44'/1'/0'/1/1", hdw44.getAddressAt(0, 1, 1).getPathAddress(Purpose.PURPOSE_44));
+        Assertions.assertEquals("m/44'/1'/3'/1/1", hdw44.getAddressAt(3, 1, 1).getPathAddress(Purpose.PURPOSE_44));
         Assertions.assertEquals("muimRQFJKMJM1pTminJxiD5HrPgSu257tX", hdw44.getAddressAt(0, 1, 1).getAddressString());
 
         HD_Wallet hdw49 = hdWalletFactory.getHD(49, "foo1".getBytes(), "test1", params);
-        Assertions.assertEquals("m/49'/0'/0'/0/0", hdw49.getAddressAt(0, 0, 0).getPathAddress(Purpose.PURPOSE_49));
-        Assertions.assertEquals("m/49'/0'/0'/1/0", hdw49.getAddressAt(0, 1, 0).getPathAddress(Purpose.PURPOSE_49));
-        Assertions.assertEquals("m/49'/0'/0'/1/1", hdw49.getAddressAt(0, 1, 1).getPathAddress(Purpose.PURPOSE_49));
-        Assertions.assertEquals("m/49'/0'/3'/1/1", hdw49.getAddressAt(3, 1, 1).getPathAddress(Purpose.PURPOSE_49));
+        Assertions.assertEquals("m/49'/1'/0'/0/0", hdw49.getAddressAt(0, 0, 0).getPathAddress(Purpose.PURPOSE_49));
+        Assertions.assertEquals("m/49'/1'/0'/1/0", hdw49.getAddressAt(0, 1, 0).getPathAddress(Purpose.PURPOSE_49));
+        Assertions.assertEquals("m/49'/1'/0'/1/1", hdw49.getAddressAt(0, 1, 1).getPathAddress(Purpose.PURPOSE_49));
+        Assertions.assertEquals("m/49'/1'/3'/1/1", hdw49.getAddressAt(3, 1, 1).getPathAddress(Purpose.PURPOSE_49));
         Assertions.assertEquals("2MuEXFSbU4xNM8kc5xBQ5BtrAGbpoWf45Yq", hdw49.getAddressAt(0, 1, 1).getAddressStringSegwitCompat());
 
         HD_Wallet hdw84 = hdWalletFactory.getHD(84, "foo1".getBytes(), "test1", params);
-        Assertions.assertEquals("m/84'/0'/0'/0/0", hdw84.getAddressAt(0, 0, 0).getPathAddress(Purpose.PURPOSE_84));
-        Assertions.assertEquals("m/84'/0'/0'/1/0", hdw84.getAddressAt(0, 1, 0).getPathAddress(Purpose.PURPOSE_84));
-        Assertions.assertEquals("m/84'/0'/0'/1/1", hdw84.getAddressAt(0, 1, 1).getPathAddress(Purpose.PURPOSE_84));
-        Assertions.assertEquals("m/84'/0'/3'/1/1", hdw84.getAddressAt(3, 1, 1).getPathAddress(Purpose.PURPOSE_84));
+        Assertions.assertEquals("m/84'/1'/0'/0/0", hdw84.getAddressAt(0, 0, 0).getPathAddress(Purpose.PURPOSE_84));
+        Assertions.assertEquals("m/84'/1'/0'/1/0", hdw84.getAddressAt(0, 1, 0).getPathAddress(Purpose.PURPOSE_84));
+        Assertions.assertEquals("m/84'/1'/0'/1/1", hdw84.getAddressAt(0, 1, 1).getPathAddress(Purpose.PURPOSE_84));
+        Assertions.assertEquals("m/84'/1'/3'/1/1", hdw84.getAddressAt(3, 1, 1).getPathAddress(Purpose.PURPOSE_84));
         Assertions.assertEquals("tb1qx8tg2ayl2hkutcmc3d2uw2zrc6wh6wa6sqf4v9", hdw84.getAddressAt(0, 1, 1).getAddressStringSegwitNative());
     }
 

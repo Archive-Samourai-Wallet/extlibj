@@ -45,6 +45,9 @@ public class FormatsUtilGeneric {
 	public static final String XPUB = "^[xtyu]pub[1-9A-Za-z][^OIl]+$";
 	public static final String HEX = "^[0-9A-Fa-f]+$";
 
+	private static final int COINTYPE_MAINNET = 0;
+	private static final int COINTYPE_TESTNET = 1;
+
 	private static FormatsUtilGeneric instance = null;
 
 	public static FormatsUtilGeneric getInstance() {
@@ -193,6 +196,10 @@ public class FormatsUtilGeneric {
 
 	public NetworkParameters getNetworkParams(boolean testnet) {
 		return testnet ? TestNet3Params.get() : MainNetParams.get();
+	}
+
+	public int getCoinType(NetworkParameters params) {
+		return FormatsUtilGeneric.getInstance().isTestNet(params) ? COINTYPE_TESTNET : COINTYPE_MAINNET;
 	}
 
 	public boolean isValidBitcoinAddress(final String address, NetworkParameters params) {

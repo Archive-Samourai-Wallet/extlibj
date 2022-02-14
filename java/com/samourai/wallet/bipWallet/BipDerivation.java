@@ -2,6 +2,8 @@ package com.samourai.wallet.bipWallet;
 
 import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.hd.HD_Address;
+import com.samourai.wallet.util.FormatsUtilGeneric;
+import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,20 +18,23 @@ public class BipDerivation {
     this.accountIndex = accountIndex;
   }
 
-  public String getPathAccount() {
-    return HD_Address.getPathAccount(purpose, 0, accountIndex);
+  public String getPathAccount(NetworkParameters params) {
+    int coinType = FormatsUtilGeneric.getInstance().getCoinType(params);
+    return HD_Address.getPathAccount(purpose, coinType, accountIndex);
   }
 
-  public String getPathChain(int chainIndex) {
-    return HD_Address.getPathChain(purpose, 0, accountIndex, chainIndex);
+  public String getPathChain(int chainIndex, NetworkParameters params) {
+    int coinType = FormatsUtilGeneric.getInstance().getCoinType(params);
+    return HD_Address.getPathChain(purpose, coinType, accountIndex, chainIndex);
   }
 
-  public String getPathAddress(UnspentOutput utxo) {
-    return utxo.getPathAddress(purpose, accountIndex);
+  public String getPathAddress(UnspentOutput utxo, NetworkParameters params) {
+    return utxo.getPathAddress(purpose, accountIndex, params);
   }
 
   public String getPathAddress(HD_Address hdAddress) {
-    return HD_Address.getPathAddress(purpose, 0, accountIndex, hdAddress.getChainIndex(), hdAddress.getAddressIndex());
+    int coinType = FormatsUtilGeneric.getInstance().getCoinType(hdAddress.getParams());
+    return HD_Address.getPathAddress(purpose, coinType, accountIndex, hdAddress.getChainIndex(), hdAddress.getAddressIndex());
   }
 
   public int getPurpose() {

@@ -5,6 +5,8 @@ import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
 import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.test.AbstractTest;
+import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.params.MainNetParams;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,30 +64,33 @@ public class BipWalletTest extends AbstractTest {
 
   @Test
   public void derivationGetPath() throws Exception {
-    Assertions.assertEquals("m/84'/0'/0", bipWallet.getDerivation().getPathAccount());
-    Assertions.assertEquals("m/84'/0'/0'/0", bipWallet.getDerivation().getPathChain(0));
-    Assertions.assertEquals("m/84'/0'/0'/1", bipWallet.getDerivation().getPathChain(1));
+    Assertions.assertEquals("m/84'/1'/0", bipWallet.getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/0'/0", bipWallet.getDerivation().getPathChain(0, params));
+    Assertions.assertEquals("m/84'/1'/0'/1", bipWallet.getDerivation().getPathChain(1, params));
+
+    NetworkParameters mainnetParams = MainNetParams.get();
+    Assertions.assertEquals("m/84'/0'/0", bipWallet.getDerivation().getPathAccount(mainnetParams));
 
     byte[] seed = hdWalletFactory.computeSeedFromWords(SEED_WORDS);
     HD_Wallet bip44w = hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE, params);
     BipWallet bipWallet44 = new BipWallet(bip44w, new MemoryIndexHandlerSupplier(), BIP_WALLET.DEPOSIT_BIP44);
-    Assertions.assertEquals("m/44'/0'/0", bipWallet44.getDerivation().getPathAccount());
-    Assertions.assertEquals("m/44'/0'/0'/2", bipWallet44.getDerivation().getPathChain(2));
+    Assertions.assertEquals("m/44'/1'/0", bipWallet44.getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/44'/1'/0'/2", bipWallet44.getDerivation().getPathChain(2, params));
 
     BipWallet bipWallet49 = new BipWallet(bip44w, new MemoryIndexHandlerSupplier(), BIP_WALLET.DEPOSIT_BIP49);
-    Assertions.assertEquals("m/49'/0'/0", bipWallet49.getDerivation().getPathAccount());
-    Assertions.assertEquals("m/49'/0'/0'/2", bipWallet49.getDerivation().getPathChain(2));
+    Assertions.assertEquals("m/49'/1'/0", bipWallet49.getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/49'/1'/0'/2", bipWallet49.getDerivation().getPathChain(2, params));
 
     BipWallet bipWalletBadbank = new BipWallet(bip44w, new MemoryIndexHandlerSupplier(), BIP_WALLET.BADBANK_BIP84);
-    Assertions.assertEquals("m/84'/0'/2147483644", bipWalletBadbank.getDerivation().getPathAccount());
-    Assertions.assertEquals("m/84'/0'/2147483644'/2", bipWalletBadbank.getDerivation().getPathChain(2));
+    Assertions.assertEquals("m/84'/1'/2147483644", bipWalletBadbank.getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/2147483644'/2", bipWalletBadbank.getDerivation().getPathChain(2, params));
 
     BipWallet bipWalletPremix = new BipWallet(bip44w, new MemoryIndexHandlerSupplier(), BIP_WALLET.PREMIX_BIP84);
-    Assertions.assertEquals("m/84'/0'/2147483645", bipWalletPremix.getDerivation().getPathAccount());
-    Assertions.assertEquals("m/84'/0'/2147483645'/2", bipWalletPremix.getDerivation().getPathChain(2));
+    Assertions.assertEquals("m/84'/1'/2147483645", bipWalletPremix.getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/2147483645'/2", bipWalletPremix.getDerivation().getPathChain(2, params));
 
     BipWallet bipWalletPostmix = new BipWallet(bip44w, new MemoryIndexHandlerSupplier(), BIP_WALLET.POSTMIX_BIP84);
-    Assertions.assertEquals("m/84'/0'/2147483646", bipWalletPostmix.getDerivation().getPathAccount());
-    Assertions.assertEquals("m/84'/0'/2147483646'/2", bipWalletPostmix.getDerivation().getPathChain(2));
+    Assertions.assertEquals("m/84'/1'/2147483646", bipWalletPostmix.getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/2147483646'/2", bipWalletPostmix.getDerivation().getPathChain(2, params));
   }
 }

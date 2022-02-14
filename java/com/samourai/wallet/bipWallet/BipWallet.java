@@ -6,6 +6,7 @@ import com.samourai.wallet.client.indexHandler.IIndexHandler;
 import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
 import com.samourai.wallet.hd.*;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
+import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,6 +101,10 @@ public class BipWallet {
 
   public String getPub() {
     return pub;
+  }
+
+  public NetworkParameters getParams() {
+    return hdWallet.getParams();
   }
 
 }

@@ -38,29 +38,29 @@ public class WalletSupplierTest extends AbstractTest {
   @Test
   public void getWallet() throws Exception {
     Assertions.assertEquals(6, walletSupplier.getWallets().size());
-    Assertions.assertEquals("m/44'/0'/0", walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP44).getDerivation().getPathAccount());
-    Assertions.assertEquals("m/49'/0'/0", walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP49).getDerivation().getPathAccount());
-    Assertions.assertEquals("m/84'/0'/0", walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84).getDerivation().getPathAccount());
-    Assertions.assertEquals("m/84'/0'/2147483644", walletSupplier.getWallet(BIP_WALLET.BADBANK_BIP84).getDerivation().getPathAccount());
-    Assertions.assertEquals("m/84'/0'/2147483645", walletSupplier.getWallet(BIP_WALLET.PREMIX_BIP84).getDerivation().getPathAccount());
-    Assertions.assertEquals("m/84'/0'/2147483646", walletSupplier.getWallet(BIP_WALLET.POSTMIX_BIP84).getDerivation().getPathAccount());
+    Assertions.assertEquals("m/44'/1'/0", walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP44).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/49'/1'/0", walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP49).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/0", walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/2147483644", walletSupplier.getWallet(BIP_WALLET.BADBANK_BIP84).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/2147483645", walletSupplier.getWallet(BIP_WALLET.PREMIX_BIP84).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/2147483646", walletSupplier.getWallet(BIP_WALLET.POSTMIX_BIP84).getDerivation().getPathAccount(params));
   }
 
   @Test
   public void getWalletByFormat() throws Exception {
-    Assertions.assertEquals("m/44'/0'/0", walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, BIP_FORMAT.LEGACY).getDerivation().getPathAccount());
-    Assertions.assertEquals("m/49'/0'/0", walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, BIP_FORMAT.SEGWIT_COMPAT).getDerivation().getPathAccount());
-    Assertions.assertEquals("m/84'/0'/0", walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount());
-    Assertions.assertEquals("m/84'/0'/2147483644", walletSupplier.getWallet(WhirlpoolAccount.BADBANK, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount());
-    Assertions.assertEquals("m/84'/0'/2147483645", walletSupplier.getWallet(WhirlpoolAccount.PREMIX, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount());
-    Assertions.assertEquals("m/84'/0'/2147483646", walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount());
+    Assertions.assertEquals("m/44'/1'/0", walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, BIP_FORMAT.LEGACY).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/49'/1'/0", walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, BIP_FORMAT.SEGWIT_COMPAT).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/0", walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/2147483644", walletSupplier.getWallet(WhirlpoolAccount.BADBANK, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/2147483645", walletSupplier.getWallet(WhirlpoolAccount.PREMIX, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/2147483646", walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount(params));
   }
 
   @Test
   public void getWalletByPub() throws Exception {
-    Assertions.assertEquals("m/84'/0'/0", walletSupplier.getWalletByPub(ZPUB_DEPOSIT).getDerivation().getPathAccount());
-    Assertions.assertEquals("m/84'/0'/2147483645", walletSupplier.getWalletByPub(ZPUB_PREMIX).getDerivation().getPathAccount());
-    Assertions.assertEquals("m/84'/0'/2147483646", walletSupplier.getWalletByPub(ZPUB_POSTMIX).getDerivation().getPathAccount());
+    Assertions.assertEquals("m/84'/1'/0", walletSupplier.getWalletByPub(ZPUB_DEPOSIT).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/2147483645", walletSupplier.getWalletByPub(ZPUB_PREMIX).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/2147483646", walletSupplier.getWalletByPub(ZPUB_POSTMIX).getDerivation().getPathAccount(params));
   }
 
   @Test
@@ -119,7 +119,7 @@ public class WalletSupplierTest extends AbstractTest {
     // verify
     BipWallet bipWallet = walletSupplier.getWalletById("custom");
     Assertions.assertNotNull(bipFormat);
-    Assertions.assertEquals("m/123'/0'/4", bipWallet.getDerivation().getPathAccount());
+    Assertions.assertEquals("m/123'/1'/4", bipWallet.getDerivation().getPathAccount(params));
     Assertions.assertEquals("testpub-4", bipWallet.getPub());
     Assertions.assertEquals("testaddr-moDTcKMvMQahsV9JUgHJjtw4NCDvVbnWyg", bipWallet.getNextAddress().getAddressString());
   }

@@ -2,6 +2,7 @@ package com.samourai.wallet.hd;
 
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
+import com.samourai.wallet.util.FormatsUtilGeneric;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
@@ -113,7 +114,8 @@ public class HD_Address {
     }
 
     public String getPathAddress(int purpose) {
-        return getPathAddress(purpose, 0, accountIndex, chainIndex, mChildNum);
+        int coinType = FormatsUtilGeneric.getInstance().getCoinType(mParams);
+        return getPathAddress(purpose, coinType, accountIndex, chainIndex, mChildNum);
     }
 
     public static String getPathAccount(int purpose, int coinType, int account) {
