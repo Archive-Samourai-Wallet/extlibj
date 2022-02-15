@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>io.samourai.code.wallet.bitcoinj</groupId>
 			<artifactId>bitcoinj-core</artifactId>
-			<version>002</version>
+			<version>003</version>
 		</dependency>
 		<dependency>
 			<groupId>com.auth0</groupId>
@@ -185,34 +185,7 @@
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
 		</repository>
-		<repository>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>bintray.kotlin.eap</id>
-			<name>Bintray Kotlin EAP Repository</name>
-			<url>https://dl.bintray.com/kotlin/kotlin-eap</url>
-		</repository>
 	</repositories>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>bintray.kotlin.eap</id>
-			<name>Bintray Kotlin EAP Repository</name>
-			<url>https://dl.bintray.com/kotlin/kotlin-eap</url>
-		</pluginRepository>
-	</pluginRepositories>
-
-
 	<scm>
     <connection>scm:git:git@code.samourai.io:wallet/ExtLibJ.git</connection>
     <tag>0.0.28</tag>
