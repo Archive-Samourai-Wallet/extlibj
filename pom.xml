@@ -6,8 +6,8 @@
 	<version>0.0.29-SNAPSHOT</version>
 	<name>extlibj</name>
 	<properties>
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.scm.id>samourai</project.scm.id>
 		<kotlin.version>1.2.71</kotlin.version>
 	</properties>
@@ -47,11 +47,6 @@
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
 			<version>2.13.0</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sourceforge.streamsupport</groupId>
-			<artifactId>streamsupport</artifactId>
-			<version>1.7.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.reactivex.rxjava2</groupId>

@@ -1,10 +1,11 @@
 package com.samourai.soroban.client;
 
 import com.samourai.wallet.util.FormatsUtilGeneric;
-import java8.util.Optional;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
+
+import java.util.Optional;
 
 public enum SorobanServer {
   TESTNET(

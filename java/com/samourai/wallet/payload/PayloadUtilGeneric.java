@@ -3,8 +3,11 @@ package com.samourai.wallet.payload;
 import com.samourai.wallet.crypto.AESUtil;
 import com.samourai.wallet.util.CharSequenceX;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PayloadUtilGeneric {
+    private static final Logger log = LoggerFactory.getLogger(PayloadUtilGeneric.class);
     private static PayloadUtilGeneric instance = null;
 
     protected PayloadUtilGeneric() { ; }
@@ -22,7 +25,9 @@ public class PayloadUtilGeneric {
             if (jsonObj != null && jsonObj.has("payload")) {
                 return true;
             }
-        } catch (Exception e) {e.printStackTrace();}
+        } catch (Exception e) {
+            log.error("Not a backup file: "+e.getMessage());
+        }
         return false;
     }
 

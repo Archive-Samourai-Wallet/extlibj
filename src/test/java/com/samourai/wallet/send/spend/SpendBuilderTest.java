@@ -16,7 +16,8 @@ import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.SimpleUtxoProvider;
 import com.samourai.wallet.util.TestUtil;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
-import java8.util.Lists;
+
+import java.util.Arrays;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.TestNet3Params;
 import org.junit.jupiter.api.Assertions;
@@ -45,10 +46,7 @@ public class SpendBuilderTest {
         utxoProvider = new SimpleUtxoProvider(bip44w.getParams(), walletSupplier);
         depositWallet84 = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84);
         Assertions.assertNotNull(depositWallet84);
-        spendBuilder = new SpendBuilder(params, utxoProvider, new Runnable() {
-            @Override
-            public void run() {}
-        });
+        spendBuilder = new SpendBuilder(params, utxoProvider, () -> {});
         
         ADDRESS_CHANGE_84 = new String[4];
         for (int i=0; i<4; i++) {
@@ -115,9 +113,9 @@ public class SpendBuilderTest {
         // should select smallest single utxo
         SpendTx spendTx = spend84(account, amount, true);
         long changeExpected = 9830;
-        verify(spendTx, SpendType.SIMPLE, Lists.of(utxo2), 170, amount, changeExpected, BIP_FORMAT.SEGWIT_NATIVE, 141, 561,
-                Lists.of(ADDRESS_RECEIVER_84, ADDRESS_CHANGE_84[1]),
-                Lists.of(amount,changeExpected));
+        verify(spendTx, SpendType.SIMPLE, Arrays.asList(utxo2), 170, amount, changeExpected, BIP_FORMAT.SEGWIT_NATIVE, 141, 561,
+                Arrays.asList(ADDRESS_RECEIVER_84, ADDRESS_CHANGE_84[1]),
+                Arrays.asList(amount,changeExpected));
     }
 
     @Test
@@ -134,9 +132,9 @@ public class SpendBuilderTest {
         // should select largest Utxos
         SpendTx spendTx = spend84(account, amount, true);
         long changeExpected = 9740;
-        verify(spendTx, SpendType.SIMPLE, Lists.of(utxo3, utxo2), 260, amount, changeExpected, BIP_FORMAT.SEGWIT_NATIVE, 209, 833,
-                Lists.of(ADDRESS_RECEIVER_84, ADDRESS_CHANGE_84[1]),
-                Lists.of(amount,changeExpected));
+        verify(spendTx, SpendType.SIMPLE, Arrays.asList(utxo3, utxo2), 260, amount, changeExpected, BIP_FORMAT.SEGWIT_NATIVE, 209, 833,
+                Arrays.asList(ADDRESS_RECEIVER_84, ADDRESS_CHANGE_84[1]),
+                Arrays.asList(amount,changeExpected));
     }
 
     @Test
@@ -153,9 +151,9 @@ public class SpendBuilderTest {
         // should select largest Utxos
         SpendTx spendTx = spend84(account, amount, true);
         long changeExpected = 9650;
-        verify(spendTx, SpendType.SIMPLE, Lists.of(utxo3, utxo2, utxo1), 350, amount, changeExpected, BIP_FORMAT.SEGWIT_NATIVE, 277, 1106,
-                Lists.of(ADDRESS_RECEIVER_84, ADDRESS_CHANGE_84[1]),
-                Lists.of(amount,changeExpected));
+        verify(spendTx, SpendType.SIMPLE, Arrays.asList(utxo3, utxo2, utxo1), 350, amount, changeExpected, BIP_FORMAT.SEGWIT_NATIVE, 277, 1106,
+                Arrays.asList(ADDRESS_RECEIVER_84, ADDRESS_CHANGE_84[1]),
+                Arrays.asList(amount,changeExpected));
     }
 
     @Test
@@ -176,9 +174,9 @@ public class SpendBuilderTest {
         // should select Boltzmann
         SpendTx spendTx = spend84(account, amount, true);
         long changeExpected = 69400;
-        verify(spendTx, SpendType.STONEWALL, Lists.of(utxo3, utxo4, utxo2, utxo5, utxo6), 600, amount, changeExpected, BIP_FORMAT.SEGWIT_NATIVE, 475, 1897,
-                Lists.of(ADDRESS_CHANGE_84[2], ADDRESS_CHANGE_84[1], ADDRESS_RECEIVER_84, ADDRESS_CHANGE_84[0]),
-                Lists.of(19700L, amount, amount, 9700L));
+        verify(spendTx, SpendType.STONEWALL, Arrays.asList(utxo3, utxo4, utxo2, utxo5, utxo6), 600, amount, changeExpected, BIP_FORMAT.SEGWIT_NATIVE, 475, 1897,
+                Arrays.asList(ADDRESS_CHANGE_84[2], ADDRESS_CHANGE_84[1], ADDRESS_RECEIVER_84, ADDRESS_CHANGE_84[0]),
+                Arrays.asList(19700L, amount, amount, 9700L));
     }
 
     private void verify(SpendTx spendTx, SpendType spendType, Collection<UTXO> utxos, long fee, long amount, long change, BipFormat changeFormat, int vSize, int weight, Collection<String> spendToAdresses, Collection<Long> spendToAmounts) {

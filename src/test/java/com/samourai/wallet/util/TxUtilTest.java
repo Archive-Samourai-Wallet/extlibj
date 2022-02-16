@@ -68,12 +68,7 @@ public class TxUtilTest {
         Script inputScript = linkedOutput.getScriptPubKey(); // equivaut à outputScript
         Transaction tx = computeSpendTx(inputKey, inputScript, inputOutPoint, null);
 
-        Callback<byte[]> fetchInputOutpointScriptBytes = new Callback<byte[]>() {
-            @Override
-            public byte[] execute() {
-                return linkedOutput.getScriptBytes();
-            }
-        };
+        Callback<byte[]> fetchInputOutpointScriptBytes = () -> linkedOutput.getScriptBytes();
 
         // TEST findInputPubkey
         byte[] pubkey = txUtil.findInputPubkey(tx, 0, fetchInputOutpointScriptBytes);

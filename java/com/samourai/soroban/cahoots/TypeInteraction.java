@@ -1,7 +1,7 @@
 package com.samourai.soroban.cahoots;
 
 import com.samourai.wallet.cahoots.CahootsTypeUser;
-import java8.util.Optional;
+import java.util.Optional;
 
 public enum TypeInteraction {
   TX_BROADCAST(CahootsTypeUser.SENDER, 4);

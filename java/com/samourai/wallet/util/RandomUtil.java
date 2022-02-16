@@ -1,10 +1,10 @@
 package com.samourai.wallet.util;
 
-import java8.util.concurrent.ThreadLocalRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.SecureRandom;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomUtil {
     private static final Logger log = LoggerFactory.getLogger(RandomUtil.class);

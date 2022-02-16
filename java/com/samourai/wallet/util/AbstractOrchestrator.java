@@ -47,36 +47,33 @@ public abstract class AbstractOrchestrator {
     this.started = true;
     this.myThread =
         new Thread(
-            new Runnable() {
-              @Override
-              public void run() {
-                if (START_DELAY > 0) {
-                  doSleep(START_DELAY);
-                }
-                while (started) {
-                  lastRunSetInLoop = false;
-                  runOrchestrator();
+                () -> {
+                  if (START_DELAY > 0) {
+                    doSleep(START_DELAY);
+                  }
+                  while (started) {
+                    lastRunSetInLoop = false;
+                    runOrchestrator();
 
-                  // orchestrator may have been stopped in the meantime, as function is not
-                  // synchronized
-                  if (lastRunSetInLoop && LAST_RUN_DELAY != null) {
-                    // wait for lastRunDelay if we did run in this loop
-                    waitForLastRunDelay(LAST_RUN_DELAY);
-                  } else {
-                    doSleep(LOOP_DELAY);
+                    // orchestrator may have been stopped in the meantime, as function is not
+                    // synchronized
+                    if (lastRunSetInLoop && LAST_RUN_DELAY != null) {
+                      // wait for lastRunDelay if we did run in this loop
+                      waitForLastRunDelay(LAST_RUN_DELAY);
+                    } else {
+                      doSleep(LOOP_DELAY);
+                    }
+
+                    lastRunSetInLoop = false;
                   }
 
-                  lastRunSetInLoop = false;
-                }
-
-                // thread exiting
-                myThread = null;
-                if (log.isDebugEnabled()) {
-                  log.debug("Ended.");
-                }
-                resetOrchestrator();
-              }
-            },
+                  // thread exiting
+                  myThread = null;
+                  if (log.isDebugEnabled()) {
+                    log.debug("Ended.");
+                  }
+                  resetOrchestrator();
+                },
             getClass().getSimpleName());
     this.myThread.setDaemon(daemon);
     this.myThread.start();

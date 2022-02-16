@@ -1,5 +1,7 @@
 package com.samourai.wallet.hd;
 
+import com.samourai.wallet.bipWallet.BipDerivation;
+import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +32,41 @@ public enum WALLET_INDEX {
   WALLET_INDEX(BIP_WALLET bipWallet, Chain chain) {
     this.bipWallet = bipWallet;
     this.chain = chain;
+  }
+
+  // used by android
+  public static WALLET_INDEX find(BipDerivation bipDerivation, Chain chain) {
+    for (WALLET_INDEX walletIndex : WALLET_INDEX.values()) {
+      // chain
+      if (walletIndex.getChain().equals(chain)) {
+        // accountIndex
+        if (walletIndex.getBipWallet().getBipDerivation().getAccountIndex() == bipDerivation.getAccountIndex()) {
+          // bipFormat
+          if (walletIndex.getBipWallet().getBipDerivation().getPurpose() == bipDerivation.getPurpose()) {
+            return walletIndex;
+          }
+        }
+      }
+    }
+    log.warn("WALLET_INDEX not found for accountIndex="+bipDerivation.getAccountIndex()+", purpose="+bipDerivation.getPurpose()+", chainIndex="+chain.getIndex());
+    return null;
+  }
+
+  // used by Android
+  public static WALLET_INDEX findChangeIndex(int account, int purpose) {
+    if (account == SamouraiAccountIndex.POSTMIX) {
+      return WALLET_INDEX.POSTMIX_CHANGE;
+    }
+    /* if (account == WhirlpoolAccount.PREMIX.getAccountIndex()) {
+      return WALLET_INDEX.PREMIX_CHANGE;
+    } */
+    if (purpose == 84) {
+      return WALLET_INDEX.BIP84_CHANGE;
+    } else if (purpose == 49) {
+      return WALLET_INDEX.BIP49_CHANGE;
+    } else {
+      return WALLET_INDEX.BIP44_CHANGE;
+    }
   }
 
   public BIP_WALLET getBipWallet() {

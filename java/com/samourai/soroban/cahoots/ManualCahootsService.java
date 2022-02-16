@@ -9,10 +9,11 @@ import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
-import java8.util.Optional;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 public class ManualCahootsService extends SorobanMessageService<ManualCahootsMessage, CahootsContext> {
     private static final Logger log = LoggerFactory.getLogger(ManualCahootsService.class);

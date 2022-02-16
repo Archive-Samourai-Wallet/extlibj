@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.samourai.wallet.api.backend.beans.HttpException;
 import com.samourai.wallet.util.JSONUtils;
 import io.reactivex.Observable;
-import java8.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public abstract class JacksonHttpClient implements IHttpClient {
@@ -60,23 +60,20 @@ public abstract class JacksonHttpClient implements IHttpClient {
       final Map<String, String> headers,
       final Object bodyObj) {
     return httpObservable(
-        new Callable<T>() {
-          @Override
-          public T call() throws Exception {
-            try {
-              String jsonBody = getObjectMapper().writeValueAsString(bodyObj);
-              String responseContent = requestJsonPost(urlStr, headers, jsonBody);
-              T result = parseJson(responseContent, responseType);
-              return result;
-            } catch (Exception e) {
-              onRequestError(e);
-              if (log.isDebugEnabled()) {
-                log.error("postJson failed: " + urlStr, e);
+            () -> {
+              try {
+                String jsonBody = getObjectMapper().writeValueAsString(bodyObj);
+                String responseContent = requestJsonPost(urlStr, headers, jsonBody);
+                T result = parseJson(responseContent, responseType);
+                return result;
+              } catch (Exception e) {
+                onRequestError(e);
+                if (log.isDebugEnabled()) {
+                  log.error("postJson failed: " + urlStr, e);
+                }
+                throw e;
               }
-              throw e;
-            }
-          }
-        });
+            });
   }
 
   @Override
@@ -122,19 +119,16 @@ public abstract class JacksonHttpClient implements IHttpClient {
 
   protected <T> Observable<Optional<T>> httpObservable(final Callable<T> supplier) {
     return Observable.fromCallable(
-        new Callable<Optional<T>>() {
-          @Override
-          public Optional<T> call() throws Exception {
-            try {
-              return Optional.ofNullable(supplier.call());
-            } catch (Exception e) {
-              if (!(e instanceof HttpException)) {
-                e = new HttpException(e, null);
+            () -> {
+              try {
+                return Optional.ofNullable(supplier.call());
+              } catch (Exception e) {
+                if (!(e instanceof HttpException)) {
+                  e = new HttpException(e, null);
+                }
+                throw e;
               }
-              throw e;
-            }
-          }
-        });
+            });
   }
 
   protected ObjectMapper getObjectMapper() {

@@ -1,10 +1,7 @@
 package com.samourai.whirlpool.client.wallet.beans;
 
-import java8.util.function.Predicate;
-import java8.util.stream.Collectors;
-import java8.util.stream.StreamSupport;
-
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public enum WhirlpoolAccount {
   DEPOSIT(true),
@@ -23,14 +20,9 @@ public enum WhirlpoolAccount {
   }
 
   public static WhirlpoolAccount[] getListByActive(final boolean active) {
-    return StreamSupport.stream(Arrays.asList(values()))
+    return Arrays.asList(values()).stream()
         .filter(
-            new Predicate<WhirlpoolAccount>() {
-              @Override
-              public boolean test(WhirlpoolAccount account) {
-                return account.isActive() == active;
-              }
-            })
+                account -> account.isActive() == active)
         .collect(Collectors.<WhirlpoolAccount>toList())
         .toArray(new WhirlpoolAccount[] {});
   }

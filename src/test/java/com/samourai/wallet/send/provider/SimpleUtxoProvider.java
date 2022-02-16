@@ -10,11 +10,10 @@ import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.util.TestUtil;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
-import java8.util.stream.Collectors;
-import java8.util.stream.StreamSupport;
 import org.bitcoinj.core.NetworkParameters;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SimpleUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvider {
 
@@ -81,7 +80,7 @@ public class SimpleUtxoProvider extends SimpleUtxoKeyProvider implements UtxoPro
 
   @Override
   public Collection<UTXO> getUtxos(WhirlpoolAccount account, BipFormat bipFormat) {
-    return StreamSupport.stream(utxosByAccount.get(account)).filter(utxo -> {
+    return utxosByAccount.get(account).stream().filter(utxo -> {
       // TODO zeroleak optimize
       String address = utxo.getOutpoints().iterator().next().getAddress();
       return getBipFormatSupplier().findByAddress(address, params)==bipFormat;
