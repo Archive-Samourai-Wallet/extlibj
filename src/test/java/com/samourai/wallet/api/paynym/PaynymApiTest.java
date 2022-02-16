@@ -1,8 +1,6 @@
 package com.samourai.wallet.api.paynym;
 
-import com.samourai.wallet.api.paynym.beans.ClaimPaynymResponse;
-import com.samourai.wallet.api.paynym.beans.GetNymInfoResponse;
-import com.samourai.wallet.api.paynym.beans.PaynymContact;
+import com.samourai.wallet.api.paynym.beans.*;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.bip47.rpc.java.Bip47UtilJava;
 import com.samourai.wallet.hd.HD_Wallet;
@@ -32,6 +30,27 @@ public class PaynymApiTest extends AbstractTest {
     bip47w = new BIP47Wallet(bip44w);
     paymentCode = bip47Util.getPaymentCode(bip47w).toString();
     Assertions.assertEquals(PCODE, paymentCode);
+  }
+
+  @Test
+  public void createPaynym() throws Exception {
+    CreatePaynymResponse response = paynymApi.createPaynym(paymentCode).blockingSingle();
+
+    Assertions.assertEquals("/"+PCODE+"/avatar", response.nymAvatar);
+    Assertions.assertEquals("+stillmud69f", response.nymName);
+    Assertions.assertEquals("nymmFABjPvpR2uxmAUKfD53mj", response.nymID);
+    Assertions.assertEquals(true, response.claimed);
+  }
+
+  @Test
+  public void addPaynym() throws Exception {
+    String token = paynymApi.getToken(paymentCode).blockingSingle();
+    AddPaynymResponse response = paynymApi.addPaynym(token, bip47w).blockingSingle();
+
+    Assertions.assertEquals("/"+PCODE+"/avatar", response.nymAvatar);
+    Assertions.assertEquals("+stillmud69f", response.nymName);
+    Assertions.assertEquals("nymmFABjPvpR2uxmAUKfD53mj", response.nymID);
+    Assertions.assertEquals(true, response.claimed);
   }
 
   @Test
