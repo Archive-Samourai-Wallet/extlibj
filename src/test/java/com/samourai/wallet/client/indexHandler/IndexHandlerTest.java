@@ -86,6 +86,7 @@ public class IndexHandlerTest extends AbstractTest {
     Assertions.assertEquals(10, indexHandler.getAndIncrementUnconfirmed());
 
     indexHandler.confirmUnconfirmed(10);
+    Assertions.assertEquals(11, indexHandler.get());
     Assertions.assertEquals(11, indexHandler.getAndIncrementUnconfirmed());
     Assertions.assertEquals(11, indexHandler.get());
   }

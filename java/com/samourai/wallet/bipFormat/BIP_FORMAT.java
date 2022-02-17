@@ -1,9 +1,7 @@
 package com.samourai.wallet.bipFormat;
 
-import com.samourai.wallet.bipFormat.BipFormat;
-import com.samourai.wallet.bipFormat.BipFormatImpl;
-import com.samourai.wallet.bipFormat.BipFormatSupplier;
-import com.samourai.wallet.bipFormat.BipFormatSupplierImpl;
+import com.samourai.wallet.bip340.BIP340Util;
+import com.samourai.wallet.bip340.Schnorr;
 import com.samourai.wallet.hd.HD_Account;
 import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.segwit.SegwitAddress;
@@ -11,6 +9,8 @@ import org.bitcoinj.core.*;
 import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
+
+import java.security.SecureRandom;
 
 public class BIP_FORMAT {
     public static final BipFormat LEGACY = new BipFormatImpl("LEGACY", "Original (P2PKH)") {
@@ -123,6 +123,35 @@ public class BIP_FORMAT {
             final TransactionWitness witness = new TransactionWitness(2);
             witness.setPush(0, sig.encodeToBitcoin());
             witness.setPush(1, key.getPubKey());
+            tx.setWitness(inputIndex, witness);
+        }
+    };
+
+    public static final BipFormat TAPROOT = new BipFormatImpl("TAPROOT", "Taproot (P2TR)") {
+        @Override
+        public String getPub(HD_Account hdAccount) {
+            return hdAccount.zpubstr();
+        }
+
+        @Override
+        public String getAddressString(HD_Address hdAddress) {
+            return hdAddress.getAddressStringSegwitNative();
+        }
+
+        @Override
+        public void sign(Transaction tx, int inputIndex, ECKey key) throws Exception {
+            ECKey tweakedKey = BIP340Util.getTweakedPrivKey(key, null);
+            byte[][] inputScriptPubKeys = new byte[tx.getInputs().size()][];
+            Coin[] inputValues = new Coin[tx.getInputs().size()];
+            for(TransactionInput input : tx.getInputs()) {
+                inputScriptPubKeys[inputIndex] = input.getConnectedOutput().getScriptPubKey().getProgram();
+                inputValues[inputIndex] = input.getValue();
+            }
+
+            Sha256Hash sigHash = tx.hashForTaprootWitnessSignature(inputIndex, Transaction.SigHash.ALL, inputScriptPubKeys, inputValues, false);
+            byte[] sig = Schnorr.sign(sigHash.getBytes(), tweakedKey.getPrivKeyBytes(), new SecureRandom().generateSeed(32));
+
+            final TransactionWitness witness = TransactionWitness.createTaprootWitness(sig, Transaction.SigHash.ALL, false);
             tx.setWitness(inputIndex, witness);
         }
     };
