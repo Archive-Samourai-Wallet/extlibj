@@ -15,8 +15,10 @@ import org.bitcoinj.script.Script;
 public class Bech32UtilGeneric {
     public static final String SCRIPT_P2WPKH = "0014";
     public static final String SCRIPT_P2WSH = "0020";
+    public static final String SCRIPT_P2TR = "5120";
     public static final int SCRIPT_P2WPKH_LEN = 20 * 2 + 2 * 2;
     public static final int SCRIPT_P2WSH_LEN = 32 * 2 + 2 * 2;
+    public static final int SCRIPT_P2TR_LEN = 32 * 2 + 2 * 2;
 
     private static Bech32UtilGeneric instance = null;
 
@@ -32,7 +34,11 @@ public class Bech32UtilGeneric {
     }
 
     public boolean isBech32Script(String script) {
-        return isP2WPKHScript(script) || isP2WSHScript(script);
+        return isP2WPKHScript(script) || isP2WSHScript(script) || isP2TRScript(script);
+    }
+
+    public boolean isP2TRScript(String script) {
+        return script.startsWith(SCRIPT_P2TR) && script.length() == SCRIPT_P2TR_LEN;
     }
 
     public boolean isP2WPKHScript(String script) {
@@ -45,15 +51,15 @@ public class Bech32UtilGeneric {
 
     public String getAddressFromScript(String script, NetworkParameters params) throws Exception    {
         String hrp = getHrp(params);
-        return Bech32Segwit.encode(hrp, (byte)0x00, Hex.decode(script.substring(4).getBytes()));
+        if(script.startsWith(SCRIPT_P2TR)) {
+            return Bech32Segwit.encode(hrp, (byte) 0x01, Hex.decode(script.substring(4).getBytes()));
+        } else {
+            return Bech32Segwit.encode(hrp, (byte) 0x00, Hex.decode(script.substring(4).getBytes()));
+        }
     }
 
     public String getAddressFromScript(Script script, NetworkParameters params) throws Exception    {
-        String hrp = getHrp(params);
-        byte[] buf = script.getProgram();
-        byte[] scriptBytes = new byte[buf.length - 2];
-        System.arraycopy(buf, 2, scriptBytes, 0, scriptBytes.length);
-        return Bech32Segwit.encode(hrp, (byte)0x00, scriptBytes);
+        return getAddressFromScript(Hex.toHexString(script.getProgram()), params);
     }
 
     protected String getHrp(NetworkParameters params) {

@@ -1,5 +1,7 @@
 package com.samourai.wallet.segwit;
 
+import com.samourai.wallet.bip340.BIP340Util;
+import com.samourai.wallet.bip340.Point;
 import com.samourai.wallet.segwit.bech32.Bech32Segwit;
 
 import org.bitcoinj.core.Address;
@@ -129,6 +131,24 @@ public class SegwitAddress {
         buf[0] = (byte)0x00;  // OP_0
         buf[1] = (byte)0x14;  // push 20 bytes
         System.arraycopy(hash, 0, buf, 2, hash.length); // keyhash
+
+        return new Script(buf);
+    }
+
+    public Script taprootRedeemScript()    {
+
+        //
+        // The P2TR redeemScript is always 34 bytes. It starts with a OP_1, followed by a canonical push of the tweaked pub key (i.e. 0x0120{32-byte tweaked key})
+        //
+        Point internalPubKeyPoint = BIP340Util.getInternalPubkey(ecKey);
+
+        if(internalPubKeyPoint == null) return null;
+
+        byte[] tweakedPubKey = internalPubKeyPoint.toBytes();
+        byte[] buf = new byte[2 + tweakedPubKey.length];
+        buf[0] = (byte)0x51;  // OP_1
+        buf[1] = (byte)0x20;  // push 32 bytes
+        System.arraycopy(tweakedPubKey, 0, buf, 2, tweakedPubKey.length); // tweaked key
 
         return new Script(buf);
     }
