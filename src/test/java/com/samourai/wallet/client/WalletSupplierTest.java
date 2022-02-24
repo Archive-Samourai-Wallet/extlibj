@@ -9,6 +9,7 @@ import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.hd.*;
 import com.samourai.wallet.test.AbstractTest;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
+import com.sun.xml.internal.ws.policy.AssertionSet;
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Transaction;
@@ -114,7 +115,9 @@ public class WalletSupplierTest extends AbstractTest {
         throw new Exception("Not implemented");
       }
     };
+    Assertions.assertEquals(3, walletSupplier.getWallets(WhirlpoolAccount.DEPOSIT).size());
     walletSupplier.register("custom", bip44w, WhirlpoolAccount.DEPOSIT, derivation, bipFormat);
+    Assertions.assertEquals(4, walletSupplier.getWallets(WhirlpoolAccount.DEPOSIT).size());
 
     // verify
     BipWallet bipWallet = walletSupplier.getWalletById("custom");
@@ -122,5 +125,6 @@ public class WalletSupplierTest extends AbstractTest {
     Assertions.assertEquals("m/123'/1'/4", bipWallet.getDerivation().getPathAccount(params));
     Assertions.assertEquals("testpub-4", bipWallet.getPub());
     Assertions.assertEquals("testaddr-moDTcKMvMQahsV9JUgHJjtw4NCDvVbnWyg", bipWallet.getNextAddress().getAddressString());
+
   }
 }
