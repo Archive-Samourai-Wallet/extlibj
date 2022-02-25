@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 public class BackendApi {
-  private Logger log = LoggerFactory.getLogger(BackendApi.class);
+  private static Logger log = LoggerFactory.getLogger(BackendApi.class);
 
   private static final String URL_UNSPENT = "/unspent?active=";
   private static final String URL_MULTIADDR = "/multiaddr?active=";
@@ -204,7 +204,8 @@ public class BackendApi {
     }
   }
 
-  protected void checkPushTxResponse(PushTxResponse pushTxResponse) throws Exception {
+  // used by Android
+  public static void checkPushTxResponse(PushTxResponse pushTxResponse) throws Exception {
     if (pushTxResponse.status == PushTxResponse.PushTxStatus.ok) {
       // success
       return;
