@@ -175,6 +175,17 @@ public class AddressFactoryGeneric {
         return idx;
     }
 
+    boolean canIncrement(WALLET_INDEX walletIndex, int value) {
+        if (WALLET_INDEX.PREMIX_RECEIVE.equals(walletIndex) || WALLET_INDEX.POSTMIX_RECEIVE.equals(walletIndex)) {
+            // disable lookahead gap limit for PREMIX to allow large tx0
+            // disable lookahead gap limit for POSTMIX to prevent REJECTED_OUTPUT
+            return true;
+        }
+        int highestIdx = highestIdxMap.get(walletIndex);
+        boolean canInc = ((value - highestIdx) < LOOKAHEAD_GAP);
+        return canInc;
+    }
+
     // should only be set by AndroidWalletStateIndexHandler
     public void setWalletIdx(WALLET_INDEX walletIndex, int value, boolean allowDecrement) {
         int walletIdx = getWalletIdx(walletIndex);
@@ -182,9 +193,7 @@ public class AddressFactoryGeneric {
             // INCREMENT
 
             // check lookahead gap
-            int highestIdx = highestIdxMap.get(walletIndex);
-            boolean canInc = ((value - highestIdx) < LOOKAHEAD_GAP);
-            if (canInc) {
+            if (canIncrement(walletIndex, value)) {
                 // increment
                 if (log.isDebugEnabled()) {
                     int oldValue = walletIdxMap.get(walletIndex);
@@ -195,7 +204,7 @@ public class AddressFactoryGeneric {
                 // apply to HdWallet
                 setHdIdx(walletIndex, value, false); // no decrement
             } else {
-                log.warn("Cannot increment "+walletIdx+", lookahead gap reached: highestIdx="+highestIdx+", valueToSet="+value);
+                log.warn("Cannot increment "+walletIndex+": walletIdx="+walletIdx+", valueToSet="+value);
             }
         } else if (walletIdx > value && allowDecrement) {
             // DECREMENT
