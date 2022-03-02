@@ -161,11 +161,11 @@ public class BackendApi {
     return new MinerFee(feeResponse);
   }
 
-  public void pushTx(String txHex) throws Exception {
-    pushTx(txHex, null);
+  public String pushTx(String txHex) throws Exception {
+    return pushTx(txHex, null);
   }
 
-  public void pushTx(String txHex, Collection<Integer> strictModeVouts) throws Exception {
+  public String pushTx(String txHex, Collection<Integer> strictModeVouts) throws Exception {
     if (log.isDebugEnabled()) {
       log.debug("pushTx... " + txHex);
     } else {
@@ -182,43 +182,45 @@ public class BackendApi {
     }
 
     try {
-      PushTxResponse pushTxResponse = httpClient.postUrlEncoded(url, PushTxResponse.class, headers, postBody);
-      checkPushTxResponse(pushTxResponse);
+      BackendPushTxResponse backendPushTxResponse = httpClient.postUrlEncoded(url, BackendPushTxResponse.class, headers, postBody);
+      checkPushTxResponse(backendPushTxResponse);
+      String txid = backendPushTxResponse.data;
+      if (log.isDebugEnabled()) {
+        log.debug("pushTx success: "+txid);
+      }
+      return txid;
     } catch (HttpException e) {
       // parse pushTxResponse
       String responseBody = e.getResponseBody();
-      PushTxResponse pushTxResponse = null;
+      BackendPushTxResponse backendPushTxResponse = null;
       try {
-        pushTxResponse = JSONUtils.getInstance().getObjectMapper().readValue(responseBody, PushTxResponse.class);
+        backendPushTxResponse = JSONUtils.getInstance().getObjectMapper().readValue(responseBody, BackendPushTxResponse.class);
       } catch(Exception ee) {
         log.error("Not a PushTxResponse: "+responseBody);
       }
-      if (pushTxResponse != null) {
-        checkPushTxResponse(pushTxResponse); // throw PushTxException
+      if (backendPushTxResponse != null) {
+        checkPushTxResponse(backendPushTxResponse); // throw PushTxException
       }
       throw e;
     }
   }
 
   // used by Android
-  public static void checkPushTxResponse(PushTxResponse pushTxResponse) throws Exception {
-    if (pushTxResponse.status == PushTxResponse.PushTxStatus.ok) {
+  public static void checkPushTxResponse(BackendPushTxResponse backendPushTxResponse) throws Exception {
+    if (backendPushTxResponse.status == BackendPushTxResponse.PushTxStatus.ok) {
       // success
       return;
     }
-
-    if (log.isDebugEnabled()) {
-      log.error("pushTx failed: "+pushTxResponse.toString());
-    }
+    log.error("pushTx failed: "+ backendPushTxResponse.toString());
 
     // address reuse
-    if (pushTxResponse.isErrorAddressReuse()) {
-      Collection<Integer> adressReuseOutputIndexs = pushTxResponse.getAdressReuseOutputIndexs();
-      throw new PushTxAddressReuseException(adressReuseOutputIndexs);
+    if (backendPushTxResponse.isErrorAddressReuse()) {
+      Collection<Integer> adressReuseOutputIndexs = backendPushTxResponse.getAdressReuseOutputIndexs();
+      throw new BackendPushTxException("address-reuse", adressReuseOutputIndexs);
     }
 
     // other error
-    throw new PushTxException(pushTxResponse.error.toString());
+    throw new BackendPushTxException(backendPushTxResponse.error.toString());
   }
 
   public boolean testConnectivity() {

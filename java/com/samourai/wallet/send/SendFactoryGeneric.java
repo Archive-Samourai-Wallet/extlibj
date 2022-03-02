@@ -136,7 +136,7 @@ public class SendFactoryGeneric {
             return null;
         }
         else    {
-            String hexString = new String(Hex.encode(signedTx.bitcoinSerialize()));
+            String hexString = TxUtil.getInstance().getTxHex(signedTx);
             if(hexString.length() > (100 * 1024)) {
                 log.warn("Transaction length too long: txLength="+hexString.length());
                 throw new SignTxLengthException();

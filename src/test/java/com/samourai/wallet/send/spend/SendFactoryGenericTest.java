@@ -2,17 +2,14 @@ package com.samourai.wallet.send.spend;
 
 import com.google.common.base.Preconditions;
 import com.samourai.wallet.bip340.BIP340Util;
-import com.samourai.wallet.bip340.Point;
 import com.samourai.wallet.bip340.Schnorr;
-import com.samourai.wallet.bipFormat.BIP_FORMAT;
-import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.send.SendFactoryGeneric;
+import com.samourai.wallet.test.AbstractTest;
 import org.bitcoinj.core.*;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
-import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -21,44 +18,20 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class SendFactoryGenericTest {
+public class SendFactoryGenericTest extends AbstractTest {
     private static final SendFactoryGeneric sendFactory = SendFactoryGeneric.getInstance();
     private static final NetworkParameters params = TestNet3Params.get();
     private ECKey inputKey = ECKey.fromPrivate(new BigInteger("45292090369707310635285627500870691371399357286012942906204494584441273561412"));
     private ECKey outputKey = ECKey.fromPrivate(new BigInteger("77292090369707310635285627500870691371399357286012942906204494584441273561412"));
-    private BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;
 
-    private Transaction computeTxCoinbase(long value, Script outputScript) {
-        Transaction tx = new Transaction(params);
+    protected Transaction computeSpendTxUnsigned(TransactionOutput txOutput) {
+        Transaction tx = computeSpendTx(txOutput);
 
-        // add output
-        tx.addOutput(Coin.valueOf(value), outputScript);
-
-        // add input: coinbase
-        int txCounter = 1;
-        TransactionInput input =
-                new TransactionInput(
-                        params, tx, new byte[] {(byte) txCounter, (byte) (txCounter++ >> 8)});
-        tx.addInput(input);
-
-        tx.verify();
-        return tx;
-    }
-
-    private Transaction computeSpendTxUnsigned(TransactionOutput txOutput) {
-        // spend coinbase
-        TransactionOutPoint inputOutPoint = txOutput.getOutPointFor();
-        inputOutPoint.setValue(txOutput.getValue());
-
-        Transaction tx = new Transaction(params);
+        // output
         SegwitAddress outputAddress = new SegwitAddress(outputKey, params);
-        TransactionOutput transactionOutput = new TransactionOutput(params, null, inputOutPoint.getValue(),
+        TransactionOutput transactionOutput = new TransactionOutput(params, null, txOutput.getValue(),
                 outputAddress.getAddress());
         tx.addOutput(transactionOutput);
-
-        // add input
-        TransactionInput txInput = new TransactionInput(params, null, new byte[0], inputOutPoint, inputOutPoint.getValue());
-        tx.addInput(txInput);
         return tx;
     }
 

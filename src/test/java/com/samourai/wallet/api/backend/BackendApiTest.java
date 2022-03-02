@@ -156,8 +156,8 @@ public class BackendApiTest extends AbstractTest {
     try {
       backendApi.pushTx(TxUtil.getInstance().getTxHex(tx));
       Assertions.assertTrue(false);
-    } catch (PushTxException e) {
-      Assertions.assertEquals("PushTx failed: bad-txns-inputs-missingorspent", e.getMessage());
+    } catch (BackendPushTxException e) {
+      Assertions.assertEquals("bad-txns-inputs-missingorspent", e.getMessage());
       Assertions.assertEquals("bad-txns-inputs-missingorspent", e.getPushTxError());
     }
   }
@@ -194,10 +194,10 @@ public class BackendApiTest extends AbstractTest {
     try {
       backendApi.pushTx(TxUtil.getInstance().getTxHex(tx), Arrays.asList(0,1));
       Assertions.assertTrue(false);
-    } catch (PushTxAddressReuseException e) {
-      Assertions.assertEquals("PushTx failed: Address reuse for outputs [1]", e.getMessage());
-      Assertions.assertEquals("Address reuse for outputs [1]", e.getPushTxError());
-      Assertions.assertArrayEquals(new Integer[]{1}, e.getAdressReuseOutputIndexs().toArray());
+    } catch (BackendPushTxException e) {
+      Assertions.assertEquals("address-reuse", e.getMessage());
+      Assertions.assertEquals("address-reuse", e.getPushTxError());
+      Assertions.assertArrayEquals(new Integer[]{1}, e.getVoutsAddressReuse().toArray());
     }
   }
 

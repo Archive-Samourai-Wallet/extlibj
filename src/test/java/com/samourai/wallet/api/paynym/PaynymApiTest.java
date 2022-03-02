@@ -1,11 +1,13 @@
 package com.samourai.wallet.api.paynym;
 
+import com.samourai.wallet.api.backend.beans.HttpException;
 import com.samourai.wallet.api.paynym.beans.*;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.bip47.rpc.java.Bip47UtilJava;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
 import com.samourai.wallet.test.AbstractTest;
+import com.samourai.wallet.util.AsyncUtil;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.TestNet3Params;
 import org.junit.jupiter.api.Assertions;
@@ -34,7 +36,7 @@ public class PaynymApiTest extends AbstractTest {
 
   @Test
   public void createPaynym() throws Exception {
-    CreatePaynymResponse response = paynymApi.createPaynym(paymentCode).blockingSingle();
+    CreatePaynymResponse response = AsyncUtil.blockingSingle(paynymApi.createPaynym(paymentCode));
 
     Assertions.assertEquals("/"+PCODE+"/avatar", response.nymAvatar);
     Assertions.assertEquals("+stillmud69f", response.nymName);
@@ -44,8 +46,8 @@ public class PaynymApiTest extends AbstractTest {
 
   @Test
   public void addPaynym() throws Exception {
-    String token = paynymApi.getToken(paymentCode).blockingSingle();
-    AddPaynymResponse response = paynymApi.addPaynym(token, bip47w).blockingSingle();
+    String token = AsyncUtil.blockingSingle(paynymApi.getToken(paymentCode));
+    AddPaynymResponse response = AsyncUtil.blockingSingle(paynymApi.addPaynym(token, bip47w));
 
     Assertions.assertEquals("/"+PCODE+"/avatar", response.nymAvatar);
     Assertions.assertEquals("+stillmud69f", response.nymName);
@@ -55,8 +57,8 @@ public class PaynymApiTest extends AbstractTest {
 
   @Test
   public void claim() throws Exception {
-    String token = paynymApi.getToken(paymentCode).blockingSingle();
-    ClaimPaynymResponse claim = paynymApi.claim(token, bip47w).blockingSingle();
+    String token = AsyncUtil.blockingSingle(paynymApi.getToken(paymentCode));
+    ClaimPaynymResponse claim = AsyncUtil.blockingSingle(paynymApi.claim(token, bip47w));
 
     Assertions.assertEquals(paymentCode, claim.claimed);
   }
@@ -65,27 +67,27 @@ public class PaynymApiTest extends AbstractTest {
   public void followUnfollow() throws Exception {
 
     // follow
-    String token = paynymApi.getToken(paymentCode).blockingSingle();
-    paynymApi.follow(token, bip47w, PCODE2).blockingSingle();
+    String token = AsyncUtil.blockingSingle(paynymApi.getToken(paymentCode));
+    AsyncUtil.blockingSingle(paynymApi.follow(token, bip47w, PCODE2));
 
     // verify
-    GetNymInfoResponse getNymInfo = paynymApi.getNymInfo(paymentCode).blockingSingle();
+    GetNymInfoResponse getNymInfo = AsyncUtil.blockingSingle(paynymApi.getNymInfo(paymentCode));
     PaynymContact paynymContact = getNymInfo.following.iterator().next();
     Assertions.assertEquals(PCODE2, paynymContact.getCode());
     Assertions.assertEquals("nymHc99UYDRYd6EdPYxbLCSLC", paynymContact.getNymId());
     Assertions.assertEquals("+boldboat533", paynymContact.getNymName());
 
     // unfollow
-    paynymApi.unfollow(token, bip47w, PCODE2).blockingSingle();
+    AsyncUtil.blockingSingle(paynymApi.unfollow(token, bip47w, PCODE2));
 
     // verify
-    getNymInfo = paynymApi.getNymInfo(paymentCode).blockingSingle();
+    getNymInfo = AsyncUtil.blockingSingle(paynymApi.getNymInfo(paymentCode));
     Assertions.assertFalse(getNymInfo.following.contains(PCODE2));
   }
 
   @Test
   public void getNym() throws Exception {
-    GetNymInfoResponse getNymInfo = paynymApi.getNymInfo(paymentCode).blockingSingle();
+    GetNymInfoResponse getNymInfo = AsyncUtil.blockingSingle(paynymApi.getNymInfo(paymentCode));
     Assertions.assertEquals("/"+PCODE+"/avatar", getNymInfo.nymAvatar);
     Assertions.assertEquals("+stillmud69f", getNymInfo.nymName);
     Assertions.assertEquals("nymmFABjPvpR2uxmAUKfD53mj", getNymInfo.nymID);
@@ -93,5 +95,15 @@ public class PaynymApiTest extends AbstractTest {
 
     Assertions.assertTrue(getNymInfo.following.isEmpty());
     Assertions.assertTrue(getNymInfo.followers.isEmpty());
+  }
+
+  @Test
+  public void getNym_error() throws Exception {
+    try {
+      GetNymInfoResponse getNymInfo = AsyncUtil.blockingSingle(paynymApi.getNymInfo(paymentCode + "foo"));
+      Assertions.assertTrue(false);
+    } catch (HttpException e) {
+      Assertions.assertEquals("Http query failed: status=500", e.getCause().getMessage());
+    }
   }
 }

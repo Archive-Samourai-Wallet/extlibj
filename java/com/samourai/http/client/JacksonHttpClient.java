@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.samourai.wallet.api.backend.beans.HttpException;
 import com.samourai.wallet.util.JSONUtils;
 import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,10 +47,7 @@ public abstract class JacksonHttpClient implements IHttpClient {
       if (log.isDebugEnabled()) {
         log.error("getJson failed: " + urlStr + ":" + e.getMessage());
       }
-      if (!(e instanceof HttpException)) {
-        e = new HttpException(e, null);
-      }
-      throw (HttpException) e;
+      throw httpException(e);
     }
   }
 
@@ -71,7 +69,7 @@ public abstract class JacksonHttpClient implements IHttpClient {
                 if (log.isDebugEnabled()) {
                   log.error("postJson failed: " + urlStr, e);
                 }
-                throw e;
+                throw httpException(e);
               }
             });
   }
@@ -89,10 +87,7 @@ public abstract class JacksonHttpClient implements IHttpClient {
       if (log.isDebugEnabled()) {
         log.error("postUrlEncoded failed: " + urlStr, e);
       }
-      if (!(e instanceof HttpException)) {
-        e = new HttpException(e, null);
-      }
-      throw (HttpException) e;
+      throw httpException(e);
     }
   }
 
@@ -117,18 +112,15 @@ public abstract class JacksonHttpClient implements IHttpClient {
     return result;
   }
 
+  protected HttpException httpException(Exception e) {
+    if (!(e instanceof HttpException)) {
+      return new HttpException(e, null);
+    }
+    return (HttpException) e;
+  }
+
   protected <T> Observable<Optional<T>> httpObservable(final Callable<T> supplier) {
-    return Observable.fromCallable(
-            () -> {
-              try {
-                return Optional.ofNullable(supplier.call());
-              } catch (Exception e) {
-                if (!(e instanceof HttpException)) {
-                  e = new HttpException(e, null);
-                }
-                throw e;
-              }
-            });
+    return Observable.fromCallable(() -> Optional.ofNullable(supplier.call())).subscribeOn(Schedulers.io());
   }
 
   protected ObjectMapper getObjectMapper() {

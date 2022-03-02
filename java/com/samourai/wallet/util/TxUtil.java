@@ -1,9 +1,7 @@
 package com.samourai.wallet.util;
 
-import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import org.bitcoinj.core.*;
-import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.script.Script;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
@@ -98,5 +96,13 @@ public class TxUtil {
       } catch (Exception e) {}
     }
     return null;
+  }
+
+  public String getTxHex(Transaction tx) {
+    return org.bitcoinj.core.Utils.HEX.encode(tx.bitcoinSerialize());
+  }
+
+  public Transaction fromTxHex(NetworkParameters params, String txHex) {
+    return new Transaction(params, org.bitcoinj.core.Utils.HEX.decode(txHex));
   }
 }

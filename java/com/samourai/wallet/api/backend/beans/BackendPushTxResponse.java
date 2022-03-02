@@ -7,8 +7,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 
-public class PushTxResponse {
-  private static Logger log = LoggerFactory.getLogger(PushTxResponse.class);
+public class BackendPushTxResponse {
+  private static Logger log = LoggerFactory.getLogger(BackendPushTxResponse.class);
   private static final String CODE_VIOLATION_STRICT_MODE_VOUTS = "VIOLATION_STRICT_MODE_VOUTS";
   private static final String ERROR_KEY_MESSAGE="message";
   private static final String ERROR_KEY_CODE="code";
@@ -17,7 +17,7 @@ public class PushTxResponse {
   public String data;
   public Object error; // string when error from node, PushTxError when address reuse
 
-  public PushTxResponse() {}
+  public BackendPushTxResponse() {}
 
   public Map<String,Object> getErrorMap() {
     if (error == null || !(error instanceof  Map)) {
