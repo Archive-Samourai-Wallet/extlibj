@@ -1,6 +1,7 @@
 package com.samourai.wallet.api.backend;
 
 import com.samourai.wallet.api.backend.beans.*;
+import com.samourai.wallet.util.JSONUtils;
 import com.samourai.wallet.util.oauth.OAuthManager;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -164,7 +165,7 @@ public class BackendApi {
     pushTx(txHex, null);
   }
 
-  public void pushTx(String txHex, List<Integer> strictModeVouts) throws Exception {
+  public void pushTx(String txHex, Collection<Integer> strictModeVouts) throws Exception {
     if (log.isDebugEnabled()) {
       log.debug("pushTx... " + txHex);
     } else {
@@ -176,13 +177,7 @@ public class BackendApi {
     postBody.put("tx", txHex);
 
     if(strictModeVouts != null && !strictModeVouts.isEmpty()) {
-      String strStrictVouts = "";
-      for(int i = 0; i < strictModeVouts.size(); i++) {
-        strStrictVouts += strictModeVouts.get(i);
-        if(i < (strictModeVouts.size() - 1)) {
-          strStrictVouts += "|";
-        }
-      }
+      String strStrictVouts = StringUtils.join(strictModeVouts,"|");
       postBody.put("strict_mode_vouts", strStrictVouts);
     }
 
@@ -190,17 +185,18 @@ public class BackendApi {
       PushTxResponse pushTxResponse = httpClient.postUrlEncoded(url, PushTxResponse.class, headers, postBody);
       checkPushTxResponse(pushTxResponse);
     } catch (HttpException e) {
-      if (log.isDebugEnabled()) {
-        log.error("pushTx failed", e);
+      // parse pushTxResponse
+      String responseBody = e.getResponseBody();
+      PushTxResponse pushTxResponse = null;
+      try {
+        pushTxResponse = JSONUtils.getInstance().getObjectMapper().readValue(responseBody, PushTxResponse.class);
+      } catch(Exception ee) {
+        log.error("Not a PushTxResponse: "+responseBody);
       }
-      log.error(
-          "PushTx failed: response="
-              + e.getResponseBody()
-              + ". error="
-              + e.getMessage()
-              + " for txHex="
-              + txHex);
-      throw new Exception("PushTx failed (" + e.getResponseBody() + ") for txHex=" + txHex);
+      if (pushTxResponse != null) {
+        checkPushTxResponse(pushTxResponse); // throw PushTxException
+      }
+      throw e;
     }
   }
 
@@ -216,13 +212,13 @@ public class BackendApi {
     }
 
     // address reuse
-    if (pushTxResponse.error != null && PushTxResponse.PushTxError.CODE_VIOLATION_STRICT_MODE_VOUTS.equals(pushTxResponse.error.code)) {
-      Collection<Integer> adressReuseOutputIndexs = (Collection<Integer>)pushTxResponse.error.message;
+    if (pushTxResponse.isErrorAddressReuse()) {
+      Collection<Integer> adressReuseOutputIndexs = pushTxResponse.getAdressReuseOutputIndexs();
       throw new PushTxAddressReuseException(adressReuseOutputIndexs);
     }
 
     // other error
-    throw new Exception("PushTx failed: "+pushTxResponse.toString());
+    throw new PushTxException(pushTxResponse.error.toString());
   }
 
   public boolean testConnectivity() {

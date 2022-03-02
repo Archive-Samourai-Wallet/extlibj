@@ -1,15 +1,14 @@
 package com.samourai.wallet.api.backend.beans;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-public class PushTxAddressReuseException extends Exception {
+public class PushTxAddressReuseException extends PushTxException {
   private List<Integer> adressReuseOutputIndexs;
 
   public PushTxAddressReuseException(Collection<Integer> adressReuseOutputIndexs) {
-    super("Address reuse detected for outputs: "+ Arrays.toString(adressReuseOutputIndexs.toArray()));
+    super("Address reuse for outputs "+adressReuseOutputIndexs);
     this.adressReuseOutputIndexs = new LinkedList<>(adressReuseOutputIndexs);
   }
 

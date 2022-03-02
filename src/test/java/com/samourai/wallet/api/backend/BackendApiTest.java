@@ -1,15 +1,23 @@
 package com.samourai.wallet.api.backend;
 
-import com.samourai.wallet.api.backend.beans.MultiAddrResponse;
-import com.samourai.wallet.api.backend.beans.TxDetail;
-import com.samourai.wallet.api.backend.beans.UnspentOutput;
-import com.samourai.wallet.api.backend.beans.WalletResponse;
+import com.samourai.wallet.api.backend.beans.*;
+import com.samourai.wallet.segwit.SegwitAddress;
+import com.samourai.wallet.send.SendFactoryGeneric;
 import com.samourai.wallet.test.AbstractTest;
+import com.samourai.wallet.util.TxUtil;
+import org.bitcoinj.core.Coin;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionOutput;
+import org.bitcoinj.script.Script;
+import org.bitcoinj.script.ScriptBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +27,9 @@ public class BackendApiTest extends AbstractTest {
       "vpub5SLqN2bLY4WeYBwMrtdanr5SfhRC7AyW1aEwbtVbt7t9y6kgBCS6ajVA4LL7Jy2iojpH1hjaiTMp5h4y9dG2dC64bAk9ZwuFCX6AvxFddaa";
   private static final String VPUB_2 =
       "vpub5b14oTd3mpWGzbxkqgaESn4Pq1MkbLbzvWZju8Y6LiqsN9JXX7ZzvdCp1qDDxLqeHGr6BUssz2yFmUDm5Fp9jTdz4madyxK6mwgsCvYdK5S";
+
+  private ECKey inputKey = ECKey.fromPrivate(new BigInteger("45292090369707310635285627500870691371399357286012942906204494584441273561412"));
+  private ECKey outputKey = ECKey.fromPrivate(new BigInteger("77292090369707310635285627500870691371399357286012942906204494584441273561412"));
 
   private BackendApi backendApi;
 
@@ -116,6 +127,78 @@ public class BackendApiTest extends AbstractTest {
         "001495df5bf26f2ae0307133ff6dc0a7d2e729872e89", tx.outputs[0].scriptpubkey);
     Assertions.assertEquals("witness_v0_keyhash", tx.outputs[0].type);
     Assertions.assertEquals("tb1qjh04hun09tsrqufnlakupf7juu5cwt5f87gh5u", tx.outputs[0].address);
+  }
+
+  @Test
+  public void pushTx_failure() throws Exception {
+    // spend coinbase -> P2WPKH
+    Script outputScript = ScriptBuilder.createP2WPKHOutputScript(inputKey);
+    Transaction txCoinbase = computeTxCoinbase(999999, outputScript);
+
+    // spend tx
+    TransactionOutput txOutput = txCoinbase.getOutput(0);
+    Transaction tx = computeSpendTx(txOutput);
+
+    // output #1
+    SegwitAddress outputAddress = new SegwitAddress(outputKey, params);
+    TransactionOutput transactionOutput = new TransactionOutput(params, null, Coin.valueOf(10000), outputAddress.getAddress());
+    tx.addOutput(transactionOutput);
+
+    // sign tx
+    Map<String, ECKey> keyBag = new LinkedHashMap<>();
+    keyBag.put(tx.getInput(0).getOutpoint().toString(), inputKey);
+    SendFactoryGeneric.getInstance().signTransaction(tx, keyBag, bipFormatSupplier);
+    tx.verify();
+
+    Assertions.assertEquals("87d73800b3f117f666abf5fc6f41567cc43f88376d898c56784747aa7023e308", tx.getHashAsString());
+
+    // push
+    try {
+      backendApi.pushTx(TxUtil.getInstance().getTxHex(tx));
+      Assertions.assertTrue(false);
+    } catch (PushTxException e) {
+      Assertions.assertEquals("PushTx failed: bad-txns-inputs-missingorspent", e.getMessage());
+      Assertions.assertEquals("bad-txns-inputs-missingorspent", e.getPushTxError());
+    }
+  }
+
+  @Test
+  public void pushTx_addressReuse() throws Exception {
+    // spend coinbase -> P2WPKH
+    Script outputScript = ScriptBuilder.createP2WPKHOutputScript(inputKey);
+    Transaction txCoinbase = computeTxCoinbase(999999, outputScript);
+
+    // spend tx
+    TransactionOutput txOutput = txCoinbase.getOutput(0);
+    Transaction tx = computeSpendTx(txOutput);
+
+    // output #1
+    SegwitAddress outputAddress = new SegwitAddress(outputKey, params);
+    TransactionOutput transactionOutput = new TransactionOutput(params, null, Coin.valueOf(10000), outputAddress.getAddress());
+    tx.addOutput(transactionOutput);
+
+    // output #2
+    outputAddress = new SegwitAddress(outputKey, params);
+    transactionOutput = new TransactionOutput(params, null, Coin.valueOf(20000), outputAddress.getAddress());
+    tx.addOutput(transactionOutput);
+
+    // sign tx
+    Map<String, ECKey> keyBag = new LinkedHashMap<>();
+    keyBag.put(tx.getInput(0).getOutpoint().toString(), inputKey);
+    SendFactoryGeneric.getInstance().signTransaction(tx, keyBag, bipFormatSupplier);
+    tx.verify();
+
+    Assertions.assertEquals("d0be0bbc23f9309a23609e5680dda236c87c826acc44a6f6a164489e23e897cf", tx.getHashAsString());
+
+    // push
+    try {
+      backendApi.pushTx(TxUtil.getInstance().getTxHex(tx), Arrays.asList(0,1));
+      Assertions.assertTrue(false);
+    } catch (PushTxAddressReuseException e) {
+      Assertions.assertEquals("PushTx failed: Address reuse for outputs [1]", e.getMessage());
+      Assertions.assertEquals("Address reuse for outputs [1]", e.getPushTxError());
+      Assertions.assertArrayEquals(new Integer[]{1}, e.getAdressReuseOutputIndexs().toArray());
+    }
   }
 
   private void assertAddressEquals(
