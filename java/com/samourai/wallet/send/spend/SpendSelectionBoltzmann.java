@@ -183,7 +183,7 @@ public class SpendSelectionBoltzmann extends SpendSelection {
     }
 
     @Override
-    public SpendTx spendTx(long amount, String address, BipFormat changeFormat, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider) throws SpendException {
+    public SpendTx spendTx(long amount, String address, BipFormat changeFormat, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider, long blockHeight) throws SpendException {
         // select utxos for boltzmann
         long inputAmount = 0L;
         long outputAmount = 0L;
@@ -210,7 +210,7 @@ public class SpendSelectionBoltzmann extends SpendSelection {
 
         BigInteger fee = BigInteger.valueOf(inputAmount - outputAmount);
         long change = computeChange(amount, fee);
-        return new SpendTx(changeFormat, amount, fee.longValue(), change, this, receivers, rbfOptIn, utxoProvider, params);
+        return new SpendTx(changeFormat, amount, fee.longValue(), change, this, receivers, rbfOptIn, utxoProvider, params, blockHeight);
     }
 
     public static void _setTestMode(boolean testMode) {

@@ -39,6 +39,7 @@ public class SpendBuilderTest {
     private static String[] ADDRESS_CHANGE_84;
     private static final String SEED_WORDS = "all all all all all all all all all all all all";
     private static final String SEED_PASSPHRASE = "test";
+    private static final long BLOCK_HEIGHT = 12345678;
 
     public SpendBuilderTest() throws Exception {
         final HD_Wallet bip44w = TestUtil.computeBip44wallet(SEED_WORDS, SEED_PASSPHRASE);
@@ -67,7 +68,7 @@ public class SpendBuilderTest {
         BigInteger feePerKb = BigInteger.valueOf(50);
         BipFormat forcedChangeFormat = null;
         List<MyTransactionOutPoint> preselectedInputs = null;
-        return spendBuilder.preview(account, addressReceiver, amount, stonewall, true, feePerKb, forcedChangeFormat, preselectedInputs);
+        return spendBuilder.preview(account, addressReceiver, amount, stonewall, true, feePerKb, forcedChangeFormat, preselectedInputs, BLOCK_HEIGHT);
     }
 
     @Test
@@ -151,7 +152,7 @@ public class SpendBuilderTest {
         // should select largest Utxos
         SpendTx spendTx = spend84(account, amount, true);
         long changeExpected = 9650;
-        verify(spendTx, SpendType.SIMPLE, Arrays.asList(utxo3, utxo2, utxo1), 350, amount, changeExpected, BIP_FORMAT.SEGWIT_NATIVE, 277, 1106,
+        verify(spendTx, SpendType.SIMPLE, Arrays.asList(utxo3, utxo2, utxo1), 350, amount, changeExpected, BIP_FORMAT.SEGWIT_NATIVE, 276, 1104,
                 Arrays.asList(ADDRESS_RECEIVER_84, ADDRESS_CHANGE_84[1]),
                 Arrays.asList(amount,changeExpected));
     }
@@ -174,7 +175,7 @@ public class SpendBuilderTest {
         // should select Boltzmann
         SpendTx spendTx = spend84(account, amount, true);
         long changeExpected = 69400;
-        verify(spendTx, SpendType.STONEWALL, Arrays.asList(utxo3, utxo4, utxo2, utxo5, utxo6), 600, amount, changeExpected, BIP_FORMAT.SEGWIT_NATIVE, 475, 1897,
+        verify(spendTx, SpendType.STONEWALL, Arrays.asList(utxo3, utxo4, utxo2, utxo5, utxo6), 600, amount, changeExpected, BIP_FORMAT.SEGWIT_NATIVE, 474, 1896,
                 Arrays.asList(ADDRESS_CHANGE_84[2], ADDRESS_CHANGE_84[1], ADDRESS_RECEIVER_84, ADDRESS_CHANGE_84[0]),
                 Arrays.asList(19700L, amount, amount, 9700L));
     }

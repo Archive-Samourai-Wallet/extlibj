@@ -36,7 +36,7 @@ public class SpendBuilder {
     }
 
     // forcedChangeType may be null
-    public SpendTx preview(WhirlpoolAccount account, String address, long amount, boolean boltzmann, boolean rbfOptIn, BigInteger feePerKb, BipFormat forcedChangeFormat, List<MyTransactionOutPoint> preselectedInputs) throws Exception {
+    public SpendTx preview(WhirlpoolAccount account, String address, long amount, boolean boltzmann, boolean rbfOptIn, BigInteger feePerKb, BipFormat forcedChangeFormat, List<MyTransactionOutPoint> preselectedInputs, long blockHeight) throws Exception {
         BipFormat addressFormat = computeAddressFormat(forcedChangeFormat, address, utxoProvider.getBipFormatSupplier(), params);
 
         // if possible, get UTXO by input 'type': p2pkh, p2sh-p2wpkh or p2wpkh, else get all UTXO
@@ -46,7 +46,7 @@ public class SpendBuilder {
         Collection<UTXO> utxos = findUtxos(neededAmount, account, addressFormat, preselectedInputs);
 
         SpendSelection spendSelection = computeUtxoSelection(account, address, boltzmann, amount, neededAmount, utxos, addressFormat, params, feePerKb, forcedChangeFormat);
-        SpendTx spendTx = spendSelection.spendTx(amount, address, addressFormat, account, rbfOptIn, params, feePerKb, restoreChangeIndexes, utxoProvider);
+        SpendTx spendTx = spendSelection.spendTx(amount, address, addressFormat, account, rbfOptIn, params, feePerKb, restoreChangeIndexes, utxoProvider, blockHeight);
         if (spendTx != null) {
             if (log.isDebugEnabled()) {
                 log.debug("spend type:" + spendSelection.getSpendType());

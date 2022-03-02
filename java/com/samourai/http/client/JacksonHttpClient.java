@@ -2,6 +2,7 @@ package com.samourai.http.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.samourai.wallet.api.backend.beans.HttpException;
+import com.samourai.wallet.util.AsyncUtil;
 import com.samourai.wallet.util.JSONUtils;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
@@ -27,28 +28,27 @@ public abstract class JacksonHttpClient implements IHttpClient {
   protected abstract String requestJsonPostUrlEncoded(
       String urlStr, Map<String, String> headers, Map<String, String> body) throws Exception;
 
-  protected void onRequestError(Exception e) {}
-
   @Override
   public <T> T getJson(String urlStr, Class<T> responseType, Map<String, String> headers)
       throws HttpException {
-    return getJson(urlStr, responseType, headers, false);
+      return getJson(urlStr, responseType, headers, false);
   }
 
   @Override
   public <T> T getJson(String urlStr, Class<T> responseType, Map<String, String> headers, boolean async)
           throws HttpException {
-    try {
-      String responseContent = requestJsonGet(urlStr, headers, async);
-      T result = parseJson(responseContent, responseType);
-      return result;
-    } catch (Exception e) {
-      onRequestError(e);
-      if (log.isDebugEnabled()) {
-        log.error("getJson failed: " + urlStr + ":" + e.getMessage());
+    return httpObservableBlockingSingle(() -> { // run on ioThread
+      try {
+        String responseContent = requestJsonGet(urlStr, headers, async);
+        T result = parseJson(responseContent, responseType);
+        return result;
+      } catch (Exception e) {
+        if (log.isDebugEnabled()) {
+          log.error("getJson failed: " + urlStr + ":" + e.getMessage());
+        }
+        throw httpException(e);
       }
-      throw httpException(e);
-    }
+    });
   }
 
   @Override
@@ -65,7 +65,6 @@ public abstract class JacksonHttpClient implements IHttpClient {
                 T result = parseJson(responseContent, responseType);
                 return result;
               } catch (Exception e) {
-                onRequestError(e);
                 if (log.isDebugEnabled()) {
                   log.error("postJson failed: " + urlStr, e);
                 }
@@ -78,17 +77,18 @@ public abstract class JacksonHttpClient implements IHttpClient {
   public <T> T postUrlEncoded(
       String urlStr, Class<T> responseType, Map<String, String> headers, Map<String, String> body)
       throws HttpException {
-    try {
-      String responseContent = requestJsonPostUrlEncoded(urlStr, headers, body);
-      T result = parseJson(responseContent, responseType);
-      return result;
-    } catch (Exception e) {
-      onRequestError(e);
-      if (log.isDebugEnabled()) {
-        log.error("postUrlEncoded failed: " + urlStr, e);
+    return httpObservableBlockingSingle(() -> { // run on ioThread
+      try {
+        String responseContent = requestJsonPostUrlEncoded(urlStr, headers, body);
+        T result = parseJson(responseContent, responseType);
+        return result;
+      } catch (Exception e) {
+        if (log.isDebugEnabled()) {
+          log.error("postUrlEncoded failed: " + urlStr, e);
+        }
+        throw httpException(e);
       }
-      throw httpException(e);
-    }
+    });
   }
 
   private <T> T parseJson(String responseContent, Class<T> responseType) throws Exception {
@@ -121,6 +121,17 @@ public abstract class JacksonHttpClient implements IHttpClient {
 
   protected <T> Observable<Optional<T>> httpObservable(final Callable<T> supplier) {
     return Observable.fromCallable(() -> Optional.ofNullable(supplier.call())).subscribeOn(Schedulers.io());
+  }
+
+  protected <T> T httpObservableBlockingSingle(final Callable<T> supplier) throws HttpException{
+    try {
+      Optional<T> opt = AsyncUtil.getInstance().blockingSingle(
+              httpObservable(supplier)
+      );
+      return opt.orElse(null);
+    } catch (Exception e) {
+      throw httpException(e);
+    }
   }
 
   protected ObjectMapper getObjectMapper() {

@@ -29,7 +29,7 @@ public class SpendTx {
     private int weight;
     private Transaction tx;
 
-    public SpendTx(BipFormat changeFormat, long amount, long fee, long change, SpendSelection spendSelection, Map<String, Long> receivers, boolean rbfOptIn, UtxoKeyProvider keyProvider, NetworkParameters params) throws SpendException {
+    public SpendTx(BipFormat changeFormat, long amount, long fee, long change, SpendSelection spendSelection, Map<String, Long> receivers, boolean rbfOptIn, UtxoKeyProvider keyProvider, NetworkParameters params, long blockHeight) throws SpendException {
         // consistency check
         long totalValueSelected = spendSelection.getTotalValueSelected();
         if((amount+fee+change) > totalValueSelected){
@@ -46,16 +46,16 @@ public class SpendTx {
         this.change = change;
         this.rbfOptIn = rbfOptIn;
 
-        this.tx = this.computeTx(keyProvider, params);
+        this.tx = this.computeTx(keyProvider, params, blockHeight);
         this.vSize = tx.getVirtualTransactionSize();
         this.weight = tx.getWeight();
     }
 
-    private Transaction computeTx(UtxoKeyProvider keyProvider, NetworkParameters params) throws SpendException {
+    private Transaction computeTx(UtxoKeyProvider keyProvider, NetworkParameters params, long blockHeight) throws SpendException {
         // spend tx
         Transaction tx;
         try {
-            tx = SendFactoryGeneric.getInstance().makeTransaction(receivers, getSpendFrom(), rbfOptIn, params);
+            tx = SendFactoryGeneric.getInstance().makeTransaction(receivers, getSpendFrom(), rbfOptIn, params, blockHeight);
         } catch (MakeTxException e) {
             log.error("MakeTxException", e);
             throw new SpendException(SpendError.MAKING);

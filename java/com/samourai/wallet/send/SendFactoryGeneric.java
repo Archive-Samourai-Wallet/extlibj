@@ -3,9 +3,9 @@ package com.samourai.wallet.send;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bip69.BIP69InputComparator;
 import com.samourai.wallet.bip69.BIP69OutputComparator;
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
-import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.exceptions.MakeTxException;
 import com.samourai.wallet.send.exceptions.SignTxException;
 import com.samourai.wallet.send.exceptions.SignTxLengthException;
@@ -14,9 +14,6 @@ import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.TxUtil;
 import org.bitcoinj.core.*;
 import org.bitcoinj.script.Script;
-import org.bitcoinj.script.ScriptBuilder;
-import org.bitcoinj.script.ScriptOpCodes;
-import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +35,19 @@ public class SendFactoryGeneric {
 
     protected SendFactoryGeneric() { ; }
 
+    // used by android
+    public Transaction makeTransaction(List<MyTransactionOutPoint> unspent, Map<String, BigInteger> receivers, boolean rbfOptIn, NetworkParameters params, long blockHeight) throws MakeTxException {
+        Map<String, Long> receiversLong = new LinkedHashMap<>();
+        for (Map.Entry<String,BigInteger> entry : receivers.entrySet()) {
+            receiversLong.put(entry.getKey(), entry.getValue().longValue());
+        }
+        return makeTransaction(receiversLong, unspent, rbfOptIn, params, blockHeight);
+    }
+
     /*
     Used by spends
      */
-    public Transaction makeTransaction(Map<String, Long> receivers, List<MyTransactionOutPoint> unspent, boolean rbfOptIn, NetworkParameters params) throws MakeTxException {
+    public Transaction makeTransaction(Map<String, Long> receivers, List<MyTransactionOutPoint> unspent, boolean rbfOptIn, NetworkParameters params, long blockHeight) throws MakeTxException {
 
         BigInteger amount = BigInteger.ZERO;
         for(Iterator<Map.Entry<String, Long>> iterator = receivers.entrySet().iterator(); iterator.hasNext();) {
@@ -49,8 +55,15 @@ public class SendFactoryGeneric {
             amount = amount.add(BigInteger.valueOf(mapEntry.getValue()));
         }
 
-        List<TransactionOutput> outputs = new ArrayList<TransactionOutput>();
         Transaction tx = new Transaction(params);
+        tx.setVersion(2);
+        if(rbfOptIn)    {
+            if(blockHeight > 0L)    {
+                tx.setLockTime(blockHeight);
+            }
+        }
+
+        List<TransactionOutput> outputs = new ArrayList<TransactionOutput>();
 
         for(Iterator<Map.Entry<String, Long>> iterator = receivers.entrySet().iterator(); iterator.hasNext();) {
             Map.Entry<String, Long> mapEntry = iterator.next();
@@ -65,21 +78,13 @@ public class SendFactoryGeneric {
                 throw new MakeTxException("Invalid amount");
             }
 
-            TransactionOutput output = null;
-            Script toOutputScript = null;
-            if(!FormatsUtilGeneric.getInstance().isValidBitcoinAddress(toAddress, params) && FormatsUtilGeneric.getInstance().isValidBIP47OpReturn(toAddress))    {
-                toOutputScript = new ScriptBuilder().op(ScriptOpCodes.OP_RETURN).data(Hex.decode(toAddress)).build();
-                output = new TransactionOutput(params, null, Coin.valueOf(0L), toOutputScript.getProgram());
+            try {
+                TransactionOutput output = TxUtil.getInstance().computeTransactionOutput(toAddress, value.longValue(), params);
+                outputs.add(output);
+            } catch (Exception e) {
+                log.error("computeTransactionOutput failed", e);
+                throw new MakeTxException(e);
             }
-            else {
-                try {
-                    output = computeTransactionOutput(toAddress, value.longValue(), params);
-                } catch (Exception e) {
-                    log.error("computeTransactionOutput failed", e);
-                    throw new MakeTxException(e);
-                }
-            }
-            outputs.add(output);
         }
 
         List<TransactionInput> inputs = new ArrayList<>();
@@ -90,7 +95,7 @@ public class SendFactoryGeneric {
             }
 
             TransactionInput input = outPoint.computeSpendInput();
-            if(rbfOptIn == true)    {
+            if(rbfOptIn)    {
                 input.setSequenceNumber(SamouraiWalletConst.RBF_SEQUENCE_VAL.longValue());
             }
             inputs.add(input);
@@ -147,6 +152,11 @@ public class SendFactoryGeneric {
         }
     }
 
+    // used by Android
+    public Transaction signTransaction(Transaction transaction, Map<String,ECKey> keyBag) throws SignTxException {
+        return signTransaction(transaction, keyBag, BIP_FORMAT.PROVIDER);
+    }
+
     public synchronized Transaction signTransaction(Transaction transaction, Map<String,ECKey> keyBag, BipFormatSupplier bipFormatSupplier) throws SignTxException {
         List<TransactionInput> inputs = transaction.getInputs();
 
@@ -178,16 +188,6 @@ public class SendFactoryGeneric {
             log.debug("signInput #"+inputIndex+": value="+txInput.getValue()+", addressType="+addressFormat+", address="+inputAddress);
         }
         addressFormat.sign(tx, inputIndex, key);
-    }
-
-    public TransactionOutput computeTransactionOutput(String address, long amount, NetworkParameters params) throws Exception {
-        if(FormatsUtilGeneric.getInstance().isValidBech32(address))    {
-            return Bech32UtilGeneric.getInstance().getTransactionOutput(address, amount, params);
-        }
-        else    {
-            Script outputScript = ScriptBuilder.createOutputScript(org.bitcoinj.core.Address.fromBase58(params, address));
-            return new TransactionOutput(params, null, Coin.valueOf(amount), outputScript.getProgram());
-        }
     }
 
 }

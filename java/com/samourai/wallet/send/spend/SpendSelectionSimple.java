@@ -93,7 +93,7 @@ public class SpendSelectionSimple extends SpendSelection {
     }
 
     @Override
-    public SpendTx spendTx(long amount, String address, BipFormat addressFormat, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider) throws SpendException {
+    public SpendTx spendTx(long amount, String address, BipFormat addressFormat, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider, long blockHeight) throws SpendException {
         List<MyTransactionOutPoint> outpoints = getSpendFrom();
         Triple<Integer, Integer, Integer> outpointTypes = FeeUtil.getInstance().getOutpointCount(new Vector(outpoints), params);
         BigInteger fee;
@@ -134,6 +134,6 @@ public class SpendSelectionSimple extends SpendSelection {
         if (restoreChangeIndexes != null) {
             restoreChangeIndexes.run(); // TODO zeroleak
         }
-        return new SpendTx(addressFormat, amount, fee.longValue(), change, this, receivers, rbfOptIn, utxoProvider, params);
+        return new SpendTx(addressFormat, amount, fee.longValue(), change, this, receivers, rbfOptIn, utxoProvider, params, blockHeight);
     }
 }

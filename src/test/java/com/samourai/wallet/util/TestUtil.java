@@ -38,7 +38,7 @@ public class TestUtil {
         utxo.confirmations = confirms;
         utxo.addr = address;
         utxo.value = value;
-        utxo.script = Hex.toHexString(SendFactoryGeneric.getInstance().computeTransactionOutput(address, value, params).getScriptBytes()); // TODO ?
+        utxo.script = Hex.toHexString(TxUtil.getInstance().computeTransactionOutput(address, value, params).getScriptBytes()); // TODO ?
         return utxo;
     }
 

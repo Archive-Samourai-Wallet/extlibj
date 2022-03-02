@@ -48,7 +48,7 @@ public abstract class SpendSelection {
         return UTXO.sumValue(selectedUTXO);
     }
 
-    public abstract SpendTx spendTx(long amount, String address, BipFormat changeFormat, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider) throws SpendException ;
+    public abstract SpendTx spendTx(long amount, String address, BipFormat changeFormat, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider, long blockHeight) throws SpendException ;
 
     protected long computeChange(long amount, BigInteger fee) throws SpendException {
         long change = getTotalValueSelected() - (amount + fee.longValue());

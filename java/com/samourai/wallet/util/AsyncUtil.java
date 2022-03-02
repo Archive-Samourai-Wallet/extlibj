@@ -2,9 +2,22 @@ package com.samourai.wallet.util;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.functions.Action;
+import io.reactivex.schedulers.Schedulers;
+
+import java.util.concurrent.Callable;
 
 public class AsyncUtil {
-    public static <T> T blockingSingle(Observable<T> o) throws Exception {
+    private static AsyncUtil instance;
+
+    public static AsyncUtil getInstance() {
+        if(instance == null) {
+            instance = new AsyncUtil();
+        }
+        return instance;
+    }
+
+    public <T> T blockingSingle(Observable<T> o) throws Exception {
         try {
             return o.blockingSingle();
         } catch (RuntimeException e) {
@@ -15,7 +28,8 @@ public class AsyncUtil {
             throw e;
         }
     }
-    public static void blockingAwait(Completable o) throws Exception {
+
+    public void blockingAwait(Completable o) throws Exception {
         try {
             o.blockingAwait();
         } catch (RuntimeException e) {
@@ -25,5 +39,21 @@ public class AsyncUtil {
             }
             throw e;
         }
+    }
+
+    public <T> Observable<T> runIOAsync(final Callable<T> callable) {
+        return Observable.fromCallable(() -> callable.call()).subscribeOn(Schedulers.io());
+    }
+
+    public Completable runIOAsyncCompletable(final Action action) {
+        return Completable.fromAction(() -> action.run()).subscribeOn(Schedulers.io());
+    }
+
+    public <T> T runIO(final Callable<T> callable) throws Exception {
+        return blockingSingle(runIOAsync(callable));
+    }
+
+    public void runIO(final Action action) throws Exception {
+        blockingAwait(runIOAsyncCompletable(action));
     }
 }
