@@ -125,11 +125,11 @@ public class SendFactoryGeneric {
 //                Log.i("SendFactory", "address from script:" + address);
                 String hash = input.getOutpoint().getHash().toString();
                 int index = (int)input.getOutpoint().getIndex();
-                ECKey ecKey = utxoProvider._getPrivKey(hash, index);
-                if(ecKey == null) {
+                byte[] privKey = utxoProvider._getPrivKey(hash, index);
+                if(privKey == null) {
                     throw new Exception("Key not found for input: "+hash+":"+index);
                 }
-                keyBag.put(input.getOutpoint().toString(), ecKey);
+                keyBag.put(input.getOutpoint().toString(), ECKey.fromPrivate(privKey));
             }
             catch(Exception e) {
                 throw new SignTxException(e);
