@@ -1,6 +1,7 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.whirlpool.WhirlpoolConst;
@@ -16,11 +17,13 @@ public abstract class CahootsWallet {
 
     private HD_Wallet bip84Wallet;
     private BIP47Wallet bip47Wallet;
+    private BipFormatSupplier bipFormatSupplier;
     private NetworkParameters params;
 
-    public CahootsWallet(HD_Wallet bip84Wallet, NetworkParameters params) {
+    public CahootsWallet(HD_Wallet bip84Wallet, BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
         this.bip84Wallet = bip84Wallet;
         this.bip47Wallet = new BIP47Wallet(bip84Wallet);
+        this.bipFormatSupplier = bipFormatSupplier;
         this.params = params;
     }
 
@@ -64,6 +67,10 @@ public abstract class CahootsWallet {
     }
 
     protected abstract List<CahootsUtxo> fetchUtxos(int account);
+
+    public BipFormatSupplier getBipFormatSupplier() {
+        return bipFormatSupplier;
+    }
 
     public NetworkParameters getParams() {
         return params;

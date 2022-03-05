@@ -1,5 +1,6 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.hd.HD_Wallet;
 import org.bitcoinj.core.NetworkParameters;
 
@@ -13,8 +14,8 @@ public class SimpleCahootsWallet extends CahootsWallet {
     private long feePerB;
     private Map<Integer,List<CahootsUtxo>> utxosByAccount;
 
-    public SimpleCahootsWallet(HD_Wallet bip84w, NetworkParameters params, int postChangeIndex, long feePerB) throws Exception {
-        super(bip84w, params);
+    public SimpleCahootsWallet(HD_Wallet bip84w, BipFormatSupplier bipFormatSupplier, NetworkParameters params, int postChangeIndex, long feePerB) throws Exception {
+        super(bip84w, bipFormatSupplier, params);
         this.postChangeIndex = postChangeIndex;
         this.feePerB = feePerB;
         this.utxosByAccount = new HashMap<Integer, List<CahootsUtxo>>();

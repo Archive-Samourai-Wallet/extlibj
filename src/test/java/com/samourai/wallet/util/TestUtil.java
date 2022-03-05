@@ -1,9 +1,9 @@
 package com.samourai.wallet.util;
 
 import com.samourai.wallet.api.backend.beans.UnspentOutput;
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
-import com.samourai.wallet.send.SendFactoryGeneric;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
@@ -29,7 +29,7 @@ public class TestUtil {
         return bip84w;
     }
 
-    public static UnspentOutput computeUtxo(String hash, int n, String xpub, String address, long value, int confirms) throws Exception {
+    public static UnspentOutput computeUtxo(String hash, int n, String xpub, String address, long value, int confirms, BipFormatSupplier bipFormatSupplier) throws Exception {
         UnspentOutput utxo = new UnspentOutput();
         utxo.tx_hash = hash;
         utxo.tx_output_n = n;
@@ -38,7 +38,7 @@ public class TestUtil {
         utxo.confirmations = confirms;
         utxo.addr = address;
         utxo.value = value;
-        utxo.script = Hex.toHexString(TxUtil.getInstance().computeTransactionOutput(address, value, params).getScriptBytes()); // TODO ?
+        utxo.script = Hex.toHexString(bipFormatSupplier.getTransactionOutput(address, value, params).getScriptBytes()); // TODO ?
         return utxo;
     }
 

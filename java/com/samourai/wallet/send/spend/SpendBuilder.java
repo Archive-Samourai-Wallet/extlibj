@@ -122,7 +122,7 @@ public class SpendBuilder {
             if (log.isDebugEnabled()) {
                 log.debug("SIMPLE spending all utxos");
             }
-            return new SpendSelectionSimple(utxos);
+            return new SpendSelectionSimple(utxoProvider.getBipFormatSupplier(), utxos);
         }
 
         // boltzmann spend
@@ -134,9 +134,10 @@ public class SpendBuilder {
         }
 
         // simple spend (less than balance)
+        BipFormatSupplier bipFormatSupplier = utxoProvider.getBipFormatSupplier();
 
         // get smallest 1 UTXO > than spend + fee + dust
-        SpendSelection spendSelection = SpendSelectionSimple.computeSpendSingle(utxos, amount, params, feePerKb);
+        SpendSelection spendSelection = SpendSelectionSimple.computeSpendSingle(utxos, amount, bipFormatSupplier, params, feePerKb);
         if (spendSelection != null) {
             if (log.isDebugEnabled()) {
                 log.debug("SIMPLE spending smallest possible utxo");
@@ -145,7 +146,7 @@ public class SpendBuilder {
         }
 
         // get largest UTXOs > than spend + fee + dust
-        spendSelection = SpendSelectionSimple.computeSpendMultiple(utxos, amount, params, feePerKb);
+        spendSelection = SpendSelectionSimple.computeSpendMultiple(utxos, amount, bipFormatSupplier, params, feePerKb);
         if (spendSelection != null) {
             if (log.isDebugEnabled()) {
                 log.debug("SIMPLE spending multiple utxos");

@@ -33,12 +33,12 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
 
         // mock sender wallet
         final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
-        TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(bip84WalletSender, params);
+        TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(bip84WalletSender, bipFormatSupplier, params);
         cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "senderAddress1");
 
         // mock receiver wallet
         final HD_Wallet bip84WalletCounterparty = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
-        TestCahootsWallet cahootsWalletCounterparty = new TestCahootsWallet(bip84WalletCounterparty, params);
+        TestCahootsWallet cahootsWalletCounterparty = new TestCahootsWallet(bip84WalletCounterparty, bipFormatSupplier, params);
         cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "counterpartyAddress1");
 
         // instanciate sender
@@ -90,12 +90,12 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
 
         // mock sender wallet
         final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
-        TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(bip84WalletSender, params);
+        TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(bip84WalletSender, bipFormatSupplier, params);
         cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "senderAddress1");
 
         // mock counterparty wallet
         final HD_Wallet bip84WalletCounterparty = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
-        TestCahootsWallet cahootsWalletCounterparty = new TestCahootsWallet(bip84WalletCounterparty, params);
+        TestCahootsWallet cahootsWalletCounterparty = new TestCahootsWallet(bip84WalletCounterparty, bipFormatSupplier, params);
         cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "counterpartyAddress1");
 
         // instanciate sender

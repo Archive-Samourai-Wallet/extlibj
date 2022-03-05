@@ -55,7 +55,7 @@ public class SpendTx {
         // spend tx
         Transaction tx;
         try {
-            tx = SendFactoryGeneric.getInstance().makeTransaction(receivers, getSpendFrom(), rbfOptIn, params, blockHeight);
+            tx = SendFactoryGeneric.getInstance().makeTransaction(receivers, getSpendFrom(), keyProvider.getBipFormatSupplier(), rbfOptIn, params, blockHeight);
         } catch (MakeTxException e) {
             log.error("MakeTxException", e);
             throw new SpendException(SpendError.MAKING);

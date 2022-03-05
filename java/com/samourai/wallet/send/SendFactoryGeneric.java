@@ -36,18 +36,18 @@ public class SendFactoryGeneric {
     protected SendFactoryGeneric() { ; }
 
     // used by android
-    public Transaction makeTransaction(List<MyTransactionOutPoint> unspent, Map<String, BigInteger> receivers, boolean rbfOptIn, NetworkParameters params, long blockHeight) throws MakeTxException {
+    public Transaction makeTransaction(List<MyTransactionOutPoint> unspent, Map<String, BigInteger> receivers, BipFormatSupplier bipFormatSupplier, boolean rbfOptIn, NetworkParameters params, long blockHeight) throws MakeTxException {
         Map<String, Long> receiversLong = new LinkedHashMap<>();
         for (Map.Entry<String,BigInteger> entry : receivers.entrySet()) {
             receiversLong.put(entry.getKey(), entry.getValue().longValue());
         }
-        return makeTransaction(receiversLong, unspent, rbfOptIn, params, blockHeight);
+        return makeTransaction(receiversLong, unspent, bipFormatSupplier, rbfOptIn, params, blockHeight);
     }
 
     /*
     Used by spends
      */
-    public Transaction makeTransaction(Map<String, Long> receivers, List<MyTransactionOutPoint> unspent, boolean rbfOptIn, NetworkParameters params, long blockHeight) throws MakeTxException {
+    public Transaction makeTransaction(Map<String, Long> receivers, List<MyTransactionOutPoint> unspent, BipFormatSupplier bipFormatSupplier, boolean rbfOptIn, NetworkParameters params, long blockHeight) throws MakeTxException {
 
         BigInteger amount = BigInteger.ZERO;
         for(Iterator<Map.Entry<String, Long>> iterator = receivers.entrySet().iterator(); iterator.hasNext();) {
@@ -79,7 +79,7 @@ public class SendFactoryGeneric {
             }
 
             try {
-                TransactionOutput output = TxUtil.getInstance().computeTransactionOutput(toAddress, value.longValue(), params);
+                TransactionOutput output = bipFormatSupplier.getTransactionOutput(toAddress, value.longValue(), params);
                 outputs.add(output);
             } catch (Exception e) {
                 log.error("computeTransactionOutput failed", e);
@@ -181,7 +181,7 @@ public class SendFactoryGeneric {
         // sign input
         TransactionInput txInput = tx.getInput(inputIndex);
         TransactionOutput connectedOutput = txInput.getOutpoint().getConnectedOutput();
-        String inputAddress = TxUtil.getInstance().getToAddress(connectedOutput);
+        String inputAddress = bipFormatSupplier.getToAddress(connectedOutput);
         BipFormat addressFormat = bipFormatSupplier.findByAddress(inputAddress, tx.getParams());
 
         if (log.isDebugEnabled()) {

@@ -1,5 +1,6 @@
 package com.samourai.wallet.cahoots.stonewallx2;
 
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.segwit.SegwitAddress;
@@ -26,8 +27,8 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
     private static final Logger log = LoggerFactory.getLogger(Stonewallx2Service.class);
     private static final Bech32UtilGeneric bech32Util = Bech32UtilGeneric.getInstance();
 
-    public Stonewallx2Service(NetworkParameters params) {
-        super(params);
+    public Stonewallx2Service(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
+        super(bipFormatSupplier, params);
     }
 
     public STONEWALLx2 startInitiator(CahootsWallet cahootsWallet, long amount, int account, String address) throws Exception {

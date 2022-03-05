@@ -4,6 +4,7 @@ import com.samourai.soroban.client.SorobanInteraction;
 import com.samourai.soroban.client.SorobanMessageService;
 import com.samourai.soroban.client.SorobanReply;
 import com.samourai.wallet.SamouraiWalletConst;
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
@@ -204,12 +205,13 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
     }
 
     private AbstractCahootsService newCahootsService(CahootsType cahootsType) throws Exception {
+        BipFormatSupplier bipFormatSupplier = cahootsWallet.getBipFormatSupplier();
         NetworkParameters params = cahootsWallet.getParams();
         switch(cahootsType) {
             case STOWAWAY:
-                return new StowawayService(params);
+                return new StowawayService(bipFormatSupplier, params);
             case STONEWALLX2:
-                return new Stonewallx2Service(params);
+                return new Stonewallx2Service(bipFormatSupplier, params);
         }
         throw new Exception("Unrecognized #Cahoots");
     }

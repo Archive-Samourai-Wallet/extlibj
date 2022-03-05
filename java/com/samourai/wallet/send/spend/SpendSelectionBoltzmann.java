@@ -2,6 +2,7 @@ package com.samourai.wallet.send.spend;
 
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.send.BoltzmannUtil;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
@@ -10,7 +11,6 @@ import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
 import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoProvider;
-import com.samourai.wallet.util.TxUtil;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.NetworkParameters;
@@ -26,8 +26,8 @@ public class SpendSelectionBoltzmann extends SpendSelection {
     private static boolean TEST_MODE = false;
     private Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair;
 
-    public SpendSelectionBoltzmann(Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair) {
-        super(SpendType.STONEWALL);
+    public SpendSelectionBoltzmann(BipFormatSupplier bipFormatSupplier, Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair) {
+        super(bipFormatSupplier, SpendType.STONEWALL);
         this.pair = pair;
     }
 
@@ -179,7 +179,7 @@ public class SpendSelectionBoltzmann extends SpendSelection {
             return null;
         }
 
-        return new SpendSelectionBoltzmann(pair);
+        return new SpendSelectionBoltzmann(utxoProvider.getBipFormatSupplier(), pair);
     }
 
     @Override
@@ -200,7 +200,7 @@ public class SpendSelectionBoltzmann extends SpendSelection {
         Map<String, Long> receivers = new HashMap<>();
         for (TransactionOutput output : pair.getRight()) {
             try {
-                String outputAddress = TxUtil.getInstance().getToAddress(output);
+                String outputAddress = getBipFormatSupplier().getToAddress(output);
                 receivers.put(outputAddress, output.getValue().longValue());
                 outputAmount += output.getValue().longValue();
             } catch (Exception e) {

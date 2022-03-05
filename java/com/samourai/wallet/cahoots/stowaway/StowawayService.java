@@ -1,6 +1,7 @@
 package com.samourai.wallet.cahoots.stowaway;
 
 import com.samourai.wallet.SamouraiWalletConst;
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.segwit.SegwitAddress;
@@ -29,8 +30,8 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     private static final Logger log = LoggerFactory.getLogger(StowawayService.class);
     private static final Bech32UtilGeneric bech32Util = Bech32UtilGeneric.getInstance();
 
-    public StowawayService(NetworkParameters params) {
-        super(params);
+    public StowawayService(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
+        super(bipFormatSupplier, params);
     }
 
     public Stowaway startInitiator(CahootsWallet cahootsWallet, long amount, int account) throws Exception {

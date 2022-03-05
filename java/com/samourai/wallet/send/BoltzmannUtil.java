@@ -6,7 +6,6 @@ import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.send.spend.SpendBuilder;
 import com.samourai.wallet.util.FeeUtil;
-import com.samourai.wallet.util.TxUtil;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -297,7 +296,7 @@ public class BoltzmannUtil {
                 BipFormat mixedFormat = SpendBuilder.computeAddressFormat(forcedChangeFormat, address, bipFormatSupplier, params);
                 _address = utxoProvider.getChangeAddress(account, mixedFormat);
             }
-            txSpendOutput = TxUtil.getInstance().computeTransactionOutput(_address, spendAmount.longValue(), params);
+            txSpendOutput = bipFormatSupplier.getTransactionOutput(_address, spendAmount.longValue(), params);
             txOutputs.add(txSpendOutput);
 
             //
@@ -307,7 +306,7 @@ public class BoltzmannUtil {
             String utxoAddress = utxos.get(0).getOutpoints().get(0).getAddress();
             BipFormat changeFormat = SpendBuilder.computeAddressFormat(forcedChangeFormat, utxoAddress, bipFormatSupplier, params);
             String changeAddress = utxoProvider.getChangeAddress(account, changeFormat);
-            txChangeOutput = TxUtil.getInstance().computeTransactionOutput(changeAddress, changeDue.longValue(), params);
+            txChangeOutput = bipFormatSupplier.getTransactionOutput(changeAddress, changeDue.longValue(), params);
             txOutputs.add(txChangeOutput);
         }
         catch(Exception e) {

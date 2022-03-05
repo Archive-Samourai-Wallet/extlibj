@@ -2,6 +2,7 @@ package com.samourai.wallet.send.spend;
 
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormat;
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.beans.SpendError;
@@ -20,20 +21,26 @@ import java.util.List;
 
 public abstract class SpendSelection {
     private static final Logger log = LoggerFactory.getLogger(SpendSelection.class);
+    private BipFormatSupplier bipFormatSupplier;
     private SpendType spendType;
     private List<UTXO> selectedUTXO;
 
-    public SpendSelection(SpendType spendType) {
+    public SpendSelection(BipFormatSupplier bipFormatSupplier, SpendType spendType) {
+        this.bipFormatSupplier = bipFormatSupplier;
         this.spendType = spendType;
         this.selectedUTXO = new ArrayList<>();
     }
 
-    public void addSelectedUTXO(UTXO utxo) {
-        selectedUTXO.add(utxo);
+    protected BipFormatSupplier getBipFormatSupplier() {
+        return bipFormatSupplier;
     }
 
     public SpendType getSpendType() {
         return spendType;
+    }
+
+    public void addSelectedUTXO(UTXO utxo) {
+        selectedUTXO.add(utxo);
     }
 
     public List<MyTransactionOutPoint> getSpendFrom() {

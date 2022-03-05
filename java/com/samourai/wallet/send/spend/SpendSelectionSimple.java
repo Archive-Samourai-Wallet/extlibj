@@ -2,6 +2,7 @@ package com.samourai.wallet.send.spend;
 
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormat;
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.beans.SpendTx;
@@ -21,15 +22,15 @@ import java.util.*;
 public class SpendSelectionSimple extends SpendSelection {
     private static final Logger log = LoggerFactory.getLogger(SpendSelectionSimple.class);
 
-    public SpendSelectionSimple(Collection<UTXO> utxos) {
-        super(SpendType.SIMPLE);
+    public SpendSelectionSimple(BipFormatSupplier bipFormatSupplier, Collection<UTXO> utxos) {
+        super(bipFormatSupplier, SpendType.SIMPLE);
 
         for (UTXO utxo : utxos) {
             addSelectedUTXO(utxo);
         }
     }
 
-    public static SpendSelectionSimple computeSpendSingle(Collection<UTXO> utxos, long amount, NetworkParameters params, BigInteger feePerKb) {
+    public static SpendSelectionSimple computeSpendSingle(Collection<UTXO> utxos, long amount, BipFormatSupplier bipFormatSupplier, NetworkParameters params, BigInteger feePerKb) {
         // sort in ascending order by value
         List<UTXO> sortedUtxos = new ArrayList<>(utxos);
         Collections.sort(sortedUtxos, new UTXO.UTXOComparator());
@@ -47,13 +48,13 @@ public class SpendSelectionSimple extends SpendSelection {
                     log.debug("total value selected:" + u.getValue());
                     log.debug("nb inputs:" + u.getOutpoints().size());
                 }
-                return new SpendSelectionSimple(Arrays.asList(u));
+                return new SpendSelectionSimple(bipFormatSupplier, Arrays.asList(u));
             }
         }
         return null;
     }
 
-    public static SpendSelectionSimple computeSpendMultiple(Collection<UTXO> utxos, long amount, NetworkParameters params, BigInteger feePerKb) {
+    public static SpendSelectionSimple computeSpendMultiple(Collection<UTXO> utxos, long amount, BipFormatSupplier bipFormatSupplier, NetworkParameters params, BigInteger feePerKb) {
         // sort in descending order by value
         List<UTXO> sortedUtxos = new ArrayList<>(utxos);
         Collections.sort(sortedUtxos, new UTXO.UTXOComparator());
@@ -86,7 +87,7 @@ public class SpendSelectionSimple extends SpendSelection {
                     log.debug("total value selected:" + totalValueSelected);
                     log.debug("nb inputs:" + selected);
                 }
-                return new SpendSelectionSimple(selectedUTXO);
+                return new SpendSelectionSimple(bipFormatSupplier, selectedUTXO);
             }
         }
         return null;

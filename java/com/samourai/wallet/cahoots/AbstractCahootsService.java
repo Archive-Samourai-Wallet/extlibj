@@ -1,8 +1,8 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.send.MyTransactionOutPoint;
-import com.samourai.wallet.util.TxUtil;
 import com.samourai.wallet.whirlpool.WhirlpoolConst;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.*;
@@ -16,11 +16,11 @@ import java.util.List;
 public abstract class AbstractCahootsService<T extends Cahoots> {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahootsService.class);
 
-    private static final TxUtil txUtil = TxUtil.getInstance();
-
+    private BipFormatSupplier bipFormatSupplier;
     protected NetworkParameters params;
 
-    public AbstractCahootsService(NetworkParameters params) {
+    public AbstractCahootsService(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
+        this.bipFormatSupplier = bipFormatSupplier;
         this.params = params;
     }
 
@@ -73,7 +73,7 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
         List<String> myOutputAddresses = computeMyOutputAddresses(cahootsWallet, myAccount);
 
         for(TransactionOutput output : transaction.getOutputs()) {
-            String outputAddress = txUtil.getToAddress(output);
+            String outputAddress = bipFormatSupplier.getToAddress(output);
             if (outputAddress != null && myOutputAddresses.contains(outputAddress)) {
                 if (output.getValue() != null) {
                     if (log.isDebugEnabled()) {

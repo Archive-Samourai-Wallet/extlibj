@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 public class StowawayServiceTest extends AbstractCahootsTest {
     private static final Logger log = LoggerFactory.getLogger(StowawayServiceTest.class);
 
-    private StowawayService stowawayService = new StowawayService(params);
+    private StowawayService stowawayService = new StowawayService(bipFormatSupplier, params);
 
     private static final String SEED_WORDS = "all all all all all all all all all all all all";
     private static final String SEED_PASSPHRASE_INITIATOR = "initiator";
@@ -34,11 +34,11 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         };
 
         final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
-        TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(bip84WalletSender, params);
+        TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(bip84WalletSender, bipFormatSupplier, params);
         cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
 
         final HD_Wallet bip84WalletCounterparty = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
-        TestCahootsWallet cahootsWalletCounterparty = new TestCahootsWallet(bip84WalletCounterparty, params);
+        TestCahootsWallet cahootsWalletCounterparty = new TestCahootsWallet(bip84WalletCounterparty, bipFormatSupplier, params);
         cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // sender => doStowaway0

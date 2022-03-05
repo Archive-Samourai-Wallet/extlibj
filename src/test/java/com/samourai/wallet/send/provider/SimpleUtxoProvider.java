@@ -58,7 +58,7 @@ public class SimpleUtxoProvider extends SimpleUtxoKeyProvider implements UtxoPro
     BipAddress bipAddress = bipWallet.getAddressAt(0, nbUtxos);
     String address = bipAddress.getAddressString();
     String pub = bipWallet.getPub();
-    UnspentOutput unspentOutput = TestUtil.computeUtxo(TestUtil.generateTxHash(nbUtxos), nbUtxos, pub, address, value, 999);
+    UnspentOutput unspentOutput = TestUtil.computeUtxo(TestUtil.generateTxHash(nbUtxos), nbUtxos, pub, address, value, 999, getBipFormatSupplier());
     MyTransactionOutPoint outPoint = unspentOutput.computeOutpoint(params);
     utxo.getOutpoints().add(outPoint);
     WhirlpoolAccount account = bipWallet.getAccount();
