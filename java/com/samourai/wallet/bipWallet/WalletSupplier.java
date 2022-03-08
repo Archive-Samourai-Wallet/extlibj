@@ -1,7 +1,7 @@
 package com.samourai.wallet.bipWallet;
 
 import com.samourai.wallet.bipFormat.BipFormat;
-import com.samourai.wallet.bipWallet.BipWallet;
+import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 
 import java.util.Collection;
@@ -12,6 +12,8 @@ public interface WalletSupplier {
   Collection<BipWallet> getWallets(WhirlpoolAccount whirlpoolAccount);
 
   BipWallet getWallet(WhirlpoolAccount account, BipFormat bipFormat);
+
+  BipWallet getWallet(BIP_WALLET bip);
 
   BipWallet getWalletByPub(String pub);
 

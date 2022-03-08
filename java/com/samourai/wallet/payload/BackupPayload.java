@@ -1,16 +1,17 @@
 package com.samourai.wallet.payload;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.samourai.wallet.api.pairing.PairingPayload;
+import com.samourai.wallet.api.pairing.PairingDojo;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.JSONUtils;
 import org.bitcoinj.core.NetworkParameters;
+import org.json.JSONObject;
 
 public class BackupPayload {
-    private JsonNode wallet;
-    private JsonNode meta;
+    private JSONObject wallet;
+    private JSONObject meta;
 
     public BackupPayload() {
         this.wallet = null;
@@ -18,17 +19,34 @@ public class BackupPayload {
     }
 
     public static BackupPayload parse(String json) throws Exception {
-        return JSONUtils.getInstance().getObjectMapper().readValue(json, BackupPayload.class);
+        BackupPayload backupPayload = JSONUtils.getInstance().getObjectMapper().readValue(json, BackupPayload.class);
+        backupPayload.validate();
+        return backupPayload;
+    }
+
+    public JSONObject toJson() {
+        JSONObject jsonObject = new JSONObject()
+                .put("wallet", wallet)
+                .put("meta", meta);
+        return jsonObject;
+    }
+
+    public void validate() throws Exception {
+        if (!wallet.has("seed")) {
+            throw new Exception("Invalid wallet.seed");
+        }
+
+        PairingDojo pairingDojo = computePairingDojo();
+        if (pairingDojo != null) {
+            pairingDojo.validate();
+        }
     }
 
     public boolean isWalletTestnet() {
-        if (wallet == null) {
+        if (!wallet.has("testnet")) {
             return false;
         }
-        if (wallet.get("testnet") == null) {
-            return false;
-        }
-        return wallet.get("testnet").booleanValue();
+        return wallet.getBoolean("testnet");
     }
 
     public NetworkParameters computeNetworkParameters() {
@@ -36,13 +54,14 @@ public class BackupPayload {
     }
 
     public String getWalletSeed() {
-        if (wallet == null) return null;
-        return wallet.get("seed").textValue();
+        return wallet.getString("seed");
     }
 
     public String getWalletPassphrase() {
-        if (wallet == null) return null;
-        return wallet.get("passphrase").textValue();
+        if (!wallet.has("passphrase")) {
+            return null;
+        }
+        return wallet.getString("passphrase");
     }
 
     public HD_Wallet computeHdWallet() throws Exception {
@@ -52,32 +71,25 @@ public class BackupPayload {
         return HD_WalletFactoryGeneric.getInstance().getHD(44, seed, passphrase, params);
     }
 
-    public PairingPayload.PairingDojo computePairingDojo() {
-        if (wallet == null) return null;
-        if (wallet.get("dojo") == null) return null;
-        JsonNode dojoPairingNode = wallet.get("dojo").get("pairing");
-        if (dojoPairingNode == null) return null;
-        String url = dojoPairingNode.get("url").textValue();
-        String apiKey = dojoPairingNode.get("apikey").textValue();
-        if (url == null || apiKey == null) return null;
-
-        PairingPayload.PairingDojo pairingDojo = new PairingPayload.PairingDojo(url, apiKey);
-        return pairingDojo;
+    public PairingDojo computePairingDojo() throws Exception {
+        if (!wallet.has("dojo")) return null;
+        JSONObject dojoNode = wallet.getJSONObject("dojo");
+        return PairingDojo.parse(dojoNode);
     }
 
-    public JsonNode getWallet() {
+    public JSONObject getWallet() {
         return wallet;
     }
 
     public void setWallet(JsonNode wallet) {
-        this.wallet = wallet;
+        this.wallet = new JSONObject(wallet.toString());
     }
 
-    public JsonNode getMeta() {
+    public JSONObject getMeta() {
         return meta;
     }
 
     public void setMeta(JsonNode meta) {
-        this.meta = meta;
+        this.meta = new JSONObject(meta.toString());
     }
 }

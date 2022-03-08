@@ -15,6 +15,7 @@ public class BipWallet {
 
   private String id;
   private HD_Wallet hdWallet;
+  private HD_Account hdAccount;
   private IndexHandlerSupplier indexHandlerSupplier;
   private WhirlpoolAccount whirlpoolAccount;
   private BipDerivation derivation;
@@ -28,11 +29,11 @@ public class BipWallet {
   public BipWallet(String id, HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, WhirlpoolAccount whirlpoolAccount, BipDerivation derivation, BipFormat bipFormat) {
     this.id = id;
     this.hdWallet = new HD_Wallet(derivation.getPurpose(), bip44w);
+    this.hdAccount = this.hdWallet.getAccount(derivation.getAccountIndex());
     this.indexHandlerSupplier = indexHandlerSupplier;
     this.whirlpoolAccount = whirlpoolAccount;
     this.derivation = derivation;
     this.bipFormat = bipFormat;
-    HD_Account hdAccount = this.hdWallet.getAccount(derivation.getAccountIndex());
     this.pub = bipFormat.getPub(hdAccount);
   }
 
@@ -107,4 +108,11 @@ public class BipWallet {
     return hdWallet.getParams();
   }
 
+  public HD_Wallet getHdWallet() {
+    return hdWallet;
+  }
+
+  public HD_Account getHdAccount() {
+    return hdAccount;
+  }
 }

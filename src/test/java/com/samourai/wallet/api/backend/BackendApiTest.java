@@ -77,7 +77,27 @@ public class BackendApiTest extends AbstractTest {
   }
 
   @Test
-  public void fetchWallet() throws Exception {
+  public void fetchWallet_single() throws Exception {
+    String[] zpubs = new String[] {VPUB_1};
+    WalletResponse walletResponse = backendApi.fetchWallet(zpubs);
+
+    Assertions.assertEquals(0, walletResponse.unspent_outputs.length);
+
+    Map<String, WalletResponse.Address> addressesMap = walletResponse.getAddressesMap();
+    assertAddressEquals(addressesMap.get(VPUB_1), VPUB_1, 63, 7, 0);
+
+    Assertions.assertTrue(walletResponse.txs.length > 0);
+
+    Assertions.assertNotNull(walletResponse.info.latest_block.hash);
+    Assertions.assertTrue(walletResponse.info.latest_block.height > 0);
+    Assertions.assertTrue(walletResponse.info.latest_block.time > 0);
+    for (MinerFeeTarget minerFeeTarget : MinerFeeTarget.values()) {
+      Assertions.assertTrue(walletResponse.info.fees.get(minerFeeTarget.getValue()) > 0);
+    }
+  }
+
+  @Test
+  public void fetchWallet_multi() throws Exception {
     String[] zpubs = new String[] {VPUB_1, VPUB_2};
     WalletResponse walletResponse = backendApi.fetchWallet(zpubs);
 

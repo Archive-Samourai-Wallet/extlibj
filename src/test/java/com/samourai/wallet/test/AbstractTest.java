@@ -4,7 +4,11 @@ import com.samourai.http.client.IHttpClient;
 import com.samourai.http.client.JettyHttpClient;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.bipWallet.WalletSupplierImpl;
+import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
+import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
+import com.samourai.wallet.payload.PayloadUtilGeneric;
 import com.samourai.wallet.segwit.SegwitAddress;
 import org.bitcoinj.core.*;
 import org.bitcoinj.params.TestNet3Params;
@@ -24,11 +28,21 @@ public class AbstractTest {
   protected HD_WalletFactoryGeneric hdWalletFactory = HD_WalletFactoryGeneric.getInstance();
   protected IHttpClient httpClient;
   protected BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;
+  protected PayloadUtilGeneric payloadUtil = PayloadUtilGeneric.getInstance();
+  protected WalletSupplierImpl walletSupplier;
+  protected HD_Wallet bip44w;
 
   public AbstractTest() {
-    httpClient = new JettyHttpClient(5000, Optional.empty(), "test");
-  }
+    try {
+      httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
 
+      byte[] seed = hdWalletFactory.computeSeedFromWords(SEED_WORDS);
+      bip44w = hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE, params);
+      walletSupplier = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip44w);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   protected Transaction computeTxCoinbase(long value, Script outputScript) {
     Transaction tx = new Transaction(params);

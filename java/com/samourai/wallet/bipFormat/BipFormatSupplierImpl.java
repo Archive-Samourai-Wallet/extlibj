@@ -39,7 +39,6 @@ public class BipFormatSupplierImpl implements BipFormatSupplier {
 
     @Override
     public BipFormat findByAddress(String address, NetworkParameters params) {
-        // TODO make it dynamic?
         try {
             Pair<Byte, byte[]> bech32Segwit = Bech32Segwit.decode(params instanceof TestNet3Params ? "tb" : "bc", address);
             int witnessVer = bech32Segwit.getLeft().intValue();

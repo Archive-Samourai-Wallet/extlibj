@@ -4,24 +4,18 @@ import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipWallet.BipDerivation;
 import com.samourai.wallet.bipWallet.BipWallet;
-import com.samourai.wallet.bipWallet.WalletSupplierImpl;
-import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
 import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.wallet.hd.HD_Account;
 import com.samourai.wallet.hd.HD_Address;
-import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.test.AbstractTest;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Transaction;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class WalletSupplierTest extends AbstractTest {
-  protected WalletSupplierImpl walletSupplier;
-  protected HD_Wallet bip44w;
 
   private static final String ZPUB_DEPOSIT =
       "vpub5YEQpEDPAZWVTkmWASSHyaUMsae7uV9FnRrhZ3cqV6RFbBQx7wjVsUfLqSE3hgNY8WQixurkbWNkfV2sRE7LPfNKQh2t3s5une4QZthwdCu";
@@ -29,14 +23,6 @@ public class WalletSupplierTest extends AbstractTest {
       "vpub5YEQpEDXWE3TW21vo2zdDK9PZgKqnonnomB2b18dadRTgtnB5F8SZg1reqvMHEDKq1k3oHz1AXbsD6MCfNcw77BqfZxWmZm4nn16XNC84mL";
   private static final String ZPUB_POSTMIX =
       "vpub5YEQpEDXWE3TawqjQNFt5o4sBM1RP1B1mtVZr8ysEA9hFLsZZ4RB8oxE4Sfkumc47jnVPUgRL9hJf3sWpTYBKtdkP3UK6J8p1n2ykmjHnrW";
-
-  @BeforeEach
-  public void setup() throws Exception {
-    byte[] seed = hdWalletFactory.computeSeedFromWords(SEED_WORDS);
-    bip44w = hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE, params);
-
-    walletSupplier = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip44w);
-  }
 
   @Test
   public void getWallet() throws Exception {

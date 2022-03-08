@@ -86,6 +86,7 @@ public class WalletSupplierImpl implements WalletSupplier {
     return walletsById.get(id);
   }
 
+  @Override
   public BipWallet getWallet(BIP_WALLET bip) {
     return getWalletById(bip.name());
   }
