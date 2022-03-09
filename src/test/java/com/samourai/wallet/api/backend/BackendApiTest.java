@@ -118,6 +118,18 @@ public class BackendApiTest extends AbstractTest {
   }
 
   @Test
+  public void fetchXPub() throws Exception {
+    XPubResponse xPubResponse = backendApi.fetchXPub(VPUB_1);
+
+    Assertions.assertEquals(XPubResponse.Status.ok, xPubResponse.status);
+    Assertions.assertEquals(1589461970, xPubResponse.data.created);
+    Assertions.assertEquals("BIP84", xPubResponse.data.derivation);
+    Assertions.assertTrue(xPubResponse.data.unused.external >= 63);
+    Assertions.assertTrue(xPubResponse.data.unused.internal >= 0);
+    Assertions.assertTrue(xPubResponse.data.balance >= 0);
+  }
+
+  @Test
   public void fetchTx() throws Exception {
     String txid = "0ba8c89afc51b65f133ac40131de7e170a41f87c5a4943502ff5705aae6341a8";
     TxDetail tx = backendApi.fetchTx(txid, true);

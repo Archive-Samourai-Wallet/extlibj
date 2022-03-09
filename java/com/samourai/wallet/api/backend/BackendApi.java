@@ -15,6 +15,7 @@ public class BackendApi {
   private static final String URL_UNSPENT = "/unspent?active=";
   private static final String URL_MULTIADDR = "/multiaddr?active=";
   private static final String URL_WALLET = "/wallet?active=";
+  private static final String URL_XPUB = "/xpub/";
   private static final String URL_TXS = "/txs?active=";
   private static final String URL_TX = "/tx/";
   private static final String URL_INIT_BIP84 = "/xpub";
@@ -136,6 +137,19 @@ public class BackendApi {
     // use async to avoid Jetty's buffer exceeded exception on large responses
     WalletResponse walletResponse = httpClient.getJson(url, WalletResponse.class, headers, true);
     return walletResponse;
+  }
+
+  public XPubResponse fetchXPub(String xpub) throws Exception {
+    String url = computeAuthUrl(urlBackend + URL_XPUB + xpub);
+    if (log.isDebugEnabled()) {
+      log.debug("fetchXpub");
+    }
+    Map<String,String> headers = computeHeaders();
+    XPubResponse response = httpClient.getJson(url, XPubResponse.class, headers);
+    if (response.status != XPubResponse.Status.ok) {
+      throw new Exception("fetchXPub failed: "+response.error);
+    }
+    return response;
   }
 
   public void initBip84(String zpub) throws Exception {
