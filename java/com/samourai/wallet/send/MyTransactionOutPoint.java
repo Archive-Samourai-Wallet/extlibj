@@ -4,6 +4,7 @@ import org.bitcoinj.core.*;
 import org.bitcoinj.script.Script;
 
 import java.math.BigInteger;
+import java.util.Collection;
 
 public class MyTransactionOutPoint extends TransactionOutPoint {
 
@@ -19,6 +20,14 @@ public class MyTransactionOutPoint extends TransactionOutPoint {
         this.value = value;
         this.address = address;
         this.confirmations = confirmations;
+    }
+
+    public static long sumValue(Collection<MyTransactionOutPoint> outpoints) {
+        long sum = 0L;
+        for (MyTransactionOutPoint outpoint : outpoints) {
+            sum += outpoint.getValue().longValue();
+        }
+        return sum;
     }
 
     public int getConfirmations() {

@@ -1,5 +1,6 @@
 package com.samourai.wallet.bipFormat;
 
+import com.samourai.wallet.hd.HD_Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,11 @@ public abstract class BipFormatImpl implements BipFormat {
   }
 
   @Override
+  public String getAddressString(HD_Address hdAddress) {
+    return getToAddress(hdAddress.getECKey(), hdAddress.getParams());
+  }
+
+  @Override
   public String getId() {
     return id;
   }
@@ -22,5 +28,10 @@ public abstract class BipFormatImpl implements BipFormat {
   @Override
   public String getLabel() {
     return label;
+  }
+
+  @Override
+  public String toString() {
+    return id;
   }
 }

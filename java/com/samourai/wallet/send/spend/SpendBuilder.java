@@ -161,13 +161,13 @@ public class SpendBuilder {
     private long computeNeededAmount(WhirlpoolAccount account, long amount, BipFormat changeFormat, BigInteger feePerKb) {
         long neededAmount = 0L;
         if (changeFormat == BIP_FORMAT.SEGWIT_NATIVE) {
-            neededAmount += FeeUtil.getInstance().estimatedFeeSegwit(0, 0, UTXO.countOutpoints(utxoProvider.getUtxos(account, BIP_FORMAT.SEGWIT_NATIVE)), 4, feePerKb).longValue();
+            neededAmount += FeeUtil.getInstance().estimatedFeeSegwit(0, 0, UTXO.countOutpoints(utxoProvider.getUtxos(account, BIP_FORMAT.SEGWIT_NATIVE)), 4, 0, feePerKb).longValue();
 //                    Log.d("segwit:" + neededAmount);
         } else if (changeFormat == BIP_FORMAT.SEGWIT_COMPAT) {
-            neededAmount += FeeUtil.getInstance().estimatedFeeSegwit(0, UTXO.countOutpoints(utxoProvider.getUtxos(account, BIP_FORMAT.SEGWIT_COMPAT)), 0, 4, feePerKb).longValue();
+            neededAmount += FeeUtil.getInstance().estimatedFeeSegwit(0, UTXO.countOutpoints(utxoProvider.getUtxos(account, BIP_FORMAT.SEGWIT_COMPAT)), 0, 4, 0, feePerKb).longValue();
 //                    Log.d("segwit:" + neededAmount);
         } else {
-            neededAmount += FeeUtil.getInstance().estimatedFeeSegwit(UTXO.countOutpoints(utxoProvider.getUtxos(account, BIP_FORMAT.LEGACY)), 0, 0, 4, feePerKb).longValue();
+            neededAmount += FeeUtil.getInstance().estimatedFeeSegwit(UTXO.countOutpoints(utxoProvider.getUtxos(account, BIP_FORMAT.LEGACY)), 0, 0, 4, 0, feePerKb).longValue();
 //                    Log.d("p2pkh:" + neededAmount);
         }
         neededAmount += amount;

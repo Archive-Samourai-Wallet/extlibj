@@ -47,7 +47,7 @@ public class SendFactoryGeneric {
     /*
     Used by spends
      */
-    public Transaction makeTransaction(Map<String, Long> receivers, List<MyTransactionOutPoint> unspent, BipFormatSupplier bipFormatSupplier, boolean rbfOptIn, NetworkParameters params, long blockHeight) throws MakeTxException {
+    public Transaction makeTransaction(Map<String, Long> receivers, Collection<MyTransactionOutPoint> unspent, BipFormatSupplier bipFormatSupplier, boolean rbfOptIn, NetworkParameters params, long blockHeight) throws MakeTxException {
 
         BigInteger amount = BigInteger.ZERO;
         for(Iterator<Map.Entry<String, Long>> iterator = receivers.entrySet().iterator(); iterator.hasNext();) {
@@ -188,6 +188,23 @@ public class SendFactoryGeneric {
             log.debug("signInput #"+inputIndex+": value="+txInput.getValue()+", addressType="+addressFormat+", address="+inputAddress);
         }
         addressFormat.sign(tx, inputIndex, key);
+    }
+
+    public Transaction signTransactionForSweep(Transaction unsignedTx, ECKey privKey, NetworkParameters params) throws SignTxException    {
+        HashMap<String,ECKey> keyBag = new HashMap<>();
+        for (TransactionInput input : unsignedTx.getInputs()) {
+            try {
+                DumpedPrivateKey pk = new DumpedPrivateKey(params, privKey.getPrivateKeyAsWiF(params));
+                ECKey ecKey = pk.getKey();
+                keyBag.put(input.getOutpoint().toString(), ecKey);
+            }
+            catch(Exception e) {
+                log.error("cannot process private key for input="+input, e);
+            }
+        }
+
+        Transaction signedTx = signTransaction(unsignedTx, keyBag);
+        return signedTx;
     }
 
 }

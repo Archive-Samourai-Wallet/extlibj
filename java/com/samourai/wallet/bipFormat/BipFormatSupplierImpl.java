@@ -62,22 +62,20 @@ public class BipFormatSupplierImpl implements BipFormatSupplier {
     }
 
     @Override
-    public String getToAddress(TransactionOutput output) {
-        String outputScript = Hex.toHexString(output.getScriptBytes());
-        if (bech32Util.isBech32Script(outputScript)) {
+    public String getToAddress(TransactionOutput output) throws Exception {
+        return getToAddress(output.getScriptBytes(), output.getParams());
+    }
+
+    @Override
+    public String getToAddress(byte[] scriptBytes, NetworkParameters params) throws Exception {
+        String script = Hex.toHexString(scriptBytes);
+        if(bech32Util.isBech32Script(script))    {
             // bech32
-            try {
-                String outputAddress = bech32Util.getAddressFromScript(outputScript, output.getParams());
-                return outputAddress;
-            } catch (Exception e) {
-                log.error("", e);
-            }
+            return bech32Util.getAddressFromScript(script, params);
         } else {
             // P2PKH or P2SH
-            String outputAddress = output.getScriptPubKey().getToAddress(output.getParams()).toString();
-            return outputAddress;
+            return new Script(scriptBytes).getToAddress(params).toString();
         }
-        return null;
     }
 
     @Override

@@ -4,7 +4,10 @@ import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import org.apache.commons.lang3.StringUtils;
-import org.bitcoinj.core.*;
+import org.bitcoinj.core.Coin;
+import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.script.Script;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -126,7 +129,7 @@ public class UnspentOutput {
           + " sats, "
           + confirmations
           + " confirmations, path="
-          + xpub.path
+          + (xpub != null && xpub.path != null ? xpub.path : "null")
           + ", address="
           + addr
           + ")";

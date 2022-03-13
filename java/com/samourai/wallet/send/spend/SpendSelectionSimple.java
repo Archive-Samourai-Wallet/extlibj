@@ -39,7 +39,7 @@ public class SpendSelectionSimple extends SpendSelection {
         // get smallest 1 UTXO > than spend + fee + dust
         for (UTXO u : sortedUtxos) {
             Triple<Integer, Integer, Integer> outpointTypes = FeeUtil.getInstance().getOutpointCount(new Vector(u.getOutpoints()), params);
-            if (u.getValue() >= (amount + SamouraiWalletConst.bDust.longValue() + FeeUtil.getInstance().estimatedFeeSegwit(outpointTypes.getLeft(), outpointTypes.getMiddle(), outpointTypes.getRight(), 2, feePerKb).longValue())) {
+            if (u.getValue() >= (amount + SamouraiWalletConst.bDust.longValue() + FeeUtil.getInstance().estimatedFeeSegwit(outpointTypes.getLeft(), outpointTypes.getMiddle(), outpointTypes.getRight(), 2, 0, feePerKb).longValue())) {
                 if (log.isDebugEnabled()) {
                     log.debug("spend type:" + SpendType.SIMPLE);
                     log.debug("single output");
@@ -79,7 +79,7 @@ public class SpendSelectionSimple extends SpendSelection {
             p2pkh += outpointTypes.getLeft();
             p2sh_p2wpkh += outpointTypes.getMiddle();
             p2wpkh += outpointTypes.getRight();
-            if (totalValueSelected >= (amount + SamouraiWalletConst.bDust.longValue() + FeeUtil.getInstance().estimatedFeeSegwit(p2pkh, p2sh_p2wpkh, p2wpkh, 2, feePerKb).longValue())) {
+            if (totalValueSelected >= (amount + SamouraiWalletConst.bDust.longValue() + FeeUtil.getInstance().estimatedFeeSegwit(p2pkh, p2sh_p2wpkh, p2wpkh, 2, 0, feePerKb).longValue())) {
                 if (log.isDebugEnabled()) {
                     log.debug("spend type:" + SpendType.SIMPLE);
                     log.debug("multiple outputs");
@@ -104,7 +104,7 @@ public class SpendSelectionSimple extends SpendSelection {
             // NO CHANGE = 1 output
 
             // estimate fee
-            fee = FeeUtil.getInstance().estimatedFeeSegwit(outpointTypes.getLeft(), outpointTypes.getMiddle(), outpointTypes.getRight(), 1, feePerKb);
+            fee = FeeUtil.getInstance().estimatedFeeSegwit(outpointTypes.getLeft(), outpointTypes.getMiddle(), outpointTypes.getRight(), 1, 0, feePerKb);
 
             // adjust amount
             amount -= fee.longValue();
@@ -116,7 +116,7 @@ public class SpendSelectionSimple extends SpendSelection {
             // WITH CHANGE = 2 outputs
 
             // estimate fee
-            fee = FeeUtil.getInstance().estimatedFeeSegwit(outpointTypes.getLeft(), outpointTypes.getMiddle(), outpointTypes.getRight(), 2, feePerKb);
+            fee = FeeUtil.getInstance().estimatedFeeSegwit(outpointTypes.getLeft(), outpointTypes.getMiddle(), outpointTypes.getRight(), 2, 0, feePerKb);
 
             // compute change
             change = computeChange(amount, fee);

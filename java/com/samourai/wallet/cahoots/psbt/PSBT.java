@@ -3,16 +3,16 @@ package com.samourai.wallet.cahoots.psbt;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.JavaUtil;
 import com.samourai.wallet.util.Z85;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.*;
-import org.bitcoinj.params.MainNetParams;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.io.*;
-import java.nio.*;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

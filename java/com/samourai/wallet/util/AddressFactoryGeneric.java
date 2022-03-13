@@ -121,7 +121,6 @@ public class AddressFactoryGeneric {
             throw new RuntimeException("getAddress("+walletIndex+") failed: wallet is null");
         }
         HD_Address hdAddress = hdChain.getAddressAt(idx);
-
         String addr = forcedFormat.getAddressString(hdAddress);
         return Pair.of(idx, addr);
     }

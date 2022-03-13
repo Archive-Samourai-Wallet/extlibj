@@ -1,7 +1,9 @@
 package com.samourai.wallet.bipFormat;
 
 import com.samourai.wallet.test.AbstractTest;
+import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.TransactionOutput;
+import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -21,8 +23,8 @@ public class BipFormatSupplierImplTest extends AbstractTest {
 
     Assertions.assertEquals(BIP_FORMAT.SEGWIT_NATIVE, bipFormatSupplier.findByAddress("tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4", params));
 
-    Assertions.assertEquals(BIP_FORMAT.TAPROOT, bipFormatSupplier.findByAddress("tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7", params));
-    Assertions.assertEquals(BIP_FORMAT.TAPROOT, bipFormatSupplier.findByAddress("tb1qqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesrxh6hy", params));
+    //Assertions.assertEquals(BIP_FORMAT.TAPROOT, bipFormatSupplier.findByAddress("tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7", params));
+    //Assertions.assertEquals(BIP_FORMAT.TAPROOT, bipFormatSupplier.findByAddress("tb1qqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesrxh6hy", params));
     Assertions.assertEquals(BIP_FORMAT.TAPROOT, bipFormatSupplier.findByAddress("tb1pqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesf3hn0c", params));
   }
 
@@ -60,5 +62,19 @@ public class BipFormatSupplierImplTest extends AbstractTest {
     address = "tb1pqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesf3hn0c";
     txOutput = bipFormatSupplier.getTransactionOutput(address, 4000, params);
     Assertions.assertEquals(address, bipFormatSupplier.getToAddress(txOutput));
+  }
+
+  @Test
+  public void getToAddress() throws Exception {
+    ECKey ecKey = ECKey.fromPublicOnly(Hex.decode("03cc8a4bc64d897bddc5fbc2f670f7a8ba0b386779106cf1223c6fc5d7cd6fc115"));
+
+    String address = BIP_FORMAT.LEGACY.getToAddress(ecKey, params);
+    Assertions.assertEquals("n3PFj7J96N3uTKZfcRYHggxfd1eAKgDLjX", address);
+
+    address = BIP_FORMAT.SEGWIT_COMPAT.getToAddress(ecKey, params);
+    Assertions.assertEquals("2N1Mdnn2XCeoyxkmVYWpKhCLfamgeXJmrYV", address);
+
+    address = BIP_FORMAT.SEGWIT_NATIVE.getToAddress(ecKey, params);
+    Assertions.assertEquals("tb1qalwlmdxd2ggue4290ekzxl9tetg56neev9pwqa", address);
   }
 }

@@ -1,15 +1,19 @@
 package com.samourai.wallet.api.backend;
 
 import com.samourai.wallet.api.backend.beans.*;
+import com.samourai.wallet.api.backend.websocket.BackendWsApi;
 import com.samourai.wallet.util.JSONUtils;
+import com.samourai.wallet.util.oauth.OAuthApi;
 import com.samourai.wallet.util.oauth.OAuthManager;
+import com.samourai.wallet.util.oauth.OAuthManagerJava;
+import com.samourai.websocket.client.IWebsocketClient;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class BackendApi {
+public class BackendApi implements ISweepBackend {
   private static Logger log = LoggerFactory.getLogger(BackendApi.class);
 
   private static final String URL_UNSPENT = "/unspent?active=";
@@ -27,11 +31,7 @@ public class BackendApi {
   private String urlBackend;
   private OAuthManager oAuthManager; // may be null
 
-  public BackendApi(IBackendClient httpClient, String urlBackend) {
-    this(httpClient, urlBackend, null);
-  }
-
-  public BackendApi(IBackendClient httpClient, String urlBackend, OAuthManager oAuthManager) {
+  protected BackendApi(IBackendClient httpClient, String urlBackend, OAuthManager oAuthManager) {
     this.httpClient = httpClient;
     this.urlBackend = urlBackend;
 
@@ -40,6 +40,23 @@ public class BackendApi {
       String oAuthStr = oAuthManager != null ? "yes" : "no";
       log.debug("urlBackend=" + urlBackend + ", oAuth=" + oAuthStr);
     }
+  }
+
+  public static BackendApi newBackendApiDojo(IBackendClient httpClient, String urlBackend, String dojoApiKey) {
+    // configure OAuth
+    OAuthApi backendOAuthApi = new BackendOAuthApi(httpClient, urlBackend);
+    OAuthManager oAuthManager = new OAuthManagerJava(dojoApiKey, backendOAuthApi);
+
+    // configure Samourai/Dojo backend
+    return new BackendApi(httpClient, urlBackend, oAuthManager);
+  }
+
+  public static BackendApi newBackendApiSamourai(IBackendClient httpClient, String urlBackend) {
+    return new BackendApi(httpClient, urlBackend, null);
+  }
+
+  public BackendWsApi newBackendWsApi(IWebsocketClient wsClient) {
+    return new BackendWsApi(wsClient, urlBackend, oAuthManager);
   }
 
   private String computeZpubStr(String[] zpubs) {
@@ -137,6 +154,12 @@ public class BackendApi {
     // use async to avoid Jetty's buffer exceeded exception on large responses
     WalletResponse walletResponse = httpClient.getJson(url, WalletResponse.class, headers, true);
     return walletResponse;
+  }
+
+  @Override
+  public Collection<UnspentOutput> fetchAddressForSweep(String address) throws Exception {
+    WalletResponse walletResponse = fetchWallet(address);
+    return Arrays.asList(walletResponse.unspent_outputs);
   }
 
   public XPubResponse fetchXPub(String xpub) throws Exception {

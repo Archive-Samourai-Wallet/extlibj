@@ -68,8 +68,8 @@ public class FeeUtil {
     return txSize;
   }
 
-  public BigInteger estimatedFeeSegwit(int inputsP2PKH, int inputsP2SHP2WPKH, int inputsP2WPKH, int outputs, BigInteger feePerKb)   {
-    int size = estimatedSizeSegwit(inputsP2PKH, inputsP2SHP2WPKH, inputsP2WPKH, outputs, 0);
+  public BigInteger estimatedFeeSegwit(int inputsP2PKH, int inputsP2SHP2WPKH, int inputsP2WPKH, int outputsNonOpReturn, int outputsOpReturn, BigInteger feePerKb)   {
+    int size = estimatedSizeSegwit(inputsP2PKH, inputsP2SHP2WPKH, inputsP2WPKH, outputsNonOpReturn, outputsOpReturn);
     return calculateFee(size, feePerKb);
   }
 
@@ -109,7 +109,7 @@ public class FeeUtil {
     return BigInteger.valueOf(fee);
   }
 
-  protected long toFeePerB(BigInteger feePerKb) {
+  public long toFeePerB(BigInteger feePerKb) {
     long feePerB = Math.round(feePerKb.doubleValue() / 1000.0);
     return feePerB;
   }

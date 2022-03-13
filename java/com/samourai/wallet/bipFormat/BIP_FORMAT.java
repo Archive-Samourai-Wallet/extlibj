@@ -3,7 +3,6 @@ package com.samourai.wallet.bipFormat;
 import com.samourai.wallet.bip340.BIP340Util;
 import com.samourai.wallet.bip340.Schnorr;
 import com.samourai.wallet.hd.HD_Account;
-import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.segwit.SegwitAddress;
 import org.bitcoinj.core.*;
 import org.bitcoinj.crypto.TransactionSignature;
@@ -20,8 +19,8 @@ public class BIP_FORMAT {
         }
 
         @Override
-        public String getAddressString(HD_Address hdAddress) {
-            return hdAddress.getAddressString();
+        public String getToAddress(ECKey ecKey, NetworkParameters params) {
+            return ecKey.toAddress(params).toString();
         }
 
         @Override
@@ -58,8 +57,8 @@ public class BIP_FORMAT {
         }
 
         @Override
-        public String getAddressString(HD_Address hdAddress) {
-            return hdAddress.getAddressStringSegwitCompat();
+        public String getToAddress(ECKey ecKey, NetworkParameters params) {
+            return new SegwitAddress(ecKey, params).getAddressAsString();
         }
 
         @Override
@@ -100,8 +99,8 @@ public class BIP_FORMAT {
         }
 
         @Override
-        public String getAddressString(HD_Address hdAddress) {
-            return hdAddress.getAddressStringSegwitNative();
+        public String getToAddress(ECKey ecKey, NetworkParameters params) {
+            return new SegwitAddress(ecKey, params).getBech32AsString();
         }
 
         @Override
@@ -134,8 +133,8 @@ public class BIP_FORMAT {
         }
 
         @Override
-        public String getAddressString(HD_Address hdAddress) {
-            return hdAddress.getAddressStringSegwitNative();
+        public String getToAddress(ECKey ecKey, NetworkParameters params) {
+            return new SegwitAddress(ecKey, params).getBech32AsString();
         }
 
         @Override

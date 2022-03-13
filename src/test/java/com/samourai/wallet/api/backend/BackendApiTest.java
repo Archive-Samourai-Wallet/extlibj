@@ -2,7 +2,9 @@ package com.samourai.wallet.api.backend;
 
 import com.samourai.wallet.api.backend.beans.*;
 import com.samourai.wallet.segwit.SegwitAddress;
+import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.SendFactoryGeneric;
+import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.test.AbstractTest;
 import com.samourai.wallet.util.TxUtil;
 import org.bitcoinj.core.Coin;
@@ -11,15 +13,13 @@ import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
+import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BackendApiTest extends AbstractTest {
 
@@ -31,10 +31,8 @@ public class BackendApiTest extends AbstractTest {
   private ECKey inputKey = ECKey.fromPrivate(new BigInteger("45292090369707310635285627500870691371399357286012942906204494584441273561412"));
   private ECKey outputKey = ECKey.fromPrivate(new BigInteger("77292090369707310635285627500870691371399357286012942906204494584441273561412"));
 
-  private BackendApi backendApi;
-
   public BackendApiTest() throws Exception {
-    backendApi = new BackendApi(httpClient, BackendServer.TESTNET.getBackendUrlClear(), null);
+    super();
   }
 
   @Test
@@ -115,6 +113,22 @@ public class BackendApiTest extends AbstractTest {
     for (MinerFeeTarget minerFeeTarget : MinerFeeTarget.values()) {
       Assertions.assertTrue(walletResponse.info.fees.get(minerFeeTarget.getValue()) > 0);
     }
+  }
+
+  @Test
+  public void fetchAddressForSweep() throws Exception {
+    String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
+    Collection<UnspentOutput> unspentOutputs = backendApi.fetchAddressForSweep(address);
+
+    Assertions.assertEquals(1, unspentOutputs.size());
+
+    UnspentOutput unspentOutput = unspentOutputs.iterator().next();
+    Assertions.assertEquals(address, unspentOutput.addr);
+    Assertions.assertEquals(75000000, unspentOutput.value);
+    Assertions.assertTrue(unspentOutput.confirmations >= 896868);
+    Assertions.assertEquals("00142ecf8c3e5697f0513999ed3aa8ea9cd04d127355", Hex.toHexString(unspentOutput.getScriptBytes()));
+    Assertions.assertEquals("d6efe01bbbc30022944c49d87e6f4e51bc091bf98197ca386bdb0c222bc56139", unspentOutput.tx_hash);
+    Assertions.assertEquals(0, unspentOutput.tx_output_n);
   }
 
   @Test

@@ -4,6 +4,7 @@ import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.segwit.bech32.Bech32;
 import com.samourai.wallet.segwit.bech32.Bech32Segwit;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.*;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -203,6 +204,9 @@ public class FormatsUtilGeneric {
 	}
 
 	public boolean isValidBitcoinAddress(final String address, NetworkParameters params) {
+		if (StringUtils.isEmpty(address)) {
+			return false;
+		}
 
 		boolean ret = false;
 		Address addr = null;

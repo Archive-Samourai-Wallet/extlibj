@@ -2,15 +2,16 @@ package com.samourai.wallet.client;
 
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
+import com.samourai.wallet.bipFormat.BipFormatImpl;
 import com.samourai.wallet.bipWallet.BipDerivation;
 import com.samourai.wallet.bipWallet.BipWallet;
 import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.wallet.hd.HD_Account;
-import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.test.AbstractTest;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -77,16 +78,7 @@ public class WalletSupplierTest extends AbstractTest {
     // register custom derivation
     BipDerivation derivation = new BipDerivation(123, 4);
     String bipFormatId = "test";
-    BipFormat bipFormat = new BipFormat() {
-      @Override
-      public String getId() {
-        return bipFormatId;
-      }
-
-      @Override
-      public String getLabel() {
-        return "test";
-      }
+    BipFormat bipFormat = new BipFormatImpl(bipFormatId, "label") {
 
       @Override
       public String getPub(HD_Account hdAccount) {
@@ -94,8 +86,8 @@ public class WalletSupplierTest extends AbstractTest {
       }
 
       @Override
-      public String getAddressString(HD_Address hdAddress) {
-        return "testaddr-"+hdAddress.getAddressString();
+      public String getToAddress(ECKey ecKey, NetworkParameters params) {
+        return "testaddress";
       }
 
       @Override
@@ -112,7 +104,7 @@ public class WalletSupplierTest extends AbstractTest {
     Assertions.assertNotNull(bipFormat);
     Assertions.assertEquals("m/123'/1'/4", bipWallet.getDerivation().getPathAccount(params));
     Assertions.assertEquals("testpub-4", bipWallet.getPub());
-    Assertions.assertEquals("testaddr-moDTcKMvMQahsV9JUgHJjtw4NCDvVbnWyg", bipWallet.getNextAddress().getAddressString());
+    Assertions.assertEquals("testaddress", bipWallet.getNextAddress().getAddressString());
 
   }
 }
