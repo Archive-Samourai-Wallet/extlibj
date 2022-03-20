@@ -22,4 +22,12 @@ public class BipAddress {
     public String getPathAddress() {
         return bipWallet.getDerivation().getPathAddress(hdAddress);
     }
+
+    @Override
+    public String toString() {
+        return "BipAddress{" +
+                "address=" + getAddressString() +
+                ", path=" + getPathAddress() +
+                '}';
+    }
 }

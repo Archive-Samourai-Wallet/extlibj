@@ -1,5 +1,6 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.hd.HD_Wallet;
@@ -33,11 +34,11 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         };
 
         final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
-        TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(bip84WalletSender, bipFormatSupplier, params);
+        TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(new WalletSupplierImpl(indexHandlerSupplier, bip84WalletSender), bipFormatSupplier, params);
         cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
 
         final HD_Wallet bip84WalletCounterparty = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
-        TestCahootsWallet cahootsWalletCounterparty = new TestCahootsWallet(bip84WalletCounterparty, bipFormatSupplier, params);
+        TestCahootsWallet cahootsWalletCounterparty = new TestCahootsWallet(new WalletSupplierImpl(indexHandlerSupplier, bip84WalletCounterparty), bipFormatSupplier, params);
         cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // sender => doSTONEWALLx2_0

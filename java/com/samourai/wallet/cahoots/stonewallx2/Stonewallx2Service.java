@@ -2,15 +2,12 @@ package com.samourai.wallet.cahoots.stonewallx2;
 
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
-import com.samourai.wallet.hd.HD_Wallet;
-import com.samourai.wallet.segwit.SegwitAddress;
+import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.FormatsUtilGeneric;
-import com.samourai.wallet.whirlpool.WhirlpoolConst;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.*;
 import org.bitcoinj.script.Script;
@@ -105,10 +102,8 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
     // counterparty
     //
     private STONEWALLx2 doSTONEWALLx2_1(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, int account) throws Exception {
-        HD_Wallet bip84Wallet = cahootsWallet.getBip84Wallet();
-
         stonewall0.setCounterpartyAccount(account);
-        byte[] fingerprint = bip84Wallet.getFingerprint();
+        byte[] fingerprint = cahootsWallet.getBip84Wallet().getFingerprint();
         stonewall0.setFingerprintCollab(fingerprint);
 
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall0.getCounterpartyAccount());
@@ -192,36 +187,24 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
 
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsA = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
         // contributor mix output
-        Pair<Integer,Integer> idxAndChain = cahootsWallet.fetchReceiveIndex(stonewall0.getCounterpartyAccount());
-        int idx = idxAndChain.getLeft();
-        int chain = idxAndChain.getRight();
-        SegwitAddress segwitAddress0 = bip84Wallet.getSegwitAddressAt(stonewall0.getCounterpartyAccount(), chain, idx);
+        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), true);
+        if (receiveAddress.getAddressString().equalsIgnoreCase(stonewall0.getDestination())) {
+            receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), true);
+        }
         if (log.isDebugEnabled()) {
-            log.debug("+output "+stonewall0.getCounterpartyAccount()+":M/"+chain+"/"+idx+" (CounterParty mix) = "+segwitAddress0.getBech32AsString());
+            log.debug("+output (CounterParty mix) = "+receiveAddress);
         }
-        if (segwitAddress0.getBech32AsString().equalsIgnoreCase(stonewall0.getDestination())) {
-            idx++;
-            segwitAddress0 = bip84Wallet.getSegwitAddressAt(stonewall0.getCounterpartyAccount(), chain, idx);
-        }
-        byte[] scriptPubKey_A0 = bech32Util.computeScriptPubKey(segwitAddress0.getBech32AsString(), params);
-        _TransactionOutput output_A0 = new _TransactionOutput(params, null, Coin.valueOf(stonewall0.getSpendAmount()), scriptPubKey_A0);
-        outputsA.put(output_A0, Triple.of(segwitAddress0.getECKey().getPubKey(), stonewall0.getFingerprintCollab(), "M/"+chain+"/" + idx));
+        _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall0.getSpendAmount());
+        outputsA.put(output_A0, computeOutput(receiveAddress, stonewall0.getFingerprintCollab()));
 
         // contributor change output
-        chain = 1;
-        if (stonewall0.getCounterpartyAccount() == WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT) {
-            ++idx;
-        } else {
-            idx = bip84Wallet.getAccount(stonewall0.getCounterpartyAccount()).getChange().getAddrIdx();
-        }
-        SegwitAddress segwitAddress1 = bip84Wallet.getSegwitAddressAt(stonewall0.getCounterpartyAccount(), chain, idx);
+        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), true);
         if (log.isDebugEnabled()) {
-            log.debug("+output " + stonewall0.getAccount() + ":M/" + chain + "/" + idx + " (CounterParty change) = " + segwitAddress1.getBech32AsString());
+            log.debug("+output (CounterParty change) = " + changeAddress);
         }
-        byte[] scriptPubKey_A1 = bech32Util.computeScriptPubKey(segwitAddress1.getBech32AsString(), params);
-        _TransactionOutput output_A1 = new _TransactionOutput(params, null, Coin.valueOf(totalContributedAmount - stonewall0.getSpendAmount()), scriptPubKey_A1);
-        outputsA.put(output_A1, Triple.of(segwitAddress1.getECKey().getPubKey(), stonewall0.getFingerprintCollab(), "M/"+chain+"/" + idx));
-        stonewall0.setCollabChange(segwitAddress1.getBech32AsString());
+        _TransactionOutput output_A1 = computeTxOutput(changeAddress, totalContributedAmount - stonewall0.getSpendAmount());
+        outputsA.put(output_A1, computeOutput(changeAddress, stonewall0.getFingerprintCollab()));
+        stonewall0.setCollabChange(changeAddress.getAddressString());
 
         STONEWALLx2 stonewall1 = new STONEWALLx2(stonewall0);
         stonewall1.doStep1(inputsA, outputsA);
@@ -375,8 +358,7 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
         //
         //
 
-        HD_Wallet bip84Wallet = cahootsWallet.getBip84Wallet();
-        String zpub = bip84Wallet.getAccount(stonewall1.getAccount()).zpubstr();
+        String zpub = cahootsWallet.getBip84Wallet().getAccount(stonewall1.getAccount()).zpubstr();
         HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>> inputsB = new HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>>();
 
         for (CahootsUtxo utxo : selectedUTXO) {
@@ -388,25 +370,17 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
 
         // spender change output
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsB = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
-        Pair<Integer,Integer> idxAndChain = cahootsWallet.fetchChangeIndex(stonewall1.getAccount());
-        int idx = idxAndChain.getLeft();
-        int chain = idxAndChain.getRight();
-        SegwitAddress segwitAddress = bip84Wallet.getSegwitAddressAt(stonewall1.getAccount(), chain, idx);
+        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall1.getAccount(), true);
         if (log.isDebugEnabled()) {
-            log.debug("+output " + stonewall1.getAccount() + ":M/" + chain + "/" + idx + " (Spender change) = " + segwitAddress.getBech32AsString());
+            log.debug("+output (Spender change) = " + changeAddress);
         }
-        byte[] scriptPubKey_B0 = bech32Util.computeScriptPubKey(segwitAddress.getBech32AsString(), params);
-        _TransactionOutput output_B0 = new _TransactionOutput(params, null, Coin.valueOf((totalSelectedAmount - stonewall1.getSpendAmount()) - (fee / 2L)), scriptPubKey_B0);
-        outputsB.put(output_B0, Triple.of(segwitAddress.getECKey().getPubKey(), stonewall1.getFingerprint(), "M/"+chain+"/" + idx));
+        _TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stonewall1.getSpendAmount()) - (fee / 2L));
+        outputsB.put(output_B0, computeOutput(changeAddress, stonewall1.getFingerprint()));
 
         STONEWALLx2 stonewall2 = new STONEWALLx2(stonewall1);
         stonewall2.doStep2(inputsB, outputsB);
 
         return stonewall2;
-    }
-
-    private long estimatedFee(int nbTotalSelectedOutPoints, int nbIncomingInputs, long feePerB) {
-        return FeeUtil.getInstance().estimatedFeeSegwit(0, 0, nbTotalSelectedOutPoints + nbIncomingInputs, 4, 0, feePerB);
     }
 
     //
@@ -439,5 +413,9 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
         long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahootsWallet, stonewall4, CahootsTypeUser.SENDER);
         stonewall4.setVerifiedSpendAmount(verifiedSpendAmount);
         return stonewall4;
+    }
+
+    private long estimatedFee(int nbTotalSelectedOutPoints, int nbIncomingInputs, long feePerB) {
+        return FeeUtil.getInstance().estimatedFeeSegwit(0, 0, nbTotalSelectedOutPoints + nbIncomingInputs, 4, 0, feePerB);
     }
 }

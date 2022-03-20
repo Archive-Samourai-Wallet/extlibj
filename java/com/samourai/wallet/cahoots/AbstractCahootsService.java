@@ -1,10 +1,13 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.hd.BipAddress;
+import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.segwit.SegwitAddress;
+import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.whirlpool.WhirlpoolConst;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,24 +96,27 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
         List<String> addresses = new LinkedList<String>();
 
         // compute change addresses
-        Pair<Integer,Integer> idxAndChain = cahootsWallet.fetchChangeIndex(myAccount);
-        int idx = idxAndChain.getLeft();
-        int chain = idxAndChain.getRight();
-        addresses.addAll(computeMyOutputAddresses(cahootsWallet, myAccount, chain, idx));
+        BipAddress changeAddress = cahootsWallet.fetchAddressChange(myAccount, false);
+        addresses.addAll(computeMyOutputAddresses(cahootsWallet, changeAddress.getHdAddress()));
 
         // compute receive addresses
         if (myAccount != WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT) {
-            idxAndChain = cahootsWallet.fetchReceiveIndex(myAccount);
-            idx = idxAndChain.getLeft();
-            chain = idxAndChain.getRight();
-            addresses.addAll(computeMyOutputAddresses(cahootsWallet, myAccount, chain, idx));
+            BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(myAccount, false);
+            addresses.addAll(computeMyOutputAddresses(cahootsWallet, receiveAddress.getHdAddress()));
         }
         return addresses;
     }
 
-    private List<String> computeMyOutputAddresses(CahootsWallet cahootsWallet, int account, int chain, int idx) throws Exception {
+    private List<String> computeMyOutputAddresses(CahootsWallet cahootsWallet, HD_Address hdAddress) throws Exception {
+        int account = hdAddress.getAccountIndex();
+        int idx = hdAddress.getAddressIndex();
+        int chain = hdAddress.getChainIndex();
+
+        int NB_ADDRESSES_MAX=4;
+        idx = Math.max(0, idx-NB_ADDRESSES_MAX); // go back address index for verification
+
         List<String> addresses = new LinkedList<String>();
-        for (int i=0; i<2; i++) {
+        for (int i=0; i<NB_ADDRESSES_MAX; i++) {
             SegwitAddress segwitAddress = cahootsWallet.getBip84Wallet().getSegwitAddressAt(account, chain, idx+i);
             addresses.add(segwitAddress.getBech32AsString());
             if (log.isDebugEnabled()) {
@@ -118,5 +124,16 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
             }
         }
         return addresses;
+    }
+
+    protected  _TransactionOutput computeTxOutput(BipAddress bipAddress, long amount) throws Exception{
+        String receiveAddressString = bipAddress.getAddressString();
+        byte[] scriptPubKey_A0 = Bech32UtilGeneric.getInstance().computeScriptPubKey(receiveAddressString, params);
+        return new _TransactionOutput(params, null, Coin.valueOf(amount), scriptPubKey_A0);
+    }
+
+    protected Triple<byte[], byte[], String> computeOutput(BipAddress bipAddress, byte[] fingerprint) {
+        HD_Address hdAddress = bipAddress.getHdAddress();
+        return Triple.of(hdAddress.getECKey().getPubKey(), fingerprint, "M/"+hdAddress.getChainIndex()+"/" + hdAddress.getAddressIndex());
     }
 }

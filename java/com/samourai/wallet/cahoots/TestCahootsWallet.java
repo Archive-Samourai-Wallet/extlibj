@@ -2,7 +2,7 @@ package com.samourai.wallet.cahoots;
 
 import com.google.common.base.Strings;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
-import com.samourai.wallet.hd.HD_Wallet;
+import com.samourai.wallet.bipWallet.WalletSupplier;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import org.bitcoinj.core.ECKey;
@@ -13,11 +13,10 @@ import org.bouncycastle.util.encoders.Hex;
 import java.math.BigInteger;
 
 public class TestCahootsWallet extends SimpleCahootsWallet {
-    public static final int POST_CHANGE_INDEX = 123;
     public static final int FEE_PER_B = 1;
 
-    public TestCahootsWallet(HD_Wallet bip84w, BipFormatSupplier bipFormatSupplier, NetworkParameters params) throws Exception {
-        super(bip84w, bipFormatSupplier, params, POST_CHANGE_INDEX, FEE_PER_B);
+    public TestCahootsWallet(WalletSupplier walletSupplier, BipFormatSupplier bipFormatSupplier, NetworkParameters params) throws Exception {
+        super(walletSupplier, bipFormatSupplier, params, FEE_PER_B);
     }
 
     public void addUtxo(int account, String txid, int n, long value, String address) {

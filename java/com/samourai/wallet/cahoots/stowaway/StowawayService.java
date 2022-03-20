@@ -3,14 +3,12 @@ package com.samourai.wallet.cahoots.stowaway;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
-import com.samourai.wallet.hd.HD_Wallet;
-import com.samourai.wallet.segwit.SegwitAddress;
+import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.RandomUtil;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ECKey;
@@ -105,9 +103,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     // receiver
     //
     private Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, int account) throws Exception {
-        HD_Wallet bip84Wallet = cahootsWallet.getBip84Wallet();
-
-        byte[] fingerprint = bip84Wallet.getFingerprint();
+        byte[] fingerprint = cahootsWallet.getBip84Wallet().getFingerprint();
         stowaway0.setFingerprintCollab(fingerprint);
 
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
@@ -172,14 +168,15 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
         }
 
         // destination output
-        int idx = bip84Wallet.getAccount(account).getReceive().getAddrIdx();
-        SegwitAddress segwitAddress = bip84Wallet.getSegwitAddressAt(account,0, idx);
+        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(account, true);
+        if (log.isDebugEnabled()) {
+            log.debug("+output (CounterParty receive) = "+receiveAddress);
+        }
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsA = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
-        byte[] scriptPubKey_A = bech32Util.computeScriptPubKey(segwitAddress.getBech32AsString(), params);
-        _TransactionOutput output_A0 = new _TransactionOutput(params, null, Coin.valueOf(stowaway0.getSpendAmount()), scriptPubKey_A);
-        outputsA.put(output_A0, Triple.of(segwitAddress.getECKey().getPubKey(), stowaway0.getFingerprintCollab(), "M/0/" + idx));
+        _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stowaway0.getSpendAmount());
+        outputsA.put(output_A0, computeOutput(receiveAddress, stowaway0.getFingerprintCollab()));
 
-        stowaway0.setDestination(segwitAddress.getBech32AsString());
+        stowaway0.setDestination(receiveAddress.getAddressString());
         stowaway0.setCounterpartyAccount(account);
 
         Stowaway stowaway1 = new Stowaway(stowaway0);
@@ -293,7 +290,6 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
         //
         //
 
-        HD_Wallet bip84Wallet = cahootsWallet.getBip84Wallet();
         HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>> inputsB = new HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>>();
 
         for (CahootsUtxo utxo : selectedUTXO) {
@@ -308,14 +304,13 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
         }
 
         // change output
-        Pair<Integer,Integer> idxAndChain = cahootsWallet.fetchChangeIndex(stowaway1.getAccount());
-        int idx = idxAndChain.getLeft();
-        int chain = idxAndChain.getRight();
-        SegwitAddress segwitAddress = bip84Wallet.getSegwitAddressAt(stowaway1.getAccount(), chain, idx);
+        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stowaway1.getAccount(), true);
+        if (log.isDebugEnabled()) {
+            log.debug("+output (sender change) = "+changeAddress);
+        }
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsB = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
-        byte[] scriptPubKey_B = bech32Util.computeScriptPubKey(segwitAddress.getBech32AsString(), params);
-        _TransactionOutput output_B0 = new _TransactionOutput(params, null, Coin.valueOf((totalSelectedAmount - stowaway1.getSpendAmount()) - fee), scriptPubKey_B);
-        outputsB.put(output_B0, Triple.of(segwitAddress.getECKey().getPubKey(), stowaway1.getFingerprint(), "M/1/" + idx));
+        _TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stowaway1.getSpendAmount()) - fee);
+        outputsB.put(output_B0, computeOutput(changeAddress, stowaway1.getFingerprint()));
 
         if (log.isDebugEnabled()) {
             log.debug("outputsB:" + outputsB.size());
@@ -326,10 +321,6 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
         stowaway2.setFeeAmount(fee);
 
         return stowaway2;
-    }
-
-    private long estimatedFee(int nbTotalSelectedOutPoints, int nbIncomingInputs, long feePerB) {
-        return FeeUtil.getInstance().estimatedFeeSegwit(0, 0, nbTotalSelectedOutPoints + nbIncomingInputs, 2, 0, feePerB);
     }
 
     //
@@ -364,4 +355,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
         return stowaway4;
     }
 
+    private long estimatedFee(int nbTotalSelectedOutPoints, int nbIncomingInputs, long feePerB) {
+        return FeeUtil.getInstance().estimatedFeeSegwit(0, 0, nbTotalSelectedOutPoints + nbIncomingInputs, 2, 0, feePerB);
+    }
 }

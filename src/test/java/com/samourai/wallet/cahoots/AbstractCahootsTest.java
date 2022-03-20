@@ -3,6 +3,8 @@ package com.samourai.wallet.cahoots;
 import com.samourai.soroban.cahoots.ManualCahootsMessage;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
+import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.TestNet3Params;
 import org.junit.jupiter.api.Assertions;
@@ -14,6 +16,7 @@ public abstract class AbstractCahootsTest {
 
     protected NetworkParameters params = TestNet3Params.get();
     protected BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;
+    protected IndexHandlerSupplier indexHandlerSupplier = new MemoryIndexHandlerSupplier();
 
     protected Cahoots cleanPayload(Cahoots payload) throws Exception {
         Cahoots copy = Cahoots.parse(payload.toJSONString());
