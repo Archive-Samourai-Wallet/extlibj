@@ -36,7 +36,7 @@ public class SendFactoryGeneric {
     protected SendFactoryGeneric() { ; }
 
     // used by android
-    public Transaction makeTransaction(List<MyTransactionOutPoint> unspent, Map<String, BigInteger> receivers, BipFormatSupplier bipFormatSupplier, boolean rbfOptIn, NetworkParameters params, long blockHeight) throws MakeTxException {
+    public Transaction makeTransaction(Collection<MyTransactionOutPoint> unspent, Map<String, BigInteger> receivers, BipFormatSupplier bipFormatSupplier, boolean rbfOptIn, NetworkParameters params, long blockHeight) throws MakeTxException {
         Map<String, Long> receiversLong = new LinkedHashMap<>();
         for (Map.Entry<String,BigInteger> entry : receivers.entrySet()) {
             receiversLong.put(entry.getKey(), entry.getValue().longValue());
@@ -82,7 +82,7 @@ public class SendFactoryGeneric {
                 TransactionOutput output = bipFormatSupplier.getTransactionOutput(toAddress, value.longValue(), params);
                 outputs.add(output);
             } catch (Exception e) {
-                log.error("computeTransactionOutput failed", e);
+                log.error("getTransactionOutput failed", e);
                 throw new MakeTxException(e);
             }
         }
@@ -170,6 +170,7 @@ public class SendFactoryGeneric {
                 throw new SignTxException("Signing input #"+i+" failed", e);
             }
         }
+        transaction.verify();
         return transaction;
     }
 

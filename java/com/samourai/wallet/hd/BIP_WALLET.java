@@ -15,7 +15,8 @@ public enum BIP_WALLET {
   DEPOSIT_BIP84(WhirlpoolAccount.DEPOSIT, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.DEPOSIT), BIP_FORMAT.SEGWIT_NATIVE),
   PREMIX_BIP84(WhirlpoolAccount.PREMIX, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.PREMIX), BIP_FORMAT.SEGWIT_NATIVE),
   POSTMIX_BIP84(WhirlpoolAccount.POSTMIX, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.POSTMIX), BIP_FORMAT.SEGWIT_NATIVE),
-  BADBANK_BIP84(WhirlpoolAccount.BADBANK, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.BADBANK), BIP_FORMAT.SEGWIT_NATIVE);
+  BADBANK_BIP84(WhirlpoolAccount.BADBANK, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.BADBANK), BIP_FORMAT.SEGWIT_NATIVE),
+  RICOCHET_BIP84(WhirlpoolAccount.RICOCHET, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.RICOCHET), BIP_FORMAT.SEGWIT_NATIVE);
 
   private static final Logger log = LoggerFactory.getLogger(BIP_WALLET.class);
   private WhirlpoolAccount account;

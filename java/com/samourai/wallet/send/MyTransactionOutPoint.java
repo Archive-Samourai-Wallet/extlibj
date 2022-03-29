@@ -22,6 +22,10 @@ public class MyTransactionOutPoint extends TransactionOutPoint {
         this.confirmations = confirmations;
     }
 
+    public MyTransactionOutPoint(TransactionOutput txOutput, String address, int confirmations) {
+        this(txOutput.getParams(), txOutput.getParentTransactionHash(), txOutput.getIndex(), BigInteger.valueOf(txOutput.getValue().getValue()), txOutput.getScriptBytes(), address, confirmations);
+    }
+
     public static long sumValue(Collection<MyTransactionOutPoint> outpoints) {
         long sum = 0L;
         for (MyTransactionOutPoint outpoint : outpoints) {
@@ -63,7 +67,7 @@ public class MyTransactionOutPoint extends TransactionOutPoint {
         return new TransactionOutput(params, null, Coin.valueOf(value.longValue()), scriptBytes);
     }
 
-    //@Override
+    @Override
     public byte[] getConnectedPubKeyScript() {
         return scriptBytes;
     }

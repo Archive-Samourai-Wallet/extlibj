@@ -7,7 +7,8 @@ public enum WhirlpoolAccount {
   DEPOSIT(true),
   PREMIX(true),
   POSTMIX(true),
-  BADBANK(false);
+  BADBANK(false),
+  RICOCHET(false);
 
   private boolean active;
 
