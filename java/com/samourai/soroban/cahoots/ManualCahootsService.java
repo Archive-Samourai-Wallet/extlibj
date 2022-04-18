@@ -6,6 +6,8 @@ import com.samourai.soroban.client.SorobanReply;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
+import com.samourai.wallet.cahoots.multi.MultiCahoots;
+import com.samourai.wallet.cahoots.multi.MultiCahootsService;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
@@ -34,6 +36,9 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
                 break;
             case STONEWALLX2:
                 payload0 = ((Stonewallx2Service)cahootsService).startInitiator(cahootsWallet, cahootsContext.getAmount(), account, cahootsContext.getAddress());
+                break;
+            case MULTI:
+                payload0 = ((MultiCahootsService)cahootsService).startInitiator(cahootsWallet, cahootsContext.getAddress(), cahootsContext.getAmount(), account);
                 break;
             default:
                 throw new Exception("Unknown Cahoots type");
@@ -152,6 +157,11 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
                     throw new Exception("Cahoots instance type mismatch");
                 }
                 break;
+            case MULTI:
+                if(!(cahoots instanceof MultiCahoots)) {
+                    throw new Exception("Cahoots instance type mismatch");
+                }
+                break;
             default:
                 throw new Exception("Unknown Cahoots type");
         }
@@ -184,6 +194,7 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
                         throw new Exception("Unknown typeUser");
                 }
                 break;
+            case MULTI:
             case STOWAWAY:
                 switch (cahootsContext.getTypeUser()) {
                     case SENDER:
@@ -212,6 +223,8 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
                 return new StowawayService(bipFormatSupplier, params);
             case STONEWALLX2:
                 return new Stonewallx2Service(bipFormatSupplier, params);
+            case MULTI:
+                return new MultiCahootsService(bipFormatSupplier, params);
         }
         throw new Exception("Unrecognized #Cahoots");
     }

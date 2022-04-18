@@ -35,6 +35,7 @@ public class MultiCahoots extends Cahoots {
     private static final Logger log = LoggerFactory.getLogger(MultiCahoots.class);
     private long stowawayFee = 0;
     private long stonewallAmount = 0;
+    private String stonewallDestination = "";
 
     private MultiCahoots()    { ; }
 
@@ -42,6 +43,7 @@ public class MultiCahoots extends Cahoots {
         super(multiCahoots);
         this.stonewallAmount = multiCahoots.stonewallAmount;
         this.stowawayFee = multiCahoots.stowawayFee;
+        this.stonewallDestination = multiCahoots.stonewallDestination;
     }
 
     public MultiCahoots(JSONObject obj)    {
@@ -56,7 +58,7 @@ public class MultiCahoots extends Cahoots {
         this.type = CahootsType.MULTI.getValue();
         this.step = 0;
         this.spendAmount = spendAmount;
-        this.strDestination = address;
+        this.stonewallDestination = address;
         this.outpoints = new HashMap<String, Long>();
         this.params = params;
         this.account = account;
@@ -77,7 +79,7 @@ public class MultiCahoots extends Cahoots {
         this.account = account;
     }
 
-    private MultiCahoots doStep0_Stowaway_StartInitiator(String destination, long spendAmount, int account, byte[] fingerprint) {
+    public MultiCahoots doStep0_Stowaway_StartInitiator(String destination, long spendAmount, int account, byte[] fingerprint) {
         //
         //
         // step0: B sends spend amount to A,  creates step0
@@ -90,6 +92,7 @@ public class MultiCahoots extends Cahoots {
         MultiCahoots stowaway0 = new MultiCahoots(destination, stowawayFee, params, account);
         stowaway0.setFingerprint(fingerprint);
         stowaway0.setStonewallAmount(spendAmount);
+        stowaway0.setStowawayFee(stowawayFee);
         return stowaway0;
     }
 
@@ -468,6 +471,7 @@ public class MultiCahoots extends Cahoots {
         JSONObject jsonObject = super.toJSON();
         jsonObject.put("stonewall_amount", stonewallAmount);
         jsonObject.put("stowaway_fee", stowawayFee);
+        jsonObject.put("stonewall_destination", stonewallDestination);
         return jsonObject;
     }
 
@@ -476,5 +480,6 @@ public class MultiCahoots extends Cahoots {
         super.fromJSON(cObj);
         this.stonewallAmount = cObj.getLong("stonewall_amount");
         this.stowawayFee = cObj.getLong("stowaway_fee");
+        this.stonewallDestination = cObj.getString("stonewall_destination");
     }
 }

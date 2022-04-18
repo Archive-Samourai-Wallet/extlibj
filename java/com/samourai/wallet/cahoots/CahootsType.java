@@ -6,7 +6,7 @@ import com.google.common.base.Optional;
 public enum CahootsType {
     STONEWALLX2(0, "StonewallX2", true),
     STOWAWAY(1, "Stowaway", false),
-    MULTI(2, "MultiCahoots", true); //true for Stonewall portion
+    MULTI(2, "MultiCahoots", false);
 
     private int value;
     private String label;

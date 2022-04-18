@@ -1,6 +1,7 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.wallet.SamouraiWalletConst;
+import com.samourai.wallet.cahoots.multi.MultiCahoots;
 import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
@@ -343,6 +344,8 @@ public abstract class Cahoots {
                 return new Stowaway(obj);
             case STONEWALLX2:
                 return new STONEWALLx2(obj);
+            case MULTI:
+                return new MultiCahoots(obj);
         }
         throw new Exception("Unrecognized #Cahoots");
     }
