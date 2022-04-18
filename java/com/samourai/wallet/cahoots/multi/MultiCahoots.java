@@ -40,6 +40,8 @@ public class MultiCahoots extends Cahoots {
 
     public MultiCahoots(MultiCahoots multiCahoots)    {
         super(multiCahoots);
+        this.stonewallAmount = multiCahoots.stonewallAmount;
+        this.stowawayFee = multiCahoots.stowawayFee;
     }
 
     public MultiCahoots(JSONObject obj)    {
@@ -47,13 +49,14 @@ public class MultiCahoots extends Cahoots {
     }
 
     // Stowaway
-    public MultiCahoots(long spendAmount, NetworkParameters params, int account)    {
+    public MultiCahoots(String address, long spendAmount, NetworkParameters params, int account)    {
         this.ts = System.currentTimeMillis() / 1000L;
         SecureRandom random = RandomUtil.getSecureRandom();
         this.strID = Hex.toHexString(Sha256Hash.hash(BigInteger.valueOf(random.nextLong()).toByteArray()));
         this.type = CahootsType.MULTI.getValue();
         this.step = 0;
         this.spendAmount = spendAmount;
+        this.strDestination = address;
         this.outpoints = new HashMap<String, Long>();
         this.params = params;
         this.account = account;
@@ -74,21 +77,7 @@ public class MultiCahoots extends Cahoots {
         this.account = account;
     }
 
-    // Stonewallx2
-    public MultiCahoots(long spendAmount, String address, NetworkParameters params, int account)    {
-        this.ts = System.currentTimeMillis() / 1000L;
-        SecureRandom random = RandomUtil.getSecureRandom();
-        this.strID = Hex.toHexString(Sha256Hash.hash(BigInteger.valueOf(random.nextLong()).toByteArray()));
-        this.type = CahootsType.STONEWALLX2.getValue();
-        this.step = 0;
-        this.spendAmount = spendAmount;
-        this.outpoints = new HashMap<String, Long>();
-        this.strDestination = address;
-        this.params = params;
-        this.account = account;
-    }
-
-    private MultiCahoots doStep0_Stowaway_StartInitiator(long spendAmount, int account, byte[] fingerprint) {
+    private MultiCahoots doStep0_Stowaway_StartInitiator(String destination, long spendAmount, int account, byte[] fingerprint) {
         //
         //
         // step0: B sends spend amount to A,  creates step0
@@ -98,7 +87,7 @@ public class MultiCahoots extends Cahoots {
             log.debug("sender account (0):" + account);
         }
         long stowawayFee = (long)(spendAmount * 0.01d);
-        MultiCahoots stowaway0 = new MultiCahoots(stowawayFee, params, account);
+        MultiCahoots stowaway0 = new MultiCahoots(destination, stowawayFee, params, account);
         stowaway0.setFingerprint(fingerprint);
         stowaway0.setStonewallAmount(spendAmount);
         return stowaway0;
@@ -289,7 +278,7 @@ public class MultiCahoots extends Cahoots {
     }
 
     private MultiCahoots doStep5_Stonewallx2_StartInitiator(long spendAmount, String address, int account, byte[] fingerprint) {
-        MultiCahoots stonewall0 = new MultiCahoots(spendAmount, address, params, account);
+        MultiCahoots stonewall0 = new MultiCahoots(address, spendAmount, params, account);
         stonewall0.setFingerprint(fingerprint);
         stonewall0.setStep(5);
 
