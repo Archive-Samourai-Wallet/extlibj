@@ -92,7 +92,7 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
         return spendAmount;
     }
 
-    private List<String> computeMyOutputAddresses(CahootsWallet cahootsWallet, int myAccount) throws Exception {
+    protected List<String> computeMyOutputAddresses(CahootsWallet cahootsWallet, int myAccount) throws Exception {
         List<String> addresses = new LinkedList<String>();
 
         // compute change addresses
@@ -135,5 +135,9 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
     protected Triple<byte[], byte[], String> computeOutput(BipAddress bipAddress, byte[] fingerprint) {
         HD_Address hdAddress = bipAddress.getHdAddress();
         return Triple.of(hdAddress.getECKey().getPubKey(), fingerprint, "M/"+hdAddress.getChainIndex()+"/" + hdAddress.getAddressIndex());
+    }
+
+    public BipFormatSupplier getBipFormatSupplier() {
+        return bipFormatSupplier;
     }
 }

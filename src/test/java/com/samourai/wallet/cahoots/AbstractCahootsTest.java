@@ -3,9 +3,12 @@ package com.samourai.wallet.cahoots;
 import com.samourai.soroban.cahoots.ManualCahootsMessage;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.cahoots.multi.MultiCahoots;
 import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
 import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
 import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.params.TestNet3Params;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
@@ -26,8 +29,8 @@ public abstract class AbstractCahootsTest {
 
     protected void verify(String expectedPayload, Cahoots cahoots) throws Exception {
         String payloadStr = cleanPayload(cahoots).toJSONString();
-        System.out.println(payloadStr);
-        //Assertions.assertEquals(expectedPayload, payloadStr);
+        System.out.println(cahoots.getStep() + ": " + payloadStr);
+        Assertions.assertEquals(expectedPayload, payloadStr);
     }
 
     protected void verify(String expectedPayload, ManualCahootsMessage cahootsMessage, boolean lastStep, CahootsType type, CahootsTypeUser typeUser) throws Exception {

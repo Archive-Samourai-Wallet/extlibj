@@ -13,9 +13,11 @@ import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.JavaUtil;
 import com.samourai.wallet.util.RandomUtil;
+import com.samourai.wallet.util.Z85;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.*;
+import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
@@ -24,6 +26,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -36,6 +39,8 @@ public class MultiCahoots extends Cahoots {
     private long stowawayFee = 0;
     private long stonewallAmount = 0;
     private String stonewallDestination = "";
+    private Transaction stowawayTransaction = null;
+    private Transaction stonewallTransaction = null;
 
     private MultiCahoots()    { ; }
 
@@ -44,6 +49,8 @@ public class MultiCahoots extends Cahoots {
         this.stonewallAmount = multiCahoots.stonewallAmount;
         this.stowawayFee = multiCahoots.stowawayFee;
         this.stonewallDestination = multiCahoots.stonewallDestination;
+        this.stowawayTransaction = multiCahoots.stowawayTransaction;
+        this.stonewallTransaction = multiCahoots.stonewallTransaction;
     }
 
     public MultiCahoots(JSONObject obj)    {
@@ -293,7 +300,7 @@ public class MultiCahoots extends Cahoots {
     //
     protected void doStep6_Stonewallx2_StartCollaborator(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
-        if(this.getStep() != 0 || this.getSpendAmount() == 0L)   {
+        if(this.getStep() != 5 || this.getSpendAmount() == 0L)   {
             throw new Exception("Invalid step/amount");
         }
         if(outputs == null)    {
@@ -369,16 +376,16 @@ public class MultiCahoots extends Cahoots {
         }
 
         TransactionOutput _output = null;
-        if(!FormatsUtilGeneric.getInstance().isValidBitcoinAddress(strDestination, params)) {
-            throw new Exception("Invalid destination address");
+        if(!FormatsUtilGeneric.getInstance().isValidBitcoinAddress(stonewallDestination, params)) {
+            throw new Exception("Invalid destination address: " + stonewallDestination);
         }
-        if(FormatsUtilGeneric.getInstance().isValidBech32(strDestination))    {
-            Pair<Byte, byte[]> pair = Bech32Segwit.decode(params instanceof TestNet3Params ? "tb" : "bc", strDestination);
+        if(FormatsUtilGeneric.getInstance().isValidBech32(stonewallDestination))    {
+            Pair<Byte, byte[]> pair = Bech32Segwit.decode(params instanceof TestNet3Params ? "tb" : "bc", stonewallDestination);
             byte[] scriptPubKey = Bech32Segwit.getScriptPubkey(pair.getLeft(), pair.getRight());
             _output = new TransactionOutput(params, null, Coin.valueOf(spendAmount), scriptPubKey);
         }
         else    {
-            Script toOutputScript = ScriptBuilder.createOutputScript(Address.fromBase58(params, strDestination));
+            Script toOutputScript = ScriptBuilder.createOutputScript(Address.fromBase58(params, stonewallDestination));
             _output = new TransactionOutput(params, null, Coin.valueOf(spendAmount), toOutputScript.getProgram());
         }
         transaction.addOutput(_output);
@@ -466,12 +473,22 @@ public class MultiCahoots extends Cahoots {
         return stowawayFee;
     }
 
+    public String getStonewallDestination() {
+        return stonewallDestination;
+    }
+
+    private void setStonewallDestination(String destination) {
+        this.stonewallDestination = destination;
+    }
+
     @Override
     public JSONObject toJSON() {
         JSONObject jsonObject = super.toJSON();
         jsonObject.put("stonewall_amount", stonewallAmount);
         jsonObject.put("stowaway_fee", stowawayFee);
         jsonObject.put("stonewall_destination", stonewallDestination);
+        jsonObject.put("stowaway_tx", stowawayTransaction == null ? "" : Z85.getInstance().encode(stowawayTransaction.bitcoinSerialize()));
+        jsonObject.put("stonewall_tx", stonewallTransaction == null ? "" : Z85.getInstance().encode(stonewallTransaction.bitcoinSerialize()));
         return jsonObject;
     }
 
@@ -481,5 +498,73 @@ public class MultiCahoots extends Cahoots {
         this.stonewallAmount = cObj.getLong("stonewall_amount");
         this.stowawayFee = cObj.getLong("stowaway_fee");
         this.stonewallDestination = cObj.getString("stonewall_destination");
+        this.stowawayTransaction = cObj.getString("stowaway_tx").equals("") ? null : new Transaction(params, Z85.getInstance().decode(cObj.getString("stowaway_tx")));
+        this.stonewallTransaction = cObj.getString("stonewall_tx").equals("") ? null : new Transaction(params, Z85.getInstance().decode(cObj.getString("stonewall_tx")));
+    }
+
+    @Override
+    protected void signTx(HashMap<String,ECKey> keyBag) {
+
+        Transaction transaction = psbt.getTransaction();
+        if (log.isDebugEnabled()) {
+            log.debug("signTx:" + transaction.toString());
+        }
+
+        for(int i = 0; i < transaction.getInputs().size(); i++)   {
+
+            TransactionInput input = transaction.getInput(i);
+            TransactionOutPoint outpoint = input.getOutpoint();
+            if(keyBag.containsKey(outpoint.toString())) {
+
+                if (log.isDebugEnabled()) {
+                    log.debug("signTx outpoint:" + outpoint.toString());
+                }
+
+                ECKey key = keyBag.get(outpoint.toString());
+                SegwitAddress segwitAddress = new SegwitAddress(key.getPubKey(), params);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("signTx bech32:" + segwitAddress.getBech32AsString());
+                }
+
+                final Script redeemScript = segwitAddress.segWitRedeemScript();
+                final Script scriptCode = redeemScript.scriptCode();
+
+                long value = outpoints.get(outpoint.getHash().toString() + "-" + outpoint.getIndex());
+                if (log.isDebugEnabled()) {
+                    log.debug("signTx value:" + value);
+                }
+
+                TransactionSignature sig = transaction.calculateWitnessSignature(i, key, scriptCode, Coin.valueOf(value), Transaction.SigHash.ALL, false);
+                final TransactionWitness witness = new TransactionWitness(2);
+                witness.setPush(0, sig.encodeToBitcoin());
+                witness.setPush(1, key.getPubKey());
+                transaction.setWitness(i, witness);
+
+            }
+
+        }
+
+        if(getStep() > 3) {
+            stonewallTransaction = transaction;
+        } else {
+            stowawayTransaction = transaction;
+        }
+    }
+
+    public void setStowawayTransaction(Transaction transaction) {
+        this.stowawayTransaction = transaction;
+    }
+
+    public Transaction getStowawayTransaction() {
+        return this.stowawayTransaction;
+    }
+
+    public void setStonewallTransaction(Transaction transaction) {
+        this.stonewallTransaction = transaction;
+    }
+
+    public Transaction getStonewallTransaction() {
+        return this.stonewallTransaction;
     }
 }
