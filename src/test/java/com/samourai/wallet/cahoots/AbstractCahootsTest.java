@@ -29,7 +29,6 @@ public abstract class AbstractCahootsTest {
 
     protected void verify(String expectedPayload, Cahoots cahoots) throws Exception {
         String payloadStr = cleanPayload(cahoots).toJSONString();
-        System.out.println(cahoots.getStep() + ": " + payloadStr);
         Assertions.assertEquals(expectedPayload, payloadStr);
     }
 
