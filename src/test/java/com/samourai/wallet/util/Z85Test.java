@@ -21,11 +21,15 @@ public class Z85Test {
 
     @Test
     public void decode() throws Exception {
-        String encoded = "mD1Crp)Gb0Rz)$})8e![32dFqNlz+%EFJDCl%nY?5PFVlX}A8F3nae><JSMt&2tkiYL8i-j5n=3DcL+:2Th%g($eT[rdVG/$eEZf}vQT{::SMMXv:+]#B@0*LBW:Zbi/yAMbi4IiL9JZQ>w1KJd]fBWx14wiR2{&z^gUm6a7d98%2]=3Dm9CD%Hkf+(.[S#uUa<&mGHtUdc]kWr-qq^&dO0O?9LLkea$&Nv70Jq?R?]:*a(LT@P=3Dih-6E{9=3Dl#:Tp]gVruh5qRGnpe{//pu!&yR6j5(>On8VMEsW@}4S+g+y#}UV4i{Q2IMA+c.Xcy/l71X";
+        String encoded = "mD1Crp)Gb0Rz)$})8e![32dFqNlz+%EFJDCl%nY?5PFVlX}A8F3nae><JSMt&2tkiYL8i-j5n=cL+:2Th%g($eT[rdVG/$eEZf}vQT{::SMMXv:+]#B@0*LBW:Zbi/yAMbi4IiL9JZQ>w1KJd]fBWx14wiR2{&z^gUm6a7d98%2]=m9CD%Hkf+(.[S#uUa<&mGHtUdc]kWr-qq^&dO0O?9LLkea$&Nv70Jq?R?]:*a(LT@P=ih-6E{9=l#:Tp]gVruh5qRGnpe{//pu!&yR6j5(>On8VMEsW@}4S+g+y#}UV4i{Q2IMA+c.Xcy/l71X";
+        String encodedHash = Hex.toHexString(Sha256Hash.hash(encoded.getBytes()));
+        Assertions.assertEquals("7bed90ca1e8ba5b7c706eae4f11dee423569f792d87395957ca9c52739b224dd", encodedHash);
+
+        Assertions.assertEquals("", "");
         byte[] data = z85.decode(encoded);
         String hash = Hex.toHexString(Sha256Hash.hash(data));
-        Assertions.assertEquals("b547387607a8dbdb964eb4f0adf48fc003bbc8c0948726a39c1b1e7b47d29831", hash);
-        Assertions.assertEquals(261, data.length);
+        Assertions.assertEquals("c5a28d6ecd02c27984db4a4c909dec6f6368e283ca23d446c8c4dc58a3aee96d", hash);
+        Assertions.assertEquals(255, data.length);
     }
 
 }
