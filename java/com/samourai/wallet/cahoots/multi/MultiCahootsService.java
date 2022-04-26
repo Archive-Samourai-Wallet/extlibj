@@ -124,8 +124,9 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         stowaway0.setFingerprintCollab(fingerprint);
 
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
+        // No need to filter out UTXOs that have been used in a previous part of the Cahoots, as this is the first time we select UTXOs.
         // sort in descending order by value
-        Collections.sort(utxos, new UTXO.UTXOComparator());
+        utxos.sort(new UTXO.UTXOComparator());
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
         }
@@ -218,8 +219,9 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         int nbIncomingInputs = transaction.getInputs().size();
 
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway1.getAccount());
+        // This is the first time we fetch UTXOs on initiator side. No need to filter yet.
         // sort in ascending order by value
-        Collections.sort(utxos, new UTXO.UTXOComparator());
+        utxos.sort(new UTXO.UTXOComparator());
         Collections.reverse(utxos);
 
         if (log.isDebugEnabled()) {
@@ -400,10 +402,20 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         stonewall0.setCounterpartyAccount(account);
 
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall0.getCounterpartyAccount());
-        Collections.shuffle(utxos);
+        ArrayList<CahootsUtxo> filteredUtxos = new ArrayList<>(utxos);
+        for(CahootsUtxo utxo : utxos) {
+            List<TransactionInput> stowawayInputs = stonewall0.getStowawayTransaction().getInputs();
+            for(TransactionInput input : stowawayInputs) {
+                if(input.getOutpoint().getHash() == utxo.getOutpoint().getTxHash() && input.getOutpoint().getIndex() == utxo.getOutpoint().getTxOutputN()) {
+                    filteredUtxos.remove(utxo);
+                    System.out.println("Removing UTXO... " + utxo.getOutpoint().toString());
+                }
+            }
+        }
+        Collections.shuffle(filteredUtxos);
 
         if (log.isDebugEnabled()) {
-            log.debug("BIP84 utxos:" + utxos.size());
+            log.debug("BIP84 utxos:" + filteredUtxos.size());
         }
 
         List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
@@ -417,7 +429,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             List<String> seenTxs = new ArrayList<String>();
             selectedUTXO = new ArrayList<CahootsUtxo>();
             totalContributedAmount = 0L;
-            for (CahootsUtxo utxo : utxos) {
+            for (CahootsUtxo utxo : filteredUtxos) {
 
                 switch (step) {
                     case 0:
@@ -518,10 +530,20 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         int nbIncomingInputs = transaction.getInputs().size();
 
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall1.getAccount());
-        Collections.shuffle(utxos);
+        ArrayList<CahootsUtxo> filteredUtxos = new ArrayList<>(utxos);
+        for(CahootsUtxo utxo : utxos) {
+            List<TransactionInput> stowawayInputs = stonewall1.getStowawayTransaction().getInputs();
+            for(TransactionInput input : stowawayInputs) {
+                if(input.getOutpoint().getHash() == utxo.getOutpoint().getTxHash() && input.getOutpoint().getIndex() == utxo.getOutpoint().getTxOutputN()) {
+                    filteredUtxos.remove(utxo);
+                    System.out.println("Removing UTXO... " + utxo.getOutpoint().toString());
+                }
+            }
+        }
+        Collections.shuffle(filteredUtxos);
 
         if (log.isDebugEnabled()) {
-            log.debug("BIP84 utxos:" + utxos.size());
+            log.debug("BIP84 utxos:" + filteredUtxos.size());
         }
 
         List<String> seenTxs = new ArrayList<String>();
@@ -545,7 +567,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             List<String> _seenTxs = seenTxs;
             selectedUTXO = new ArrayList<CahootsUtxo>();
             nbTotalSelectedOutPoints = 0;
-            for (CahootsUtxo utxo : utxos) {
+            for (CahootsUtxo utxo : filteredUtxos) {
 
                 switch (step) {
                     case 0:
