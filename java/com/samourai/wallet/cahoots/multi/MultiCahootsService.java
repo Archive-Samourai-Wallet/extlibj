@@ -408,7 +408,6 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             for(TransactionInput input : stowawayInputs) {
                 if(input.getOutpoint().getHash() == utxo.getOutpoint().getTxHash() && input.getOutpoint().getIndex() == utxo.getOutpoint().getTxOutputN()) {
                     filteredUtxos.remove(utxo);
-                    System.out.println("Removing UTXO... " + utxo.getOutpoint().toString());
                 }
             }
         }
@@ -536,7 +535,6 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             for(TransactionInput input : stowawayInputs) {
                 if(input.getOutpoint().getHash() == utxo.getOutpoint().getTxHash() && input.getOutpoint().getIndex() == utxo.getOutpoint().getTxOutputN()) {
                     filteredUtxos.remove(utxo);
-                    System.out.println("Removing UTXO... " + utxo.getOutpoint().toString());
                 }
             }
         }
