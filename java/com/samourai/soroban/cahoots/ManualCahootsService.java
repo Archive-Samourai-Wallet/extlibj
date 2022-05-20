@@ -132,7 +132,7 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
     }
 
     private void verifyResponse(CahootsContext cahootsContext, Cahoots cahoots) throws Exception {
-        if (cahoots.getStep() >= 3) {
+        if ((cahoots.getStep() >= 3 && cahoots.getStep() <= 5) || (cahoots.getStep() >= 8 && cahoots.getStep() <= 10)) {
             // check fee
             long minerFee = cahoots.getFeeAmount();
             if (minerFee > SamouraiWalletConst.MAX_ACCEPTABLE_FEES) {
