@@ -80,16 +80,24 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
             if (optInteraction.isPresent()) {
                 // reply interaction
                 final TypeInteraction typeInteraction = optInteraction.get();
-                switch (typeInteraction) {
-                    case TX_BROADCAST:
-                        Cahoots signedCahoots = cahootsService.reply(cahootsWallet, payload);
-                        if (cahootsContext != null) {
-                            verifyResponse(cahootsContext, signedCahoots);
-                        }
-                        response = new TxBroadcastInteraction(signedCahoots);
-                        break;
-                    default:
-                        throw new Exception("Unknown typeInteraction: "+typeInteraction);
+                if(request.getType() == CahootsType.MULTI && typeInteraction == TypeInteraction.TX_BROADCAST_MULTI) {
+                    Cahoots signedCahoots = cahootsService.reply(cahootsWallet, payload);
+                    if (cahootsContext != null) {
+                        verifyResponse(cahootsContext, signedCahoots);
+                    }
+                    response = new TxBroadcastInteraction(signedCahoots);
+                } else {
+                    switch (typeInteraction) {
+                        case TX_BROADCAST:
+                            Cahoots signedCahoots = cahootsService.reply(cahootsWallet, payload);
+                            if (cahootsContext != null) {
+                                verifyResponse(cahootsContext, signedCahoots);
+                            }
+                            response = new TxBroadcastInteraction(signedCahoots);
+                            break;
+                        default:
+                            throw new Exception("Unknown typeInteraction: "+typeInteraction);
+                    }
                 }
             } else {
                 // standard reply

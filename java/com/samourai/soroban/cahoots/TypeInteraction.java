@@ -4,7 +4,8 @@ import com.samourai.wallet.cahoots.CahootsTypeUser;
 import java.util.Optional;
 
 public enum TypeInteraction {
-  TX_BROADCAST(CahootsTypeUser.SENDER, 4);
+  TX_BROADCAST(CahootsTypeUser.SENDER, 4),
+  TX_BROADCAST_MULTI(CahootsTypeUser.SENDER, 9);
 
   private CahootsTypeUser typeUser;
   private int step;
