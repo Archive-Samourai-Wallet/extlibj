@@ -150,7 +150,7 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
             if (log.isDebugEnabled()) {
                 log.debug(cahootsContext.getTypeUser()+" verifiedSpendAmount="+verifiedSpendAmount+", maxSpendAmount="+maxSpendAmount);
             }
-            if (verifiedSpendAmount > maxSpendAmount) {
+            if (verifiedSpendAmount > maxSpendAmount && (cahootsContext.getCahootsType() != CahootsType.MULTI || cahootsContext.getTypeUser() == CahootsTypeUser.SENDER)) {
                 throw new Exception("Cahoots verifiedSpendAmount mismatch: " + verifiedSpendAmount);
             }
         }
