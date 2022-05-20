@@ -98,6 +98,10 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
                         default:
                             throw new Exception("Unknown typeInteraction: "+typeInteraction);
                     }
+                } else {
+                    // standard reply
+                    Cahoots cahootsResponse = cahootsService.reply(cahootsWallet, payload);
+                    response = new ManualCahootsMessage(cahootsResponse);
                 }
             } else {
                 // standard reply
