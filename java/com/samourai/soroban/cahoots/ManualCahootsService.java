@@ -143,7 +143,9 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
             long maxSpendAmount = computeMaxSpendAmount(minerFee, cahootsContext);
             long verifiedSpendAmount = cahoots.getVerifiedSpendAmount();
             if (verifiedSpendAmount == 0) {
-                throw new Exception("Cahoots spendAmount verification failed");
+                if(cahootsContext.getCahootsType() != CahootsType.MULTI || cahootsContext.getTypeUser() == CahootsTypeUser.SENDER) {
+                    throw new Exception("Cahoots spendAmount verification failed");
+                }
             }
             if (log.isDebugEnabled()) {
                 log.debug(cahootsContext.getTypeUser()+" verifiedSpendAmount="+verifiedSpendAmount+", maxSpendAmount="+maxSpendAmount);
