@@ -100,7 +100,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     //
-    // sender
+    // counterparty
     //
     private MultiCahoots doMultiCahoots0_Stowaway0(String address, long spendAmount, int account, byte[] fingerprint) {
         //
@@ -117,7 +117,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     //
-    // receiver
+    // sender
     //
     private MultiCahoots doMultiCahoots1_Stowaway1(MultiCahoots stowaway0, CahootsWallet cahootsWallet, int account) throws Exception {
         byte[] fingerprint = cahootsWallet.getBip84Wallet().getFingerprint();
@@ -204,7 +204,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     //
-    // sender
+    // counterparty
     //
     private MultiCahoots doMultiCahoots2_Stowaway2(MultiCahoots stowaway1, CahootsWallet cahootsWallet) throws Exception {
 
@@ -329,7 +329,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             log.debug("+output (sender change) = "+changeAddress);
         }
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsB = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
-        _TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stowaway1.getSpendAmount()) - fee);
+        _TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stowaway1.getSpendAmount()));
         outputsB.put(output_B0, computeOutput(changeAddress, stowaway1.getFingerprint()));
 
         if (log.isDebugEnabled()) {
@@ -344,7 +344,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     //
-    // receiver
+    // sender
     //
     private MultiCahoots doMultiCahoots3_Stowaway3(MultiCahoots stowaway2, CahootsWallet cahootsWallet) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway2.getCounterpartyAccount());
@@ -360,7 +360,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     //
-    // sender
+    // counterparty
     //
     private MultiCahoots doMultiCahoots4_Stowaway4(MultiCahoots stowaway3, CahootsWallet cahootsWallet) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway3.getAccount());
@@ -614,9 +614,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             log.debug("destination:" + stonewall1.getDestination());
         }
 
-        // TODO remove this code for taking fee from counterparty change
-        // TODO also ensure in next step on server side that we do not have a fee
-        /*if (transaction.getOutputs() != null && transaction.getOutputs().size() == 2) {
+        if (transaction.getOutputs() != null && transaction.getOutputs().size() == 2) {
 
             int idx = -1;
             for (int i = 0; i < 2; i++) {
@@ -637,7 +635,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
 
             if(idx == 0 || idx == 1) {
                 Coin value = transaction.getOutputs().get(idx).getValue();
-                Coin _value = Coin.valueOf(value.longValue() - (fee / 2L));
+                Coin _value = Coin.valueOf(value.longValue() - (fee));
                 if (log.isDebugEnabled()) {
                     log.debug("output value post fee:" + _value);
                 }
@@ -653,7 +651,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             log.error("outputs: "+transaction.getOutputs().size());
             log.error("tx:"+transaction.toString());
             throw new Exception("Cannot compose #Cahoots: invalid tx outputs count");
-        }*/
+        }
 
         NetworkParameters params = stonewall1.getParams();
 
@@ -692,6 +690,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     // counterparty
     //
     private MultiCahoots doMultiCahoots8_Stonewallx23(MultiCahoots stonewall2, CahootsWallet cahootsWallet) throws Exception {
+        System.out.println("PERFORMING doMultiCahoots8_Stonewallx23");
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall2.getCounterpartyAccount());
         HashMap<String, ECKey> keyBag_A = computeKeyBag(stonewall2, utxos);
 
@@ -738,7 +737,9 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             }
         }
 
-        return (inputSum - outputSum) == 0;
+        System.out.println("INPUT: " + inputSum);
+        System.out.println("OUTPUT: " + outputSum);
+        return (inputSum - outputSum) == 0 && inputSum != 0 && outputSum != 0;
     }
 
     //
