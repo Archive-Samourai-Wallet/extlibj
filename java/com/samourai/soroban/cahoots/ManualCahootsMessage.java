@@ -9,7 +9,9 @@ public class ManualCahootsMessage implements SorobanMessage {
     private Cahoots cahoots;
 
     public static final int LAST_STEP = 4;
+    public static final int LAST_STEP_MULTI = 9;
     public static final int NB_STEPS = LAST_STEP+1; // starting from 0
+    public static final int NB_STEPS_MULTI = LAST_STEP_MULTI+1; // starting from 0
 
     public ManualCahootsMessage(Cahoots cahoots) {
         this.cahoots = cahoots;
@@ -24,12 +26,12 @@ public class ManualCahootsMessage implements SorobanMessage {
     }
 
     public int getNbSteps() {
-        return NB_STEPS;
+        return getType() == CahootsType.MULTI ? NB_STEPS_MULTI : NB_STEPS;
     }
 
     @Override
     public boolean isDone() {
-        return getStep() == LAST_STEP;
+        return this.getType() == CahootsType.MULTI ? getStep() == LAST_STEP_MULTI : getStep() == LAST_STEP;
     }
 
     public CahootsType getType() {
@@ -54,6 +56,6 @@ public class ManualCahootsMessage implements SorobanMessage {
 
     @Override
     public String toString() {
-        return "(ManualCahootsMessage)step="+getStep()+"/"+NB_STEPS+", type="+getType()+", typeUser="+getTypeUser()+", payload="+toPayload();
+        return "(ManualCahootsMessage)step="+getStep()+"/"+getNbSteps()+", type="+getType()+", typeUser="+getTypeUser()+", payload="+toPayload();
     }
 }
