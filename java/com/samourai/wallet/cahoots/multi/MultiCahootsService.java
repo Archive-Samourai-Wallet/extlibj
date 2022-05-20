@@ -244,6 +244,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         Collections.shuffle(lowUTXO);
         listOfLists.add(lowUTXO);
         listOfLists.add(utxos);
+        int OUTPUTS_STOWAWAY = 2;
         for(List<CahootsUtxo> list : listOfLists)   {
 
             selectedUTXO.clear();
@@ -257,7 +258,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
                     log.debug("BIP84 selected utxo:" + utxo.getValue());
                 }
                 nbTotalSelectedOutPoints ++;
-                if (stowaway1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB))) {
+                if (stowaway1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB, OUTPUTS_STOWAWAY))) {
 
                     // discard "extra" utxo, if any
                     List<CahootsUtxo> _selectedUTXO = new ArrayList<CahootsUtxo>();
@@ -271,7 +272,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
                             log.debug("BIP84 post selected utxo:" + utxoSel.getValue());
                         }
                         _nbTotalSelectedOutPoints ++;
-                        if (stowaway1.isContributedAmountSufficient(_totalSelectedAmount, estimatedFee(_nbTotalSelectedOutPoints, nbIncomingInputs, feePerB))) {
+                        if (stowaway1.isContributedAmountSufficient(_totalSelectedAmount, estimatedFee(_nbTotalSelectedOutPoints, nbIncomingInputs, feePerB, OUTPUTS_STOWAWAY))) {
                             selectedUTXO.clear();
                             selectedUTXO.addAll(_selectedUTXO);
                             totalSelectedAmount = _totalSelectedAmount;
@@ -283,12 +284,12 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
                     break;
                 }
             }
-            if (stowaway1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB))) {
+            if (stowaway1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB, OUTPUTS_STOWAWAY))) {
                 break;
             }
         }
 
-        long estimatedFee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB);
+        long estimatedFee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB, OUTPUTS_STOWAWAY);
         if (log.isDebugEnabled()) {
             log.debug(selectedUTXO.size()+" selected utxos, totalContributedAmount="+totalSelectedAmount+", requiredAmount="+stowaway1.computeRequiredAmount(estimatedFee));
         }
@@ -296,7 +297,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
         }
 
-        long fee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB);
+        long fee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB, OUTPUTS_STOWAWAY);
         if (log.isDebugEnabled()) {
             log.debug("fee:" + fee);
         }
@@ -402,8 +403,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         stonewall0.setCounterpartyAccount(account);
 
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall0.getCounterpartyAccount());
-        System.out.println("UTXOS::");
-        System.out.println(utxos);
+
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
         }
@@ -523,8 +523,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         int nbIncomingInputs = transaction.getInputs().size();
 
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall1.getAccount());
-        System.out.println("UTXOS::");
-        System.out.println(utxos);
+
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
         }
@@ -545,6 +544,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
         long totalSelectedAmount = 0L;
         int nbTotalSelectedOutPoints = 0;
+        int OUTPUTS_STONEWALL = 4;
         for (int step = 0; step < 3; step++) {
 
             if (stonewall1.getCounterpartyAccount() == 0) {
@@ -582,15 +582,15 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
                     }
                 }
 
-                if (stonewall1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB))) {
+                if (stonewall1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB, OUTPUTS_STONEWALL))) {
                     break;
                 }
             }
-            if (stonewall1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB))) {
+            if (stonewall1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB, OUTPUTS_STONEWALL))) {
                 break;
             }
         }
-        long estimatedFee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB);
+        long estimatedFee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB, OUTPUTS_STONEWALL);
         if (log.isDebugEnabled()) {
             log.debug(selectedUTXO.size()+" selected utxos, totalContributedAmount="+totalSelectedAmount+", requiredAmount="+stonewall1.computeRequiredAmount(estimatedFee));
         }
@@ -598,7 +598,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
         }
 
-        long fee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB);
+        long fee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB, OUTPUTS_STONEWALL);
         if (log.isDebugEnabled()) {
             log.debug("fee:" + fee);
         }
@@ -717,7 +717,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         return stonewall4;
     }
 
-    private long estimatedFee(int nbTotalSelectedOutPoints, int nbIncomingInputs, long feePerB) {
-        return FeeUtil.getInstance().estimatedFeeSegwit(0, 0, nbTotalSelectedOutPoints + nbIncomingInputs, 2, 0, feePerB);
+    private long estimatedFee(int nbTotalSelectedOutPoints, int nbIncomingInputs, long feePerB, int outputsNonOpReturn) {
+        return FeeUtil.getInstance().estimatedFeeSegwit(0, 0, nbTotalSelectedOutPoints + nbIncomingInputs, outputsNonOpReturn, 0, feePerB);
     }
 }
