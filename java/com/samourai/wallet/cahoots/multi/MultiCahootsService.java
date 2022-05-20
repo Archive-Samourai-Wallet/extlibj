@@ -402,7 +402,8 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         stonewall0.setCounterpartyAccount(account);
 
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall0.getCounterpartyAccount());
-
+        System.out.println("UTXOS::");
+        System.out.println(utxos);
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
         }
@@ -522,7 +523,8 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         int nbIncomingInputs = transaction.getInputs().size();
 
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall1.getAccount());
-
+        System.out.println("UTXOS::");
+        System.out.println(utxos);
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
         }
