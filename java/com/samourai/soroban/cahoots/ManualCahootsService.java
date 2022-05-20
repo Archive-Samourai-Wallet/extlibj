@@ -110,7 +110,11 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
             }
         }
         if (cahootsContext != null && !(response instanceof SorobanInteraction)) {
-            verifyResponse(cahootsContext, (ManualCahootsMessage)response);
+            if(cahootsContext.getCahootsType() == CahootsType.MULTI && request.getStep() > 4) {
+                verifyResponse(cahootsContext, (ManualCahootsMessage)response);
+            } else if(cahootsContext.getCahootsType() != CahootsType.MULTI) {
+                verifyResponse(cahootsContext, (ManualCahootsMessage)response);
+            }
         }
         return response;
     }
