@@ -613,7 +613,10 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         if (log.isDebugEnabled()) {
             log.debug("destination:" + stonewall1.getDestination());
         }
-        if (transaction.getOutputs() != null && transaction.getOutputs().size() == 2) {
+
+        // TODO remove this code for taking fee from counterparty change
+        // TODO also ensure in next step on server side that we do not have a fee
+        /*if (transaction.getOutputs() != null && transaction.getOutputs().size() == 2) {
 
             int idx = -1;
             for (int i = 0; i < 2; i++) {
@@ -650,7 +653,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             log.error("outputs: "+transaction.getOutputs().size());
             log.error("tx:"+transaction.toString());
             throw new Exception("Cannot compose #Cahoots: invalid tx outputs count");
-        }
+        }*/
 
         NetworkParameters params = stonewall1.getParams();
 
@@ -676,7 +679,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         if (log.isDebugEnabled()) {
             log.debug("+output (Spender change) = " + changeAddress);
         }
-        _TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stonewall1.getSpendAmount()) - (fee / 2L));
+        _TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stonewall1.getSpendAmount()) - (fee));
         outputsB.put(output_B0, computeOutput(changeAddress, stonewall1.getFingerprint()));
 
         MultiCahoots stonewall2 = new MultiCahoots(stonewall1);
@@ -693,12 +696,49 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         HashMap<String, ECKey> keyBag_A = computeKeyBag(stonewall2, utxos);
 
         MultiCahoots stonewall3 = new MultiCahoots(stonewall2);
-        stonewall3.doStep8_Stonewallx2(keyBag_A);
+        boolean noFeeTaken = checkForNoFee(stonewall3, utxos);
+        if(noFeeTaken) {
+            stonewall3.doStep8_Stonewallx2(keyBag_A);
+        } else {
+            throw new Exception("Cannot compose #Cahoots: fee is being taken from us");
+        }
 
         // compute verifiedSpendAmount
         long verifiedSpendAmount = computeSpendAmount(keyBag_A, cahootsWallet, stonewall3, CahootsTypeUser.COUNTERPARTY);
         stonewall3.setVerifiedSpendAmount(verifiedSpendAmount);
         return stonewall3;
+    }
+
+    private boolean checkForNoFee(MultiCahoots stonewall3, List<CahootsUtxo> utxos) {
+        long inputSum = 0;
+        long outputSum = 0;
+
+        for(int i = 0; i < stonewall3.getTransaction().getInputs().size(); i++) {
+            TransactionInput input = stonewall3.getTransaction().getInput(i);
+            for(CahootsUtxo cahootsUtxo : utxos) {
+                int outpointIndex = cahootsUtxo.getOutpoint().getTxOutputN();
+                Sha256Hash outpointHash = cahootsUtxo.getOutpoint().getHash();
+                if(input != null && input.getOutpoint().getHash().equals(outpointHash) && input.getOutpoint().getIndex() == outpointIndex) {
+                    Coin value = input.getValue();
+                    if(value != null) {
+                        long amount = value.value;
+                        inputSum += amount;
+                    }
+                }
+            }
+        }
+        for(int i = 0; i < stonewall3.getTransaction().getOutputs().size(); i++) {
+            TransactionOutput utxo = stonewall3.getTransaction().getOutput(i);
+            long amount = utxo.getValue().value;
+            String address = utxo.getScriptPubKey().getToAddress(stonewall3.getParams()).toString();
+            if(address.equals(stonewall3.getCollabChange())) {
+                outputSum += amount;
+            } else if(amount == stonewall3.getStonewallAmount() && !address.equals(stonewall3.getStonewallDestination())) {
+                outputSum += amount;
+            }
+        }
+
+        return (inputSum - outputSum) == 0;
     }
 
     //
