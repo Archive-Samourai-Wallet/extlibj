@@ -402,19 +402,9 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         stonewall0.setCounterpartyAccount(account);
 
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall0.getCounterpartyAccount());
-        ArrayList<CahootsUtxo> filteredUtxos = new ArrayList<>(utxos);
-        for(CahootsUtxo utxo : utxos) {
-            List<TransactionInput> stowawayInputs = stonewall0.getStowawayTransaction().getInputs();
-            for(TransactionInput input : stowawayInputs) {
-                if(input.getOutpoint().getHash() == utxo.getOutpoint().getTxHash() && input.getOutpoint().getIndex() == utxo.getOutpoint().getTxOutputN()) {
-                    filteredUtxos.remove(utxo);
-                }
-            }
-        }
-        Collections.shuffle(filteredUtxos);
 
         if (log.isDebugEnabled()) {
-            log.debug("BIP84 utxos:" + filteredUtxos.size());
+            log.debug("BIP84 utxos:" + utxos.size());
         }
 
         List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
@@ -426,9 +416,12 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             }
 
             List<String> seenTxs = new ArrayList<String>();
+            for(TransactionInput input : stonewall0.getStowawayTransaction().getInputs()) {
+                seenTxs.add(input.getOutpoint().getHash().toString());
+            }
             selectedUTXO = new ArrayList<CahootsUtxo>();
             totalContributedAmount = 0L;
-            for (CahootsUtxo utxo : filteredUtxos) {
+            for (CahootsUtxo utxo : utxos) {
 
                 switch (step) {
                     case 0:
@@ -529,19 +522,9 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         int nbIncomingInputs = transaction.getInputs().size();
 
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall1.getAccount());
-        ArrayList<CahootsUtxo> filteredUtxos = new ArrayList<>(utxos);
-        for(CahootsUtxo utxo : utxos) {
-            List<TransactionInput> stowawayInputs = stonewall1.getStowawayTransaction().getInputs();
-            for(TransactionInput input : stowawayInputs) {
-                if(input.getOutpoint().getHash() == utxo.getOutpoint().getTxHash() && input.getOutpoint().getIndex() == utxo.getOutpoint().getTxOutputN()) {
-                    filteredUtxos.remove(utxo);
-                }
-            }
-        }
-        Collections.shuffle(filteredUtxos);
 
         if (log.isDebugEnabled()) {
-            log.debug("BIP84 utxos:" + filteredUtxos.size());
+            log.debug("BIP84 utxos:" + utxos.size());
         }
 
         List<String> seenTxs = new ArrayList<String>();
@@ -549,6 +532,10 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             if (!seenTxs.contains(input.getOutpoint().getHash().toString())) {
                 seenTxs.add(input.getOutpoint().getHash().toString());
             }
+        }
+
+        for(TransactionInput input : stonewall1.getStowawayTransaction().getInputs()) {
+            seenTxs.add(input.getOutpoint().getHash().toString());
         }
 
         long feePerB = cahootsWallet.fetchFeePerB();
@@ -565,7 +552,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             List<String> _seenTxs = seenTxs;
             selectedUTXO = new ArrayList<CahootsUtxo>();
             nbTotalSelectedOutPoints = 0;
-            for (CahootsUtxo utxo : filteredUtxos) {
+            for (CahootsUtxo utxo : utxos) {
 
                 switch (step) {
                     case 0:
