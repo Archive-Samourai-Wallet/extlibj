@@ -30,13 +30,10 @@ public class SweepUtilGenericTest extends AbstractTest {
         PrivKeyReader privKeyReader = new PrivKeyReader(pk, params);
         Collection<SweepPreview> sweepPreviews = sweepUtil.sweepPreviews(privKeyReader, 1, backendApi);
 
-        Assertions.assertEquals(3, sweepPreviews.size());
+        Assertions.assertEquals(2, sweepPreviews.size());
         Iterator<SweepPreview> it = sweepPreviews.iterator();
 
         SweepPreview sweepPreview = it.next();
-        assertSweepPreview(sweepPreview, 9798, "mwdHSyBBHMbcy8rogvzssvDrGyffRo3amQ", BIP_FORMAT.LEGACY, 202, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
-
-        sweepPreview = it.next();
         assertSweepPreview(sweepPreview, 1048, "2Mu3RYBxGdkz8rwCaYZWhi24A4aR1cSWJFb", BIP_FORMAT.SEGWIT_COMPAT,152, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
 
         sweepPreview = it.next();
@@ -52,13 +49,10 @@ public class SweepUtilGenericTest extends AbstractTest {
         BackendApi backendApi = computeBackendApi(params);
         Collection<SweepPreview> sweepPreviews = sweepUtil.sweepPreviews(privKeyReader, 1, backendApi);
 
-        Assertions.assertEquals(3, sweepPreviews.size());
+        Assertions.assertEquals(2, sweepPreviews.size());
         Iterator<SweepPreview> it = sweepPreviews.iterator();
 
         SweepPreview sweepPreview = it.next();
-        assertSweepPreview(sweepPreview, 9798, "mwdHSyBBHMbcy8rogvzssvDrGyffRo3amQ", BIP_FORMAT.LEGACY, 202, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
-
-        sweepPreview = it.next();
         assertSweepPreview(sweepPreview, 1048, "2Mu3RYBxGdkz8rwCaYZWhi24A4aR1cSWJFb", BIP_FORMAT.SEGWIT_COMPAT,152, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
 
         sweepPreview = it.next();

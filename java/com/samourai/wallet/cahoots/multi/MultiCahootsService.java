@@ -3,15 +3,12 @@ package com.samourai.wallet.cahoots.multi;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
-import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
-import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.FormatsUtilGeneric;
-import com.samourai.wallet.util.RandomUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.*;
@@ -20,7 +17,6 @@ import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -140,8 +136,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             }
         }
         if(highUTXO.size() > 0)    {
-            SecureRandom random = RandomUtil.getSecureRandom();
-            CahootsUtxo utxo = highUTXO.get(random.nextInt(highUTXO.size()));
+            CahootsUtxo utxo = highUTXO.get(getRandNextInt(highUTXO.size()));
             if (log.isDebugEnabled()) {
                 log.debug("BIP84 selected random utxo:" + utxo.getValue());
             }
@@ -241,7 +236,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         long feePerB = cahootsWallet.fetchFeePerB();
 
         List<List<CahootsUtxo>> listOfLists = new ArrayList<List<CahootsUtxo>>();
-        Collections.shuffle(lowUTXO);
+        shuffleUtxos(lowUTXO);
         listOfLists.add(lowUTXO);
         listOfLists.add(utxos);
         for(List<CahootsUtxo> list : listOfLists)   {
@@ -411,7 +406,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
                 }
             }
         }
-        Collections.shuffle(filteredUtxos);
+        shuffleUtxos(filteredUtxos);
 
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + filteredUtxos.size());
@@ -538,7 +533,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
                 }
             }
         }
-        Collections.shuffle(filteredUtxos);
+        shuffleUtxos(filteredUtxos);
 
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + filteredUtxos.size());

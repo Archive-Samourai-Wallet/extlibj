@@ -3,27 +3,31 @@ package com.samourai.wallet.cahoots;
 import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.cahoots.multi.MultiCahoots;
 import com.samourai.wallet.cahoots.multi.MultiCahootsService;
-import com.samourai.wallet.cahoots.stowaway.Stowaway;
-import com.samourai.wallet.cahoots.stowaway.StowawayService;
 import com.samourai.wallet.hd.HD_Wallet;
-import com.samourai.wallet.util.RandomUtil;
 import com.samourai.wallet.util.TestUtil;
-import org.bouncycastle.util.encoders.Hex;
+import org.bitcoinj.core.Transaction;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.security.SecureRandom;
+import java.util.List;
 
-/*
-NOTICE: This may sometimes fail because of the multiple UTXOs. The service can occasionally choose at random the UTXOs under certain criteria. This is normal.
-You may need to run it a couple of times until it selects the right UTXOs. I don't really want to remove the randomness, and it's not too high of a priority to manually set a seed here.
- */
 public class MultiCahootsServiceTest extends AbstractCahootsTest {
     private static final Logger log = LoggerFactory.getLogger(MultiCahootsServiceTest.class);
 
-    private MultiCahootsService stowawayService = new MultiCahootsService(bipFormatSupplier, params);
+    private MultiCahootsService multiCahootsService = new MultiCahootsService(bipFormatSupplier, params) {
+        @Override
+        protected int getRandNextInt(int bound) {
+            return 0; // make test reproductible
+        }
+
+        @Override
+        protected void shuffleUtxos(List<CahootsUtxo> utxos) {
+            // no shuffle
+        }
+    };
 
     private static final String SEED_WORDS = "all all all all all all all all all all all all";
     private static final String SEED_PASSPHRASE_INITIATOR = "initiator";
@@ -61,39 +65,47 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
 
         // sender => doStowaway0
         long spendAmount = 5000;
-        MultiCahoots payload0 = stowawayService.startInitiator(cahootsWalletSender, "tb1qas00y34404zwx2fp2veekveks4c5crfjx802v3", spendAmount, account); //grabbed random addr from testnet
+        MultiCahoots payload0 = multiCahootsService.startInitiator(cahootsWalletSender, "tb1qas00y34404zwx2fp2veekveks4c5crfjx802v3", spendAmount, account); //grabbed random addr from testnet
         verify(EXPECTED_PAYLOADS[0], payload0);
 
         // receiver => doStowaway1
-        MultiCahoots payload1 = stowawayService.startCollaborator(cahootsWalletCounterparty, account, payload0);
+        MultiCahoots payload1 = multiCahootsService.startCollaborator(cahootsWalletCounterparty, account, payload0);
         verify(EXPECTED_PAYLOADS[1], payload1);
 
         // sender => doStowaway2
-        MultiCahoots payload2 = stowawayService.reply(cahootsWalletSender, payload1);
+        MultiCahoots payload2 = multiCahootsService.reply(cahootsWalletSender, payload1);
         verify(EXPECTED_PAYLOADS[2], payload2);
 
         // receiver => doStowaway3
-        MultiCahoots payload3 = stowawayService.reply(cahootsWalletCounterparty, payload2);
+        MultiCahoots payload3 = multiCahootsService.reply(cahootsWalletCounterparty, payload2);
         verify(EXPECTED_PAYLOADS[3], payload3);
 
         // sender => doStowaway4
-        MultiCahoots payload4 = stowawayService.reply(cahootsWalletSender, payload3);
+        MultiCahoots payload4 = multiCahootsService.reply(cahootsWalletSender, payload3);
         verify(EXPECTED_PAYLOADS[4], payload4);
 
         // receiver => doStonewall0
-        MultiCahoots payload5 = stowawayService.reply(cahootsWalletCounterparty, payload4);
+        MultiCahoots payload5 = multiCahootsService.reply(cahootsWalletCounterparty, payload4);
         verify(EXPECTED_PAYLOADS[5], payload5);
 
         // sender => doStonewall1
-        MultiCahoots payload6 = stowawayService.reply(cahootsWalletSender, payload5);
+        MultiCahoots payload6 = multiCahootsService.reply(cahootsWalletSender, payload5);
         verify(EXPECTED_PAYLOADS[6], payload6);
 
         // receiver => doStonewall2
-        MultiCahoots payload7 = stowawayService.reply(cahootsWalletCounterparty, payload6);
+        MultiCahoots payload7 = multiCahootsService.reply(cahootsWalletCounterparty, payload6);
         verify(EXPECTED_PAYLOADS[7], payload7);
 
         // receiver => doStonewall2
-        MultiCahoots payload8 = stowawayService.reply(cahootsWalletCounterparty, payload7);
+        MultiCahoots payload8 = multiCahootsService.reply(cahootsWalletCounterparty, payload7);
         verify(EXPECTED_PAYLOADS[8], payload8);
+
+        Transaction stowawayTx = payload8.getStowawayTransaction();
+        System.out.println(stowawayTx.toString());
+        Assertions.assertEquals("ea9006dda17a9ccd3c92ed7148d8f78616fb2164301eb3b4467234b2cf5eefb5", stowawayTx.getHashAsString());
+
+        Transaction stonewallx2Tx = payload8.getStonewallTransaction();
+        System.out.println(stonewallx2Tx.toString());
+        Assertions.assertEquals("d01168399a06e286fc41f00914c22a8b7fd4df1af3f552715bc511032be79487", stonewallx2Tx.getHashAsString());
     }
 }
