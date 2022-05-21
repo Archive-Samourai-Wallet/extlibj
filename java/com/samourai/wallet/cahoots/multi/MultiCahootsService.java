@@ -568,9 +568,6 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
 
                     selectedUTXO.add(utxo);
                     totalSelectedAmount += utxo.getValue();
-                    System.out.println("OUTPOINT " + utxo.getOutpoint().toString());
-                    System.out.println("Adding... " + utxo.getValue());
-                    System.out.println("TOTAL " + totalSelectedAmount);
                     nbTotalSelectedOutPoints ++;
                     if (log.isDebugEnabled()) {
                         log.debug("BIP84 selected utxo:" + utxo.getValue());
@@ -636,7 +633,6 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>> inputsB = new HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>>();
 
         for (CahootsUtxo utxo : selectedUTXO) {
-            System.out.println("OUTPOINT " + utxo.getOutpoint().toString());
             MyTransactionOutPoint _outpoint = utxo.getOutpoint();
             ECKey eckey = utxo.getKey();
             String path = utxo.getPath();
@@ -657,10 +653,8 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         if (log.isDebugEnabled()) {
             log.debug("+output (Spender change) = " + changeAddress);
         }
-        System.out.println("TOTAL SELECTED: " + totalSelectedAmount);
-        System.out.println("SPEND AMOUNT: " + stonewall1.getSpendAmount());
+
         long amount = (totalSelectedAmount - stonewall1.getSpendAmount()) - (fee / 2L);
-        System.out.println("Amount " + amount);
         _TransactionOutput output_B0 = computeTxOutput(changeAddress, amount);
         outputsB.put(output_B0, computeOutput(changeAddress, stonewall1.getFingerprintCollab()));
         stonewall1.setCollabChange(changeAddress.getAddressString());
@@ -688,19 +682,15 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     private boolean checkForNoFee(MultiCahoots multiCahoots, List<CahootsUtxo> utxos) {
-        System.out.println(multiCahoots.getTransaction().toString());
         long inputSum = 0;
         long outputSum = 0;
 
         for(int i = 0; i < multiCahoots.getTransaction().getInputs().size(); i++) {
             TransactionInput input = multiCahoots.getTransaction().getInput(i);
-            System.out.println("INPUT {" + input.getOutpoint().toString() + "}");
             for(CahootsUtxo cahootsUtxo : utxos) {
                 int outpointIndex = cahootsUtxo.getOutpoint().getTxOutputN();
                 Sha256Hash outpointHash = cahootsUtxo.getOutpoint().getTxHash();
-                System.out.println("CAHOOTS UTXO {" + cahootsUtxo.getOutpoint().toString() + "}");
                 if(input != null && input.getOutpoint().getHash().equals(outpointHash) && input.getOutpoint().getIndex() == outpointIndex) {
-                    System.out.println("MATCH");
                     long amount = cahootsUtxo.getValue();
                     inputSum += amount;
                     break;
@@ -716,18 +706,13 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            System.out.println("Address " + address);
             if(address != null && address.equals(multiCahoots.getCollabChange())) {
-                System.out.println("Adding change " + amount);
                 outputSum += amount;
             } else if(address != null && amount == multiCahoots.getSpendAmount() && !address.equals(multiCahoots.getDestination())) {
-                System.out.println("Adding " + amount);
                 outputSum += amount;
             }
         }
 
-        System.out.println("INPUT " + inputSum);
-        System.out.println("OUTPUT " + outputSum);
         return (inputSum - outputSum) == (multiCahoots.getFeeAmount()/2L) && inputSum != 0 && outputSum != 0;
     }
 

@@ -251,6 +251,7 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
 
             List<String> _seenTxs = seenTxs;
             selectedUTXO = new ArrayList<CahootsUtxo>();
+            totalSelectedAmount = 0;
             nbTotalSelectedOutPoints = 0;
             for (CahootsUtxo utxo : utxos) {
 
