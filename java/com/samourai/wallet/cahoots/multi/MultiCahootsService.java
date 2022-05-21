@@ -707,6 +707,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     private boolean checkForNoFee(MultiCahoots multiCahoots, List<CahootsUtxo> utxos) {
+        System.out.println(multiCahoots.getTransaction().toString());
         long inputSum = 0;
         long outputSum = 0;
 
@@ -726,7 +727,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             long amount = utxo.getValue().value;
             String address = null;
             try {
-                address = Bech32UtilGeneric.getInstance().getAddressFromScript(utxo.getScriptPubKey(), multiCahoots.getParams());
+                address = bech32Util.getAddressFromScript(utxo);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -737,6 +738,8 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             }
         }
 
+        System.out.println("INPUT" + inputSum);
+        System.out.println("OUTPUT " + outputSum);
         return (inputSum - outputSum) == 0 && inputSum != 0 && outputSum != 0;
     }
 
