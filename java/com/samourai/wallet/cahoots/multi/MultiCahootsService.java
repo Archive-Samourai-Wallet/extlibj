@@ -500,7 +500,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         outputsA.put(output_A0, computeOutput(receiveAddress, stonewall0.getFingerprintCollab()));
 
         // contributor change output
-        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), true);
+        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall0.getAccount(), true);
         if (log.isDebugEnabled()) {
             log.debug("+output (CounterParty change) = " + changeAddress);
         }
@@ -669,7 +669,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
 
         // spender change output
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsB = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
-        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall1.getAccount(), true);
+        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall1.getCounterpartyAccount(), true);
         if (log.isDebugEnabled()) {
             log.debug("+output (Spender change) = " + changeAddress);
         }
