@@ -732,8 +732,10 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
                 e.printStackTrace();
             }
             if(address != null && address.equals(multiCahoots.getCollabChange())) {
+                System.out.println("Adding change " + amount);
                 outputSum += amount;
             } else if(address != null && amount == multiCahoots.getSpendAmount() && !address.equals(multiCahoots.getDestination())) {
+                System.out.println("Adding " + amount);
                 outputSum += amount;
             }
         }
