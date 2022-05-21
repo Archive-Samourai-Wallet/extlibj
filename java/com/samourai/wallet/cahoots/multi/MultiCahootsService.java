@@ -651,7 +651,9 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         if (log.isDebugEnabled()) {
             log.debug("+output (Spender change) = " + changeAddress);
         }
-        _TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stonewall1.getSpendAmount()) - (fee / 2L));
+        long amount = (totalSelectedAmount - stonewall1.getSpendAmount()) - (fee / 2L);
+        System.out.println("Amount " + amount);
+        _TransactionOutput output_B0 = computeTxOutput(changeAddress, amount);
         outputsB.put(output_B0, computeOutput(changeAddress, stonewall1.getFingerprintCollab()));
         stonewall1.setCollabChange(changeAddress.getAddressString());
 
