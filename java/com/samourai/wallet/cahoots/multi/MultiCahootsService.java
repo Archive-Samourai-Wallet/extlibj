@@ -685,7 +685,6 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     // sender
     //
     private MultiCahoots doMultiCahoots8_Stonewallx23(MultiCahoots stonewall2, CahootsWallet cahootsWallet) throws Exception {
-        System.out.println("PERFORMING doMultiCahoots8_Stonewallx23");
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall2.getAccount());
         HashMap<String, ECKey> keyBag_A = computeKeyBag(stonewall2, utxos);
 
@@ -699,7 +698,6 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     private boolean checkForNoFee(MultiCahoots multiCahoots, List<CahootsUtxo> utxos) {
-        System.out.println(multiCahoots.getTransaction().toString());
         long inputSum = 0;
         long outputSum = 0;
 
@@ -724,16 +722,12 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
                 e.printStackTrace();
             }
             if(address != null && address.equals(multiCahoots.getCollabChange())) {
-                System.out.println("Adding change " + amount);
                 outputSum += amount;
             } else if(address != null && amount == multiCahoots.getSpendAmount() && !address.equals(multiCahoots.getDestination())) {
-                System.out.println("Adding " + amount);
                 outputSum += amount;
             }
         }
 
-        System.out.println("INPUT" + inputSum);
-        System.out.println("OUTPUT " + outputSum);
         return (inputSum - outputSum) == 0 && inputSum != 0 && outputSum != 0;
     }
 
