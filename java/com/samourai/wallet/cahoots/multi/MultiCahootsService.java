@@ -680,7 +680,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         if (log.isDebugEnabled()) {
             log.debug("+output (Spender change) = " + changeAddress);
         }
-        _TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stonewall1.getSpendAmount()) - (fee));
+        _TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stonewall1.getSpendAmount()));
         outputsB.put(output_B0, computeOutput(changeAddress, stonewall1.getFingerprint()));
 
         MultiCahoots stonewall2 = new MultiCahoots(stonewall1);
