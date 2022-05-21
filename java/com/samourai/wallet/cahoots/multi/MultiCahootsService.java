@@ -544,6 +544,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
 
             List<String> _seenTxs = seenTxs;
             selectedUTXO = new ArrayList<CahootsUtxo>();
+            totalSelectedAmount = 0L;
             nbTotalSelectedOutPoints = 0;
             for (CahootsUtxo utxo : utxos) {
 
