@@ -604,31 +604,14 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             log.debug("destination:" + stonewall1.getDestination());
         }
 
-        if (transaction.getOutputs() != null && transaction.getOutputs().size() == 2) {
-
-            int idx = -1;
-            for (int i = 0; i < transaction.getOutputs().size(); i++) {
-                TransactionOutput utxo = transaction.getOutput(i);
-                if(utxo.getValue().value != stonewall1.getSpendAmount() && !getBipFormatSupplier().getToAddress(utxo).equals(stonewall1.getCollabChange())) {
-                    // find user's change output, it is the output that does not equal our change address, and does not equal the stonewall amount
-                    idx = i;
-                    break;
-                }
+        if (transaction.getOutputs() != null && transaction.getOutputs().size() == 1) {
+            Coin value = transaction.getOutputs().get(0).getValue();
+            Coin _value = Coin.valueOf(value.longValue() - (fee));
+            if (log.isDebugEnabled()) {
+                log.debug("output value post fee:" + _value);
             }
-
-            if(idx != -1) {
-                Coin value = transaction.getOutputs().get(idx).getValue();
-                Coin _value = Coin.valueOf(value.longValue() - (fee));
-                if (log.isDebugEnabled()) {
-                    log.debug("output value post fee:" + _value);
-                }
-                transaction.getOutputs().get(idx).setValue(_value);
-                stonewall1.getPSBT().setTransaction(transaction);
-            }
-            else {
-                throw new Exception("Cannot compose #Cahoots: invalid tx outputs");
-            }
-
+            transaction.getOutputs().get(0).setValue(_value);
+            stonewall1.getPSBT().setTransaction(transaction);
         }
         else {
             log.error("outputs: "+transaction.getOutputs().size());
