@@ -566,6 +566,8 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
 
                     selectedUTXO.add(utxo);
                     totalSelectedAmount += utxo.getValue();
+                    System.out.println("Adding... " + utxo.getValue());
+                    System.out.println("TOTAL " + totalSelectedAmount);
                     nbTotalSelectedOutPoints ++;
                     if (log.isDebugEnabled()) {
                         log.debug("BIP84 selected utxo:" + utxo.getValue());
@@ -651,6 +653,8 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         if (log.isDebugEnabled()) {
             log.debug("+output (Spender change) = " + changeAddress);
         }
+        System.out.println("TOTAL SELECTED: " + totalSelectedAmount);
+        System.out.println("SPEND AMOUNT: " + stonewall1.getSpendAmount());
         long amount = (totalSelectedAmount - stonewall1.getSpendAmount()) - (fee / 2L);
         System.out.println("Amount " + amount);
         _TransactionOutput output_B0 = computeTxOutput(changeAddress, amount);
