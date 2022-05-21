@@ -11,6 +11,11 @@ public class TxBroadcastInteraction extends SorobanInteraction {
         this.signedCahoots = signedCahoots;
     }
 
+    public TxBroadcastInteraction(TypeInteraction interaction, Cahoots signedCahoots) {
+        super(interaction, new ManualCahootsMessage(signedCahoots));
+        this.signedCahoots = signedCahoots;
+    }
+
     public Cahoots getSignedCahoots() {
         return signedCahoots;
     }

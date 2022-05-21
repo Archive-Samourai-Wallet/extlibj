@@ -85,7 +85,7 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
                     if (cahootsContext != null) {
                         verifyResponse(cahootsContext, signedCahoots);
                     }
-                    response = new TxBroadcastInteraction(signedCahoots);
+                    response = new TxBroadcastInteraction(TypeInteraction.TX_BROADCAST_MULTI, signedCahoots);
                 } else if(request.getType() != CahootsType.MULTI) {
                     switch (typeInteraction) {
                         case TX_BROADCAST:
