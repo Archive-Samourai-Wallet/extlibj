@@ -486,18 +486,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         }
 
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsA = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
-        // contributor mix output
-        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getAccount(), true);
-        if (receiveAddress.getAddressString().equalsIgnoreCase(stonewall0.getDestination())) {
-            receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getAccount(), true);
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("+output (CounterParty mix) = "+receiveAddress);
-        }
-        _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall0.getSpendAmount());
-        outputsA.put(output_A0, computeOutput(receiveAddress, stonewall0.getFingerprint()));
-
-        // contributor change output
+        // sender change output
         BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall0.getAccount(), true);
         if (log.isDebugEnabled()) {
             log.debug("+output (CounterParty change) = " + changeAddress);
@@ -655,7 +644,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         //
         //
 
-        String zpub = cahootsWallet.getBip84Wallet().getAccount(stonewall1.getAccount()).zpubstr();
+        String zpub = cahootsWallet.getBip84Wallet().getAccount(stonewall1.getCounterpartyAccount()).zpubstr();
         HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>> inputsB = new HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>>();
 
         for (CahootsUtxo utxo : selectedUTXO) {
@@ -667,6 +656,14 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
 
         // spender change output
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsB = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
+        // contributor mix output
+        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(stonewall1.getCounterpartyAccount(), true);
+        if (log.isDebugEnabled()) {
+            log.debug("+output (CounterParty mix) = "+receiveAddress);
+        }
+        _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall1.getSpendAmount());
+        outputsB.put(output_A0, computeOutput(receiveAddress, stonewall1.getFingerprintCollab()));
+
         BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall1.getCounterpartyAccount(), true);
         if (log.isDebugEnabled()) {
             log.debug("+output (Spender change) = " + changeAddress);
