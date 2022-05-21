@@ -606,7 +606,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
 
         if (transaction.getOutputs() != null && transaction.getOutputs().size() == 1) {
             Coin value = transaction.getOutputs().get(0).getValue();
-            Coin _value = Coin.valueOf(value.longValue() - (fee));
+            Coin _value = Coin.valueOf(value.longValue() - (fee / 2L));
             if (log.isDebugEnabled()) {
                 log.debug("output value post fee:" + _value);
             }
@@ -651,7 +651,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         if (log.isDebugEnabled()) {
             log.debug("+output (Spender change) = " + changeAddress);
         }
-        _TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stonewall1.getSpendAmount()));
+        _TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stonewall1.getSpendAmount()) - (fee / 2L));
         outputsB.put(output_B0, computeOutput(changeAddress, stonewall1.getFingerprintCollab()));
         stonewall1.setCollabChange(changeAddress.getAddressString());
 
