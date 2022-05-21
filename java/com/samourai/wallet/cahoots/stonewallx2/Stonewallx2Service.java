@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -102,14 +101,14 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
     // counterparty
     //
     private STONEWALLx2 doSTONEWALLx2_1(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, int account) throws Exception {
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall0.getCounterpartyAccount());
-        return doSTONEWALLx2_1(stonewall0, cahootsWallet, account, utxos);
+        return doSTONEWALLx2_1(stonewall0, cahootsWallet, account, new ArrayList<>());
     }
-    public STONEWALLx2 doSTONEWALLx2_1(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, int account, List<CahootsUtxo> utxos) throws Exception {
+    public STONEWALLx2 doSTONEWALLx2_1(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, int account, List<String> seenTxs) throws Exception {
         stonewall0.setCounterpartyAccount(account);
         byte[] fingerprint = cahootsWallet.getBip84Wallet().getFingerprint();
         stonewall0.setFingerprintCollab(fingerprint);
 
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall0.getCounterpartyAccount());
         shuffleUtxos(utxos);
 
         if (log.isDebugEnabled()) {
@@ -124,7 +123,6 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
                 step = 2;
             }
 
-            List<String> seenTxs = new ArrayList<String>();
             selectedUTXO = new ArrayList<CahootsUtxo>();
             totalContributedAmount = 0L;
             for (CahootsUtxo utxo : utxos) {
@@ -219,10 +217,9 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
     // sender
     //
     private STONEWALLx2 doSTONEWALLx2_2(STONEWALLx2 stonewall1, CahootsWallet cahootsWallet) throws Exception {
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall1.getAccount());
-        return doSTONEWALLx2_2(stonewall1, cahootsWallet, utxos);
+        return doSTONEWALLx2_2(stonewall1, cahootsWallet, new ArrayList<>());
     }
-    public STONEWALLx2 doSTONEWALLx2_2(STONEWALLx2 stonewall1, CahootsWallet cahootsWallet, List<CahootsUtxo> utxos) throws Exception {
+    public STONEWALLx2 doSTONEWALLx2_2(STONEWALLx2 stonewall1, CahootsWallet cahootsWallet, List<String> seenTxs) throws Exception {
 
         Transaction transaction = stonewall1.getTransaction();
         if (log.isDebugEnabled()) {
@@ -231,13 +228,13 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
         }
         int nbIncomingInputs = transaction.getInputs().size();
 
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall1.getAccount());
         shuffleUtxos(utxos);
 
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
         }
 
-        List<String> seenTxs = new ArrayList<String>();
         for (TransactionInput input : transaction.getInputs()) {
             if (!seenTxs.contains(input.getOutpoint().getHash().toString())) {
                 seenTxs.add(input.getOutpoint().getHash().toString());
@@ -257,6 +254,7 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
 
             List<String> _seenTxs = seenTxs;
             selectedUTXO = new ArrayList<CahootsUtxo>();
+            totalSelectedAmount = 0;
             nbTotalSelectedOutPoints = 0;
             for (CahootsUtxo utxo : utxos) {
 
@@ -330,7 +328,7 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
                     log.debug("script hex:" + Hex.toHexString(script));
                     log.debug("address from script:" + bech32Util.getAddressFromScript(new Script(script), params));
                 }
-                if(bech32Util.getAddressFromScript(new Script(script), params).equalsIgnoreCase(stonewall1.getCollabChange())) {
+                if(getBipFormatSupplier().getToAddress(script, params).equalsIgnoreCase(stonewall1.getCollabChange())) {
                     idx = i;
                     break;
                 }

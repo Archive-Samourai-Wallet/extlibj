@@ -7,7 +7,11 @@ public class TxBroadcastInteraction extends SorobanInteraction {
     private Cahoots signedCahoots;
 
     public TxBroadcastInteraction(Cahoots signedCahoots) {
-        super(TypeInteraction.TX_BROADCAST, new ManualCahootsMessage(signedCahoots));
+        this(TypeInteraction.TX_BROADCAST, signedCahoots);
+    }
+
+    public TxBroadcastInteraction(TypeInteraction interaction, Cahoots signedCahoots) {
+        super(interaction, new ManualCahootsMessage(signedCahoots));
         this.signedCahoots = signedCahoots;
     }
 
