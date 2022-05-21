@@ -329,7 +329,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             log.debug("+output (sender change) = "+changeAddress);
         }
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsB = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
-        _TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stowaway1.getSpendAmount()));
+        _TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stowaway1.getSpendAmount()) - fee);
         outputsB.put(output_B0, computeOutput(changeAddress, stowaway1.getFingerprint()));
 
         if (log.isDebugEnabled()) {
