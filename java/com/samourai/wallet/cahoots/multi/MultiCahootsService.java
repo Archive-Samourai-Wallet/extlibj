@@ -678,6 +678,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     private boolean checkForNoFee(MultiCahoots multiCahoots, List<CahootsUtxo> utxos) {
+        System.out.println(multiCahoots.getTransaction().toString());
         long inputSum = 0;
         long outputSum = 0;
 
@@ -701,13 +702,18 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            System.out.println("Address " + address);
             if(address != null && address.equals(multiCahoots.getCollabChange())) {
+                System.out.println("Adding change " + amount);
                 outputSum += amount;
             } else if(address != null && amount == multiCahoots.getSpendAmount() && !address.equals(multiCahoots.getDestination())) {
+                System.out.println("Adding " + amount);
                 outputSum += amount;
             }
         }
 
+        System.out.println("INPUT " + inputSum);
+        System.out.println("OUTPUT " + outputSum);
         return (inputSum - outputSum) == 0 && inputSum != 0 && outputSum != 0;
     }
 
