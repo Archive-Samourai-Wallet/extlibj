@@ -620,23 +620,16 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         if (transaction.getOutputs() != null && transaction.getOutputs().size() == 2) {
 
             int idx = -1;
-            for (int i = 0; i < 2; i++) {
-                byte[] buf = transaction.getOutputs().get(i).getScriptBytes();
-                byte[] script = new byte[buf.length];
-                script[0] = 0x00;
-                System.arraycopy(buf, 1, script, 1, script.length - 1);
-                if (log.isDebugEnabled()) {
-                    log.debug("script:" + new Script(script).toString());
-                    log.debug("script hex:" + Hex.toHexString(script));
-                    log.debug("address from script:" + bech32Util.getAddressFromScript(new Script(script), params));
-                }
-                if(bech32Util.getAddressFromScript(new Script(script), params).equalsIgnoreCase(stonewall1.getCollabChange())) {
+            for (int i = 0; i < transaction.getOutputs().size(); i++) {
+                TransactionOutput utxo = transaction.getOutput(i);
+                if(utxo.getValue().value != stonewall1.getSpendAmount() && !bech32Util.getAddressFromScript(utxo.getScriptPubKey(), params).equalsIgnoreCase(stonewall1.getCollabChange())) {
+                    // find user's change output, it is the output that does not equal our change address, and does not equal the stonewall amount
                     idx = i;
                     break;
                 }
             }
 
-            if(idx == 0 || idx == 1) {
+            if(idx != -1) {
                 Coin value = transaction.getOutputs().get(idx).getValue();
                 Coin _value = Coin.valueOf(value.longValue() - (fee));
                 if (log.isDebugEnabled()) {
