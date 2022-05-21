@@ -392,6 +392,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         stonewall0.setFingerprint(multiCahoots.getFingerprint());
         stonewall0.setFingerprintCollab(multiCahoots.getFingerprintCollab());
         stonewall0.setCounterpartyAccount(multiCahoots.getCounterpartyAccount());
+        stonewall0.setDestination(multiCahoots.getStonewallDestination());
 
         stonewall0.setStowawayTransaction(multiCahoots.getStowawayTransaction());
         if (log.isDebugEnabled()) {
@@ -505,7 +506,6 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         }
         _TransactionOutput output_A1 = computeTxOutput(changeAddress, totalContributedAmount - stonewall0.getSpendAmount());
         outputsA.put(output_A1, computeOutput(changeAddress, stonewall0.getFingerprintCollab()));
-        stonewall0.setCollabChange(changeAddress.getAddressString());
 
         MultiCahoots stonewall1 = new MultiCahoots(stonewall0);
         stonewall1.doStep6_Stonewallx2_StartCollaborator(inputsA, outputsA);
@@ -682,6 +682,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         }
         _TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stonewall1.getSpendAmount()));
         outputsB.put(output_B0, computeOutput(changeAddress, stonewall1.getFingerprint()));
+        stonewall1.setCollabChange(changeAddress.getAddressString());
 
         MultiCahoots stonewall2 = new MultiCahoots(stonewall1);
         stonewall2.doStep7_Stonewallx2(inputsB, outputsB);
