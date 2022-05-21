@@ -693,7 +693,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         stonewall3.doStep8_Stonewallx2(keyBag_A);
 
         // compute verifiedSpendAmount
-        long verifiedSpendAmount = computeSpendAmount(keyBag_A, cahootsWallet, stonewall3, CahootsTypeUser.COUNTERPARTY);
+        long verifiedSpendAmount = computeSpendAmount(keyBag_A, cahootsWallet, stonewall3, CahootsTypeUser.SENDER);
         stonewall3.setVerifiedSpendAmount(verifiedSpendAmount);
         return stonewall3;
     }
@@ -753,7 +753,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         }
 
         // compute verifiedSpendAmount
-        long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahootsWallet, stonewall4, CahootsTypeUser.SENDER);
+        long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahootsWallet, stonewall4, CahootsTypeUser.COUNTERPARTY);
         stonewall4.setVerifiedSpendAmount(verifiedSpendAmount);
         return stonewall4;
     }
