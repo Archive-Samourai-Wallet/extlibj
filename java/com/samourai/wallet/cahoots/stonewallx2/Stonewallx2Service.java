@@ -102,12 +102,15 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
     // counterparty
     //
     private STONEWALLx2 doSTONEWALLx2_1(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, int account) throws Exception {
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall0.getCounterpartyAccount());
+        return doSTONEWALLx2_1(stonewall0, cahootsWallet, account, utxos);
+    }
+    public STONEWALLx2 doSTONEWALLx2_1(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, int account, List<CahootsUtxo> utxos) throws Exception {
         stonewall0.setCounterpartyAccount(account);
         byte[] fingerprint = cahootsWallet.getBip84Wallet().getFingerprint();
         stonewall0.setFingerprintCollab(fingerprint);
 
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall0.getCounterpartyAccount());
-        Collections.shuffle(utxos);
+        shuffleUtxos(utxos);
 
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
@@ -216,6 +219,10 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
     // sender
     //
     private STONEWALLx2 doSTONEWALLx2_2(STONEWALLx2 stonewall1, CahootsWallet cahootsWallet) throws Exception {
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall1.getAccount());
+        return doSTONEWALLx2_2(stonewall1, cahootsWallet, utxos);
+    }
+    public STONEWALLx2 doSTONEWALLx2_2(STONEWALLx2 stonewall1, CahootsWallet cahootsWallet, List<CahootsUtxo> utxos) throws Exception {
 
         Transaction transaction = stonewall1.getTransaction();
         if (log.isDebugEnabled()) {
@@ -224,8 +231,7 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
         }
         int nbIncomingInputs = transaction.getInputs().size();
 
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall1.getAccount());
-        Collections.shuffle(utxos);
+        shuffleUtxos(utxos);
 
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
@@ -386,7 +392,7 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
     //
     // counterparty
     //
-    private STONEWALLx2 doSTONEWALLx2_3(STONEWALLx2 stonewall2, CahootsWallet cahootsWallet) throws Exception {
+    public STONEWALLx2 doSTONEWALLx2_3(STONEWALLx2 stonewall2, CahootsWallet cahootsWallet) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall2.getCounterpartyAccount());
         HashMap<String, ECKey> keyBag_A = computeKeyBag(stonewall2, utxos);
 
@@ -402,7 +408,7 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
     //
     // sender
     //
-    private STONEWALLx2 doSTONEWALLx2_4(STONEWALLx2 stonewall3, CahootsWallet cahootsWallet) throws Exception {
+    public STONEWALLx2 doSTONEWALLx2_4(STONEWALLx2 stonewall3, CahootsWallet cahootsWallet) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall3.getAccount());
         HashMap<String, ECKey> keyBag_B = computeKeyBag(stonewall3, utxos);
 

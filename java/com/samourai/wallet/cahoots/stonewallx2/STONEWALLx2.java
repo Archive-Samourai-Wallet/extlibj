@@ -58,7 +58,7 @@ public class STONEWALLx2 extends Cahoots {
     //
     // counterparty
     //
-    protected void doStep1(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
+    public void doStep1(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
         if(this.getStep() != 0 || this.getSpendAmount() == 0L)   {
             throw new Exception("Invalid step/amount");
@@ -114,7 +114,7 @@ public class STONEWALLx2 extends Cahoots {
     //
     // sender
     //
-    protected void doStep2(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
+    public void doStep2(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
         Transaction transaction = psbt.getTransaction();
         if (log.isDebugEnabled()) {
@@ -178,7 +178,7 @@ public class STONEWALLx2 extends Cahoots {
     //
     // counterparty
     //
-    protected void doStep3(HashMap<String,ECKey> keyBag)    {
+    public void doStep3(HashMap<String,ECKey> keyBag)    {
 
         Transaction transaction = this.getTransaction();
         List<TransactionInput> inputs = new ArrayList<TransactionInput>();
@@ -210,7 +210,7 @@ public class STONEWALLx2 extends Cahoots {
     //
     // sender
     //
-    protected void doStep4(HashMap<String,ECKey> keyBag)    {
+    public void doStep4(HashMap<String,ECKey> keyBag)    {
 
         signTx(keyBag);
 

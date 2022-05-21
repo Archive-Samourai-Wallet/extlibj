@@ -354,7 +354,7 @@ public abstract class Cahoots {
         return toJSON().toString();
     }
 
-    protected void signTx(HashMap<String,ECKey> keyBag) {
+    public void signTx(HashMap<String,ECKey> keyBag) {
 
         Transaction transaction = psbt.getTransaction();
         if (log.isDebugEnabled()) {

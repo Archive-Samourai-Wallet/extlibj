@@ -82,7 +82,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     //
     // sender
     //
-    private Stowaway doStowaway0(long spendAmount, int account, byte[] fingerprint) {
+    public Stowaway doStowaway0(long spendAmount, int account, byte[] fingerprint) {
         //
         //
         // step0: B sends spend amount to A,  creates step0
@@ -99,7 +99,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     //
     // receiver
     //
-    private Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, int account) throws Exception {
+    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, int account) throws Exception {
         byte[] fingerprint = cahootsWallet.getBip84Wallet().getFingerprint();
         stowaway0.setFingerprintCollab(fingerprint);
 
@@ -184,7 +184,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     //
     // sender
     //
-    private Stowaway doStowaway2(Stowaway stowaway1, CahootsWallet cahootsWallet) throws Exception {
+    public Stowaway doStowaway2(Stowaway stowaway1, CahootsWallet cahootsWallet) throws Exception {
 
         if (log.isDebugEnabled()) {
             log.debug("sender account (2):" + stowaway1.getAccount());
@@ -218,7 +218,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
         long feePerB = cahootsWallet.fetchFeePerB();
 
         List<List<CahootsUtxo>> listOfLists = new ArrayList<List<CahootsUtxo>>();
-        Collections.shuffle(lowUTXO);
+        shuffleUtxos(lowUTXO);
         listOfLists.add(lowUTXO);
         listOfLists.add(utxos);
         for(List<CahootsUtxo> list : listOfLists)   {
@@ -322,7 +322,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     //
     // receiver
     //
-    private Stowaway doStowaway3(Stowaway stowaway2, CahootsWallet cahootsWallet) throws Exception {
+    public Stowaway doStowaway3(Stowaway stowaway2, CahootsWallet cahootsWallet) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway2.getCounterpartyAccount());
         HashMap<String, ECKey> keyBag_A = computeKeyBag(stowaway2, utxos);
 
@@ -338,7 +338,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
     //
     // sender
     //
-    private Stowaway doStowaway4(Stowaway stowaway3, CahootsWallet cahootsWallet) throws Exception {
+    public Stowaway doStowaway4(Stowaway stowaway3, CahootsWallet cahootsWallet) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway3.getAccount());
         HashMap<String, ECKey> keyBag_B = computeKeyBag(stowaway3, utxos);
 

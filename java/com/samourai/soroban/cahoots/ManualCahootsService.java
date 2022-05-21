@@ -230,13 +230,15 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
     private AbstractCahootsService newCahootsService(CahootsType cahootsType) throws Exception {
         BipFormatSupplier bipFormatSupplier = cahootsWallet.getBipFormatSupplier();
         NetworkParameters params = cahootsWallet.getParams();
+        StowawayService stowawayService = new StowawayService(bipFormatSupplier, params);
+        Stonewallx2Service stonewallx2Service = new Stonewallx2Service(bipFormatSupplier, params);
         switch(cahootsType) {
             case STOWAWAY:
-                return new StowawayService(bipFormatSupplier, params);
+                return stowawayService;
             case STONEWALLX2:
-                return new Stonewallx2Service(bipFormatSupplier, params);
+                return stonewallx2Service;
             case MULTI:
-                return new MultiCahootsService(bipFormatSupplier, params);
+                return new MultiCahootsService(bipFormatSupplier, params, stonewallx2Service, stowawayService);
         }
         throw new Exception("Unrecognized #Cahoots");
     }
