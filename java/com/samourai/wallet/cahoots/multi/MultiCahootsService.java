@@ -410,6 +410,11 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             log.debug("BIP84 utxos:" + utxos.size());
         }
 
+        List<String> seenTxs = new ArrayList<String>();
+        for(TransactionInput input : stonewall0.getStowawayTransaction().getInputs()) {
+            seenTxs.add(input.getOutpoint().getHash().toString());
+        }
+
         List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
         long totalContributedAmount = 0L;
         for (int step = 0; step < 3; step++) {
@@ -418,10 +423,6 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
                 step = 2;
             }
 
-            List<String> seenTxs = new ArrayList<String>();
-            for(TransactionInput input : stonewall0.getStowawayTransaction().getInputs()) {
-                seenTxs.add(input.getOutpoint().getHash().toString());
-            }
             selectedUTXO = new ArrayList<CahootsUtxo>();
             totalContributedAmount = 0L;
             for (CahootsUtxo utxo : utxos) {
@@ -566,6 +567,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
 
                     selectedUTXO.add(utxo);
                     totalSelectedAmount += utxo.getValue();
+                    System.out.println("OUTPOINT " + utxo.getOutpoint().toString());
                     System.out.println("Adding... " + utxo.getValue());
                     System.out.println("TOTAL " + totalSelectedAmount);
                     nbTotalSelectedOutPoints ++;
@@ -633,6 +635,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>> inputsB = new HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>>();
 
         for (CahootsUtxo utxo : selectedUTXO) {
+            System.out.println("OUTPOINT " + utxo.getOutpoint().toString());
             MyTransactionOutPoint _outpoint = utxo.getOutpoint();
             ECKey eckey = utxo.getKey();
             String path = utxo.getPath();
