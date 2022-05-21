@@ -489,6 +489,13 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         }
 
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsA = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
+        // contributor mix output
+        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), true);
+        if (log.isDebugEnabled()) {
+            log.debug("+output (CounterParty mix) = "+receiveAddress);
+        }
+        _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall0.getSpendAmount());
+        outputsA.put(output_A0, computeOutput(receiveAddress, stonewall0.getFingerprintCollab()));
         // sender change output
         BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), true);
         if (log.isDebugEnabled()) {
@@ -644,13 +651,6 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
 
         // spender change output
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsB = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
-        // contributor mix output
-        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(stonewall1.getAccount(), true);
-        if (log.isDebugEnabled()) {
-            log.debug("+output (CounterParty mix) = "+receiveAddress);
-        }
-        _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall1.getSpendAmount());
-        outputsB.put(output_A0, computeOutput(receiveAddress, stonewall1.getFingerprint()));
 
         BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall1.getAccount(), true);
         if (log.isDebugEnabled()) {
