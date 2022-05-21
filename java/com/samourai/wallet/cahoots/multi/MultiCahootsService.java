@@ -690,18 +690,16 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
 
         for(int i = 0; i < multiCahoots.getTransaction().getInputs().size(); i++) {
             TransactionInput input = multiCahoots.getTransaction().getInput(i);
-            System.out.println("INPUT {\n" +
-                    input.getOutpoint().toString() + "\n}");
+            System.out.println("INPUT {" + input.getOutpoint().toString() + "}");
             for(CahootsUtxo cahootsUtxo : utxos) {
                 int outpointIndex = cahootsUtxo.getOutpoint().getTxOutputN();
                 Sha256Hash outpointHash = cahootsUtxo.getOutpoint().getTxHash();
-                System.out.println("CAHOOTS UTXO {\n" +
-                        cahootsUtxo.getOutpoint().toString() + "\n}");
+                System.out.println("CAHOOTS UTXO {" + cahootsUtxo.getOutpoint().toString() + "}");
                 if(input != null && input.getOutpoint().getHash().equals(outpointHash) && input.getOutpoint().getIndex() == outpointIndex) {
+                    System.out.println("MATCH");
                     long amount = cahootsUtxo.getValue();
                     inputSum += amount;
-                } else {
-                    System.out.println("Does not match: " + input.getOutpoint().toString() + ", " + cahootsUtxo.getOutpoint().toString());
+                    break;
                 }
             }
         }
