@@ -6,7 +6,6 @@ import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.hd.BipAddress;
-import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.util.FeeUtil;
@@ -28,7 +27,6 @@ import java.util.List;
 
 public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     private static final Logger log = LoggerFactory.getLogger(MultiCahootsService.class);
-    private static final Bech32UtilGeneric bech32Util = Bech32UtilGeneric.getInstance();
 
     public MultiCahootsService(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
         super(bipFormatSupplier, params);
@@ -484,20 +482,20 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             MyTransactionOutPoint _outpoint = utxo.getOutpoint();
             ECKey eckey = utxo.getKey();
             String path = utxo.getPath();
-            inputsA.put(_outpoint, Triple.of(eckey.getPubKey(), stonewall0.getFingerprintCollab(), path));
+            inputsA.put(_outpoint, Triple.of(eckey.getPubKey(), stonewall0.getFingerprint(), path));
         }
 
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsA = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
         // contributor mix output
-        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), true);
+        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getAccount(), true);
         if (receiveAddress.getAddressString().equalsIgnoreCase(stonewall0.getDestination())) {
-            receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), true);
+            receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getAccount(), true);
         }
         if (log.isDebugEnabled()) {
             log.debug("+output (CounterParty mix) = "+receiveAddress);
         }
         _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall0.getSpendAmount());
-        outputsA.put(output_A0, computeOutput(receiveAddress, stonewall0.getFingerprintCollab()));
+        outputsA.put(output_A0, computeOutput(receiveAddress, stonewall0.getFingerprint()));
 
         // contributor change output
         BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall0.getAccount(), true);
@@ -505,7 +503,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             log.debug("+output (CounterParty change) = " + changeAddress);
         }
         _TransactionOutput output_A1 = computeTxOutput(changeAddress, totalContributedAmount - stonewall0.getSpendAmount());
-        outputsA.put(output_A1, computeOutput(changeAddress, stonewall0.getFingerprintCollab()));
+        outputsA.put(output_A1, computeOutput(changeAddress, stonewall0.getFingerprint()));
 
         MultiCahoots stonewall1 = new MultiCahoots(stonewall0);
         stonewall1.doStep6_Stonewallx2_StartCollaborator(inputsA, outputsA);
@@ -622,7 +620,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             int idx = -1;
             for (int i = 0; i < transaction.getOutputs().size(); i++) {
                 TransactionOutput utxo = transaction.getOutput(i);
-                if(utxo.getValue().value != stonewall1.getSpendAmount() && !bech32Util.getAddressFromScript(utxo.getScriptPubKey(), params).equalsIgnoreCase(stonewall1.getCollabChange())) {
+                if(utxo.getValue().value != stonewall1.getSpendAmount() && !getBipFormatSupplier().getToAddress(utxo).equals(stonewall1.getCollabChange())) {
                     // find user's change output, it is the output that does not equal our change address, and does not equal the stonewall amount
                     idx = i;
                     break;
@@ -674,7 +672,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             log.debug("+output (Spender change) = " + changeAddress);
         }
         _TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stonewall1.getSpendAmount()));
-        outputsB.put(output_B0, computeOutput(changeAddress, stonewall1.getFingerprint()));
+        outputsB.put(output_B0, computeOutput(changeAddress, stonewall1.getFingerprintCollab()));
         stonewall1.setCollabChange(changeAddress.getAddressString());
 
         MultiCahoots stonewall2 = new MultiCahoots(stonewall1);
@@ -721,7 +719,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             long amount = utxo.getValue().value;
             String address = null;
             try {
-                address = bech32Util.getAddressFromScript(utxo);
+                address = getBipFormatSupplier().getToAddress(utxo);
             } catch (Exception e) {
                 e.printStackTrace();
             }
