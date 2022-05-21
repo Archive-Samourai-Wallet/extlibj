@@ -3,8 +3,6 @@ package com.samourai.wallet.cahoots.multi;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
-import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
-import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
@@ -14,7 +12,6 @@ import com.samourai.wallet.util.RandomUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.*;
-import org.bitcoinj.script.Script;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,34 +59,33 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         MultiCahoots payload;
         switch (step) {
             case 1:
+                // sender
                 payload = doMultiCahoots2_Stowaway2(multiCahoots, cahootsWallet);
                 break;
             case 2:
+                // counterparty
                 payload = doMultiCahoots3_Stowaway3(multiCahoots, cahootsWallet);
                 break;
             case 3:
+                // sender
                 payload = doMultiCahoots4_Stowaway4(multiCahoots, cahootsWallet);
+                payload = doMultiCahoots4_Stonewallx20_StartInitiator(payload, cahootsWallet);
                 break;
             case 4:
-                payload = doMultiCahoots5_Stonewallx20_StartInitiator(multiCahoots, cahootsWallet);
+                // counterparty
+                payload = doMultiCahoots5_Stonewallx21_StartCollaborator(multiCahoots, cahootsWallet, multiCahoots.getAccount());
                 break;
             case 5:
-                payload = doMultiCahoots6_Stonewallx21_StartCollaborator(multiCahoots, cahootsWallet, multiCahoots.getAccount());
+                // sender
+                payload = doMultiCahoots6_Stonewallx22(multiCahoots, cahootsWallet);
                 break;
             case 6:
-                payload = doMultiCahoots7_Stonewallx22(multiCahoots, cahootsWallet);
+                // counterparty
+                payload = doMultiCahoots7_Stonewallx23(multiCahoots, cahootsWallet);
                 break;
             case 7:
-                payload = doMultiCahoots8_Stonewallx23(multiCahoots, cahootsWallet);
-                break;
-            case 8:
-                payload = doMultiCahoots9_Stonewallx24(multiCahoots, cahootsWallet);
-                break;
-            case 9:
-                MultiCahoots finalCahoots = multiCahoots;
-                finalCahoots.setStep(10);
-                // sender receives tx, broadcasts on device
-                payload = finalCahoots;
+                // sender
+                payload = doMultiCahoots8_Stonewallx24(multiCahoots, cahootsWallet);
                 break;
             default:
                 throw new Exception("Unrecognized #Cahoots step");
@@ -380,9 +376,9 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     //
-    // counterparty
+    // sender
     //
-    public MultiCahoots doMultiCahoots5_Stonewallx20_StartInitiator(MultiCahoots multiCahoots, CahootsWallet cahootsWallet) throws Exception {
+    public MultiCahoots doMultiCahoots4_Stonewallx20_StartInitiator(MultiCahoots multiCahoots, CahootsWallet cahootsWallet) throws Exception {
         if (multiCahoots.getStonewallAmount() <= 0) {
             throw new Exception("Invalid amount");
         }
@@ -391,7 +387,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         }
 
         MultiCahoots stonewall0 = new MultiCahoots(multiCahoots.getStonewallDestination(), multiCahoots.getStonewallAmount(), multiCahoots.getParams(), multiCahoots.getAccount());
-        stonewall0.setStep(5);
+        stonewall0.setStep(4);
         // Testing this out, might need to "fake" the initiation so the fingerprints don't change from prior step.
         stonewall0.setFingerprint(multiCahoots.getFingerprint());
         stonewall0.setFingerprintCollab(multiCahoots.getFingerprintCollab());
@@ -406,11 +402,11 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     //
-    // sender
+    // counterparty
     //
-    private MultiCahoots doMultiCahoots6_Stonewallx21_StartCollaborator(MultiCahoots stonewall0, CahootsWallet cahootsWallet, int account) throws Exception {
+    private MultiCahoots doMultiCahoots5_Stonewallx21_StartCollaborator(MultiCahoots stonewall0, CahootsWallet cahootsWallet, int account) throws Exception {
 
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall0.getAccount());
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall0.getCounterpartyAccount());
 
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
@@ -489,28 +485,29 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             MyTransactionOutPoint _outpoint = utxo.getOutpoint();
             ECKey eckey = utxo.getKey();
             String path = utxo.getPath();
-            inputsA.put(_outpoint, Triple.of(eckey.getPubKey(), stonewall0.getFingerprint(), path));
+            inputsA.put(_outpoint, Triple.of(eckey.getPubKey(), stonewall0.getFingerprintCollab(), path));
         }
 
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsA = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
         // sender change output
-        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall0.getAccount(), true);
+        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), true);
         if (log.isDebugEnabled()) {
             log.debug("+output (CounterParty change) = " + changeAddress);
         }
         _TransactionOutput output_A1 = computeTxOutput(changeAddress, totalContributedAmount - stonewall0.getSpendAmount());
-        outputsA.put(output_A1, computeOutput(changeAddress, stonewall0.getFingerprint()));
+        outputsA.put(output_A1, computeOutput(changeAddress, stonewall0.getFingerprintCollab()));
+        stonewall0.setCollabChange(changeAddress.getAddressString());
 
         MultiCahoots stonewall1 = new MultiCahoots(stonewall0);
-        stonewall1.doStep6_Stonewallx2_StartCollaborator(inputsA, outputsA);
+        stonewall1.doStep5_Stonewallx2_StartCollaborator(inputsA, outputsA);
 
         return stonewall1;
     }
 
     //
-    // counterparty
+    // sender - new
     //
-    private MultiCahoots doMultiCahoots7_Stonewallx22(MultiCahoots stonewall1, CahootsWallet cahootsWallet) throws Exception {
+    private MultiCahoots doMultiCahoots6_Stonewallx22(MultiCahoots stonewall1, CahootsWallet cahootsWallet) throws Exception {
 
         Transaction transaction = stonewall1.getTransaction();
         if (log.isDebugEnabled()) {
@@ -519,7 +516,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         }
         int nbIncomingInputs = transaction.getInputs().size();
 
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall1.getCounterpartyAccount());
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall1.getAccount());
 
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
@@ -635,7 +632,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         //
         //
 
-        String zpub = cahootsWallet.getBip84Wallet().getAccount(stonewall1.getCounterpartyAccount()).zpubstr();
+        String zpub = cahootsWallet.getBip84Wallet().getAccount(stonewall1.getAccount()).zpubstr();
         HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>> inputsB = new HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>>();
 
         for (CahootsUtxo utxo : selectedUTXO) {
@@ -648,41 +645,45 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         // spender change output
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsB = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
         // contributor mix output
-        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(stonewall1.getCounterpartyAccount(), true);
+        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(stonewall1.getAccount(), true);
         if (log.isDebugEnabled()) {
             log.debug("+output (CounterParty mix) = "+receiveAddress);
         }
         _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall1.getSpendAmount());
-        outputsB.put(output_A0, computeOutput(receiveAddress, stonewall1.getFingerprintCollab()));
+        outputsB.put(output_A0, computeOutput(receiveAddress, stonewall1.getFingerprint()));
 
-        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall1.getCounterpartyAccount(), true);
+        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall1.getAccount(), true);
         if (log.isDebugEnabled()) {
             log.debug("+output (Spender change) = " + changeAddress);
         }
 
         long amount = (totalSelectedAmount - stonewall1.getSpendAmount()) - (fee / 2L);
         _TransactionOutput output_B0 = computeTxOutput(changeAddress, amount);
-        outputsB.put(output_B0, computeOutput(changeAddress, stonewall1.getFingerprintCollab()));
-        stonewall1.setCollabChange(changeAddress.getAddressString());
+        outputsB.put(output_B0, computeOutput(changeAddress, stonewall1.getFingerprint()));
 
         MultiCahoots stonewall2 = new MultiCahoots(stonewall1);
-        stonewall2.doStep7_Stonewallx2(inputsB, outputsB);
+        stonewall2.doStep6_Stonewallx2(inputsB, outputsB);
 
         return stonewall2;
     }
 
     //
-    // sender
+    // counterparty - new
     //
-    private MultiCahoots doMultiCahoots8_Stonewallx23(MultiCahoots stonewall2, CahootsWallet cahootsWallet) throws Exception {
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall2.getAccount());
+    private MultiCahoots doMultiCahoots7_Stonewallx23(MultiCahoots stonewall2, CahootsWallet cahootsWallet) throws Exception {
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall2.getCounterpartyAccount());
         HashMap<String, ECKey> keyBag_A = computeKeyBag(stonewall2, utxos);
 
         MultiCahoots stonewall3 = new MultiCahoots(stonewall2);
-        stonewall3.doStep8_Stonewallx2(keyBag_A);
+        boolean noFeeTaken = checkForNoFee(stonewall3, utxos);
+        if(noFeeTaken) {
+            stonewall3.doStep7_Stonewallx2(keyBag_A);
+        } else {
+            throw new Exception("Cannot compose #Cahoots: fee is being taken from us");
+        }
 
         // compute verifiedSpendAmount
-        long verifiedSpendAmount = computeSpendAmount(keyBag_A, cahootsWallet, stonewall3, CahootsTypeUser.SENDER);
+        long verifiedSpendAmount = computeSpendAmount(keyBag_A, cahootsWallet, stonewall3, CahootsTypeUser.COUNTERPARTY);
         stonewall3.setVerifiedSpendAmount(verifiedSpendAmount);
         return stonewall3;
     }
@@ -723,22 +724,17 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     //
-    // counterparty
+    // sender - new
     //
-    private MultiCahoots doMultiCahoots9_Stonewallx24(MultiCahoots stonewall3, CahootsWallet cahootsWallet) throws Exception {
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall3.getCounterpartyAccount());
+    private MultiCahoots doMultiCahoots8_Stonewallx24(MultiCahoots stonewall3, CahootsWallet cahootsWallet) throws Exception {
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall3.getAccount());
         HashMap<String, ECKey> keyBag_B = computeKeyBag(stonewall3, utxos);
 
         MultiCahoots stonewall4 = new MultiCahoots(stonewall3);
-        boolean noFeeTaken = checkForNoFee(stonewall4, utxos);
-        if(noFeeTaken) {
-            stonewall4.doStep9_Stonewallx2(keyBag_B);
-        } else {
-            throw new Exception("Cannot compose #Cahoots: fee is being taken from us");
-        }
+        stonewall4.doStep8_Stonewallx2(keyBag_B);
 
         // compute verifiedSpendAmount
-        long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahootsWallet, stonewall4, CahootsTypeUser.COUNTERPARTY);
+        long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahootsWallet, stonewall4, CahootsTypeUser.SENDER);
         stonewall4.setVerifiedSpendAmount(verifiedSpendAmount);
         return stonewall4;
     }

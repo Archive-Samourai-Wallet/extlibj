@@ -26,7 +26,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -271,14 +270,12 @@ public class MultiCahoots extends Cahoots {
     public void doStep4_Stowaway(HashMap<String,ECKey> keyBag)    {
 
         signTx(keyBag);
-
-        this.setStep(4);
     }
 
     //
     // sender
     //
-    protected void doStep6_Stonewallx2_StartCollaborator(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
+    protected void doStep5_Stonewallx2_StartCollaborator(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
         if(this.getStep() != 5 || this.getSpendAmount() == 0L)   {
             throw new Exception("Invalid step/amount");
@@ -324,13 +321,13 @@ public class MultiCahoots extends Cahoots {
 
         this.psbt = new PSBT(transaction);
 
-        this.setStep(6);
+        this.setStep(5);
     }
 
     //
     // counterparty
     //
-    protected void doStep7_Stonewallx2(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
+    protected void doStep6_Stonewallx2(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
         Transaction transaction = psbt.getTransaction();
         if (log.isDebugEnabled()) {
@@ -384,13 +381,13 @@ public class MultiCahoots extends Cahoots {
 
         psbt = new PSBT(transaction);
 
-        this.setStep(7);
+        this.setStep(6);
     }
 
     //
     // sender
     //
-    protected void doStep8_Stonewallx2(HashMap<String,ECKey> keyBag)    {
+    protected void doStep7_Stonewallx2(HashMap<String,ECKey> keyBag)    {
 
         Transaction transaction = this.getTransaction();
         List<TransactionInput> inputs = new ArrayList<TransactionInput>();
@@ -412,17 +409,17 @@ public class MultiCahoots extends Cahoots {
 
         signTx(keyBag);
 
-        this.setStep(8);
+        this.setStep(7);
     }
 
     //
     // counterparty
     //
-    protected void doStep9_Stonewallx2(HashMap<String,ECKey> keyBag)    {
+    protected void doStep8_Stonewallx2(HashMap<String,ECKey> keyBag)    {
 
         signTx(keyBag);
 
-        this.setStep(9);
+        this.setStep(8);
     }
 
     private void setStonewallAmount(long amount) {

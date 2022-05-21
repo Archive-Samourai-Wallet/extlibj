@@ -9,7 +9,7 @@ public class ManualCahootsMessage implements SorobanMessage {
     private Cahoots cahoots;
 
     public static final int LAST_STEP = 4;
-    public static final int LAST_STEP_MULTI = 10;
+    public static final int LAST_STEP_MULTI = 8;
     public static final int NB_STEPS = LAST_STEP+1; // starting from 0
     public static final int NB_STEPS_MULTI = LAST_STEP_MULTI+1; // starting from 0
 
