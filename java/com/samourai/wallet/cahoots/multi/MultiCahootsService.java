@@ -706,13 +706,12 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         return stonewall3;
     }
 
-    private boolean checkForNoFee(MultiCahoots stonewall3, List<CahootsUtxo> utxos) {
-        System.out.println(stonewall3.getTransaction().toString());
+    private boolean checkForNoFee(MultiCahoots multiCahoots, List<CahootsUtxo> utxos) {
         long inputSum = 0;
         long outputSum = 0;
 
-        for(int i = 0; i < stonewall3.getTransaction().getInputs().size(); i++) {
-            TransactionInput input = stonewall3.getTransaction().getInput(i);
+        for(int i = 0; i < multiCahoots.getTransaction().getInputs().size(); i++) {
+            TransactionInput input = multiCahoots.getTransaction().getInput(i);
             for(CahootsUtxo cahootsUtxo : utxos) {
                 int outpointIndex = cahootsUtxo.getOutpoint().getTxOutputN();
                 Sha256Hash outpointHash = cahootsUtxo.getOutpoint().getTxHash();
@@ -722,20 +721,22 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
                 }
             }
         }
-        for(int i = 0; i < stonewall3.getTransaction().getOutputs().size(); i++) {
-            TransactionOutput utxo = stonewall3.getTransaction().getOutput(i);
+        for(int i = 0; i < multiCahoots.getTransaction().getOutputs().size(); i++) {
+            TransactionOutput utxo = multiCahoots.getTransaction().getOutput(i);
             long amount = utxo.getValue().value;
-            String address = utxo.getScriptPubKey().getToAddress(stonewall3.getParams()).toString();
-            System.out.println(address);
-            if(address.equals(stonewall3.getCollabChange())) {
+            String address = null;
+            try {
+                address = Bech32UtilGeneric.getInstance().getAddressFromScript(utxo.getScriptPubKey(), multiCahoots.getParams());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if(address != null && address.equals(multiCahoots.getCollabChange())) {
                 outputSum += amount;
-            } else if(amount == stonewall3.getSpendAmount() && !address.equals(stonewall3.getStonewallDestination())) {
+            } else if(address != null && amount == multiCahoots.getSpendAmount() && !address.equals(multiCahoots.getDestination())) {
                 outputSum += amount;
             }
         }
 
-        System.out.println("INPUT: " + inputSum);
-        System.out.println("OUTPUT: " + outputSum);
         return (inputSum - outputSum) == 0 && inputSum != 0 && outputSum != 0;
     }
 
@@ -746,7 +747,6 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall3.getCounterpartyAccount());
         HashMap<String, ECKey> keyBag_B = computeKeyBag(stonewall3, utxos);
 
-        System.out.println("PERFORMING doMultiCahoots9_Stonewallx24");
         MultiCahoots stonewall4 = new MultiCahoots(stonewall3);
         boolean noFeeTaken = checkForNoFee(stonewall4, utxos);
         if(noFeeTaken) {
