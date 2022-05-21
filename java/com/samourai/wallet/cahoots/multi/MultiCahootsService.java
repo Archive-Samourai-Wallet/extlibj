@@ -714,13 +714,10 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             TransactionInput input = stonewall3.getTransaction().getInput(i);
             for(CahootsUtxo cahootsUtxo : utxos) {
                 int outpointIndex = cahootsUtxo.getOutpoint().getTxOutputN();
-                Sha256Hash outpointHash = cahootsUtxo.getOutpoint().getHash();
+                Sha256Hash outpointHash = cahootsUtxo.getOutpoint().getTxHash();
                 if(input != null && input.getOutpoint().getHash().equals(outpointHash) && input.getOutpoint().getIndex() == outpointIndex) {
-                    Coin value = input.getValue();
-                    if(value != null) {
-                        long amount = value.value;
-                        inputSum += amount;
-                    }
+                    long amount = cahootsUtxo.getValue();
+                    inputSum += amount;
                 }
             }
         }
@@ -748,7 +745,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         HashMap<String, ECKey> keyBag_B = computeKeyBag(stonewall3, utxos);
 
         MultiCahoots stonewall4 = new MultiCahoots(stonewall3);
-        boolean noFeeTaken = checkForNoFee(stonewall3, utxos);
+        boolean noFeeTaken = checkForNoFee(stonewall4, utxos);
         if(noFeeTaken) {
             stonewall4.doStep9_Stonewallx2(keyBag_B);
         } else {
