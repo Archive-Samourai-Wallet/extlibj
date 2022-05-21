@@ -277,7 +277,7 @@ public class MultiCahoots extends Cahoots {
     //
     protected void doStep5_Stonewallx2_StartCollaborator(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
-        if(this.getStep() != 5 || this.getSpendAmount() == 0L)   {
+        if(this.getStep() != 4 || this.getSpendAmount() == 0L)   {
             throw new Exception("Invalid step/amount");
         }
         if(outputs == null)    {
