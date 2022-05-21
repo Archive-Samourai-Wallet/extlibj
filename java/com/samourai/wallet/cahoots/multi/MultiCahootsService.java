@@ -54,36 +54,42 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     @Override
-    public MultiCahoots reply(CahootsWallet cahootsWallet, MultiCahoots stowaway) throws Exception {
-        int step = stowaway.getStep();
+    public MultiCahoots reply(CahootsWallet cahootsWallet, MultiCahoots multiCahoots) throws Exception {
+        int step = multiCahoots.getStep();
         if (log.isDebugEnabled()) {
             log.debug("# Stowaway <= step="+step);
         }
         MultiCahoots payload;
         switch (step) {
             case 1:
-                payload = doMultiCahoots2_Stowaway2(stowaway, cahootsWallet);
+                payload = doMultiCahoots2_Stowaway2(multiCahoots, cahootsWallet);
                 break;
             case 2:
-                payload = doMultiCahoots3_Stowaway3(stowaway, cahootsWallet);
+                payload = doMultiCahoots3_Stowaway3(multiCahoots, cahootsWallet);
                 break;
             case 3:
-                payload = doMultiCahoots4_Stowaway4(stowaway, cahootsWallet);
+                payload = doMultiCahoots4_Stowaway4(multiCahoots, cahootsWallet);
                 break;
             case 4:
-                payload = doMultiCahoots5_Stonewallx20_StartInitiator(stowaway, cahootsWallet);
+                payload = doMultiCahoots5_Stonewallx20_StartInitiator(multiCahoots, cahootsWallet);
                 break;
             case 5:
-                payload = doMultiCahoots6_Stonewallx21_StartCollaborator(stowaway, cahootsWallet, stowaway.getAccount());
+                payload = doMultiCahoots6_Stonewallx21_StartCollaborator(multiCahoots, cahootsWallet, multiCahoots.getAccount());
                 break;
             case 6:
-                payload = doMultiCahoots7_Stonewallx22(stowaway, cahootsWallet);
+                payload = doMultiCahoots7_Stonewallx22(multiCahoots, cahootsWallet);
                 break;
             case 7:
-                payload = doMultiCahoots8_Stonewallx23(stowaway, cahootsWallet);
+                payload = doMultiCahoots8_Stonewallx23(multiCahoots, cahootsWallet);
                 break;
             case 8:
-                payload = doMultiCahoots9_Stonewallx24(stowaway, cahootsWallet);
+                payload = doMultiCahoots9_Stonewallx24(multiCahoots, cahootsWallet);
+                break;
+            case 9:
+                MultiCahoots finalCahoots = multiCahoots;
+                finalCahoots.setStep(10);
+                // sender receives tx, broadcasts on device
+                payload = finalCahoots;
                 break;
             default:
                 throw new Exception("Unrecognized #Cahoots step");

@@ -104,7 +104,7 @@ public class MultiCahoots extends Cahoots {
     }
 
     //
-    // receiver
+    // counterparty
     //
     public void doStep1_Stowaway_StartCollaborator(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
@@ -153,10 +153,6 @@ public class MultiCahoots extends Cahoots {
             psbt.addOutput(PSBT.PSBT_OUT_BIP32_DERIVATION, (byte[])triple.getLeft(), PSBT.writeBIP32Derivation((byte[])triple.getMiddle(), 84, params instanceof TestNet3Params ? 1 : 0, account, Integer.valueOf(s[1]), Integer.valueOf(s[2])));
         }
 
-        //
-        //
-        //
-//        this.psbt = psbt;
         this.psbt = new PSBT(transaction);
 
         if (log.isDebugEnabled()) {
@@ -236,17 +232,13 @@ public class MultiCahoots extends Cahoots {
             psbt.addOutput(PSBT.PSBT_OUT_BIP32_DERIVATION, (byte[])triple.getLeft(), PSBT.writeBIP32Derivation((byte[])triple.getMiddle(), 84, params instanceof TestNet3Params ? 1 : 0, account, Integer.valueOf(s[1]), Integer.valueOf(s[2])));
         }
 
-        //
-        //
-        //
-//        psbt.setTransaction(transaction);
         psbt = new PSBT(transaction);
 
         this.setStep(2);
     }
 
     //
-    // receiver
+    // counterparty
     //
     public void doStep3_Stowaway(HashMap<String,ECKey> keyBag)    {
 
@@ -266,10 +258,6 @@ public class MultiCahoots extends Cahoots {
             transaction.addOutput(output);
         }
 
-        //
-        //
-        //
-//        psbt.setTransaction(transaction);
         psbt = new PSBT(transaction);
 
         signTx(keyBag);
@@ -287,16 +275,8 @@ public class MultiCahoots extends Cahoots {
         this.setStep(4);
     }
 
-    private MultiCahoots doStep5_Stonewallx2_StartInitiator(long spendAmount, String address, int account, byte[] fingerprint) {
-        MultiCahoots stonewall0 = new MultiCahoots(address, spendAmount, params, account);
-        stonewall0.setFingerprint(fingerprint);
-        stonewall0.setStep(5);
-
-        return stonewall0;
-    }
-
     //
-    // counterparty
+    // sender
     //
     protected void doStep6_Stonewallx2_StartCollaborator(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
@@ -342,17 +322,13 @@ public class MultiCahoots extends Cahoots {
             psbt.addOutput(PSBT.PSBT_OUT_BIP32_DERIVATION, (byte[])triple.getLeft(), PSBT.writeBIP32Derivation((byte[])triple.getMiddle(), 84, params instanceof TestNet3Params ? 1 : 0, cptyAccount, Integer.valueOf(s[1]), Integer.valueOf(s[2])));
         }
 
-        //
-        //
-        //
-//        this.psbt = psbt;
         this.psbt = new PSBT(transaction);
 
         this.setStep(6);
     }
 
     //
-    // sender
+    // counterparty
     //
     protected void doStep7_Stonewallx2(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
@@ -406,17 +382,13 @@ public class MultiCahoots extends Cahoots {
             psbt.addOutput(PSBT.PSBT_OUT_BIP32_DERIVATION, (byte[])triple.getLeft(), PSBT.writeBIP32Derivation((byte[])triple.getMiddle(), 84, params instanceof TestNet3Params ? 1 : 0, account, Integer.valueOf(s[1]), Integer.valueOf(s[2])));
         }
 
-        //
-        //
-        //
-//        psbt.setTransaction(transaction);
         psbt = new PSBT(transaction);
 
         this.setStep(7);
     }
 
     //
-    // counterparty
+    // sender
     //
     protected void doStep8_Stonewallx2(HashMap<String,ECKey> keyBag)    {
 
@@ -436,10 +408,6 @@ public class MultiCahoots extends Cahoots {
             transaction.addOutput(output);
         }
 
-        //
-        //
-        //
-//        psbt.setTransaction(transaction);
         psbt = new PSBT(transaction);
 
         signTx(keyBag);
@@ -448,7 +416,7 @@ public class MultiCahoots extends Cahoots {
     }
 
     //
-    // sender
+    // counterparty
     //
     protected void doStep9_Stonewallx2(HashMap<String,ECKey> keyBag)    {
 
