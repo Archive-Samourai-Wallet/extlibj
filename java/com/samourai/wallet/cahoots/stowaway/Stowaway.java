@@ -1,5 +1,6 @@
 package com.samourai.wallet.cahoots.stowaway;
 
+import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.bip69.BIP69InputComparator;
 import com.samourai.wallet.bip69.BIP69OutputComparator;
 import com.samourai.wallet.cahoots.Cahoots;
@@ -247,5 +248,23 @@ public class Stowaway extends Cahoots {
         signTx(keyBag);
 
         this.setStep(4);
+    }
+
+    @Override
+    public long computeMaxSpendAmount(long minerFee, CahootsContext cahootsContext) throws Exception {
+        long maxSpendAmount;
+        switch (cahootsContext.getTypeUser()) {
+            case SENDER:
+                // spends amount + minerFee
+                maxSpendAmount = cahootsContext.getAmount()+minerFee;
+                break;
+            case COUNTERPARTY:
+                // receives money (<0)
+                maxSpendAmount = 0;
+                break;
+            default:
+                throw new Exception("Unknown typeUser");
+        }
+        return maxSpendAmount;
     }
 }

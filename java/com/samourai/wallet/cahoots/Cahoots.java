@@ -1,5 +1,6 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.cahoots.multi.MultiCahoots;
 import com.samourai.wallet.cahoots.psbt.PSBT;
@@ -415,4 +416,6 @@ public abstract class Cahoots {
     public long computeRequiredAmount(long estimatedFee) {
         return computeRequiredAmount()+estimatedFee;
     }
+
+    public abstract long computeMaxSpendAmount(long minerFee, CahootsContext cahootsContext) throws Exception;
 }

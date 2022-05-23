@@ -1,5 +1,6 @@
 package com.samourai.wallet.cahoots.stonewallx2;
 
+import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.bip69.BIP69InputComparator;
 import com.samourai.wallet.bip69.BIP69OutputComparator;
 import com.samourai.wallet.cahoots.Cahoots;
@@ -217,4 +218,23 @@ public class STONEWALLx2 extends Cahoots {
         this.setStep(4);
     }
 
+    @Override
+    public long computeMaxSpendAmount(long minerFee, CahootsContext cahootsContext) throws Exception {
+        // shares minerFee
+        long maxSpendAmount;
+        long sharedMinerFee = minerFee / 2;
+        switch (cahootsContext.getTypeUser()) {
+            case SENDER:
+                // spends amount + minerFee
+                maxSpendAmount = cahootsContext.getAmount()+sharedMinerFee;
+                break;
+            case COUNTERPARTY:
+                // receives money (maxSpendAmount < 0)
+                maxSpendAmount = sharedMinerFee;
+                break;
+            default:
+                throw new Exception("Unknown typeUser");
+        }
+        return maxSpendAmount;
+    }
 }

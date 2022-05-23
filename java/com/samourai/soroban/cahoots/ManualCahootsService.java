@@ -140,7 +140,7 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
             }
 
             // check verifiedSpendAmount
-            long maxSpendAmount = computeMaxSpendAmount(minerFee, cahootsContext, cahoots.getStep());
+            long maxSpendAmount = cahoots.computeMaxSpendAmount(minerFee, cahootsContext);
             long verifiedSpendAmount = cahoots.getVerifiedSpendAmount();
             if (verifiedSpendAmount == 0) {
                 throw new Exception("Cahoots spendAmount verification failed");
@@ -190,64 +190,6 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
         if (!message.getTypeUser().equals(typeUserExpected)) {
             throw new Exception("Cahoots typeUser mismatch");
         }
-    }
-
-    private long computeMaxSpendAmount(long minerFee, CahootsContext cahootsContext, int step) throws Exception {
-        long maxSpendAmount;
-        if(step > 5) {
-            // in multi-cahoots stonewall portion
-            long sharedMinerFee = minerFee / 2;
-            switch (cahootsContext.getTypeUser()) {
-                case SENDER:
-                    // spends amount + minerFee
-                    maxSpendAmount = cahootsContext.getAmount()+sharedMinerFee;
-                    break;
-                case COUNTERPARTY:
-                    // receives money (maxSpendAmount < 0)
-                    maxSpendAmount = sharedMinerFee;
-                    break;
-                default:
-                    throw new Exception("Unknown typeUser");
-            }
-        } else {
-            switch (cahootsContext.getCahootsType()) {
-                case STONEWALLX2:
-                    // shares minerFee
-                    long sharedMinerFee = minerFee / 2;
-                    switch (cahootsContext.getTypeUser()) {
-                        case SENDER:
-                            // spends amount + minerFee
-                            maxSpendAmount = cahootsContext.getAmount()+sharedMinerFee;
-                            break;
-                        case COUNTERPARTY:
-                            // receives money (maxSpendAmount < 0)
-                            maxSpendAmount = sharedMinerFee;
-                            break;
-                        default:
-                            throw new Exception("Unknown typeUser");
-                    }
-                    break;
-                case MULTI:
-                case STOWAWAY:
-                    switch (cahootsContext.getTypeUser()) {
-                        case SENDER:
-                            // spends amount + minerFee
-                            maxSpendAmount = cahootsContext.getAmount()+minerFee;
-                            break;
-                        case COUNTERPARTY:
-                            // receives money (<0)
-                            maxSpendAmount = 0;
-                            break;
-                        default:
-                            throw new Exception("Unknown typeUser");
-                    }
-                    break;
-                default:
-                    throw new Exception("Unknown Cahoots type");
-            }
-        }
-
-        return maxSpendAmount;
     }
 
     private AbstractCahootsService newCahootsService(CahootsType cahootsType) throws Exception {

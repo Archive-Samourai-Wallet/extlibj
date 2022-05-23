@@ -1,13 +1,11 @@
 package com.samourai.wallet.cahoots.multi;
 
+import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.cahoots.Cahoots;
 import com.samourai.wallet.cahoots.CahootsType;
-import com.samourai.wallet.cahoots._TransactionOutput;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
-import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.RandomUtil;
-import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Sha256Hash;
@@ -93,5 +91,62 @@ public class MultiCahoots extends Cahoots {
 
     public void setStonewallx2(STONEWALLx2 stonewallx2) {
         this.stonewallx2 = stonewallx2;
+    }
+
+    public Transaction getStowawayTransaction() {
+        return getStowaway().getTransaction();
+    }
+
+    public Transaction getStonewallTransaction() {
+        return getStonewallx2().getTransaction();
+    }
+
+    @Override
+    public long getVerifiedSpendAmount() {
+        return getStowaway().getVerifiedSpendAmount() + getStonewallx2().getVerifiedSpendAmount();
+    }
+
+    @Override
+    public long getFeeAmount() {
+        return stonewallx2.getFeeAmount() + stowaway.getFeeAmount();
+    }
+
+    @Override
+    public long computeMaxSpendAmount(long minerFee, CahootsContext cahootsContext) throws Exception {
+        long maxSpendAmount;
+        long sharedMinerFee = minerFee / 2;
+        switch (cahootsContext.getTypeUser()) {
+            case SENDER:
+                // spends amount + minerFee
+                maxSpendAmount = cahootsContext.getAmount()+sharedMinerFee;
+                break;
+            case COUNTERPARTY:
+                // receives money (maxSpendAmount < 0)
+                maxSpendAmount = sharedMinerFee;
+                break;
+            default:
+                throw new Exception("Unknown typeUser");
+        }
+        return maxSpendAmount;
+    }
+
+    @Override
+    public Transaction getTransaction() {
+        return stonewallx2.getTransaction();
+    }
+
+    @Override
+    public HashMap<String, Long> getOutpoints() {
+        return stonewallx2.getOutpoints();
+    }
+
+    @Override
+    public String getDestination() {
+        return stonewallx2.getDestination();
+    }
+
+    @Override
+    public long getSpendAmount() {
+        return stonewallx2.getSpendAmount();
     }
 }
