@@ -4,8 +4,6 @@ import com.samourai.wallet.util.CharSequenceX;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 public class AESUtilTest {
 
     private String expected = "all all all all all all all all all all all all";
@@ -80,7 +78,7 @@ public class AESUtilTest {
     @Test
     public void encryptException() throws Exception {
         // throw Exception for null password
-        assertThrows(DecryptionException.class,
+        Assertions.assertThrows(DecryptionException.class,
                 () -> {
                     AESUtil.encrypt(this.expected, null);
                 });
