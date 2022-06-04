@@ -1,8 +1,12 @@
 package com.samourai.wallet.cahoots.stonewallx2;
 
+import com.samourai.wallet.bip47.rpc.PaymentAddress;
+import com.samourai.wallet.bip47.rpc.PaymentCode;
+import com.samourai.wallet.bip47.rpc.java.Bip47UtilJava;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.hd.BipAddress;
+import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
@@ -197,6 +201,136 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
         }
         _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall0.getSpendAmount());
         outputsA.put(output_A0, computeOutput(receiveAddress, stonewall0.getFingerprintCollab()));
+
+        // contributor change output
+        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), true);
+        if (log.isDebugEnabled()) {
+            log.debug("+output (CounterParty change) = " + changeAddress);
+        }
+        _TransactionOutput output_A1 = computeTxOutput(changeAddress, totalContributedAmount - stonewall0.getSpendAmount());
+        outputsA.put(output_A1, computeOutput(changeAddress, stonewall0.getFingerprintCollab()));
+        stonewall0.setCollabChange(changeAddress.getAddressString());
+
+        STONEWALLx2 stonewall1 = new STONEWALLx2(stonewall0);
+        stonewall1.doStep1(inputsA, outputsA);
+
+        return stonewall1;
+    }
+
+    // TODO combine portions of the original doSTONEWALLx2_1 to make it not as copy/pasted
+    public STONEWALLx2 doSTONEWALLx2_1_Multi(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, int account, List<String> seenTxs) throws Exception {
+        stonewall0.setCounterpartyAccount(account);
+        byte[] fingerprint = cahootsWallet.getBip84Wallet().getFingerprint();
+        stonewall0.setFingerprintCollab(fingerprint);
+
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall0.getCounterpartyAccount());
+        shuffleUtxos(utxos);
+
+        if (log.isDebugEnabled()) {
+            log.debug("BIP84 utxos:" + utxos.size());
+        }
+
+        List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
+        long totalContributedAmount = 0L;
+        for (int step = 0; step < 3; step++) {
+
+            if (stonewall0.getCounterpartyAccount() == 0) {
+                step = 2;
+            }
+
+            selectedUTXO = new ArrayList<CahootsUtxo>();
+            totalContributedAmount = 0L;
+            for (CahootsUtxo utxo : utxos) {
+
+                switch (step) {
+                    case 0:
+                        if (utxo.getPath() != null && utxo.getPath().length() > 3 && utxo.getPath().charAt(2) != '0') {
+                            continue;
+                        }
+                        break;
+                    case 1:
+                        if (utxo.getPath() != null && utxo.getPath().length() > 3 && utxo.getPath().charAt(2) != '1') {
+                            continue;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+                MyTransactionOutPoint outpoint = utxo.getOutpoint();
+                if (!seenTxs.contains(outpoint.getHash().toString())) {
+                    seenTxs.add(outpoint.getHash().toString());
+
+                    selectedUTXO.add(utxo);
+                    totalContributedAmount += utxo.getValue();
+                    if (log.isDebugEnabled()) {
+                        log.debug("BIP84 selected utxo:" + utxo.getValue());
+                    }
+                }
+
+                if (stonewall0.isContributedAmountSufficient(totalContributedAmount)) {
+                    break;
+                }
+            }
+            if (stonewall0.isContributedAmountSufficient(totalContributedAmount)) {
+                break;
+            }
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug(selectedUTXO.size()+" selected utxos, totalContributedAmount="+totalContributedAmount+", requiredAmount="+stonewall0.computeRequiredAmount());
+        }
+        if (!stonewall0.isContributedAmountSufficient(totalContributedAmount)) {
+            throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
+        }
+
+        NetworkParameters params = stonewall0.getParams();
+
+        //
+        //
+        // step1: A utxos -> B (take largest that cover amount)
+        //
+        //
+
+        HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>> inputsA = new HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>>();
+
+        for (CahootsUtxo utxo : selectedUTXO) {
+            MyTransactionOutPoint _outpoint = utxo.getOutpoint();
+            ECKey eckey = utxo.getKey();
+            String path = utxo.getPath();
+            inputsA.put(_outpoint, Triple.of(eckey.getPubKey(), stonewall0.getFingerprintCollab(), path));
+        }
+
+        HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsA = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
+        // contributor mix output
+        Coin balance = computeBalance(utxos);
+        if(balance.isGreaterThan(THRESHOLD)) {
+            // TODO remove hardcoded stuff
+            PaymentCode externalPaymentCode = new PaymentCode("");
+            int idx = 0;
+            PaymentAddress segwitAddress = Bip47UtilJava.getInstance().getSendAddress(cahootsWallet.getBip47Wallet(), externalPaymentCode, idx, params);
+            String receiveAddress = segwitAddress.getSegwitAddressSend().getBech32AsString();
+            if (receiveAddress.equalsIgnoreCase(stonewall0.getDestination())) {
+                idx++;
+                segwitAddress = Bip47UtilJava.getInstance().getSendAddress(cahootsWallet.getBip47Wallet(), externalPaymentCode, idx, params);
+                receiveAddress = segwitAddress.getSegwitAddressSend().getBech32AsString();
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("+output (CounterParty mix) = "+receiveAddress);
+            }
+            _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall0.getSpendAmount());
+            outputsA.put(output_A0, computeOutput(segwitAddress.getSendECKey().getPubKey(), stonewall0.getFingerprintCollab(), 47, idx));
+        } else {
+            BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), true);
+            if (receiveAddress.getAddressString().equalsIgnoreCase(stonewall0.getDestination())) {
+                receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), true);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("+output (CounterParty mix) = "+receiveAddress);
+            }
+            _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall0.getSpendAmount());
+            outputsA.put(output_A0, computeOutput(receiveAddress, stonewall0.getFingerprintCollab()));
+        }
 
         // contributor change output
         BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), true);
@@ -421,5 +555,14 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
 
     private long estimatedFee(int nbTotalSelectedOutPoints, int nbIncomingInputs, long feePerB) {
         return FeeUtil.getInstance().estimatedFeeSegwit(0, 0, nbTotalSelectedOutPoints + nbIncomingInputs, 4, 0, feePerB);
+    }
+
+    private Coin THRESHOLD = Coin.valueOf(200000000);
+    private Coin computeBalance(List<CahootsUtxo> utxos) {
+        Coin balance = Coin.ZERO;
+        for(CahootsUtxo cahootsUtxo : utxos) {
+            balance = balance.add(cahootsUtxo.getOutpoint().getValue());
+        }
+        return balance;
     }
 }

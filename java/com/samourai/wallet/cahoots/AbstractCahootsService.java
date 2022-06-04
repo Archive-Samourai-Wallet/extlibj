@@ -130,14 +130,21 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
     }
 
     protected  _TransactionOutput computeTxOutput(BipAddress bipAddress, long amount) throws Exception{
-        String receiveAddressString = bipAddress.getAddressString();
-        byte[] scriptPubKey_A0 = Bech32UtilGeneric.getInstance().computeScriptPubKey(receiveAddressString, params);
-        return new _TransactionOutput(params, null, Coin.valueOf(amount), scriptPubKey_A0);
+        return computeTxOutput(bipAddress.getAddressString(), amount);
     }
 
     protected Triple<byte[], byte[], String> computeOutput(BipAddress bipAddress, byte[] fingerprint) {
         HD_Address hdAddress = bipAddress.getHdAddress();
-        return Triple.of(hdAddress.getECKey().getPubKey(), fingerprint, "M/"+hdAddress.getChainIndex()+"/" + hdAddress.getAddressIndex());
+        return computeOutput(hdAddress.getECKey().getPubKey(), fingerprint, hdAddress.getChainIndex(), hdAddress.getAddressIndex());
+    }
+
+    protected  _TransactionOutput computeTxOutput(String receiveAddressString, long amount) throws Exception{
+        byte[] scriptPubKey_A0 = Bech32UtilGeneric.getInstance().computeScriptPubKey(receiveAddressString, params);
+        return new _TransactionOutput(params, null, Coin.valueOf(amount), scriptPubKey_A0);
+    }
+
+    protected Triple<byte[], byte[], String> computeOutput(byte[] pubKey, byte[] fingerprint, int chainIdx, int addressIdx) {
+        return Triple.of(pubKey, fingerprint, "M/"+chainIdx+"/" + addressIdx);
     }
 
     public BipFormatSupplier getBipFormatSupplier() {
