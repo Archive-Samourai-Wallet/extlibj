@@ -1,15 +1,7 @@
 package com.samourai.wallet.util;
 
 import com.samourai.wallet.segwit.SegwitAddress;
-import com.samourai.wallet.send.SendFactoryGeneric;
-import org.bitcoinj.core.Address;
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Transaction;
-import org.bitcoinj.core.TransactionInput;
-import org.bitcoinj.core.TransactionOutPoint;
-import org.bitcoinj.core.TransactionOutput;
+import org.bitcoinj.core.*;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
@@ -17,8 +9,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class TxUtilTest {
     private static final TxUtil txUtil = TxUtil.getInstance();
@@ -184,5 +174,17 @@ public class TxUtilTest {
     public void fromTxHex() throws Exception {
         Transaction tx = TxUtil.getInstance().fromTxHex(params, "0100000001b7a9adfe6fe61e78c5576f5ceb7e1f7f3453a33b63621e573ed8df775a84d2e30000000049483045022100d9f002ad1e648f1658f20605efb33eb3375a3d4eceecc9d6415034622d60cbe302204bcfdc452a5fa4aa43ce0af6459e64ac674a51b8773d8b00cd29d7d33d323d2501ffffffff013f420f000000000017a91430a3a154ab9b649fc4f57dff2ac8ec3a400c825b8700000000");
         Assertions.assertEquals("067e0b9e37a9164e4d54bba02a9173ab629341fd96b98893d2ceff04db351f5b", tx.getHashAsString());
+    }
+
+    @Test
+    public void findInputIndex() throws Exception {
+        Transaction tx = TxUtil.getInstance().fromTxHex(params, "0100000001b7a9adfe6fe61e78c5576f5ceb7e1f7f3453a33b63621e573ed8df775a84d2e30000000049483045022100d9f002ad1e648f1658f20605efb33eb3375a3d4eceecc9d6415034622d60cbe302204bcfdc452a5fa4aa43ce0af6459e64ac674a51b8773d8b00cd29d7d33d323d2501ffffffff013f420f000000000017a91430a3a154ab9b649fc4f57dff2ac8ec3a400c825b8700000000");
+
+        // test
+        Integer index = txUtil.findInputIndex(tx, "e3d2845a77dfd83e571e62633ba353347f1f7eeb5c6f57c5781ee66ffeada9b7", 0);
+        Assertions.assertEquals(0, index);
+
+        index = txUtil.findInputIndex(tx, "foo", 0);
+        Assertions.assertEquals(null, index);
     }
 }
