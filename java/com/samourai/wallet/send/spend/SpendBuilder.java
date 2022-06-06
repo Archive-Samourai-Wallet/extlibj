@@ -42,10 +42,17 @@ public class SpendBuilder {
         // if possible, get UTXO by input 'type': p2pkh, p2sh-p2wpkh or p2wpkh, else get all UTXO
         long neededAmount = computeNeededAmount(account, amount, addressFormat, feePerKb);
 
-        // get all UTXO
-        Collection<UTXO> utxos = findUtxos(neededAmount, account, addressFormat, preselectedInputs);
+        SpendSelection spendSelection;
+        if (preselectedInputs != null && !preselectedInputs.isEmpty()) {
+            // get preselected UTXO
+            spendSelection = computeUtxoPreselection(neededAmount, preselectedInputs);
+        }
+        else {
+            // get all UTXO
+            Collection<UTXO> utxos = findUtxos(neededAmount, account, addressFormat);
+            spendSelection = computeUtxoSelection(account, address, boltzmann, amount, neededAmount, utxos, addressFormat, params, feePerKb, forcedChangeFormat);
+        }
 
-        SpendSelection spendSelection = computeUtxoSelection(account, address, boltzmann, amount, neededAmount, utxos, addressFormat, params, feePerKb, forcedChangeFormat);
         SpendTx spendTx = spendSelection.spendTx(amount, address, addressFormat, account, rbfOptIn, params, feePerKb, restoreChangeIndexes, utxoProvider, blockHeight);
         if (spendTx != null) {
             if (log.isDebugEnabled()) {
@@ -59,21 +66,7 @@ public class SpendBuilder {
         return spendTx;
     }
 
-    private Collection<UTXO> findUtxos(long neededAmount, WhirlpoolAccount account, BipFormat addressFormat, Collection<MyTransactionOutPoint> preselectedInputs) {
-        // spend from preselected inputs
-        if (preselectedInputs != null && preselectedInputs.size() > 0) {
-            Collection<UTXO> utxos = new ArrayList<>();
-            // sort in descending order by value
-            for (MyTransactionOutPoint outPoint : preselectedInputs) {
-                UTXO u = new UTXO();
-                List<MyTransactionOutPoint> outs = new ArrayList<>();
-                outs.add(outPoint);
-                u.setOutpoints(outs);
-                utxos.add(u);
-            }
-            return UTXO.sumValue(utxos) >= neededAmount ? utxos : new LinkedList<>();
-        }
-
+    private Collection<UTXO> findUtxos(long neededAmount, WhirlpoolAccount account, BipFormat addressFormat) {
         Collection<UTXO> utxos = utxoProvider.getUtxos(account, addressFormat);
 
         // TODO filter-out do-not-spends
@@ -105,6 +98,27 @@ public class SpendBuilder {
         // fallback by mixed type
         utxos = utxoProvider.getUtxos(account);
         return UTXO.sumValue(utxos) >= neededAmount ? utxos : new LinkedList<>();
+    }
+
+    private SpendSelection computeUtxoPreselection(long amount, Collection<MyTransactionOutPoint> preselectedInputs) throws SpendException {
+        // find preselected UTXOs
+        Collection<UTXO> utxos = new ArrayList<>();
+        for (MyTransactionOutPoint outPoint : preselectedInputs) {
+            UTXO u = new UTXO();
+            List<MyTransactionOutPoint> outs = new ArrayList<>();
+            outs.add(outPoint);
+            u.setOutpoints(outs);
+            utxos.add(u);
+        }
+
+        // check balance
+        long balance = UTXO.sumValue(utxos);
+        if (amount > balance) {
+            log.warn("InsufficientFundsException: amount="+amount+", preselectedBalance="+balance);
+            throw new SpendException(SpendError.INSUFFICIENT_FUNDS);
+        }
+
+        return new SpendSelectionSimple(utxoProvider.getBipFormatSupplier(), utxos);
     }
 
     private SpendSelection computeUtxoSelection(WhirlpoolAccount account, String address, boolean boltzmann, long amount, long neededAmount, Collection<UTXO> utxos, BipFormat addressFormat, NetworkParameters params, BigInteger feePerKb, BipFormat forcedChangeFormat) throws SpendException {
