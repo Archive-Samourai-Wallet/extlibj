@@ -6,13 +6,15 @@ import com.samourai.wallet.bip47.rpc.secretPoint.ISecretPoint;
 import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.util.CryptoTestUtil;
-import java.nio.ByteBuffer;
+import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.TransactionOutPoint;
 import org.bitcoinj.params.TestNet3Params;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.nio.ByteBuffer;
 
 public class PaymentCodeTest {
     private static final NetworkParameters params = TestNet3Params.get();
@@ -91,4 +93,12 @@ public class PaymentCodeTest {
         Assertions.assertArrayEquals(data, dataUnmasked);
     }
 
+    @Test
+    public void invalidPaymentCodeException() throws Exception {
+        // throw exception for invalid payment code
+        Assertions.assertThrows(AddressFormatException.class,
+            () -> {
+                PaymentCode paymentCode1 = new PaymentCode("PM8TJdufVsRkwm8K4uLBUdPEzoZCsq2JCN47wQxcD");
+            });
+    }
 }
