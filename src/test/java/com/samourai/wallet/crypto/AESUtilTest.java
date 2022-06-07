@@ -79,8 +79,8 @@ public class AESUtilTest {
     public void encryptException() throws Exception {
         // throw Exception for null password
         Assertions.assertThrows(DecryptionException.class,
-                () -> {
-                    AESUtil.encrypt(this.expected, null);
-                });
+            () -> {
+                AESUtil.encrypt(this.expected, null);
+            });
     }
 }

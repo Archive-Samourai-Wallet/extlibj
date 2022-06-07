@@ -13,7 +13,6 @@ import org.bitcoinj.core.TransactionOutPoint;
 import org.bitcoinj.params.TestNet3Params;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
 import java.nio.ByteBuffer;
 
 public class PaymentCodeTest {
