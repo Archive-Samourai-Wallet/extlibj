@@ -155,7 +155,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         for(TransactionInput input : multiCahoots4.getStowaway().getTransaction().getInputs()) {
             seenTxs.add(input.getOutpoint().getHash().toString());
         }
-        STONEWALLx2 stonewall1 = stonewallx2Service.doSTONEWALLx2_1(multiCahoots4.getStonewallx2(), cahootsWallet, account, seenTxs);
+        STONEWALLx2 stonewall1 = stonewallx2Service.doSTONEWALLx2_1_Multi(multiCahoots4.getStonewallx2(), cahootsWallet, account, seenTxs);
 
         MultiCahoots multiCahoots5 = new MultiCahoots(multiCahoots4);
         multiCahoots5.setStowaway(stowaway5);
