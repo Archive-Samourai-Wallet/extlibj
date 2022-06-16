@@ -1,5 +1,6 @@
 package com.samourai.wallet.cahoots.stonewallx2;
 
+import com.samourai.http.client.JettyHttpClient;
 import com.samourai.wallet.bip47.rpc.PaymentAddress;
 import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.bip47.rpc.java.Bip47UtilJava;
@@ -11,6 +12,8 @@ import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.FormatsUtilGeneric;
+import com.samourai.xmanager.client.XManagerClient;
+import com.samourai.xmanager.protocol.XManagerService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.*;
@@ -22,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
     private static final Logger log = LoggerFactory.getLogger(Stonewallx2Service.class);
@@ -305,21 +309,18 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
         // contributor mix output
         Coin balance = computeBalance(utxos);
         if(balance.isGreaterThan(THRESHOLD)) {
-            // TODO remove hardcoded stuff
-            PaymentCode externalPaymentCode = new PaymentCode("");
-            int idx = 0;
-            PaymentAddress segwitAddress = Bip47UtilJava.getInstance().getSendAddress(cahootsWallet.getBip47Wallet(), externalPaymentCode, idx, params);
-            String receiveAddress = segwitAddress.getSegwitAddressSend().getBech32AsString();
-            if (receiveAddress.equalsIgnoreCase(stonewall0.getDestination())) {
-                idx++;
-                segwitAddress = Bip47UtilJava.getInstance().getSendAddress(cahootsWallet.getBip47Wallet(), externalPaymentCode, idx, params);
-                receiveAddress = segwitAddress.getSegwitAddressSend().getBech32AsString();
+            BipAddress ourAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), true);
+            if (ourAddress.getAddressString().equalsIgnoreCase(stonewall0.getDestination())) {
+                ourAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), true);
             }
+            JettyHttpClient httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
+            XManagerClient xManagerClient = new XManagerClient(httpClient, true, false);
+            String receiveAddress = xManagerClient.getAddressOrDefault(XManagerService.SAAS);
             if (log.isDebugEnabled()) {
                 log.debug("+output (CounterParty mix) = "+receiveAddress);
             }
             _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall0.getSpendAmount());
-            outputsA.put(output_A0, computeOutput(segwitAddress.getSendECKey().getPubKey(), stonewall0.getFingerprintCollab(), 47, idx));
+            outputsA.put(output_A0, computeOutput(ourAddress, stonewall0.getFingerprintCollab())); // ourAddress is dummy data.
         } else {
             BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), true);
             if (receiveAddress.getAddressString().equalsIgnoreCase(stonewall0.getDestination())) {
@@ -557,7 +558,7 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
         return FeeUtil.getInstance().estimatedFeeSegwit(0, 0, nbTotalSelectedOutPoints + nbIncomingInputs, 4, 0, feePerB);
     }
 
-    private Coin THRESHOLD = Coin.valueOf(200000000);
+    private Coin THRESHOLD = Coin.valueOf(1000000);
     private Coin computeBalance(List<CahootsUtxo> utxos) {
         Coin balance = Coin.ZERO;
         for(CahootsUtxo cahootsUtxo : utxos) {
