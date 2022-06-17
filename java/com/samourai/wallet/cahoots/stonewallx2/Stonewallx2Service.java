@@ -315,7 +315,7 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
             }
             JettyHttpClient httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
             XManagerClient xManagerClient = new XManagerClient(httpClient, true, false);
-            String receiveAddress = xManagerClient.getAddressOrDefault(XManagerService.SAAS);
+            String receiveAddress = xManagerClient.getAddressOrDefault(XManagerService.STONEWALL);
             if (log.isDebugEnabled()) {
                 log.debug("+output (CounterParty mix) = "+receiveAddress);
             }
