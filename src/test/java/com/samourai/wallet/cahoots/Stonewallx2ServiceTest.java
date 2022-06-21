@@ -5,6 +5,7 @@ import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.util.TestUtil;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -62,5 +63,25 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         // sender => doSTONEWALLx2_4
         STONEWALLx2 payload4 = stonewallx2Service.reply(cahootsWalletSender, payload3);
         verify(EXPECTED_PAYLOADS[4], payload4);
+    }
+
+    @Test
+    public void invalidStonewallExcetion() throws Exception {
+        final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
+        TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(new WalletSupplierImpl(indexHandlerSupplier, bip84WalletSender), bipFormatSupplier, params);
+        long spendAmount = 5000;
+        String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
+
+        // throw Exception for 0 spend amount
+        Assertions.assertThrows(Exception.class,
+            () -> {
+                stonewallx2Service.startInitiator(cahootsWalletSender, 0, 0, address);
+            });
+
+        // throw Exception for blank address
+        Assertions.assertThrows(Exception.class,
+                () -> {
+                    stonewallx2Service.startInitiator(cahootsWalletSender, spendAmount, 0, "");
+                });
     }
 }

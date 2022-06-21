@@ -59,45 +59,87 @@ public class JacksonHttpClientTest extends AbstractTest {
   }
 
   @Test
-  public void getJson() throws Exception {
+  public void getJsonSuccess() throws Exception {
     // success
     PaynymErrorResponse response = httpClient.getJson("http://test", PaynymErrorResponse.class, null);
     Assertions.assertEquals("test", response.message);
 
-    //exception
+    // success: String - parseJson()
+    String stringResponse = httpClient.getJson("http://test", String.class, null);
+    Assertions.assertEquals("{\"message\":\"test\"}", stringResponse);
+  }
+
+  @Test
+  public void getJsonException() throws Exception {
+    // exception
     mockException = new IllegalArgumentException("test");
     try {
       httpClient.getJson("http://test", PaynymErrorResponse.class, null);
     } catch (HttpException e) {
       Assertions.assertEquals("test", e.getCause().getMessage());
     }
-  }
 
-  @Test
-  public void postJson() throws Exception {
-    // success
-    PaynymErrorResponse response = AsyncUtil.getInstance().blockingSingle(httpClient.postJson("http://test", PaynymErrorResponse.class, null, null)).get();
-    Assertions.assertEquals("test", response.message);
-
-    //exception
-    mockException = new IllegalArgumentException("test");
+    // exception: String - parseJson()
     try {
-      AsyncUtil.getInstance().blockingSingle(httpClient.postJson("http://test", PaynymErrorResponse.class, null, null)).get();
+      httpClient.getJson("http://test", String.class, null);
     } catch (HttpException e) {
       Assertions.assertEquals("test", e.getCause().getMessage());
     }
   }
 
   @Test
-  public void postUrlEncoded() throws Exception {
+  public void postJsonSuccess() throws Exception {
+    // success
+    PaynymErrorResponse response = AsyncUtil.getInstance().blockingSingle(httpClient.postJson("http://test", PaynymErrorResponse.class, null, null)).get();
+    Assertions.assertEquals("test", response.message);
+
+    // success: String - parseJson()
+    String stringResponse = AsyncUtil.getInstance().blockingSingle(httpClient.postJson("http://test", String.class, null, null)).get();
+    Assertions.assertEquals("{\"message\":\"test\"}", stringResponse);
+  }
+
+  @Test
+  public void postJsonException() throws Exception {
+    // exception
+    mockException = new IllegalArgumentException("test");
+    try {
+      AsyncUtil.getInstance().blockingSingle(httpClient.postJson("http://test", PaynymErrorResponse.class, null, null)).get();
+    } catch (HttpException e) {
+      Assertions.assertEquals("test", e.getCause().getMessage());
+    }
+
+    // exception: String - parseJson()
+    try {
+      AsyncUtil.getInstance().blockingSingle(httpClient.postJson("http://test", String.class, null, null)).get();
+    } catch (HttpException e) {
+      Assertions.assertEquals("test", e.getCause().getMessage());
+    }
+  }
+
+  @Test
+  public void postUrlEncodedSuccess() throws Exception {
     // success
     PaynymErrorResponse response = httpClient.postUrlEncoded("http://test", PaynymErrorResponse.class, null, null);
     Assertions.assertEquals("test", response.message);
 
-    //exception
+    // success: String - parseJson()
+    String stringResponse = httpClient.postUrlEncoded("http://test", String.class, null, null);
+    Assertions.assertEquals("{\"message\":\"test\"}", stringResponse);
+  }
+
+  @Test
+  public void postUrlEncodedException() throws Exception {
+    // exception
     mockException = new IllegalArgumentException("test");
     try {
       httpClient.postUrlEncoded("http://test", PaynymErrorResponse.class, null, null);
+    } catch (HttpException e) {
+      Assertions.assertEquals("test", e.getCause().getMessage());
+    }
+
+    // exception: String - parseJson()
+    try {
+      httpClient.postUrlEncoded("http://test", String.class, null, null);
     } catch (HttpException e) {
       Assertions.assertEquals("test", e.getCause().getMessage());
     }
