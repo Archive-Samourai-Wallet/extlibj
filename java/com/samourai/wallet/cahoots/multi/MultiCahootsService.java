@@ -65,12 +65,12 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             case 2:
                 // counterparty
                 payload = doMultiCahoots3_Stowaway3(multiCahoots, cahootsWallet);
-                payload = doMultiCahoots5_Stonewallx21_StartCollaborator(multiCahoots, cahootsWallet, multiCahoots.getAccount());
+                payload = doMultiCahoots5_Stonewallx21_StartCollaborator(payload, cahootsWallet, payload.getAccount());
                 break;
             case 3:
                 // sender
                 payload = doMultiCahoots4_Stowaway4(multiCahoots, cahootsWallet);
-                payload = doMultiCahoots6_Stonewallx22(multiCahoots, cahootsWallet);
+                payload = doMultiCahoots6_Stonewallx22(payload, cahootsWallet);
                 break;
             case 4:
                 // counterparty
