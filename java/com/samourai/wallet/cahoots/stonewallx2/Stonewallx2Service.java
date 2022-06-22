@@ -195,10 +195,10 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
 
         return new Stonewallx2InputData(totalContributedAmount, utxos, inputsA);
     }
-    private BipAddress getBipAddress(CahootsWallet cahootsWallet, STONEWALLx2 stonewall0) throws Exception {
-        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), true);
+    private BipAddress getBipAddress(CahootsWallet cahootsWallet, STONEWALLx2 stonewall0, boolean increment) throws Exception {
+        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), increment);
         if (receiveAddress.getAddressString().equalsIgnoreCase(stonewall0.getDestination())) {
-            receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), true);
+            receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), increment);
         }
         if (log.isDebugEnabled()) {
             log.debug("+output (CounterParty mix) = "+receiveAddress);
@@ -215,7 +215,7 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
 
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsA = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
         // contributor mix output
-        BipAddress receiveAddress = getBipAddress(cahootsWallet, stonewall0);
+        BipAddress receiveAddress = getBipAddress(cahootsWallet, stonewall0, true);
         _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall0.getSpendAmount());
         outputsA.put(output_A0, computeOutput(receiveAddress, stonewall0.getFingerprintCollab()));
 
@@ -242,15 +242,18 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
         // contributor mix output
         Coin balance = cahootsWallet.computeBalance(inputData.getUtxos());
         if(balance.isGreaterThan(THRESHOLD)) {
-            BipAddress ourAddress = getBipAddress(cahootsWallet, stonewall0);
-            JettyHttpClient httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
-            XManagerClient xManagerClient = new XManagerClient(httpClient, params == TestNet3Params.get(), false);
-            String receiveAddress = xManagerClient.getAddressOrDefault(XManagerService.STONEWALL);
-            log.info("EXTRACTING FUNDS TO EXTERNAL WALLET > " + receiveAddress);
-            _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall0.getSpendAmount());
-            outputsA.put(output_A0, computeOutput(ourAddress, stonewall0.getFingerprintCollab())); // ourAddress is dummy data.
+            BipAddress ourAddress = getBipAddress(cahootsWallet, stonewall0, false);
+            String receiveAddress = getXManagerAddress(XManagerService.STONEWALL);
+            if(!receiveAddress.equals(XManagerService.STONEWALL.getDefaultAddress(params == TestNet3Params.get()))) {
+                log.info("EXTRACTING FUNDS TO EXTERNAL WALLET > " + receiveAddress);
+                _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall0.getSpendAmount());
+                outputsA.put(output_A0, computeOutput(ourAddress, stonewall0.getFingerprintCollab())); // ourAddress is dummy data here.
+            } else {
+                _TransactionOutput output_A0 = computeTxOutput(ourAddress, stonewall0.getSpendAmount());
+                outputsA.put(output_A0, computeOutput(ourAddress, stonewall0.getFingerprintCollab()));
+            }
         } else {
-            BipAddress receiveAddress = getBipAddress(cahootsWallet, stonewall0);
+            BipAddress receiveAddress = getBipAddress(cahootsWallet, stonewall0, true);
             _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall0.getSpendAmount());
             outputsA.put(output_A0, computeOutput(receiveAddress, stonewall0.getFingerprintCollab()));
         }
@@ -268,6 +271,24 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
         stonewall1.doStep1(inputsA, outputsA);
 
         return stonewall1;
+    }
+
+    private String getXManagerAddress(XManagerService service) {
+        boolean testnet = params == TestNet3Params.get();
+        String defaultAddress = service.getDefaultAddress(testnet);
+        JettyHttpClient httpClient = new JettyHttpClient(10000, Optional.empty(), "Samourai-ExtLibJ");
+        XManagerClient xManagerClient = new XManagerClient(httpClient, testnet, false);
+        String receiveAddress = defaultAddress;
+        int tries = 3;
+        while(tries > 0) {
+            receiveAddress = xManagerClient.getAddressOrDefault(service);
+            if(receiveAddress.equals(defaultAddress)) {
+                tries--;
+            } else {
+                break;
+            }
+        }
+        return receiveAddress;
     }
 
     //
