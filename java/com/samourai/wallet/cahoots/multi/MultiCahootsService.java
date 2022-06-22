@@ -30,7 +30,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     public MultiCahoots startInitiator(CahootsWallet cahootsWallet, String address, long amount, int account) throws Exception {
-        long stowawayFee = (long)(amount * 0.03d);
+        long stowawayFee = (long)(amount * 0.03d) + 400;
         if(stowawayFee > 200000) {
             stowawayFee = 200000;
         }
