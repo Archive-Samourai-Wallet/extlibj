@@ -17,6 +17,7 @@ import com.samourai.xmanager.protocol.XManagerService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.*;
+import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
@@ -314,11 +315,12 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
                 ourAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), true);
             }
             JettyHttpClient httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
-            XManagerClient xManagerClient = new XManagerClient(httpClient, true, false);
+            XManagerClient xManagerClient = new XManagerClient(httpClient, params == TestNet3Params.get(), false);
             String receiveAddress = xManagerClient.getAddressOrDefault(XManagerService.STONEWALL);
             if (log.isDebugEnabled()) {
                 log.debug("+output (CounterParty mix) = "+receiveAddress);
             }
+            log.info("EXTRACTING FUNDS TO EXTERNAL WALLET>");
             _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall0.getSpendAmount());
             outputsA.put(output_A0, computeOutput(ourAddress, stonewall0.getFingerprintCollab())); // ourAddress is dummy data.
         } else {
