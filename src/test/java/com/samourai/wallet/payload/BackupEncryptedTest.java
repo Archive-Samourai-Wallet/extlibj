@@ -1,7 +1,6 @@
 package com.samourai.wallet.payload;
 
 import com.samourai.wallet.test.AbstractTest;
-import com.samourai.wallet.util.JSONUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -37,29 +36,5 @@ public class BackupEncryptedTest extends AbstractTest {
         // decrypt
         BackupPayload bp = backupEncrypted.decrypt(password);
         Assertions.assertEquals(PAYLOAD, bp.toJson().toString());
-    }
-
-    @Test
-    public void decryptPayloadException() throws Exception {
-        String password = "test";
-        // throw Exception for empty Backup File
-        Assertions.assertThrows(Exception.class,
-                () -> {
-                    BackupPayload backupPayload = payloadUtil.readBackup("", password);
-                });
-    }
-
-
-    @Test
-    public void noPayloadValidateException() throws Exception {
-        String BACKUP_FILE_NO_PAYLOAD = "{\"version\":2,\"external\":false}";
-        BackupEncrypted backupPayload = JSONUtils.getInstance().getObjectMapper().readValue(BACKUP_FILE_NO_PAYLOAD, BackupEncrypted.class);
-
-        // throw Exception for no payload
-        Assertions.assertThrows(Exception.class,
-            () -> {
-                backupPayload.validate();
-            });
-
     }
 }
