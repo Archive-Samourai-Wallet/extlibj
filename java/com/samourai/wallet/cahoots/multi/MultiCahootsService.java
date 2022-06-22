@@ -65,24 +65,18 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             case 2:
                 // counterparty
                 payload = doMultiCahoots3_Stowaway3(multiCahoots, cahootsWallet);
+                payload = doMultiCahoots5_Stonewallx21_StartCollaborator(multiCahoots, cahootsWallet, multiCahoots.getAccount());
                 break;
             case 3:
                 // sender
                 payload = doMultiCahoots4_Stowaway4(multiCahoots, cahootsWallet);
+                payload = doMultiCahoots6_Stonewallx22(multiCahoots, cahootsWallet);
                 break;
             case 4:
                 // counterparty
-                payload = doMultiCahoots5_Stonewallx21_StartCollaborator(multiCahoots, cahootsWallet, multiCahoots.getAccount());
-                break;
-            case 5:
-                // sender
-                payload = doMultiCahoots6_Stonewallx22(multiCahoots, cahootsWallet);
-                break;
-            case 6:
-                // counterparty
                 payload = doMultiCahoots7_Stonewallx23(multiCahoots, cahootsWallet);
                 break;
-            case 7:
+            case 5:
                 // sender
                 payload = doMultiCahoots8_Stonewallx24(multiCahoots, cahootsWallet);
                 break;
@@ -130,7 +124,6 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
 
         MultiCahoots multiCahoots3 = new MultiCahoots(multiCahoots2);
         multiCahoots3.setStowaway(stowaway3);
-        multiCahoots3.setStep(3);
         return multiCahoots3;
     }
 
@@ -142,7 +135,6 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
 
         MultiCahoots multiCahoots4 = new MultiCahoots(multiCahoots3);
         multiCahoots4.setStowaway(stowaway4);
-        multiCahoots4.setStep(4);
         return multiCahoots4;
     }
 
@@ -163,7 +155,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         MultiCahoots multiCahoots5 = new MultiCahoots(multiCahoots4);
         multiCahoots5.setStowaway(stowaway5);
         multiCahoots5.setStonewallx2(stonewall1);
-        multiCahoots5.setStep(5);
+        multiCahoots5.setStep(3);
 
         return multiCahoots5;
     }
@@ -186,7 +178,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
 
         MultiCahoots multiCahoots6 = new MultiCahoots(multiCahoots5);
         multiCahoots6.setStonewallx2(stonewall2);
-        multiCahoots6.setStep(6);
+        multiCahoots6.setStep(4);
         return multiCahoots6;
     }
 
@@ -204,7 +196,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
 
         MultiCahoots multiCahoots7 = new MultiCahoots(multiCahoots6);
         multiCahoots7.setStonewallx2(stonewall3);
-        multiCahoots7.setStep(7);
+        multiCahoots7.setStep(5);
         return multiCahoots7;
     }
 
@@ -251,7 +243,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
 
         MultiCahoots multiCahoots8 = new MultiCahoots(multiCahoots7);
         multiCahoots8.setStonewallx2(stonewall4);
-        multiCahoots8.setStep(8);
+        multiCahoots8.setStep(6);
         return multiCahoots8;
     }
 }
