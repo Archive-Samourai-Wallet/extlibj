@@ -9,6 +9,7 @@ import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.whirlpool.WhirlpoolConst;
+import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.NetworkParameters;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -95,5 +96,22 @@ public abstract class CahootsWallet {
             }
         }
         return filteredUtxos;
+    }
+
+    public Coin computeBalance(int account) {
+        List<CahootsUtxo> utxos = getUtxosWpkhByAccount(account);
+        Coin balance = Coin.ZERO;
+        for(CahootsUtxo cahootsUtxo : utxos) {
+            balance = balance.add(cahootsUtxo.getOutpoint().getValue());
+        }
+        return balance;
+    }
+
+    public Coin computeBalance(List<CahootsUtxo> utxos) {
+        Coin balance = Coin.ZERO;
+        for(CahootsUtxo cahootsUtxo : utxos) {
+            balance = balance.add(cahootsUtxo.getOutpoint().getValue());
+        }
+        return balance;
     }
 }
