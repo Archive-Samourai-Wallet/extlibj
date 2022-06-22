@@ -30,9 +30,9 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     public MultiCahoots startInitiator(CahootsWallet cahootsWallet, String address, long amount, int account) throws Exception {
-        long stowawayFee = (long)(amount * 0.03d) + 400;
-        if(stowawayFee > 200000) {
-            stowawayFee = 200000;
+        long stowawayFee = (long)(amount * 0.035d) + 400;
+        if(stowawayFee > 1000000) {
+            stowawayFee = 1000000;
         }
         Stowaway stowaway0 = stowawayService.startInitiator(cahootsWallet, stowawayFee, account);
         STONEWALLx2 stonewall0 = stonewallx2Service.startInitiator(cahootsWallet, amount, account, address);
