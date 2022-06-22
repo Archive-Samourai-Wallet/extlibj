@@ -5,7 +5,7 @@ import java.util.Optional;
 
 public enum TypeInteraction {
   TX_BROADCAST(CahootsTypeUser.SENDER, 4),
-  TX_BROADCAST_MULTI(CahootsTypeUser.SENDER, 8);
+  TX_BROADCAST_MULTI(CahootsTypeUser.SENDER, 6);
 
   private CahootsTypeUser typeUser;
   private int step;
