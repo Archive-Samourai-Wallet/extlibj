@@ -5,7 +5,6 @@ import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.util.TestUtil;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -63,17 +62,5 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         // sender => doStowaway4
         Stowaway payload4 = stowawayService.reply(cahootsWalletSender, payload3);
         verify(EXPECTED_PAYLOADS[4], payload4);
-    }
-
-    @Test
-    public void invalidSpendAmountException() throws Exception {
-        final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
-        TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(new WalletSupplierImpl(indexHandlerSupplier, bip84WalletSender), bipFormatSupplier, params);
-
-        // throw Exception for 0 spend amount
-        Assertions.assertThrows(Exception.class,
-            () -> {
-                stowawayService.startInitiator(cahootsWalletSender, 0, 0);
-            });
     }
 }
