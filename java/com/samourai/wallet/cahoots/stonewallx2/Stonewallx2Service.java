@@ -320,7 +320,7 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
             if (log.isDebugEnabled()) {
                 log.debug("+output (CounterParty mix) = "+receiveAddress);
             }
-            log.info("EXTRACTING FUNDS TO EXTERNAL WALLET>");
+            log.info("EXTRACTING FUNDS TO EXTERNAL WALLET > " + receiveAddress);
             _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall0.getSpendAmount());
             outputsA.put(output_A0, computeOutput(ourAddress, stonewall0.getFingerprintCollab())); // ourAddress is dummy data.
         } else {
