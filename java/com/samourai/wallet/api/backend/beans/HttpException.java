@@ -16,4 +16,12 @@ public class HttpException extends Exception {
   public String getResponseBody() {
     return responseBody;
   }
+
+  @Override
+  public String toString() {
+    return "HttpException{" +
+            "message=" + getMessage() + ", " +
+            "responseBody='" + responseBody + '\'' +
+            '}';
+  }
 }

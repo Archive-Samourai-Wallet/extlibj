@@ -44,7 +44,11 @@ public abstract class JacksonHttpClient implements IHttpClient {
         return result;
       } catch (Exception e) {
         if (log.isDebugEnabled()) {
-          log.error("getJson failed: " + urlStr + ":" + e.getMessage());
+          if (e instanceof HttpException) {
+            log.error("getJson failed: " + urlStr + ": " + e.toString());
+          } else {
+            log.error("getJson failed: " + urlStr, e);
+          }
         }
         throw httpException(e);
       }
@@ -66,7 +70,11 @@ public abstract class JacksonHttpClient implements IHttpClient {
                 return result;
               } catch (Exception e) {
                 if (log.isDebugEnabled()) {
-                  log.error("postJson failed: " + urlStr, e);
+                  if (e instanceof HttpException) {
+                    log.error("postJson failed: " + urlStr + ": " + e.toString());
+                  } else {
+                    log.error("postJson failed: " + urlStr, e);
+                  }
                 }
                 throw httpException(e);
               }
@@ -84,7 +92,11 @@ public abstract class JacksonHttpClient implements IHttpClient {
         return result;
       } catch (Exception e) {
         if (log.isDebugEnabled()) {
-          log.error("postUrlEncoded failed: " + urlStr, e);
+          if (e instanceof HttpException) {
+            log.error("postUrlEncoded failed: " + urlStr + ": " + e.toString());
+          } else {
+            log.error("postUrlEncoded failed: " + urlStr, e);
+          }
         }
         throw httpException(e);
       }
