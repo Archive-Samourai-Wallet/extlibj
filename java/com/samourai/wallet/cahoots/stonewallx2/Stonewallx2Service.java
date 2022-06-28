@@ -501,5 +501,5 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
         return FeeUtil.getInstance().estimatedFeeSegwit(0, 0, nbTotalSelectedOutPoints + nbIncomingInputs, 4, 0, feePerB);
     }
 
-    public static final Coin THRESHOLD = Coin.valueOf(1000000);
+    public static final Coin THRESHOLD = Coin.valueOf(200000000);
 }
