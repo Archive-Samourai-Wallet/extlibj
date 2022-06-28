@@ -20,9 +20,9 @@ public class BipWalletTest extends AbstractTest {
 
   @BeforeEach
   public void setUp() throws Exception {
-    byte[] seed = hdWalletFactory.computeSeedFromWords(SEED_WORDS);
-    HD_Wallet bip44w = hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE, params);
-    bipWallet = new BipWallet(bip44w, new MemoryIndexHandlerSupplier(), BIP_WALLET.DEPOSIT_BIP84);
+    super.setUp();
+
+    bipWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84);
   }
 
   @Test

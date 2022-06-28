@@ -18,7 +18,8 @@ public class JacksonHttpClientTest extends AbstractTest {
   private Exception mockException;
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws Exception{
+    super.setUp();
     this.mockException = null;
   }
 

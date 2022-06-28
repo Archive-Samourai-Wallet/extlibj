@@ -1,5 +1,7 @@
 package com.samourai.wallet.util;
 
+import org.bitcoinj.core.Sha256Hash;
+import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -7,7 +9,7 @@ public class Z85Test {
     private static final Z85 z85 = Z85.getInstance();
 
     @Test
-    public void testZ85() throws Exception {
+    public void encode() throws Exception {
         byte[] data = "A purely peer-to-peer version of electronic cash would allow online payments to be sent directly from one party to another without going through a financial institution. Digital signatures provide part of the solution, but the main benefits are lost if a trusted third party is still required to prevent double-spending. We propose a solution to the double-spending problem using a peer-to-peer network. The network timestamps transactions by hashing them into an ongoing chain of hash-based proof-of-work, forming a record that cannot be changed without redoing the proof-of-work. The longest chain not only serves as proof of the sequence of events witnessed, but proof that it came from the largest pool of CPU power. As long as a majority of CPU power is controlled by nodes that are not cooperating to attack the network, they'll generate the longest chain and outpace attackers. The network itself requires minimal structure. Messages are broadcast on a best effort basis, and nodes can leave and rejoin the network at will, accepting the longest proof-of-work chain as proof of what happened while they were gone.1234567890-_)({(@".getBytes();
 
         String encoded = z85.encode(data);
@@ -15,6 +17,19 @@ public class Z85Test {
 
         byte[] decoded = data;
         Assertions.assertEquals(data, decoded);
+    }
+
+    @Test
+    public void decode() throws Exception {
+        String encoded = "mD1Crp)Gb0Rz)$})8e![32dFqNlz+%EFJDCl%nY?5PFVlX}A8F3nae><JSMt&2tkiYL8i-j5n=cL+:2Th%g($eT[rdVG/$eEZf}vQT{::SMMXv:+]#B@0*LBW:Zbi/yAMbi4IiL9JZQ>w1KJd]fBWx14wiR2{&z^gUm6a7d98%2]=m9CD%Hkf+(.[S#uUa<&mGHtUdc]kWr-qq^&dO0O?9LLkea$&Nv70Jq?R?]:*a(LT@P=ih-6E{9=l#:Tp]gVruh5qRGnpe{//pu!&yR6j5(>On8VMEsW@}4S+g+y#}UV4i{Q2IMA+c.Xcy/l71X";
+        String encodedHash = Hex.toHexString(Sha256Hash.hash(encoded.getBytes()));
+        Assertions.assertEquals("7bed90ca1e8ba5b7c706eae4f11dee423569f792d87395957ca9c52739b224dd", encodedHash);
+
+        Assertions.assertEquals("", "");
+        byte[] data = z85.decode(encoded);
+        String hash = Hex.toHexString(Sha256Hash.hash(data));
+        Assertions.assertEquals("c5a28d6ecd02c27984db4a4c909dec6f6368e283ca23d446c8c4dc58a3aee96d", hash);
+        Assertions.assertEquals(255, data.length);
     }
 
 }

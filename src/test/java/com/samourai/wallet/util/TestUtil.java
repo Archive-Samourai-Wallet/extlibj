@@ -38,7 +38,7 @@ public class TestUtil {
         utxo.confirmations = confirms;
         utxo.addr = address;
         utxo.value = value;
-        utxo.script = Hex.toHexString(bipFormatSupplier.getTransactionOutput(address, value, params).getScriptBytes()); // TODO ?
+        utxo.script = Hex.toHexString(bipFormatSupplier.getTransactionOutput(address, value, params).getScriptBytes());
         return utxo;
     }
 

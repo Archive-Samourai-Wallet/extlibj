@@ -19,10 +19,10 @@ public class BipAddressTest extends AbstractTest {
 
   @BeforeEach
   public void setUp() throws Exception {
-    byte[] seed = hdWalletFactory.computeSeedFromWords(SEED_WORDS);
-    HD_Wallet bip44w = hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE, params);
-    bipWalletDeposit = new BipWallet(bip44w, new MemoryIndexHandlerSupplier(), BIP_WALLET.DEPOSIT_BIP44);
-    bipWalletPremix = new BipWallet(bip44w, new MemoryIndexHandlerSupplier(), BIP_WALLET.POSTMIX_BIP84);
+    super.setUp();
+
+    bipWalletDeposit = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP44);
+    bipWalletPremix = walletSupplier.getWallet(BIP_WALLET.PREMIX_BIP84);
   }
 
   @Test
