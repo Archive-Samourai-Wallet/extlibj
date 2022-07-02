@@ -9,6 +9,8 @@ import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.cahoots.multi.Stonewallx2InputData;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.segwit.SegwitAddress;
+import com.samourai.wallet.segwit.bech32.Bech32;
+import com.samourai.wallet.segwit.bech32.Bech32Segwit;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
@@ -235,13 +237,15 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
     }
 
     public STONEWALLx2 doSTONEWALLx2_1_Multi(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, int account, List<String> seenTxs) throws Exception {
+        String destinationAddress = stonewall0.getDestination();
+        boolean isBech32 = FormatsUtilGeneric.getInstance().isValidBech32(destinationAddress);
         Stonewallx2InputData inputData = getInputData(cahootsWallet, stonewall0, account, seenTxs);
         HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>> inputsA = inputData.getInputs();
 
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsA = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
         // contributor mix output
         Coin balance = cahootsWallet.computeBalance(inputData.getUtxos());
-        if(balance.isGreaterThan(THRESHOLD)) {
+        if(balance.isGreaterThan(THRESHOLD) && isBech32) {
             BipAddress ourAddress = getBipAddress(cahootsWallet, stonewall0, false);
             String receiveAddress = getXManagerAddress(XManagerService.STONEWALL);
             if(!receiveAddress.equals(XManagerService.STONEWALL.getDefaultAddress(params == TestNet3Params.get()))) {
