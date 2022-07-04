@@ -98,16 +98,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>io.samourai.code.whirlpool</groupId>
-			<artifactId>whirlpool-client</artifactId>
-			<version>0.23.41</version>
-		</dependency>
-		<dependency>
-			<groupId>io.samourai.code.wallet</groupId>
-			<artifactId>java-http-client</artifactId>
-			<version>1.0.4</version>
-		</dependency>
 	</dependencies>
 	<build>
         <sourceDirectory>java</sourceDirectory>

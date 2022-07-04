@@ -12,6 +12,7 @@ import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
 import com.samourai.wallet.util.TxUtil;
+import com.samourai.xmanager.client.XManagerClient;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.TransactionInput;
@@ -26,11 +27,13 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     private static final Logger log = LoggerFactory.getLogger(MultiCahootsService.class);
     private Stonewallx2Service stonewallx2Service;
     private StowawayService stowawayService;
+    private XManagerClient xManagerClient;
 
-    public MultiCahootsService(BipFormatSupplier bipFormatSupplier, NetworkParameters params, Stonewallx2Service stonewallx2Service, StowawayService stowawayService) {
+    public MultiCahootsService(BipFormatSupplier bipFormatSupplier, NetworkParameters params, Stonewallx2Service stonewallx2Service, StowawayService stowawayService, XManagerClient xManagerClient) {
         super(bipFormatSupplier, params, TypeInteraction.TX_BROADCAST_MULTI);
         this.stonewallx2Service = stonewallx2Service;
         this.stowawayService = stowawayService;
+        this.xManagerClient = xManagerClient;
     }
 
     @Override
@@ -153,7 +156,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             seenTxs.add(input.getOutpoint().getHash().toString());
         }
         int account = multiCahoots2.getStonewallx2().getAccount();
-        STONEWALLx2 stonewall1 = stonewallx2Service.doSTONEWALLx2_1_Multi(multiCahoots2.getStonewallx2(), cahootsWallet, account, seenTxs);
+        STONEWALLx2 stonewall1 = stonewallx2Service.doSTONEWALLx2_1_Multi(multiCahoots2.getStonewallx2(), cahootsWallet, account, seenTxs, xManagerClient);
 
         MultiCahoots multiCahoots3 = new MultiCahoots(multiCahoots2);
         multiCahoots3.setStowaway(stowaway3);

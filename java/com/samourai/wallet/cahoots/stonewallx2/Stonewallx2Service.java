@@ -1,6 +1,5 @@
 package com.samourai.wallet.cahoots.stonewallx2;
 
-import com.samourai.http.client.JettyHttpClient;
 import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
@@ -24,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
     private static final Logger log = LoggerFactory.getLogger(Stonewallx2Service.class);
@@ -234,7 +232,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
         return stonewall1;
     }
 
-    public STONEWALLx2 doSTONEWALLx2_1_Multi(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, int account, List<String> seenTxs) throws Exception {
+    public STONEWALLx2 doSTONEWALLx2_1_Multi(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, int account, List<String> seenTxs, XManagerClient xManagerClient) throws Exception {
         String destinationAddress = stonewall0.getDestination();
         boolean isBech32 = FormatsUtilGeneric.getInstance().isValidBech32(destinationAddress);
         Stonewallx2InputData inputData = getInputData(cahootsWallet, stonewall0, account, seenTxs);
@@ -245,7 +243,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
         Coin balance = CahootsUtxo.sumValue(inputData.getUtxos());
         if(balance.isGreaterThan(THRESHOLD) && isBech32) {
             BipAddress ourAddress = getBipAddress(cahootsWallet, stonewall0, false);
-            String receiveAddress = getXManagerAddress(XManagerService.STONEWALL);
+            String receiveAddress = xManagerClient.getAddressOrDefault(XManagerService.STONEWALL, 3);
             if(!receiveAddress.equals(XManagerService.STONEWALL.getDefaultAddress(params == TestNet3Params.get()))) {
                 log.info("EXTRACTING FUNDS TO EXTERNAL WALLET > " + receiveAddress);
                 _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stonewall0.getSpendAmount());
@@ -273,24 +271,6 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
         stonewall1.doStep1(inputsA, outputsA);
 
         return stonewall1;
-    }
-
-    private String getXManagerAddress(XManagerService service) {
-        boolean testnet = params == TestNet3Params.get();
-        String defaultAddress = service.getDefaultAddress(testnet);
-        JettyHttpClient httpClient = new JettyHttpClient(10000, Optional.empty(), "Samourai-ExtLibJ");
-        XManagerClient xManagerClient = new XManagerClient(httpClient, testnet, false);
-        String receiveAddress = defaultAddress;
-        int tries = 3;
-        while(tries > 0) {
-            receiveAddress = xManagerClient.getAddressOrDefault(service);
-            if(receiveAddress.equals(defaultAddress)) {
-                tries--;
-            } else {
-                break;
-            }
-        }
-        return receiveAddress;
     }
 
     //

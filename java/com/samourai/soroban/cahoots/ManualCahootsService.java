@@ -11,6 +11,7 @@ import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
+import com.samourai.xmanager.client.XManagerClient;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,14 +31,14 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
         this.multiCahootsService = multiCahootsService;
     }
 
-    public ManualCahootsService(CahootsWallet cahootsWallet) {
+    public ManualCahootsService(CahootsWallet cahootsWallet, XManagerClient xManagerClient) {
         BipFormatSupplier bipFormatSupplier = cahootsWallet.getBipFormatSupplier();
         NetworkParameters params = cahootsWallet.getParams();
 
         this.cahootsWallet = cahootsWallet;
         this.stowawayService = new StowawayService(bipFormatSupplier, params);
         this.stonewallx2Service = new Stonewallx2Service(bipFormatSupplier, params);
-        this.multiCahootsService = new MultiCahootsService(bipFormatSupplier, params, stonewallx2Service, stowawayService);
+        this.multiCahootsService = new MultiCahootsService(bipFormatSupplier, params, stonewallx2Service, stowawayService, xManagerClient);
     }
 
     public ManualCahootsMessage initiate(int account, CahootsContext cahootsContext) throws Exception {
