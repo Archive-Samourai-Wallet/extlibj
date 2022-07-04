@@ -1,16 +1,11 @@
 package com.samourai.wallet.cahoots.stonewallx2;
 
 import com.samourai.http.client.JettyHttpClient;
-import com.samourai.wallet.bip47.rpc.PaymentAddress;
-import com.samourai.wallet.bip47.rpc.PaymentCode;
-import com.samourai.wallet.bip47.rpc.java.Bip47UtilJava;
+import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.cahoots.multi.Stonewallx2InputData;
 import com.samourai.wallet.hd.BipAddress;
-import com.samourai.wallet.segwit.SegwitAddress;
-import com.samourai.wallet.segwit.bech32.Bech32;
-import com.samourai.wallet.segwit.bech32.Bech32Segwit;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
@@ -31,12 +26,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
+public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
     private static final Logger log = LoggerFactory.getLogger(Stonewallx2Service.class);
     private static final Bech32UtilGeneric bech32Util = Bech32UtilGeneric.getInstance();
 
     public Stonewallx2Service(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
         super(bipFormatSupplier, params);
+    }
+
+    @Override
+    public STONEWALLx2 startInitiator(CahootsWallet cahootsWallet, int account, CahootsContext cahootsContext) throws Exception {
+        return startInitiator(cahootsWallet, cahootsContext.getAmount(), account, cahootsContext.getAddress());
     }
 
     public STONEWALLx2 startInitiator(CahootsWallet cahootsWallet, long amount, int account, String address) throws Exception {
@@ -158,7 +158,7 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
                     selectedUTXO.add(utxo);
                     totalContributedAmount += utxo.getValue();
                     if (log.isDebugEnabled()) {
-                        log.debug("BIP84 selected utxo:" + utxo.getValue());
+                        log.debug("BIP84 selected utxo: " + utxo);
                     }
                 }
 
@@ -362,7 +362,7 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
                     totalSelectedAmount += utxo.getValue();
                     nbTotalSelectedOutPoints ++;
                     if (log.isDebugEnabled()) {
-                        log.debug("BIP84 selected utxo:" + utxo.getValue());
+                        log.debug("BIP84 selected utxo: " + utxo);
                     }
                 }
 
@@ -503,6 +503,26 @@ public class Stonewallx2Service extends AbstractCahootsService<STONEWALLx2> {
 
     private long estimatedFee(int nbTotalSelectedOutPoints, int nbIncomingInputs, long feePerB) {
         return FeeUtil.getInstance().estimatedFeeSegwit(0, 0, nbTotalSelectedOutPoints + nbIncomingInputs, 4, 0, feePerB);
+    }
+
+    @Override
+    protected long computeMaxSpendAmount(long minerFee, CahootsContext cahootsContext) throws Exception {
+        // shares minerFee
+        long maxSpendAmount;
+        long sharedMinerFee = minerFee / 2;
+        switch (cahootsContext.getTypeUser()) {
+            case SENDER:
+                // spends amount + minerFee
+                maxSpendAmount = cahootsContext.getAmount()+sharedMinerFee;
+                break;
+            case COUNTERPARTY:
+                // receives money (maxSpendAmount < 0)
+                maxSpendAmount = sharedMinerFee;
+                break;
+            default:
+                throw new Exception("Unknown typeUser");
+        }
+        return maxSpendAmount;
     }
 
     public static final Coin THRESHOLD = Coin.valueOf(200000000);

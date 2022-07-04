@@ -1,29 +1,25 @@
 package com.samourai.wallet.cahoots.multi;
 
-import com.samourai.soroban.cahoots.CahootsContext;
+import com.samourai.soroban.cahoots.ManualCahootsMessage;
 import com.samourai.wallet.cahoots.Cahoots;
 import com.samourai.wallet.cahoots.CahootsType;
+import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
-import com.samourai.wallet.util.RandomUtil;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Transaction;
-import org.bouncycastle.util.encoders.Hex;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.HashMap;
 
 public class MultiCahoots extends Cahoots {
     private static final Logger log = LoggerFactory.getLogger(MultiCahoots.class);
 
-    private Stowaway stowaway;
-    private STONEWALLx2 stonewallx2;
+    protected Stowaway stowaway;
+    protected STONEWALLx2 stonewallx2;
 
     private MultiCahoots()    { ; }
 
@@ -31,6 +27,11 @@ public class MultiCahoots extends Cahoots {
         super(multiCahoots);
         this.stonewallx2 = new STONEWALLx2(multiCahoots.stonewallx2);
         this.stowaway = new Stowaway(multiCahoots.stowaway);
+
+        // keep stowaway unchanged once finished
+        if (multiCahoots.stowaway.getStep() == ManualCahootsMessage.LAST_STEP) {
+            this.stowaway.setStep(multiCahoots.stowaway.getStep());
+        }
     }
 
     public MultiCahoots(JSONObject obj)    {
@@ -38,17 +39,8 @@ public class MultiCahoots extends Cahoots {
     }
 
     // Stowaway
-    public MultiCahoots(long spendAmount, NetworkParameters params, int account, Stowaway stowaway, STONEWALLx2 stonewallx2)    {
-        this.ts = System.currentTimeMillis() / 1000L;
-        SecureRandom random = RandomUtil.getSecureRandom();
-        this.strID = Hex.toHexString(Sha256Hash.hash(BigInteger.valueOf(random.nextLong()).toByteArray()));
-        this.type = CahootsType.MULTI.getValue();
-        this.step = 0;
-        this.spendAmount = spendAmount;
-        this.outpoints = new HashMap<String, Long>();
-        this.params = params;
-        this.account = account;
-
+    public MultiCahoots(NetworkParameters params, Stowaway stowaway, STONEWALLx2 stonewallx2)    {
+        super(CahootsType.MULTI.getValue(), params);
         this.stowaway = stowaway;
         this.stonewallx2 = stonewallx2;
     }
@@ -102,37 +94,8 @@ public class MultiCahoots extends Cahoots {
     }
 
     @Override
-    public long getVerifiedSpendAmount() {
-        return getStowaway().getVerifiedSpendAmount() + getStonewallx2().getVerifiedSpendAmount();
-    }
-
-    @Override
     public long getFeeAmount() {
         return stonewallx2.getFeeAmount() + stowaway.getFeeAmount();
-    }
-
-    @Override
-    public long computeMaxSpendAmount(long minerFee, CahootsContext cahootsContext) throws Exception {
-        long maxSpendAmount;
-        long sharedMinerFee = minerFee / 2;
-        switch (cahootsContext.getTypeUser()) {
-            case SENDER:
-                // spends amount + minerFee
-                maxSpendAmount = cahootsContext.getAmount()+sharedMinerFee;
-                break;
-            case COUNTERPARTY:
-                // receives money (maxSpendAmount < 0)
-                maxSpendAmount = sharedMinerFee;
-                break;
-            default:
-                throw new Exception("Unknown typeUser");
-        }
-        return maxSpendAmount;
-    }
-
-    @Override
-    public Transaction getTransaction() {
-        return stonewallx2.getTransaction();
     }
 
     @Override
@@ -148,5 +111,15 @@ public class MultiCahoots extends Cahoots {
     @Override
     public long getSpendAmount() {
         return stonewallx2.getSpendAmount();
+    }
+
+    @Override
+    public Transaction getTransaction() {
+        return stonewallx2.getTransaction();
+    }
+
+    @Override
+    public PSBT getPSBT() {
+        return stonewallx2.getPSBT();
     }
 }

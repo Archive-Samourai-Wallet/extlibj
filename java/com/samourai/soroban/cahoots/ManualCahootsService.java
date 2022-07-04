@@ -3,7 +3,6 @@ package com.samourai.soroban.cahoots;
 import com.samourai.soroban.client.SorobanInteraction;
 import com.samourai.soroban.client.SorobanMessageService;
 import com.samourai.soroban.client.SorobanReply;
-import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.cahoots.multi.MultiCahoots;
@@ -16,36 +15,37 @@ import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
-
 public class ManualCahootsService extends SorobanMessageService<ManualCahootsMessage, CahootsContext> {
     private static final Logger log = LoggerFactory.getLogger(ManualCahootsService.class);
 
     private CahootsWallet cahootsWallet;
+    private StowawayService stowawayService;
+    private Stonewallx2Service stonewallx2Service;
+    private MultiCahootsService multiCahootsService;
+
+    public ManualCahootsService(CahootsWallet cahootsWallet, StowawayService stowawayService, Stonewallx2Service stonewallx2Service, MultiCahootsService multiCahootsService) {
+        this.cahootsWallet = cahootsWallet;
+        this.stowawayService = stowawayService;
+        this.stonewallx2Service = stonewallx2Service;
+        this.multiCahootsService = multiCahootsService;
+    }
 
     public ManualCahootsService(CahootsWallet cahootsWallet) {
+        BipFormatSupplier bipFormatSupplier = cahootsWallet.getBipFormatSupplier();
+        NetworkParameters params = cahootsWallet.getParams();
+
         this.cahootsWallet = cahootsWallet;
+        this.stowawayService = new StowawayService(bipFormatSupplier, params);
+        this.stonewallx2Service = new Stonewallx2Service(bipFormatSupplier, params);
+        this.multiCahootsService = new MultiCahootsService(bipFormatSupplier, params, stonewallx2Service, stowawayService);
     }
 
     public ManualCahootsMessage initiate(int account, CahootsContext cahootsContext) throws Exception {
-        AbstractCahootsService cahootsService = newCahootsService(cahootsContext.getCahootsType());
-        Cahoots payload0;
-        switch(cahootsContext.getCahootsType()) {
-            case STOWAWAY:
-                payload0 = ((StowawayService)cahootsService).startInitiator(cahootsWallet, cahootsContext.getAmount(), account);
-                break;
-            case STONEWALLX2:
-                payload0 = ((Stonewallx2Service)cahootsService).startInitiator(cahootsWallet, cahootsContext.getAmount(), account, cahootsContext.getAddress());
-                break;
-            case MULTI:
-                payload0 = ((MultiCahootsService)cahootsService).startInitiator(cahootsWallet, cahootsContext.getAddress(), cahootsContext.getAmount(), account);
-                break;
-            default:
-                throw new Exception("Unknown Cahoots type");
-        }
+        AbstractCahootsService cahootsService = getCahootsService(cahootsContext.getCahootsType());
+        Cahoots payload0 = cahootsService.startInitiator(cahootsWallet, account, cahootsContext);
         ManualCahootsMessage response = new ManualCahootsMessage(payload0);
 
-        verifyResponse(cahootsContext, response);
+        verifyResponse(cahootsContext, response, cahootsService, null);
         return response;
     }
 
@@ -64,7 +64,7 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
             verifyRequest(cahootsContext, request);
         }
 
-        final AbstractCahootsService cahootsService = newCahootsService(request.getType());
+        final AbstractCahootsService cahootsService = getCahootsService(request.getType());
         final Cahoots payload = request.getCahoots();
         SorobanReply response;
         if (payload.getStep() == 0) {
@@ -73,47 +73,19 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
             response = new ManualCahootsMessage(cahootsResponse);
         } else {
             // continue existing Cahoots
+            Cahoots cahootsResponse = cahootsService.reply(cahootsWallet, payload);
 
             // check for interaction
-            Optional<TypeInteraction> optInteraction =
-                    TypeInteraction.find(request.getTypeUser().getPartner(), request.getStep() + 1);
-            if (optInteraction.isPresent()) {
+            SorobanInteraction interaction = cahootsService.checkInteraction(request, cahootsResponse);
+            if (interaction != null) {
                 // reply interaction
-                final TypeInteraction typeInteraction = optInteraction.get();
-                if(request.getType() == CahootsType.MULTI && typeInteraction == TypeInteraction.TX_BROADCAST_MULTI) {
-                    Cahoots signedCahoots = cahootsService.reply(cahootsWallet, payload);
-                    if (cahootsContext != null) {
-                        verifyResponse(cahootsContext, signedCahoots);
-                    }
-                    response = new TxBroadcastInteraction(TypeInteraction.TX_BROADCAST_MULTI, signedCahoots);
-                } else if(request.getType() != CahootsType.MULTI) {
-                    switch (typeInteraction) {
-                        case TX_BROADCAST:
-                            Cahoots signedCahoots = cahootsService.reply(cahootsWallet, payload);
-                            if (cahootsContext != null) {
-                                verifyResponse(cahootsContext, signedCahoots);
-                            }
-                            response = new TxBroadcastInteraction(signedCahoots);
-                            break;
-                        default:
-                            throw new Exception("Unknown typeInteraction: "+typeInteraction);
-                    }
-                } else {
-                    // standard reply
-                    Cahoots cahootsResponse = cahootsService.reply(cahootsWallet, payload);
-                    response = new ManualCahootsMessage(cahootsResponse);
-                }
+                response = interaction;
             } else {
                 // standard reply
-                Cahoots cahootsResponse = cahootsService.reply(cahootsWallet, payload);
                 response = new ManualCahootsMessage(cahootsResponse);
-            }
-        }
-        if (cahootsContext != null && !(response instanceof SorobanInteraction)) {
-            if(cahootsContext.getCahootsType() == CahootsType.MULTI && request.getStep() > 4) {
-                verifyResponse(cahootsContext, (ManualCahootsMessage)response);
-            } else if(cahootsContext.getCahootsType() != CahootsType.MULTI) {
-                verifyResponse(cahootsContext, (ManualCahootsMessage)response);
+                if (cahootsContext != null) {
+                    verifyResponse(cahootsContext, (ManualCahootsMessage)response, cahootsService, request);
+                }
             }
         }
         return response;
@@ -124,36 +96,12 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
         doVerify(sorobanContext, message, typeUserExpected);
     }
 
-    private void verifyResponse(CahootsContext cahootsContext, ManualCahootsMessage message) throws Exception {
+    private void verifyResponse(CahootsContext cahootsContext, ManualCahootsMessage response, AbstractCahootsService cahootsService, ManualCahootsMessage request) throws Exception {
         CahootsTypeUser typeUserExpected = cahootsContext.getTypeUser();
-        doVerify(cahootsContext, message, typeUserExpected);
+        doVerify(cahootsContext, response, typeUserExpected);
 
-        verifyResponse(cahootsContext, message.getCahoots());
+        cahootsService.verifyResponse(cahootsContext, response.getCahoots(), (request!=null?request.getCahoots():null));
     }
-
-    private void verifyResponse(CahootsContext cahootsContext, Cahoots cahoots) throws Exception {
-        if ((cahoots.getStep() == 3) || (cahoots.getStep() >= 5 && cahoots.getStep() <= 9)) {
-            // check fee
-            long minerFee = cahoots.getFeeAmount();
-            if (minerFee > SamouraiWalletConst.MAX_ACCEPTABLE_FEES) {
-                throw new Exception("Cahoots fee too high: " + cahoots.getTransaction().getFee().longValue());
-            }
-
-            // check verifiedSpendAmount
-            long maxSpendAmount = cahoots.computeMaxSpendAmount(minerFee, cahootsContext);
-            long verifiedSpendAmount = cahoots.getVerifiedSpendAmount();
-            if (verifiedSpendAmount == 0) {
-                throw new Exception("Cahoots spendAmount verification failed");
-            }
-            if (log.isDebugEnabled()) {
-                log.debug(cahootsContext.getTypeUser()+" verifiedSpendAmount="+verifiedSpendAmount+", maxSpendAmount="+maxSpendAmount);
-            }
-            if (verifiedSpendAmount > maxSpendAmount) {
-                throw new Exception("Cahoots verifiedSpendAmount mismatch: " + verifiedSpendAmount);
-            }
-        }
-    }
-
 
     private void doVerify(CahootsContext cahootsContext, ManualCahootsMessage message, CahootsTypeUser typeUserExpected) throws Exception {
         Cahoots cahoots = message.getCahoots();
@@ -192,18 +140,14 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
         }
     }
 
-    private AbstractCahootsService newCahootsService(CahootsType cahootsType) throws Exception {
-        BipFormatSupplier bipFormatSupplier = cahootsWallet.getBipFormatSupplier();
-        NetworkParameters params = cahootsWallet.getParams();
-        StowawayService stowawayService = new StowawayService(bipFormatSupplier, params);
-        Stonewallx2Service stonewallx2Service = new Stonewallx2Service(bipFormatSupplier, params);
+    private AbstractCahootsService getCahootsService(CahootsType cahootsType) throws Exception {
         switch(cahootsType) {
             case STOWAWAY:
                 return stowawayService;
             case STONEWALLX2:
                 return stonewallx2Service;
             case MULTI:
-                return new MultiCahootsService(bipFormatSupplier, params, stonewallx2Service, stowawayService);
+                return multiCahootsService;
         }
         throw new Exception("Unrecognized #Cahoots");
     }

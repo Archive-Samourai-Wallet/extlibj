@@ -24,4 +24,14 @@ public class CahootsUtxo extends UTXO {
     public ECKey getKey() {
         return key;
     }
+
+    @Override
+    public String toString() {
+        return "CahootsUtxo{" +
+                "utxo=" + outpoint.toString() +
+                ", value=" + outpoint.getValue() +
+                ", address="+outpoint.getAddress() +
+                ", path="+getPath()+
+                '}';
+    }
 }

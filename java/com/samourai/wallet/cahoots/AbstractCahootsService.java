@@ -1,5 +1,10 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.soroban.cahoots.CahootsContext;
+import com.samourai.soroban.cahoots.ManualCahootsMessage;
+import com.samourai.soroban.cahoots.TxBroadcastInteraction;
+import com.samourai.soroban.cahoots.TypeInteraction;
+import com.samourai.soroban.client.SorobanInteraction;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.HD_Address;
@@ -24,17 +29,49 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
 
     private BipFormatSupplier bipFormatSupplier;
     protected NetworkParameters params;
+    private TypeInteraction typeInteractionBroadcast;
 
-    public AbstractCahootsService(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
+    public AbstractCahootsService(BipFormatSupplier bipFormatSupplier, NetworkParameters params, TypeInteraction typeInteractionBroadcast) {
         this.bipFormatSupplier = bipFormatSupplier;
         this.params = params;
+        this.typeInteractionBroadcast = typeInteractionBroadcast;
     }
+
+    public abstract T startInitiator(CahootsWallet cahootsWallet, int account, CahootsContext cahootsContext) throws Exception;
 
     public abstract T startCollaborator(CahootsWallet cahootsWallet, int account, T payload0) throws Exception;
 
     public abstract T reply(CahootsWallet cahootsWallet, T payload) throws Exception;
 
-    protected HashMap<String, ECKey> computeKeyBag(Cahoots cahoots, List<CahootsUtxo> utxos) {
+    public void verifyResponse(CahootsContext cahootsContext, T response, T request) throws Exception {
+        if (request != null) {
+            // properties should never change
+            if (response.getType() != request.getType()) {
+                throw new Exception("Invalid altered Cahoots type");
+            }
+            if (response.getVersion() != request.getVersion()) {
+                throw new Exception("Invalid altered Cahoots version");
+            }
+            if (!response.getParams().equals(request.getParams())) {
+                throw new Exception("Invalid altered Cahoots params");
+            }
+
+            // step should increment
+            if (response.getStep() != request.getStep() + 1) {
+                throw new Exception("Invalid response step");
+            }
+        }
+    }
+
+    public SorobanInteraction checkInteraction(ManualCahootsMessage request, Cahoots cahootsResponse) {
+        // broadcast by SENDER
+        if (request.getTypeUser().getPartner().equals(typeInteractionBroadcast.getTypeUser()) && (request.getStep()+1) == typeInteractionBroadcast.getStep()) {
+            return new TxBroadcastInteraction(typeInteractionBroadcast, cahootsResponse);
+        }
+        return null;
+    }
+
+    protected HashMap<String, ECKey> computeKeyBag(Cahoots2x cahoots, List<CahootsUtxo> utxos) {
         // utxos by hash
         HashMap<String, CahootsUtxo> utxosByHash = new HashMap<String, CahootsUtxo>();
         for (CahootsUtxo utxo : utxos) {
@@ -58,9 +95,12 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
 
     // verify
 
-    protected long computeSpendAmount(HashMap<String,ECKey> keyBag, CahootsWallet cahootsWallet, Cahoots cahoots, CahootsTypeUser typeUser) throws Exception {
+    protected long computeSpendAmount(HashMap<String,ECKey> keyBag, CahootsWallet cahootsWallet, Cahoots2x cahoots, CahootsTypeUser typeUser) throws Exception {
         long spendAmount = 0;
 
+        if (log.isDebugEnabled()) {
+            log.debug("computeSpendAmount: keyBag="+keyBag.keySet());
+        }
         Transaction transaction = cahoots.getTransaction();
         for(TransactionInput input : transaction.getInputs()) {
             TransactionOutPoint outpoint = input.getOutpoint();
@@ -68,7 +108,7 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
                 Long inputValue = cahoots.getOutpoints().get(outpoint.getHash().toString() + "-" + outpoint.getIndex());
                 if (inputValue != null) {
                     if (log.isDebugEnabled()) {
-                        log.debug("computeSpendAmount: +input "+inputValue);
+                        log.debug("computeSpendAmount: +input "+inputValue + " "+outpoint.toString());
                     }
                     spendAmount += inputValue;
                 }
@@ -83,14 +123,14 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
             if (outputAddress != null && myOutputAddresses.contains(outputAddress)) {
                 if (output.getValue() != null) {
                     if (log.isDebugEnabled()) {
-                        log.debug("computeSpendAmount: -output " + output.getValue().longValue());
+                        log.debug("computeSpendAmount: -output " + output.getValue().longValue()+" "+outputAddress);
                     }
                     spendAmount -= output.getValue().longValue();
                 }
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug("computeSpendAmount = " + spendAmount);
+            log.debug("computeSpendAmount = " + spendAmount+" (account="+myAccount+")");
         }
         return spendAmount;
     }

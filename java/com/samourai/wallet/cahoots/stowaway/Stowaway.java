@@ -1,9 +1,8 @@
 package com.samourai.wallet.cahoots.stowaway;
 
-import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.bip69.BIP69InputComparator;
 import com.samourai.wallet.bip69.BIP69OutputComparator;
-import com.samourai.wallet.cahoots.Cahoots;
+import com.samourai.wallet.cahoots.Cahoots2x;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots._TransactionOutput;
 import com.samourai.wallet.cahoots.psbt.PSBT;
@@ -11,7 +10,6 @@ import com.samourai.wallet.cahoots.psbt.PSBTEntry;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.JavaUtil;
-import com.samourai.wallet.util.RandomUtil;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.*;
 import org.bitcoinj.params.TestNet3Params;
@@ -20,14 +18,12 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class Stowaway extends Cahoots {
+public class Stowaway extends Cahoots2x {
     private static final Logger log = LoggerFactory.getLogger(Stowaway.class);
 
     private Stowaway()    { ; }
@@ -41,29 +37,13 @@ public class Stowaway extends Cahoots {
     }
 
     public Stowaway(long spendAmount, NetworkParameters params, int account)    {
-        this.ts = System.currentTimeMillis() / 1000L;
-        SecureRandom random = RandomUtil.getSecureRandom();
-        this.strID = Hex.toHexString(Sha256Hash.hash(BigInteger.valueOf(random.nextLong()).toByteArray()));
-        this.type = CahootsType.STOWAWAY.getValue();
-        this.step = 0;
-        this.spendAmount = spendAmount;
-        this.outpoints = new HashMap<String, Long>();
-        this.params = params;
-        this.account = account;
+        this(spendAmount, params, null, null, account);
     }
 
     public Stowaway(long spendAmount, NetworkParameters params, String strPayNymInit, String strPayNymCollab, int account)    {
-        this.ts = System.currentTimeMillis() / 1000L;
-        SecureRandom random = RandomUtil.getSecureRandom();
-        this.strID = Hex.toHexString(Sha256Hash.hash(BigInteger.valueOf(random.nextLong()).toByteArray()));
-        this.type = CahootsType.STOWAWAY.getValue();
-        this.step = 0;
-        this.spendAmount = spendAmount;
-        this.outpoints = new HashMap<String, Long>();
+        super(CahootsType.STOWAWAY.getValue(), params, spendAmount, null, account);
         this.strPayNymInit = strPayNymInit;
         this.strPayNymCollab = strPayNymCollab;
-        this.params = params;
-        this.account = account;
     }
 
     //
@@ -248,23 +228,5 @@ public class Stowaway extends Cahoots {
         signTx(keyBag);
 
         this.setStep(4);
-    }
-
-    @Override
-    public long computeMaxSpendAmount(long minerFee, CahootsContext cahootsContext) throws Exception {
-        long maxSpendAmount;
-        switch (cahootsContext.getTypeUser()) {
-            case SENDER:
-                // spends amount + minerFee
-                maxSpendAmount = cahootsContext.getAmount()+minerFee;
-                break;
-            case COUNTERPARTY:
-                // receives money (<0)
-                maxSpendAmount = 0;
-                break;
-            default:
-                throw new Exception("Unknown typeUser");
-        }
-        return maxSpendAmount;
     }
 }

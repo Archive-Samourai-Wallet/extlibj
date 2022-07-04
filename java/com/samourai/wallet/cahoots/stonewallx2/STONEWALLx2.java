@@ -1,9 +1,8 @@
 package com.samourai.wallet.cahoots.stonewallx2;
 
-import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.bip69.BIP69InputComparator;
 import com.samourai.wallet.bip69.BIP69OutputComparator;
-import com.samourai.wallet.cahoots.Cahoots;
+import com.samourai.wallet.cahoots.Cahoots2x;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots._TransactionOutput;
 import com.samourai.wallet.cahoots.psbt.PSBT;
@@ -11,7 +10,6 @@ import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.segwit.bech32.Bech32Segwit;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FormatsUtilGeneric;
-import com.samourai.wallet.util.RandomUtil;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.*;
@@ -23,14 +21,12 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class STONEWALLx2 extends Cahoots {
+public class STONEWALLx2 extends Cahoots2x {
     private static final Logger log = LoggerFactory.getLogger(STONEWALLx2.class);
 
     private STONEWALLx2()    { ; }
@@ -44,16 +40,7 @@ public class STONEWALLx2 extends Cahoots {
     }
 
     public STONEWALLx2(long spendAmount, String address, NetworkParameters params, int account)    {
-        this.ts = System.currentTimeMillis() / 1000L;
-        SecureRandom random = RandomUtil.getSecureRandom();
-        this.strID = Hex.toHexString(Sha256Hash.hash(BigInteger.valueOf(random.nextLong()).toByteArray()));
-        this.type = CahootsType.STONEWALLX2.getValue();
-        this.step = 0;
-        this.spendAmount = spendAmount;
-        this.outpoints = new HashMap<String, Long>();
-        this.strDestination = address;
-        this.params = params;
-        this.account = account;
+        super(CahootsType.STONEWALLX2.getValue(), params, spendAmount, address, account);
     }
 
     //
@@ -216,25 +203,5 @@ public class STONEWALLx2 extends Cahoots {
         signTx(keyBag);
 
         this.setStep(4);
-    }
-
-    @Override
-    public long computeMaxSpendAmount(long minerFee, CahootsContext cahootsContext) throws Exception {
-        // shares minerFee
-        long maxSpendAmount;
-        long sharedMinerFee = minerFee / 2;
-        switch (cahootsContext.getTypeUser()) {
-            case SENDER:
-                // spends amount + minerFee
-                maxSpendAmount = cahootsContext.getAmount()+sharedMinerFee;
-                break;
-            case COUNTERPARTY:
-                // receives money (maxSpendAmount < 0)
-                maxSpendAmount = sharedMinerFee;
-                break;
-            default:
-                throw new Exception("Unknown typeUser");
-        }
-        return maxSpendAmount;
     }
 }

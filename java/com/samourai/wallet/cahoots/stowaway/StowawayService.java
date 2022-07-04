@@ -1,10 +1,10 @@
 package com.samourai.wallet.cahoots.stowaway;
 
+import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.hd.BipAddress;
-import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.util.FeeUtil;
@@ -21,12 +21,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class StowawayService extends AbstractCahootsService<Stowaway> {
+public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     private static final Logger log = LoggerFactory.getLogger(StowawayService.class);
-    private static final Bech32UtilGeneric bech32Util = Bech32UtilGeneric.getInstance();
 
     public StowawayService(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
         super(bipFormatSupplier, params);
+    }
+
+    @Override
+    public Stowaway startInitiator(CahootsWallet cahootsWallet, int account, CahootsContext cahootsContext) throws Exception {
+        return startInitiator(cahootsWallet, cahootsContext.getAmount(), account);
     }
 
     public Stowaway startInitiator(CahootsWallet cahootsWallet, long amount, int account) throws Exception {
@@ -121,7 +125,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
         if(highUTXO.size() > 0)    {
             CahootsUtxo utxo = highUTXO.get(getRandNextInt(highUTXO.size()));
             if (log.isDebugEnabled()) {
-                log.debug("BIP84 selected random utxo:" + utxo.getValue());
+                log.debug("BIP84 selected random utxo: " + utxo);
             }
             selectedUTXO.add(utxo);
             totalContributedAmount = utxo.getValue();
@@ -131,7 +135,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
                 selectedUTXO.add(utxo);
                 totalContributedAmount += utxo.getValue();
                 if (log.isDebugEnabled()) {
-                    log.debug("BIP84 selected utxo:" + utxo.getValue());
+                    log.debug("BIP84 selected utxo: " + utxo);
                 }
                 if (stowaway0.isContributedAmountSufficient(totalContributedAmount)) {
                     break;
@@ -231,7 +235,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
                 selectedUTXO.add(utxo);
                 totalSelectedAmount += utxo.getValue();
                 if (log.isDebugEnabled()) {
-                    log.debug("BIP84 selected utxo:" + utxo.getValue());
+                    log.debug("BIP84 selected utxo: " + utxo);
                 }
                 nbTotalSelectedOutPoints ++;
                 if (stowaway1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB))) {
@@ -245,7 +249,7 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
                         _selectedUTXO.add(utxoSel);
                         _totalSelectedAmount += utxoSel.getValue();
                         if (log.isDebugEnabled()) {
-                            log.debug("BIP84 post selected utxo:" + utxoSel.getValue());
+                            log.debug("BIP84 post selected utxo: " + utxoSel);
                         }
                         _nbTotalSelectedOutPoints ++;
                         if (stowaway1.isContributedAmountSufficient(_totalSelectedAmount, estimatedFee(_nbTotalSelectedOutPoints, nbIncomingInputs, feePerB))) {
@@ -353,5 +357,23 @@ public class StowawayService extends AbstractCahootsService<Stowaway> {
 
     private long estimatedFee(int nbTotalSelectedOutPoints, int nbIncomingInputs, long feePerB) {
         return FeeUtil.getInstance().estimatedFeeSegwit(0, 0, nbTotalSelectedOutPoints + nbIncomingInputs, 2, 0, feePerB);
+    }
+
+    @Override
+    protected long computeMaxSpendAmount(long minerFee, CahootsContext cahootsContext) throws Exception {
+        long maxSpendAmount;
+        switch (cahootsContext.getTypeUser()) {
+            case SENDER:
+                // spends amount + minerFee
+                maxSpendAmount = cahootsContext.getAmount()+minerFee;
+                break;
+            case COUNTERPARTY:
+                // receives money (<0)
+                maxSpendAmount = 0;
+                break;
+            default:
+                throw new Exception("Unknown typeUser");
+        }
+        return maxSpendAmount;
     }
 }
