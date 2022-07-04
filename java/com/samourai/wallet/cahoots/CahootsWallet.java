@@ -97,21 +97,4 @@ public abstract class CahootsWallet {
         }
         return filteredUtxos;
     }
-
-    public Coin computeBalance(int account) {
-        List<CahootsUtxo> utxos = getUtxosWpkhByAccount(account);
-        Coin balance = Coin.ZERO;
-        for(CahootsUtxo cahootsUtxo : utxos) {
-            balance = balance.add(cahootsUtxo.getOutpoint().getValue());
-        }
-        return balance;
-    }
-
-    public Coin computeBalance(List<CahootsUtxo> utxos) {
-        Coin balance = Coin.ZERO;
-        for(CahootsUtxo cahootsUtxo : utxos) {
-            balance = balance.add(cahootsUtxo.getOutpoint().getValue());
-        }
-        return balance;
-    }
 }

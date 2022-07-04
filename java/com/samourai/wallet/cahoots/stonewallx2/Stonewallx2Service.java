@@ -178,8 +178,6 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
             throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
         }
 
-        NetworkParameters params = stonewall0.getParams();
-
         //
         //
         // step1: A utxos -> B (take largest that cover amount)
@@ -244,7 +242,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
 
         HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsA = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
         // contributor mix output
-        Coin balance = cahootsWallet.computeBalance(inputData.getUtxos());
+        Coin balance = CahootsUtxo.sumValue(inputData.getUtxos());
         if(balance.isGreaterThan(THRESHOLD) && isBech32) {
             BipAddress ourAddress = getBipAddress(cahootsWallet, stonewall0, false);
             String receiveAddress = getXManagerAddress(XManagerService.STONEWALL);

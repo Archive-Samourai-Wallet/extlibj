@@ -2,10 +2,12 @@ package com.samourai.wallet.cahoots;
 
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
+import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ECKey;
 
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 public class CahootsUtxo extends UTXO {
     private MyTransactionOutPoint outpoint;
@@ -23,6 +25,14 @@ public class CahootsUtxo extends UTXO {
 
     public ECKey getKey() {
         return key;
+    }
+
+    public static Coin sumValue(List<CahootsUtxo> utxos) {
+        Coin balance = Coin.ZERO;
+        for(CahootsUtxo cahootsUtxo : utxos) {
+            balance = balance.add(cahootsUtxo.getOutpoint().getValue());
+        }
+        return balance;
     }
 
     @Override
