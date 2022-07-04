@@ -47,36 +47,35 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
         cahootsWalletCounterparty.addUtxo(account, "counterpartyTx2", 1, 9000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
-        // sender => doStowaway0
+        // sender
         long spendAmount = 5000;
         CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(spendAmount, "tb1qas00y34404zwx2fp2veekveks4c5crfjx802v3");
         MultiCahoots payload0 = multiCahootsService.startInitiator(cahootsWalletSender, account, contextSender); //grabbed random addr from testnet
         verify(EXPECTED_PAYLOADS[0], payload0);
 
-        // counterparty => doStowaway1
+        // counterparty
+        CahootsContext contextCp = CahootsContext.newCounterpartyMultiCahoots();
         MultiCahoots payload1 = multiCahootsService.startCollaborator(cahootsWalletCounterparty, account, payload0);
         verify(EXPECTED_PAYLOADS[1], payload1);
 
-        // sender => doStowaway2
-        MultiCahoots payload2 = multiCahootsService.reply(cahootsWalletSender, payload1);
+        // sender
+        MultiCahoots payload2 = multiCahootsService.reply(cahootsWalletSender, contextSender, payload1);
         verify(EXPECTED_PAYLOADS[2], payload2);
 
-        // counterparty => doStowaway3
-        MultiCahoots payload3 = multiCahootsService.reply(cahootsWalletCounterparty, payload2);
-        Assertions.assertEquals(-575, payload3.getStowaway().getVerifiedSpendAmount()); // received MULTICAHOOTS fee
+        // counterparty
+        MultiCahoots payload3 = multiCahootsService.reply(cahootsWalletCounterparty, contextCp, payload2);
         verify(EXPECTED_PAYLOADS[3], payload3);
 
-        // sender => doStowaway4
-        MultiCahoots payload4 = multiCahootsService.reply(cahootsWalletSender, payload3);
-        Assertions.assertEquals(823, payload4.getStowaway().getVerifiedSpendAmount()); // spent MULTICAHOOTS fee
+        // sender
+        MultiCahoots payload4 = multiCahootsService.reply(cahootsWalletSender, contextSender, payload3);
         verify(EXPECTED_PAYLOADS[4], payload4);
 
-        // counterparty => doStonewall1
-        MultiCahoots payload5 = multiCahootsService.reply(cahootsWalletCounterparty, payload4);
+        // counterparty
+        MultiCahoots payload5 = multiCahootsService.reply(cahootsWalletCounterparty, contextCp, payload4);
         verify(EXPECTED_PAYLOADS[5], payload5);
 
-        // sender => doStonewall2
-        MultiCahoots payload6 = multiCahootsService.reply(cahootsWalletSender, payload5);
+        // sender
+        MultiCahoots payload6 = multiCahootsService.reply(cahootsWalletSender, contextSender, payload5);
         verify(EXPECTED_PAYLOADS[6], payload6);
 
         Transaction stowawayTx = payload6.getStowaway().getTransaction();

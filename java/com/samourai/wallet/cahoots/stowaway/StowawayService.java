@@ -33,7 +33,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         return startInitiator(cahootsWallet, cahootsContext.getAmount(), account);
     }
 
-    public Stowaway startInitiator(CahootsWallet cahootsWallet, long amount, int account) throws Exception {
+    protected Stowaway startInitiator(CahootsWallet cahootsWallet, long amount, int account) throws Exception {
         if (amount <= 0) {
             throw new Exception("Invalid amount");
         }
@@ -55,7 +55,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     }
 
     @Override
-    public Stowaway reply(CahootsWallet cahootsWallet, Stowaway stowaway) throws Exception {
+    public Stowaway reply(CahootsWallet cahootsWallet, CahootsContext cahootsContext, Stowaway stowaway) throws Exception {
         int step = stowaway.getStep();
         if (log.isDebugEnabled()) {
             log.debug("# Stowaway <= step="+step);
@@ -66,10 +66,10 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
                 payload = doStowaway2(stowaway, cahootsWallet);
                 break;
             case 2:
-                payload = doStowaway3(stowaway, cahootsWallet);
+                payload = doStowaway3(stowaway, cahootsWallet, cahootsContext);
                 break;
             case 3:
-                payload = doStowaway4(stowaway, cahootsWallet);
+                payload = doStowaway4(stowaway, cahootsWallet, cahootsContext);
                 break;
             default:
                 throw new Exception("Unrecognized #Cahoots step");
@@ -326,32 +326,32 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     //
     // receiver
     //
-    public Stowaway doStowaway3(Stowaway stowaway2, CahootsWallet cahootsWallet) throws Exception {
+    public Stowaway doStowaway3(Stowaway stowaway2, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway2.getCounterpartyAccount());
         HashMap<String, ECKey> keyBag_A = computeKeyBag(stowaway2, utxos);
 
         Stowaway stowaway3 = new Stowaway(stowaway2);
         stowaway3.doStep3(keyBag_A);
 
-        // compute verifiedSpendAmount
+        // check verifiedSpendAmount
         long verifiedSpendAmount = computeSpendAmount(keyBag_A, cahootsWallet, stowaway3, CahootsTypeUser.COUNTERPARTY);
-        stowaway3.setVerifiedSpendAmount(verifiedSpendAmount);
+        checkMaxSpendAmount(verifiedSpendAmount, stowaway3.getFeeAmount(), cahootsContext);
         return stowaway3;
     }
 
     //
     // sender
     //
-    public Stowaway doStowaway4(Stowaway stowaway3, CahootsWallet cahootsWallet) throws Exception {
+    public Stowaway doStowaway4(Stowaway stowaway3, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway3.getAccount());
         HashMap<String, ECKey> keyBag_B = computeKeyBag(stowaway3, utxos);
 
         Stowaway stowaway4 = new Stowaway(stowaway3);
         stowaway4.doStep4(keyBag_B);
 
-        // compute verifiedSpendAmount
+        // check verifiedSpendAmount
         long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahootsWallet, stowaway4, CahootsTypeUser.SENDER);
-        stowaway4.setVerifiedSpendAmount(verifiedSpendAmount);
+        checkMaxSpendAmount(verifiedSpendAmount, stowaway4.getFeeAmount(), cahootsContext);
         return stowaway4;
     }
 

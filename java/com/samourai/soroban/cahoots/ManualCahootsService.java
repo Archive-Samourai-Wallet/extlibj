@@ -74,7 +74,7 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
             response = new ManualCahootsMessage(cahootsResponse);
         } else {
             // continue existing Cahoots
-            Cahoots cahootsResponse = cahootsService.reply(cahootsWallet, payload);
+            Cahoots cahootsResponse = cahootsService.reply(cahootsWallet, cahootsContext, payload);
 
             // check for interaction
             SorobanInteraction interaction = cahootsService.checkInteraction(request, cahootsResponse);

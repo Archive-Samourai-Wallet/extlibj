@@ -80,7 +80,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     @Override
-    public MultiCahoots reply(CahootsWallet cahootsWallet, MultiCahoots multiCahoots) throws Exception {
+    public MultiCahoots reply(CahootsWallet cahootsWallet, CahootsContext cahootsContext, MultiCahoots multiCahoots) throws Exception {
         int step = multiCahoots.getStep();
         if (log.isDebugEnabled()) {
             log.debug("# MultiCahoots <= step="+step);
@@ -93,19 +93,19 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
                 break;
             case 2:
                 // counterparty
-                payload = doMultiCahoots3_Stowaway3_Stonewallx21(multiCahoots, cahootsWallet);
+                payload = doMultiCahoots3_Stowaway3_Stonewallx21(multiCahoots, cahootsWallet, cahootsContext);
                 break;
             case 3:
                 // sender
-                payload = doMultiCahoots4_Stowaway4_Stonewallx22(multiCahoots, cahootsWallet);
+                payload = doMultiCahoots4_Stowaway4_Stonewallx22(multiCahoots, cahootsWallet, cahootsContext);
                 break;
             case 4:
                 // counterparty
-                payload = doMultiCahoots5_Stonewallx23(multiCahoots, cahootsWallet);
+                payload = doMultiCahoots5_Stonewallx23(multiCahoots, cahootsWallet, cahootsContext);
                 break;
             case 5:
                 // sender
-                payload = doMultiCahoots6_Stonewallx24(multiCahoots, cahootsWallet);
+                payload = doMultiCahoots6_Stonewallx24(multiCahoots, cahootsWallet, cahootsContext);
                 break;
             default:
                 throw new Exception("Unrecognized #Cahoots step");
@@ -146,9 +146,9 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     //
     // counterparty
     //
-    private MultiCahoots doMultiCahoots3_Stowaway3_Stonewallx21(MultiCahoots multiCahoots2, CahootsWallet cahootsWallet) throws Exception {
+    private MultiCahoots doMultiCahoots3_Stowaway3_Stonewallx21(MultiCahoots multiCahoots2, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
         // continue stowaway
-        Stowaway stowaway3 = stowawayService.doStowaway3(multiCahoots2.getStowaway(), cahootsWallet);
+        Stowaway stowaway3 = stowawayService.doStowaway3(multiCahoots2.getStowaway(), cahootsWallet, cahootsContext);
 
         // start stonewallx2 as collaborator
         List<String> seenTxs = new ArrayList<>();
@@ -168,9 +168,9 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     //
     // sender
     //
-    private MultiCahoots doMultiCahoots4_Stowaway4_Stonewallx22(MultiCahoots multiCahoots3, CahootsWallet cahootsWallet) throws Exception {
+    private MultiCahoots doMultiCahoots4_Stowaway4_Stonewallx22(MultiCahoots multiCahoots3, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
         // continue stowaway
-        Stowaway stowaway4 = stowawayService.doStowaway4(multiCahoots3.getStowaway(), cahootsWallet);
+        Stowaway stowaway4 = stowawayService.doStowaway4(multiCahoots3.getStowaway(), cahootsWallet, cahootsContext);
 
         // continue stonewallx2
         List<String> seenTxs = new ArrayList<String>();
@@ -194,7 +194,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     //
     // counterparty
     //
-    private MultiCahoots doMultiCahoots5_Stonewallx23(MultiCahoots multiCahoots6, CahootsWallet cahootsWallet) throws Exception {
+    private MultiCahoots doMultiCahoots5_Stonewallx23(MultiCahoots multiCahoots6, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
         int account = multiCahoots6.getStonewallx2().getCounterpartyAccount();
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
 
@@ -202,7 +202,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
         if(!noExtraFee) {
             throw new Exception("Cannot compose #Cahoots: extra fee is being taken from us");
         }
-        STONEWALLx2 stonewall3 = stonewallx2Service.doSTONEWALLx2_3(multiCahoots6.getStonewallx2(), cahootsWallet);
+        STONEWALLx2 stonewall3 = stonewallx2Service.doSTONEWALLx2_3(multiCahoots6.getStonewallx2(), cahootsWallet, cahootsContext);
 
         MultiCahoots multiCahoots7 = new MultiCahoots(multiCahoots6);
         multiCahoots7.setStonewallx2(stonewall3);
@@ -248,8 +248,8 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     //
     // sender
     //
-    private MultiCahoots doMultiCahoots6_Stonewallx24(MultiCahoots multiCahoots7, CahootsWallet cahootsWallet) throws Exception {
-        STONEWALLx2 stonewall4 = stonewallx2Service.doSTONEWALLx2_4(multiCahoots7.getStonewallx2(), cahootsWallet);
+    private MultiCahoots doMultiCahoots6_Stonewallx24(MultiCahoots multiCahoots7, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+        STONEWALLx2 stonewall4 = stonewallx2Service.doSTONEWALLx2_4(multiCahoots7.getStonewallx2(), cahootsWallet, cahootsContext);
 
         MultiCahoots multiCahoots8 = new MultiCahoots(multiCahoots7);
         multiCahoots8.setStonewallx2(stonewall4);

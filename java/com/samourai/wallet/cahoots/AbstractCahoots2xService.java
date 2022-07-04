@@ -61,18 +61,19 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends Abst
             if (cahoots.feeAmount > SamouraiWalletConst.MAX_ACCEPTABLE_FEES) {
                 throw new Exception("Cahoots fee too high: " + cahoots.getTransaction().getFee().longValue());
             }
+        }
+    }
 
-            // check verifiedSpendAmount
-            long maxSpendAmount = computeMaxSpendAmount(cahoots.feeAmount, cahootsContext);
-            if (log.isDebugEnabled()) {
-                log.debug(cahootsContext.getTypeUser()+" verifiedSpendAmount="+cahoots.verifiedSpendAmount+", maxSpendAmount="+maxSpendAmount);
-            }
-            if (cahoots.verifiedSpendAmount == 0) {
-                throw new Exception("Cahoots spendAmount verification failed");
-            }
-            if (cahoots.verifiedSpendAmount > maxSpendAmount) {
-                throw new Exception("Cahoots verifiedSpendAmount mismatch: " + cahoots.verifiedSpendAmount);
-            }
+    protected void checkMaxSpendAmount(long verifiedSpendAmount, long feeAmount, CahootsContext cahootsContext) throws Exception {
+        long maxSpendAmount = computeMaxSpendAmount(feeAmount, cahootsContext);
+        if (log.isDebugEnabled()) {
+            log.debug(cahootsContext.getTypeUser()+" verifiedSpendAmount="+verifiedSpendAmount+", maxSpendAmount="+maxSpendAmount);
+        }
+        if (verifiedSpendAmount == 0) {
+            throw new Exception("Cahoots spendAmount verification failed");
+        }
+        if (verifiedSpendAmount > maxSpendAmount) {
+            throw new Exception("Cahoots verifiedSpendAmount mismatch: " + verifiedSpendAmount);
         }
     }
 

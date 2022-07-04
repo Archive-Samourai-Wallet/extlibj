@@ -1,5 +1,6 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
@@ -44,23 +45,25 @@ public class StowawayServiceTest extends AbstractCahootsTest {
 
         // sender => doStowaway0
         long spendAmount = 5000;
-        Stowaway payload0 = stowawayService.startInitiator(cahootsWalletSender, spendAmount, account);
+        CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(spendAmount);
+        Stowaway payload0 = stowawayService.startInitiator(cahootsWalletSender, account, cahootsContextSender);
         verify(EXPECTED_PAYLOADS[0], payload0);
 
         // receiver => doStowaway1
+        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStonewallx2();
         Stowaway payload1 = stowawayService.startCollaborator(cahootsWalletCounterparty, account, payload0);
         verify(EXPECTED_PAYLOADS[1], payload1);
 
         // sender => doStowaway2
-        Stowaway payload2 = stowawayService.reply(cahootsWalletSender, payload1);
+        Stowaway payload2 = stowawayService.reply(cahootsWalletSender, cahootsContextSender, payload1);
         verify(EXPECTED_PAYLOADS[2], payload2);
 
         // receiver => doStowaway3
-        Stowaway payload3 = stowawayService.reply(cahootsWalletCounterparty, payload2);
+        Stowaway payload3 = stowawayService.reply(cahootsWalletCounterparty, cahootsContextCp, payload2);
         verify(EXPECTED_PAYLOADS[3], payload3);
 
         // sender => doStowaway4
-        Stowaway payload4 = stowawayService.reply(cahootsWalletSender, payload3);
+        Stowaway payload4 = stowawayService.reply(cahootsWalletSender, cahootsContextSender, payload3);
         verify(EXPECTED_PAYLOADS[4], payload4);
     }
 }

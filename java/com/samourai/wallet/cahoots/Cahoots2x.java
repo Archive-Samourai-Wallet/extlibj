@@ -40,7 +40,6 @@ public abstract class Cahoots2x extends Cahoots {
     protected byte[] fingerprint = null;
     protected byte[] fingerprintCollab = null;
     protected String strCollabChange = null;
-    protected long verifiedSpendAmount = 0; // set for step >= 3
 
     public Cahoots2x()    {
         super();
@@ -173,14 +172,6 @@ public abstract class Cahoots2x extends Cahoots {
         this.strCollabChange = strCollabChange;
     }
 
-    public long getVerifiedSpendAmount() {
-        return verifiedSpendAmount;
-    }
-
-    public void setVerifiedSpendAmount(long verifiedSpendAmount) {
-        this.verifiedSpendAmount = verifiedSpendAmount;
-    }
-
     @Override
     protected JSONObject toJSONObjectCahoots() throws Exception {
         JSONObject obj = super.toJSONObjectCahoots();
@@ -250,7 +241,6 @@ public abstract class Cahoots2x extends Cahoots {
                 fingerprintCollab = Hex.decode(obj.getString("fingerprint_collab"));
             }
             this.psbt = obj.getString("psbt").equals("") ? null : PSBT.fromBytes(Z85.getInstance().decode(obj.getString("psbt")), getParams());
-            this.verifiedSpendAmount = 0; // skip verifiedSpendAmount
         }
     }
 

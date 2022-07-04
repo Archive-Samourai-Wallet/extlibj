@@ -1,5 +1,6 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
@@ -44,23 +45,25 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         // sender => doSTONEWALLx2_0
         long spendAmount = 5000;
         String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
-        STONEWALLx2 payload0 = stonewallx2Service.startInitiator(cahootsWalletSender, spendAmount, account, address);
+        CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(spendAmount, address);
+        STONEWALLx2 payload0 = stonewallx2Service.startInitiator(cahootsWalletSender, account, cahootsContextSender);
         verify(EXPECTED_PAYLOADS[0], payload0);
 
         // counterparty => doSTONEWALLx2_1
+        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStonewallx2();
         STONEWALLx2 payload1 = stonewallx2Service.startCollaborator(cahootsWalletCounterparty, account, payload0);
         verify(EXPECTED_PAYLOADS[1], payload1);
 
         // sender => doSTONEWALLx2_2
-        STONEWALLx2 payload2 = stonewallx2Service.reply(cahootsWalletSender, payload1);
+        STONEWALLx2 payload2 = stonewallx2Service.reply(cahootsWalletSender, cahootsContextSender, payload1);
         verify(EXPECTED_PAYLOADS[2], payload2);
 
         // counterparty => doSTONEWALLx2_3
-        STONEWALLx2 payload3 = stonewallx2Service.reply(cahootsWalletCounterparty, payload2);
+        STONEWALLx2 payload3 = stonewallx2Service.reply(cahootsWalletCounterparty, cahootsContextCp, payload2);
         verify(EXPECTED_PAYLOADS[3], payload3);
 
         // sender => doSTONEWALLx2_4
-        STONEWALLx2 payload4 = stonewallx2Service.reply(cahootsWalletSender, payload3);
+        STONEWALLx2 payload4 = stonewallx2Service.reply(cahootsWalletSender, cahootsContextSender, payload3);
         verify(EXPECTED_PAYLOADS[4], payload4);
     }
 }

@@ -37,7 +37,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
         return startInitiator(cahootsWallet, cahootsContext.getAmount(), account, cahootsContext.getAddress());
     }
 
-    public STONEWALLx2 startInitiator(CahootsWallet cahootsWallet, long amount, int account, String address) throws Exception {
+    protected STONEWALLx2 startInitiator(CahootsWallet cahootsWallet, long amount, int account, String address) throws Exception {
         if (amount <= 0) {
             throw new Exception("Invalid amount");
         }
@@ -62,7 +62,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
     }
 
     @Override
-    public STONEWALLx2 reply(CahootsWallet cahootsWallet, STONEWALLx2 stonewall) throws Exception {
+    public STONEWALLx2 reply(CahootsWallet cahootsWallet, CahootsContext cahootsContext, STONEWALLx2 stonewall) throws Exception {
         int step = stonewall.getStep();
         if (log.isDebugEnabled()) {
             log.debug("# STONEWALLx2 <= step="+step);
@@ -73,10 +73,10 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
                 payload = doSTONEWALLx2_2(stonewall, cahootsWallet);
                 break;
             case 2:
-                payload = doSTONEWALLx2_3(stonewall, cahootsWallet);
+                payload = doSTONEWALLx2_3(stonewall, cahootsWallet, cahootsContext);
                 break;
             case 3:
-                payload = doSTONEWALLx2_4(stonewall, cahootsWallet);
+                payload = doSTONEWALLx2_4(stonewall, cahootsWallet, cahootsContext);
                 break;
             default:
                 throw new Exception("Unrecognized #Cahoots step");
@@ -450,32 +450,32 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
     //
     // counterparty
     //
-    public STONEWALLx2 doSTONEWALLx2_3(STONEWALLx2 stonewall2, CahootsWallet cahootsWallet) throws Exception {
+    public STONEWALLx2 doSTONEWALLx2_3(STONEWALLx2 stonewall2, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall2.getCounterpartyAccount());
         HashMap<String, ECKey> keyBag_A = computeKeyBag(stonewall2, utxos);
 
         STONEWALLx2 stonewall3 = new STONEWALLx2(stonewall2);
         stonewall3.doStep3(keyBag_A);
 
-        // compute verifiedSpendAmount
+        // check verifiedSpendAmount
         long verifiedSpendAmount = computeSpendAmount(keyBag_A, cahootsWallet, stonewall3, CahootsTypeUser.COUNTERPARTY);
-        stonewall3.setVerifiedSpendAmount(verifiedSpendAmount);
+        checkMaxSpendAmount(verifiedSpendAmount, stonewall3.getFeeAmount(), cahootsContext);
         return stonewall3;
     }
 
     //
     // sender
     //
-    public STONEWALLx2 doSTONEWALLx2_4(STONEWALLx2 stonewall3, CahootsWallet cahootsWallet) throws Exception {
+    public STONEWALLx2 doSTONEWALLx2_4(STONEWALLx2 stonewall3, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall3.getAccount());
         HashMap<String, ECKey> keyBag_B = computeKeyBag(stonewall3, utxos);
 
         STONEWALLx2 stonewall4 = new STONEWALLx2(stonewall3);
         stonewall4.doStep4(keyBag_B);
 
-        // compute verifiedSpendAmount
+        // check verifiedSpendAmount
         long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahootsWallet, stonewall4, CahootsTypeUser.SENDER);
-        stonewall4.setVerifiedSpendAmount(verifiedSpendAmount);
+        checkMaxSpendAmount(verifiedSpendAmount, stonewall4.getFeeAmount(), cahootsContext);
         return stonewall4;
     }
 

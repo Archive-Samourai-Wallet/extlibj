@@ -41,7 +41,7 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
 
     public abstract T startCollaborator(CahootsWallet cahootsWallet, int account, T payload0) throws Exception;
 
-    public abstract T reply(CahootsWallet cahootsWallet, T payload) throws Exception;
+    public abstract T reply(CahootsWallet cahootsWallet, CahootsContext cahootsContext, T payload) throws Exception;
 
     public void verifyResponse(CahootsContext cahootsContext, T response, T request) throws Exception {
         if (request != null) {
