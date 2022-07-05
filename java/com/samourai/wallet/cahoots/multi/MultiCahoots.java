@@ -1,11 +1,13 @@
 package com.samourai.wallet.cahoots.multi;
 
 import com.samourai.soroban.cahoots.ManualCahootsMessage;
+import com.samourai.wallet.api.backend.IPushTx;
 import com.samourai.wallet.cahoots.Cahoots;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
+import com.samourai.wallet.util.TxUtil;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
@@ -121,5 +123,20 @@ public class MultiCahoots extends Cahoots {
     @Override
     public PSBT getPSBT() {
         return stonewallx2.getPSBT();
+    }
+
+    @Override
+    public void pushTx(IPushTx pushTx) throws Exception {
+        // push stowaway
+        String stowawayHex = TxUtil.getInstance().getTxHex(getStowawayTransaction());
+        if (!pushTx.pushTx(stowawayHex).getLeft()) {
+            throw new Exception("PushTx failed for stowaway: "+stowawayHex);
+        }
+
+        // push stonewallx2
+        String stonewallHex = TxUtil.getInstance().getTxHex(getStowawayTransaction());
+        if (!pushTx.pushTx(stonewallHex).getLeft()) {
+            throw new Exception("PushTx failed for stonewallx2: "+stonewallHex);
+        }
     }
 }
