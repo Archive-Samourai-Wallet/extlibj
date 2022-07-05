@@ -23,12 +23,20 @@ public class ManualCahootsMessage implements SorobanMessage {
         return cahoots.getStep();
     }
 
+    public static int getLastStep(CahootsType cahootsType) {
+        return cahootsType == CahootsType.MULTI ? LAST_STEP_MULTI : LAST_STEP;
+    }
+
+    public static int getNbSteps(CahootsType cahootsType) {
+        return getLastStep(cahootsType) + 1; // starting from 0
+    }
+
     protected int getLastStep() {
-        return getType() == CahootsType.MULTI ? LAST_STEP_MULTI : LAST_STEP;
+        return getLastStep(getType());
     }
 
     public int getNbSteps() {
-        return getLastStep() + 1; // starting from 0
+        return getNbSteps(getType());
     }
 
     @Override
