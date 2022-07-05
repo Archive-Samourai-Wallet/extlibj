@@ -5,7 +5,9 @@ import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.cahoots.multi.MultiCahoots;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.util.TestUtil;
+import com.samourai.wallet.util.TxUtil;
 import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionOutput;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,7 +83,37 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         Transaction stowawayTx = payload6.getStowaway().getTransaction();
         Assertions.assertEquals("68618508ae3d1166fc40489dd093a8a136141d29633fcb3229861357134358df", stowawayTx.getHashAsString());
 
+
+        // verify stowaway
+        Transaction tx = payload4.getTransaction();
+        Assertions.assertEquals("7127186e001f1963137b590e298add049a7d9d89f2ada7280e13b9d76d80b2be", tx.getHashAsString());
+        Assertions.assertEquals("02000000000102d54f4c6e366d8fc11b8630d4dd1536765ec8022bd3ab8a62fefc2ee96b9ccf140100000000fdffffff26de7fe4341de0b955ecaf4d2f232b7a9f47f8191959937c5372da46325cb6b40100000000fdffffff04030f00000000000016001440852bf6ea044204b826a182d1b75528364fd0bdeb120000000000001600145fadc28295301797ec5e7c1af71b4cee28dfac328813000000000000160014b57c4444c6a4baa680461186f6558111300a54288813000000000000160014ec1ef246b57d44e3292153339b333685714c0d32024730440220545bb8ae4b02f15b621a22d073255e5279d39f050567c6320ebd7288f9d5462202203ebeb250003c1c57285908d236cc7a102e73a2aec27a884c9757522823a43bbe012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f2024830450221008d63dd2560ba0a3d2ac8c4fd32df149769cdf9b6b71da7663a23e07c1573e25902203f6547b3248ecb067b055fdd589127d0a4215af433de81472a56e492fe1954df012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f200000000", TxUtil.getInstance().getTxHex(tx));
+
+        // all outputAddresses are bech32
+        String[] OUTPUT_ADDRESSES = new String[]{
+                "tb1qgzzjhah2q3pqfwpx5xpdrd649qmyl59a6m6cp4",
+                "tb1qt7ku9q54xqte0mz70sd0wx6vac5dltpj3g0m24",
+                "tb1qk47yg3xx5ja2dqzxzxr0v4vpzycq54pg8cqqxt",
+                "tb1qas00y34404zwx2fp2veekveks4c5crfjx802v3"
+        };
+        for (TransactionOutput txOutput : tx.getOutputs()) {
+            String toAddress = bipFormatSupplier.getToAddress(txOutput);
+            Assertions.assertEquals(OUTPUT_ADDRESSES[txOutput.getIndex()], toAddress);
+        }
+
+        // verify stonewallx2
         Transaction stonewallx2Tx = payload6.getStonewallx2().getTransaction();
         Assertions.assertEquals("7127186e001f1963137b590e298add049a7d9d89f2ada7280e13b9d76d80b2be", stonewallx2Tx.getHashAsString());
+
+        OUTPUT_ADDRESSES = new String[]{
+                "tb1qgzzjhah2q3pqfwpx5xpdrd649qmyl59a6m6cp4",
+                "tb1qt7ku9q54xqte0mz70sd0wx6vac5dltpj3g0m24",
+                "tb1qk47yg3xx5ja2dqzxzxr0v4vpzycq54pg8cqqxt",
+                "tb1qas00y34404zwx2fp2veekveks4c5crfjx802v3"
+        };
+        for (TransactionOutput txOutput : tx.getOutputs()) {
+            String toAddress = bipFormatSupplier.getToAddress(txOutput);
+            Assertions.assertEquals(OUTPUT_ADDRESSES[txOutput.getIndex()], toAddress);
+        }
     }
 }
