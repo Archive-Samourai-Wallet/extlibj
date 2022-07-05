@@ -43,6 +43,18 @@ public class HD_WalletFactoryGenericTest {
     }
 
     @Test
+    public void restoreWallet_hex() throws Exception {
+        NetworkParameters params = MainNetParams.get();
+        HD_Wallet hdWallet;
+        String passphrase = "TREZOR";
+
+        hdWallet = hdWalletFactory.restoreWallet("064f8f0bebfa2f65db003b56bc911535614f2764799bc89091398c1aed82e884", passphrase, params);
+        Assertions.assertEquals("064f8f0bebfa2f65db003b56bc911535614f2764799bc89091398c1aed82e884", hdWallet.getSeedHex());
+        Assertions.assertEquals(passphrase, hdWallet.getPassphrase());
+        Assertions.assertEquals(new BigInteger("86537261523959021197231152630513431638710381086905592664083437282970228049122"), hdWallet.mRoot.getPrivKey());
+    }
+
+    @Test
     public void computeSeedFromWords() throws Exception {
         byte[] mSeed;
 

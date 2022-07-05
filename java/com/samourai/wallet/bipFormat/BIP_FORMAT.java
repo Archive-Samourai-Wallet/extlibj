@@ -134,7 +134,7 @@ public class BIP_FORMAT {
 
         @Override
         public String getToAddress(ECKey ecKey, NetworkParameters params) {
-            return new SegwitAddress(ecKey, params).getBech32AsString();
+            return BIP340Util.getP2TRAddress(params, ecKey, true);
         }
 
         @Override
