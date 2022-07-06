@@ -29,12 +29,20 @@ public class CahootsContext implements SorobanContext {
         return newCounterparty(CahootsType.STONEWALLX2);
     }
 
+    public static CahootsContext newCounterpartyMultiCahoots() {
+        return newCounterparty(CahootsType.MULTI);
+    }
+
     public static CahootsContext newInitiatorStowaway(long amount) {
         return new CahootsContext(CahootsTypeUser.SENDER, CahootsType.STOWAWAY, amount, null);
     }
 
     public static CahootsContext newInitiatorStonewallx2(long amount, String address) {
         return new CahootsContext(CahootsTypeUser.SENDER, CahootsType.STONEWALLX2, amount, address);
+    }
+
+    public static CahootsContext newInitiatorMultiCahoots(long amount, String address) {
+        return new CahootsContext(CahootsTypeUser.SENDER, CahootsType.MULTI, amount, address);
     }
 
     public CahootsTypeUser getTypeUser() {

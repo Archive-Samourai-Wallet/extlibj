@@ -15,4 +15,6 @@ public class SamouraiWalletConst {
     public static final BigInteger NLOCKTIME_SEQUENCE_VAL = BigInteger.valueOf(0xffffffffL - 3L);
 
     public static final String samouraiDonationPCode = "PM8TJVzLGqWR3dtxZYaTWn3xJUop3QP3itR4eYzX7XvV5uAfctEEuHhKNo3zCcqfAbneMhyfKkCthGv5werVbwLruhZyYNTxqbCrZkNNd2pPJA2e2iAh";
+    public static final String MULTICAHOOTS_PCODE = "PM8TJXBr2UNrPuhTFrmiCrww74GCFm1WbTqpxEXACpfzAsKqM3xvgZPG2PhDGycW2Ud9RiCzVHb3NprRvGffpYbi9bw6sYjU5nZJm94syV1J67V9fRND";
+
 }

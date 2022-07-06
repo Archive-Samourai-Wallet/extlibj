@@ -1,15 +1,15 @@
 package com.samourai.soroban.cahoots;
 
+import com.samourai.soroban.client.SorobanMessage;
 import com.samourai.wallet.cahoots.Cahoots;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsTypeUser;
-import com.samourai.soroban.client.SorobanMessage;
 
 public class ManualCahootsMessage implements SorobanMessage {
     private Cahoots cahoots;
 
-    public static final int LAST_STEP = 4;
-    public static final int NB_STEPS = LAST_STEP+1; // starting from 0
+    public static final int LAST_STEP = TypeInteraction.TX_BROADCAST.getStep();
+    public static final int LAST_STEP_MULTI = TypeInteraction.TX_BROADCAST_MULTI.getStep();
 
     public ManualCahootsMessage(Cahoots cahoots) {
         this.cahoots = cahoots;
@@ -23,13 +23,25 @@ public class ManualCahootsMessage implements SorobanMessage {
         return cahoots.getStep();
     }
 
+    public static int getLastStep(CahootsType cahootsType) {
+        return cahootsType == CahootsType.MULTI ? LAST_STEP_MULTI : LAST_STEP;
+    }
+
+    public static int getNbSteps(CahootsType cahootsType) {
+        return getLastStep(cahootsType) + 1; // starting from 0
+    }
+
+    protected int getLastStep() {
+        return getLastStep(getType());
+    }
+
     public int getNbSteps() {
-        return NB_STEPS;
+        return getNbSteps(getType());
     }
 
     @Override
     public boolean isDone() {
-        return getStep() == LAST_STEP;
+        return getStep() == getLastStep();
     }
 
     public CahootsType getType() {
@@ -54,6 +66,6 @@ public class ManualCahootsMessage implements SorobanMessage {
 
     @Override
     public String toString() {
-        return "(ManualCahootsMessage)step="+getStep()+"/"+NB_STEPS+", type="+getType()+", typeUser="+getTypeUser()+", payload="+toPayload();
+        return "(ManualCahootsMessage)step="+getStep()+"/"+getNbSteps()+", type="+getType()+", typeUser="+getTypeUser()+", payload="+toPayload();
     }
 }

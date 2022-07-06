@@ -15,8 +15,8 @@ import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
 import com.samourai.wallet.payload.PayloadUtilGeneric;
 import com.samourai.wallet.send.provider.SimpleUtxoProvider;
-import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.util.FormatsUtilGeneric;
+import com.samourai.xmanager.client.XManagerClient;
 import org.bitcoinj.core.*;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
@@ -42,6 +42,7 @@ public class AbstractTest {
   protected BIP47Wallet bip47Wallet;
   protected BackendApi backendApi;
   protected SimpleUtxoProvider utxoProvider;
+  protected XManagerClient xManagerClient;
   protected BIP47UtilGeneric bip47Util = Bip47UtilJava.getInstance();
 
   public AbstractTest() {
@@ -61,6 +62,7 @@ public class AbstractTest {
     bip47Wallet = new BIP47Wallet(bip44w);
     walletSupplier = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip44w);
     utxoProvider = new SimpleUtxoProvider(bip44w.getParams(), walletSupplier);
+    xManagerClient = new XManagerClient(httpClient, true, false);
 
     backendApi = computeBackendApi(params);
   }

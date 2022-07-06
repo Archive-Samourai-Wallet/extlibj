@@ -1,29 +1,33 @@
 package examples;
 
-import com.samourai.wallet.cahoots.CahootsWallet;
+import com.samourai.http.client.IHttpClient;
+import com.samourai.http.client.JettyHttpClient;
 import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.soroban.cahoots.ManualCahootsMessage;
 import com.samourai.soroban.cahoots.ManualCahootsService;
 import com.samourai.soroban.cahoots.TxBroadcastInteraction;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.params.TestNet3Params;
+import com.samourai.wallet.cahoots.CahootsWallet;
+import com.samourai.xmanager.client.XManagerClient;
+
+import java.util.Optional;
 
 public class Stonewallx2Example {
-    private static final NetworkParameters params = TestNet3Params.get();
-
     // TODO instanciate real wallets here!
     private static final CahootsWallet cahootsWalletSender = null; // new SimpleCahootsWallet(...)
     private static final CahootsWallet cahootsWalletCounterparty = null; // new SimpleCahootsWallet(...)
 
     public void Stonewallx2() throws Exception {
+        // configure xManagerClient
+        IHttpClient httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
+        XManagerClient xManagerClient = new XManagerClient(httpClient, true, false);
 
         // instanciate sender
         int senderAccount = 0;
-        ManualCahootsService cahootsSender = new ManualCahootsService(cahootsWalletSender);
+        ManualCahootsService cahootsSender = new ManualCahootsService(cahootsWalletSender, xManagerClient);
 
         // instanciate counterparty
         int receiverAccount = 0;
-        ManualCahootsService cahootsCounterparty = new ManualCahootsService(cahootsWalletCounterparty);
+        ManualCahootsService cahootsCounterparty = new ManualCahootsService(cahootsWalletCounterparty, xManagerClient);
 
         // STEP 0: sender
         long spendAmount = 5000;
