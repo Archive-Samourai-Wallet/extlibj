@@ -414,8 +414,6 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
             throw new Exception("Cannot compose #Cahoots: invalid tx outputs count");
         }
 
-        NetworkParameters params = stonewall1.getParams();
-
         //
         //
         // step2: B verif, utxos -> A (take smallest that cover amount)

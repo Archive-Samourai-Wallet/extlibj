@@ -73,6 +73,10 @@ public abstract class CahootsWallet {
         return depositWallet.getHdWallet();
     }
 
+    protected BipWallet getDepositWallet() {
+        return depositWallet;
+    }
+
     public BIP47Wallet getBip47Wallet() {
         return bip47Wallet;
     }

@@ -150,8 +150,6 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
             throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
         }
 
-        NetworkParameters params = stowaway0.getParams();
-
         //
         //
         // step1: A utxos -> B (take largest that cover amount)

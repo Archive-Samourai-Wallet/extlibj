@@ -3,6 +3,7 @@ package com.samourai.wallet.send.spend;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.client.indexHandler.IIndexHandler;
 import com.samourai.wallet.send.BoltzmannUtil;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
@@ -31,7 +32,9 @@ public class SpendSelectionBoltzmann extends SpendSelection {
         this.pair = pair;
     }
 
-    public static SpendSelectionBoltzmann compute(long neededAmount, UtxoProvider utxoProvider, BipFormat changeFormat, long amount, String address, WhirlpoolAccount account, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes) {
+    public static SpendSelectionBoltzmann compute(long neededAmount, UtxoProvider utxoProvider, BipFormat changeFormat, long amount, String address, WhirlpoolAccount account, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb, IIndexHandler changeIndexHandler) {
+        int initialChangeIndex = changeIndexHandler.get();
+
         if (log.isDebugEnabled()) {
             log.debug("needed amount:" + neededAmount);
         }
@@ -148,7 +151,8 @@ public class SpendSelectionBoltzmann extends SpendSelection {
         }
 
         if ((_utxos1 == null || _utxos1.size() == 0) && (_utxos2 == null || _utxos2.size() == 0)) {
-            // can't do boltzmann, revert to SPEND_SIMPLE
+            // can't do boltzmann => revert change index
+            changeIndexHandler.set(initialChangeIndex, true);
             return null;
         }
 
@@ -172,10 +176,8 @@ public class SpendSelectionBoltzmann extends SpendSelection {
         Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair = BoltzmannUtil.getInstance().boltzmann(_utxos1Shuffled, _utxos2Shuffled, BigInteger.valueOf(amount), address, account, utxoProvider, forcedChangeFormat, params, feePerKb);
 
         if (pair == null) {
-            // can't do boltzmann, revert to SPEND_SIMPLE
-            if (restoreChangeIndexes != null) {
-                restoreChangeIndexes.run();
-            }
+            // can't do boltzmann => revert change index
+            changeIndexHandler.set(initialChangeIndex, true);
             return null;
         }
 
@@ -183,7 +185,7 @@ public class SpendSelectionBoltzmann extends SpendSelection {
     }
 
     @Override
-    public SpendTx spendTx(long amount, String address, BipFormat changeFormat, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider, long blockHeight) throws SpendException {
+    public SpendTx spendTx(long amount, String address, BipFormat changeFormat, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, UtxoProvider utxoProvider, long blockHeight) throws SpendException {
         // select utxos for boltzmann
         long inputAmount = 0L;
         long outputAmount = 0L;
@@ -201,6 +203,11 @@ public class SpendSelectionBoltzmann extends SpendSelection {
         for (TransactionOutput output : pair.getRight()) {
             try {
                 String outputAddress = getBipFormatSupplier().getToAddress(output);
+                if (receivers.containsKey(outputAddress)) {
+                    // prevent erasing existing receiver
+                    log.error("receiver already set");
+                    throw new SpendException(SpendError.MAKING);
+                }
                 receivers.put(outputAddress, output.getValue().longValue());
                 outputAmount += output.getValue().longValue();
             } catch (Exception e) {

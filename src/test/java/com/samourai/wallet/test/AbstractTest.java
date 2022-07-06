@@ -16,21 +16,29 @@ import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
 import com.samourai.wallet.payload.PayloadUtilGeneric;
 import com.samourai.wallet.send.provider.SimpleUtxoProvider;
 import com.samourai.wallet.util.FormatsUtilGeneric;
+import com.samourai.wallet.util.TxUtil;
 import com.samourai.xmanager.client.XManagerClient;
+import com.samourai.xmanager.protocol.XManagerService;
 import org.bitcoinj.core.*;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class AbstractTest {
   protected static final Logger log = LoggerFactory.getLogger(AbstractTest.class);
 
   protected static final String SEED_WORDS = "all all all all all all all all all all all all";
   protected static final String SEED_PASSPHRASE = "whirlpool";
+
+  protected static final String ADDRESS_BIP44 = "muimRQFJKMJM1pTminJxiD5HrPgSu257tX";
+  protected static final String ADDRESS_BIP49 = "2Mww8dCYPUpKHofjgcXcBCEGmniw9CoaiD2";
+  protected static final String ADDRESS_BIP84 = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
 
   protected NetworkParameters params = TestNet3Params.get();
   protected HD_WalletFactoryGeneric hdWalletFactory = HD_WalletFactoryGeneric.getInstance();
@@ -62,7 +70,12 @@ public class AbstractTest {
     bip47Wallet = new BIP47Wallet(bip44w);
     walletSupplier = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip44w);
     utxoProvider = new SimpleUtxoProvider(bip44w.getParams(), walletSupplier);
-    xManagerClient = new XManagerClient(httpClient, true, false);
+    xManagerClient = new XManagerClient(httpClient, true, false) {
+      @Override
+      public String getAddressOrDefault(XManagerService service) {
+        return "xm-"+service.name(); // mock
+      }
+    };
 
     backendApi = computeBackendApi(params);
   }
@@ -100,5 +113,31 @@ public class AbstractTest {
     TransactionInput txInput = new TransactionInput(params, null, new byte[0], inputOutPoint, inputOutPoint.getValue());
     tx.addInput(txInput);
     return tx;
+  }
+
+  protected void verifyTx(Transaction tx, String txid, String raw, Map<String,Long> outputsExpected) throws Exception {
+    if (log.isDebugEnabled()) {
+      log.debug(tx.toString());
+    }
+    Assertions.assertEquals(txid, tx.getHashAsString());
+    Assertions.assertEquals(raw, TxUtil.getInstance().getTxHex(tx));
+
+    Map<String,Long> outputsActuals = new LinkedHashMap<>();
+    for (TransactionOutput txOutput : tx.getOutputs()) {
+      String address = bipFormatSupplier.getToAddress(txOutput);
+      outputsActuals.put(address, txOutput.getValue().getValue());
+    }
+    // sort by value ASC to comply with UTXOComparator
+    outputsActuals = sortMapOutputs(outputsActuals);
+    outputsExpected = sortMapOutputs(outputsExpected);
+    if (log.isDebugEnabled()) {
+      log.debug("outputsActuals: "+outputsActuals);
+    }
+    Assertions.assertEquals(outputsExpected, outputsActuals);
+  }
+
+  protected Map<String,Long> sortMapOutputs(Map<String,Long> map) {
+    return map.entrySet().stream().sorted(Map.Entry.comparingByKey())
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 }

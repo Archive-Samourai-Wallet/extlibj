@@ -2,15 +2,16 @@ package com.samourai.wallet.cahoots;
 
 import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.soroban.cahoots.ManualCahootsMessage;
+import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.cahoots.multi.MultiCahootsService;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
 import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
 import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
+import com.samourai.wallet.hd.Chain;
+import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.test.AbstractTest;
-import com.samourai.wallet.util.TxUtil;
-import org.bitcoinj.core.Transaction;
-import org.bitcoinj.core.TransactionOutput;
+import com.samourai.wallet.util.TestUtil;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,18 @@ import java.util.List;
 public abstract class AbstractCahootsTest extends AbstractTest {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahootsTest.class);
 
-    protected IndexHandlerSupplier indexHandlerSupplier = new MemoryIndexHandlerSupplier();
+    private static final String SEED_WORDS = "all all all all all all all all all all all all";
+    private static final String SEED_PASSPHRASE_INITIATOR = "initiator";
+    private static final String SEED_PASSPHRASE_COUNTERPARTY = "counterparty";
+
+    protected TestCahootsWallet cahootsWalletSender;
+    protected TestCahootsWallet cahootsWalletCounterparty;
+
+    protected static String[] SENDER_RECEIVE_84;
+    protected static String[] COUNTERPARTY_RECEIVE_84;
+    protected static String[] SENDER_CHANGE_84;
+    protected static String[] COUNTERPARTY_CHANGE_84;
+
     protected Stonewallx2Service stonewallx2Service = new Stonewallx2Service(bipFormatSupplier, params) {
         @Override
         protected void shuffleUtxos(List<CahootsUtxo> utxos) {
@@ -42,6 +54,32 @@ public abstract class AbstractCahootsTest extends AbstractTest {
 
     public void setUp() throws Exception {
         super.setUp();
+
+        final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
+        cahootsWalletSender = new TestCahootsWallet(new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletSender), bipFormatSupplier, params);
+
+        final HD_Wallet bip84WalletCounterparty = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
+        cahootsWalletCounterparty = new TestCahootsWallet(new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletCounterparty), bipFormatSupplier, params);
+
+        SENDER_RECEIVE_84 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            SENDER_RECEIVE_84[i] = cahootsWalletSender.getDepositWallet().getAddressAt(Chain.RECEIVE.getIndex(), i).getAddressString();
+        }
+
+        COUNTERPARTY_RECEIVE_84 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            COUNTERPARTY_RECEIVE_84[i] = cahootsWalletCounterparty.getDepositWallet().getAddressAt(Chain.RECEIVE.getIndex(), i).getAddressString();
+        }
+
+        SENDER_CHANGE_84 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            SENDER_CHANGE_84[i] = cahootsWalletSender.getDepositWallet().getAddressAt(Chain.CHANGE.getIndex(), i).getAddressString();
+        }
+
+        COUNTERPARTY_CHANGE_84 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            COUNTERPARTY_CHANGE_84[i] = cahootsWalletCounterparty.getDepositWallet().getAddressAt(Chain.CHANGE.getIndex(), i).getAddressString();
+        }
     }
 
     protected Cahoots cleanPayload(Cahoots payload) throws Exception {
@@ -102,15 +140,5 @@ public abstract class AbstractCahootsTest extends AbstractTest {
             }
         }
         return lastPayload;
-    }
-
-    protected void verifyTx(Transaction tx, String txid, String raw, String[] OUTPUT_ADDRESSES) throws Exception {
-        Assertions.assertEquals(txid, tx.getHashAsString());
-        Assertions.assertEquals(raw, TxUtil.getInstance().getTxHex(tx));
-
-        for (TransactionOutput txOutput : tx.getOutputs()) {
-            String toAddress = bipFormatSupplier.getToAddress(txOutput);
-            Assertions.assertEquals(OUTPUT_ADDRESSES[txOutput.getIndex()], toAddress);
-        }
     }
 }

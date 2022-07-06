@@ -9,23 +9,15 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class Stonewallx2ServiceTest extends AbstractCahootsTest {
     private static final Logger log = LoggerFactory.getLogger(Stonewallx2ServiceTest.class);
 
-    private static final String SEED_WORDS = "all all all all all all all all all all all all";
-    private static final String SEED_PASSPHRASE_INITIATOR = "initiator";
-    private static final String SEED_PASSPHRASE_COUNTERPARTY = "counterparty";
-
-    private TestCahootsWallet cahootsWalletSender;
-    private TestCahootsWallet cahootsWalletCounterparty;
-
     @BeforeEach
     public void setUp() throws Exception {
-        final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
-        cahootsWalletSender = new TestCahootsWallet(new WalletSupplierImpl(indexHandlerSupplier, bip84WalletSender), bipFormatSupplier, params);
-
-        final HD_Wallet bip84WalletCounterparty = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
-        cahootsWalletCounterparty = new TestCahootsWallet(new WalletSupplierImpl(indexHandlerSupplier, bip84WalletCounterparty), bipFormatSupplier, params);
+        super.setUp();
     }
 
     @Test
@@ -38,7 +30,7 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
 
         // setup Cahoots
         long spendAmount = 5000;
-        String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
+        String address = ADDRESS_BIP84;
         CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(account, spendAmount, address);
         CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStonewallx2(account);
 
@@ -52,20 +44,19 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stonewallx2Service, cahootsContextSender, cahootsContextCp, EXPECTED_PAYLOADS);
 
         // verify TX
-        String txid = "c9a3da30bcec70069030a9f25a91e9a9aaee71b498383229f76eda84b398e88c";
-        String raw = "02000000000102d54f4c6e366d8fc11b8630d4dd1536765ec8022bd3ab8a62fefc2ee96b9ccf140100000000fdffffffad05bb9c893f5cb9762ea57729efaf4a4b8eb1e377533fddc49d15d01fb307940100000000fdffffff04eb12000000000000160014657b6afdeef6809fdabce7face295632fbd94febeb1200000000000016001485963b79fea38b84ce818e5f29a5a115bd4c8229881300000000000016001428a90fa3f4f285fc689f389115326dbf96917d6288130000000000001600142ecf8c3e5697f0513999ed3aa8ea9cd04d127355024830450221009dfb70f0c4b54bbe60dff0ad8a49a6fc8ee8136bd04d553a62d41cc39a8b2e8602206b3961a25d1d32d3cc07e6d91b731764b858c6e8f07f135643e0d21631f8c3b5012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f202483045022100f3999d41aa1f1d2d75a5049dd27df303e477fb6af9357b2126645f56af56dc22022003fc958f62ebb43addfcd988e544606c690d54da477371ee57aa80a0838c468c012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f200000000";
+        String txid = "e896b8c0194070ea2692af11e808f6f128bb4b533917011ac913b4f6fc48fc95";
+        String raw = "02000000000102d54f4c6e366d8fc11b8630d4dd1536765ec8022bd3ab8a62fefc2ee96b9ccf140100000000fdffffffad05bb9c893f5cb9762ea57729efaf4a4b8eb1e377533fddc49d15d01fb307940100000000fdffffff04eb120000000000001600144e4fed51986dbaf322d2b36e690b8638fa0f0204eb12000000000000160014657b6afdeef6809fdabce7face295632fbd94feb881300000000000016001428a90fa3f4f285fc689f389115326dbf96917d6288130000000000001600142ecf8c3e5697f0513999ed3aa8ea9cd04d1273550247304402204baaacb3787465c84f29717af596ec6c946008934ba06df317515aeaa62c78fd022012858f397fa9708e9b08382fc231fb9ab59a1abe3ee830495e13eddebd050e5a012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f202483045022100f530b6c177a1a0145b359261ee5a90adc825ad3f5c2e6777cce035d1172ba7ca022049326f6a99b91129f83f1db77eca60617e6d7b833406bfc5a7a9bfdca26c5a04012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f200000000";
 
-        String[] OUTPUT_ADDRESSES = new String[]{
-                "tb1qv4ak4l0w76qflk4uulavu22kxtaajnltkzxyq5",
-                "tb1qsktrk7075w9cfn5p3e0jnfdpzk75eq3f5qced4",
-                "tb1q9z5slgl572zlc6yl8zg32vndh7tfzltzz3pw8w",
-                "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4"
-        };
-        verifyTx(cahoots.getTransaction(), txid, raw, OUTPUT_ADDRESSES);
+        Map<String,Long> outputs = new LinkedHashMap<>();
+        outputs.put(address, spendAmount);
+        outputs.put(COUNTERPARTY_RECEIVE_84[0], spendAmount);
+        outputs.put(COUNTERPARTY_CHANGE_84[0], 4843L);
+        outputs.put(SENDER_CHANGE_84[0], 4843L);
+        verifyTx(cahoots.getTransaction(), txid, raw, outputs);
     }
 
     @Test
-    public void STONEWALLx2_P2SH() throws Exception {
+    public void STONEWALLx2_BIP44() throws Exception {
         int account = 0;
 
         // setup wallets
@@ -74,22 +65,21 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
 
         // setup Cahoots
         long spendAmount = 5000;
-        String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
+        String address = ADDRESS_BIP44;
         CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(account, spendAmount, address);
         CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStonewallx2(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
 
         // verify TX
-        String txid = "c9a3da30bcec70069030a9f25a91e9a9aaee71b498383229f76eda84b398e88c";
-        String raw = "02000000000102d54f4c6e366d8fc11b8630d4dd1536765ec8022bd3ab8a62fefc2ee96b9ccf140100000000fdffffffad05bb9c893f5cb9762ea57729efaf4a4b8eb1e377533fddc49d15d01fb307940100000000fdffffff04eb12000000000000160014657b6afdeef6809fdabce7face295632fbd94febeb1200000000000016001485963b79fea38b84ce818e5f29a5a115bd4c8229881300000000000016001428a90fa3f4f285fc689f389115326dbf96917d6288130000000000001600142ecf8c3e5697f0513999ed3aa8ea9cd04d127355024830450221009dfb70f0c4b54bbe60dff0ad8a49a6fc8ee8136bd04d553a62d41cc39a8b2e8602206b3961a25d1d32d3cc07e6d91b731764b858c6e8f07f135643e0d21631f8c3b5012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f202483045022100f3999d41aa1f1d2d75a5049dd27df303e477fb6af9357b2126645f56af56dc22022003fc958f62ebb43addfcd988e544606c690d54da477371ee57aa80a0838c468c012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f200000000";
+        String txid = "5cfabc2db752deaabefe808147e28ec60fa1706bef41a87555bbe63a2e8bbee8";
+        String raw = "02000000000102d54f4c6e366d8fc11b8630d4dd1536765ec8022bd3ab8a62fefc2ee96b9ccf140100000000fdffffffad05bb9c893f5cb9762ea57729efaf4a4b8eb1e377533fddc49d15d01fb307940100000000fdffffff04eb120000000000001600144e4fed51986dbaf322d2b36e690b8638fa0f0204eb12000000000000160014657b6afdeef6809fdabce7face295632fbd94feb881300000000000016001428a90fa3f4f285fc689f389115326dbf96917d6288130000000000001976a9149bcdad097fa4695a3bdab991e3212da04002ce4088ac02483045022100b86bf7f548b876959359eb852300c6b7578ff8cd8e7835a7c753c2ceef1d2fbc022060e9b59703faef8540d08af264f3c5c0b0701b18b83c6a6ed9514cc8128084ca012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f202473044022025f17e2b7cafd288ed71e426c8e290bfc814caae1f447d6a2715dfde21d7220b02203bda53a0e8a70424ea2c3dda2f1335eac7c9e5032498d80519bbdb3e73447840012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f200000000";
 
-        String[] OUTPUT_ADDRESSES = new String[]{
-                "tb1qv4ak4l0w76qflk4uulavu22kxtaajnltkzxyq5",
-                "tb1qsktrk7075w9cfn5p3e0jnfdpzk75eq3f5qced4",
-                "tb1q9z5slgl572zlc6yl8zg32vndh7tfzltzz3pw8w",
-                "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4"
-        };
-        verifyTx(cahoots.getTransaction(), txid, raw, OUTPUT_ADDRESSES);
+        Map<String,Long> outputs = new LinkedHashMap<>();
+        outputs.put(address, spendAmount);
+        outputs.put(COUNTERPARTY_RECEIVE_84[0], spendAmount);
+        outputs.put(COUNTERPARTY_CHANGE_84[0], 4843L);
+        outputs.put(SENDER_CHANGE_84[0], 4843L);
+        verifyTx(cahoots.getTransaction(), txid, raw, outputs);
     }
 }
