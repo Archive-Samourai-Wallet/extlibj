@@ -87,4 +87,26 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
             Assertions.assertEquals(OUTPUT_ADDRESSES[txOutput.getIndex()], toAddress);
         }
     }
+
+    @Test
+    public void invalidStonewallExcetion() throws Exception {
+        final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
+        TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(new WalletSupplierImpl(indexHandlerSupplier, bip84WalletSender), bipFormatSupplier, params);
+        long spendAmount = 5000;
+        String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
+
+        // throw Exception for 0 spend amount
+        Assertions.assertThrows(Exception.class,
+                () -> {
+                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(0, address);
+                    stonewallx2Service.startInitiator(cahootsWalletSender, 0, cahootsContextSender);
+                });
+
+        // throw Exception for blank address
+        Assertions.assertThrows(Exception.class,
+                () -> {
+                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(0, "");
+                    stonewallx2Service.startInitiator(cahootsWalletSender, 0, cahootsContextSender);
+                });
+    }
 }

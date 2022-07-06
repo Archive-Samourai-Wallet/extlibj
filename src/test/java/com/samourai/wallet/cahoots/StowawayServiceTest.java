@@ -87,4 +87,17 @@ public class StowawayServiceTest extends AbstractCahootsTest {
             Assertions.assertEquals(OUTPUT_ADDRESSES[txOutput.getIndex()], toAddress);
         }
     }
+
+    @Test
+    public void invalidSpendAmountException() throws Exception {
+        final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
+        TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(new WalletSupplierImpl(indexHandlerSupplier, bip84WalletSender), bipFormatSupplier, params);
+
+        // throw Exception for 0 spend amount
+        Assertions.assertThrows(Exception.class,
+                () -> {
+                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(0);
+                    stowawayService.startInitiator(cahootsWalletSender, 0, cahootsContextSender);
+                });
+    }
 }
