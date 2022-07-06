@@ -37,22 +37,23 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     @Override
-    public MultiCahoots startInitiator(CahootsWallet cahootsWallet, int account, CahootsContext cahootsContext) throws Exception {
+    public MultiCahoots startInitiator(CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
         CahootsContext stowawayContext = computeStowawayContext(cahootsContext);
         CahootsContext stonewallContext = computeStonewallContext(cahootsContext);
-        Stowaway stowaway0 = stowawayService.startInitiator(cahootsWallet, account, stowawayContext);
-        STONEWALLx2 stonewall0 = stonewallx2Service.startInitiator(cahootsWallet, account, stonewallContext);
+        Stowaway stowaway0 = stowawayService.startInitiator(cahootsWallet, stowawayContext);
+        STONEWALLx2 stonewall0 = stonewallx2Service.startInitiator(cahootsWallet, stonewallContext);
 
         MultiCahoots multiCahoots0 = new MultiCahoots(params, stowaway0, stonewall0);
         return multiCahoots0;
     }
 
     private CahootsContext computeStowawayContext(CahootsContext multiCahootsContext) {
+        int account = multiCahootsContext.getAccount();
         if (multiCahootsContext.getTypeUser().equals(CahootsTypeUser.COUNTERPARTY)) {
-            return CahootsContext.newCounterpartyStowaway();
+            return CahootsContext.newCounterpartyStowaway(account);
         }
         long stowawayFee = computeMultiCahootsFee(multiCahootsContext.getAmount());
-        return CahootsContext.newInitiatorStowaway(stowawayFee);
+        return CahootsContext.newInitiatorStowaway(account, stowawayFee);
     }
 
     private long computeMultiCahootsFee(long amount) {
@@ -64,15 +65,16 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
     }
 
     private CahootsContext computeStonewallContext(CahootsContext multiCahootsContext) {
+        int account = multiCahootsContext.getAccount();
         if (multiCahootsContext.getTypeUser().equals(CahootsTypeUser.COUNTERPARTY)) {
-            return CahootsContext.newCounterpartyStonewallx2();
+            return CahootsContext.newCounterpartyStonewallx2(account);
         }
-        return CahootsContext.newInitiatorStonewallx2(multiCahootsContext.getAmount(), multiCahootsContext.getAddress());
+        return CahootsContext.newInitiatorStonewallx2(account, multiCahootsContext.getAmount(), multiCahootsContext.getAddress());
     }
 
     @Override
-    public MultiCahoots startCollaborator(CahootsWallet cahootsWallet, int account, MultiCahoots stowaway0) throws Exception {
-        MultiCahoots stowaway1 = doMultiCahoots1_Stowaway1(stowaway0, cahootsWallet, account);
+    public MultiCahoots startCollaborator(CahootsWallet cahootsWallet, CahootsContext cahootsContext, MultiCahoots stowaway0) throws Exception {
+        MultiCahoots stowaway1 = doMultiCahoots1_Stowaway1(stowaway0, cahootsWallet, cahootsContext.getAccount());
         if (log.isDebugEnabled()) {
             log.debug("# MultiCahoots COUNTERPARTY => step="+stowaway1.getStep());
         }

@@ -29,8 +29,8 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     }
 
     @Override
-    public Stowaway startInitiator(CahootsWallet cahootsWallet, int account, CahootsContext cahootsContext) throws Exception {
-        return startInitiator(cahootsWallet, cahootsContext.getAmount(), account);
+    public Stowaway startInitiator(CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+        return startInitiator(cahootsWallet, cahootsContext.getAmount(), cahootsContext.getAccount());
     }
 
     protected Stowaway startInitiator(CahootsWallet cahootsWallet, long amount, int account) throws Exception {
@@ -46,8 +46,8 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     }
 
     @Override
-    public Stowaway startCollaborator(CahootsWallet cahootsWallet, int account, Stowaway stowaway0) throws Exception {
-        Stowaway stowaway1 = doStowaway1(stowaway0, cahootsWallet, account);
+    public Stowaway startCollaborator(CahootsWallet cahootsWallet, CahootsContext cahootsContext, Stowaway stowaway0) throws Exception {
+        Stowaway stowaway1 = doStowaway1(stowaway0, cahootsWallet, cahootsContext.getAccount());
         if (log.isDebugEnabled()) {
             log.debug("# Stowaway COUNTERPARTY => step="+stowaway1.getStep());
         }

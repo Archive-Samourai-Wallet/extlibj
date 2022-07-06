@@ -33,8 +33,8 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
     }
 
     @Override
-    public STONEWALLx2 startInitiator(CahootsWallet cahootsWallet, int account, CahootsContext cahootsContext) throws Exception {
-        return startInitiator(cahootsWallet, cahootsContext.getAmount(), account, cahootsContext.getAddress());
+    public STONEWALLx2 startInitiator(CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+        return startInitiator(cahootsWallet, cahootsContext.getAmount(), cahootsContext.getAccount(), cahootsContext.getAddress());
     }
 
     protected STONEWALLx2 startInitiator(CahootsWallet cahootsWallet, long amount, int account, String address) throws Exception {
@@ -53,8 +53,8 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
     }
 
     @Override
-    public STONEWALLx2 startCollaborator(CahootsWallet cahootsWallet, int account, STONEWALLx2 stonewall0) throws Exception {
-        STONEWALLx2 stonewall1 = doSTONEWALLx2_1(stonewall0, cahootsWallet, account);
+    public STONEWALLx2 startCollaborator(CahootsWallet cahootsWallet, CahootsContext cahootsContext, STONEWALLx2 stonewall0) throws Exception {
+        STONEWALLx2 stonewall1 = doSTONEWALLx2_1(stonewall0, cahootsWallet, cahootsContext.getAccount());
         if (log.isDebugEnabled()) {
             log.debug("# STONEWALLx2 COUNTERPARTY => step="+stonewall1.getStep());
         }

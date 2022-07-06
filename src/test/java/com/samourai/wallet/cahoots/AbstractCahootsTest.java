@@ -1,5 +1,6 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.soroban.cahoots.ManualCahootsMessage;
 import com.samourai.wallet.cahoots.multi.MultiCahootsService;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
@@ -7,6 +8,9 @@ import com.samourai.wallet.cahoots.stowaway.StowawayService;
 import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
 import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
 import com.samourai.wallet.test.AbstractTest;
+import com.samourai.wallet.util.TxUtil;
+import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionOutput;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,5 +60,57 @@ public abstract class AbstractCahootsTest extends AbstractTest {
         Assertions.assertEquals(lastStep, cahootsMessage.isDone());
         Assertions.assertEquals(type, cahootsMessage.getType());
         Assertions.assertEquals(typeUser, cahootsMessage.getTypeUser());
+    }
+
+    protected Cahoots doCahoots(CahootsWallet cahootsWalletSender, CahootsWallet cahootsWalletCounterparty, AbstractCahootsService cahootsService, CahootsContext cahootsContextSender, CahootsContext cahootsContextCp, String[] EXPECTED_PAYLOADS) throws Exception {
+        int nbSteps = EXPECTED_PAYLOADS != null ? EXPECTED_PAYLOADS.length : ManualCahootsMessage.getNbSteps(cahootsContextSender.getCahootsType());
+
+        // sender => _0
+        Cahoots lastPayload = cahootsService.startInitiator(cahootsWalletSender, cahootsContextSender);
+        if (log.isDebugEnabled()) {
+            log.debug("#0 SENDER => "+lastPayload.toJSONString());
+        }
+        if (EXPECTED_PAYLOADS != null) {
+            verify(EXPECTED_PAYLOADS[0], lastPayload);
+        }
+
+        // counterparty => _1
+        lastPayload = cahootsService.startCollaborator(cahootsWalletCounterparty, cahootsContextCp, lastPayload);
+        if (log.isDebugEnabled()) {
+            log.debug("#1 COUNTERPARTY => "+lastPayload.toJSONString());
+        }
+        if (EXPECTED_PAYLOADS != null) {
+            verify(EXPECTED_PAYLOADS[1], lastPayload);
+        }
+
+        for (int i=2; i<nbSteps; i++) {
+            if (i%2 == 0) {
+                // sender
+                lastPayload = cahootsService.reply(cahootsWalletSender, cahootsContextSender, lastPayload);
+                if (log.isDebugEnabled()) {
+                    log.debug("#"+i+" SENDER => "+lastPayload.toJSONString());
+                }
+            } else {
+                // counterparty
+                lastPayload = cahootsService.reply(cahootsWalletCounterparty, cahootsContextCp, lastPayload);
+                if (log.isDebugEnabled()) {
+                    log.debug("#"+i+" COUNTERPARTY => "+lastPayload.toJSONString());
+                }
+            }
+            if (EXPECTED_PAYLOADS != null) {
+                verify(EXPECTED_PAYLOADS[i], lastPayload);
+            }
+        }
+        return lastPayload;
+    }
+
+    protected void verifyTx(Transaction tx, String txid, String raw, String[] OUTPUT_ADDRESSES) throws Exception {
+        Assertions.assertEquals(txid, tx.getHashAsString());
+        Assertions.assertEquals(raw, TxUtil.getInstance().getTxHex(tx));
+
+        for (TransactionOutput txOutput : tx.getOutputs()) {
+            String toAddress = bipFormatSupplier.getToAddress(txOutput);
+            Assertions.assertEquals(OUTPUT_ADDRESSES[txOutput.getIndex()], toAddress);
+        }
     }
 }

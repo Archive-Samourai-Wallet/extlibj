@@ -54,25 +54,25 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
 
         // sender => start Stowaway
         long spendAmount = 5000;
-        CahootsContext contextSender = CahootsContext.newInitiatorStowaway(spendAmount);
-        ManualCahootsMessage payload0 = cahootsSender.initiate(account, contextSender);
+        CahootsContext contextSender = CahootsContext.newInitiatorStowaway(account, spendAmount);
+        ManualCahootsMessage payload0 = cahootsSender.initiate(contextSender);
         verify(EXPECTED_PAYLOADS[0], payload0, false, CahootsType.STOWAWAY, CahootsTypeUser.SENDER);
 
         // receiver => doStowaway1
-        CahootsContext contextReceiver = CahootsContext.newCounterpartyStowaway();
-        ManualCahootsMessage payload1 = (ManualCahootsMessage)cahootsReceiver.reply(account, contextReceiver, payload0);
+        CahootsContext contextReceiver = CahootsContext.newCounterpartyStowaway(account);
+        ManualCahootsMessage payload1 = (ManualCahootsMessage)cahootsReceiver.reply(contextReceiver, payload0);
         verify(EXPECTED_PAYLOADS[1], payload1, false, CahootsType.STOWAWAY, CahootsTypeUser.COUNTERPARTY);
 
         // sender => doStowaway2
-        ManualCahootsMessage payload2 = (ManualCahootsMessage)cahootsSender.reply(account, contextSender, payload1);
+        ManualCahootsMessage payload2 = (ManualCahootsMessage)cahootsSender.reply(contextSender, payload1);
         verify(EXPECTED_PAYLOADS[2], payload2, false, CahootsType.STOWAWAY, CahootsTypeUser.SENDER);
 
         // receiver => doStowaway3
-        ManualCahootsMessage payload3 = (ManualCahootsMessage)cahootsReceiver.reply(account, contextReceiver, payload2);
+        ManualCahootsMessage payload3 = (ManualCahootsMessage)cahootsReceiver.reply(contextReceiver, payload2);
         verify(EXPECTED_PAYLOADS[3], payload3, false, CahootsType.STOWAWAY, CahootsTypeUser.COUNTERPARTY);
 
         // sender => interaction TX_BROADCAST
-        TxBroadcastInteraction txBroadcastInteraction = (TxBroadcastInteraction)cahootsSender.reply(account, contextSender, payload3);
+        TxBroadcastInteraction txBroadcastInteraction = (TxBroadcastInteraction)cahootsSender.reply(contextSender, payload3);
         Assertions.assertEquals(TypeInteraction.TX_BROADCAST, txBroadcastInteraction.getTypeInteraction());
 
         // sender => doStowaway4
@@ -110,25 +110,25 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
         // sender => start Stonewallx2
         long spendAmount = 5000;
         String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
-            CahootsContext contextSender = CahootsContext.newInitiatorStonewallx2(spendAmount, address);
-        ManualCahootsMessage payload0 = cahootsSender.initiate(account, contextSender);
+            CahootsContext contextSender = CahootsContext.newInitiatorStonewallx2(account, spendAmount, address);
+        ManualCahootsMessage payload0 = cahootsSender.initiate(contextSender);
         verify(EXPECTED_PAYLOADS[0], payload0, false, CahootsType.STONEWALLX2, CahootsTypeUser.SENDER);
 
         // counterparty => doSTONEWALLx2_1
-        CahootsContext contextCounterparty = CahootsContext.newCounterpartyStonewallx2();
-        ManualCahootsMessage payload1 = (ManualCahootsMessage)cahootsCounterparty.reply(account, contextCounterparty, payload0);
+        CahootsContext contextCounterparty = CahootsContext.newCounterpartyStonewallx2(account);
+        ManualCahootsMessage payload1 = (ManualCahootsMessage)cahootsCounterparty.reply(contextCounterparty, payload0);
         verify(EXPECTED_PAYLOADS[1], payload1, false, CahootsType.STONEWALLX2, CahootsTypeUser.COUNTERPARTY);
 
         // sender => doSTONEWALLx2_2
-        ManualCahootsMessage payload2 = (ManualCahootsMessage)cahootsSender.reply(account, contextSender, payload1);
+        ManualCahootsMessage payload2 = (ManualCahootsMessage)cahootsSender.reply(contextSender, payload1);
         verify(EXPECTED_PAYLOADS[2], payload2, false, CahootsType.STONEWALLX2, CahootsTypeUser.SENDER);
 
         // counterparty => doSTONEWALLx2_3
-        ManualCahootsMessage payload3 = (ManualCahootsMessage)cahootsCounterparty.reply(account, contextCounterparty, payload2);
+        ManualCahootsMessage payload3 = (ManualCahootsMessage)cahootsCounterparty.reply(contextCounterparty, payload2);
         verify(EXPECTED_PAYLOADS[3], payload3, false, CahootsType.STONEWALLX2, CahootsTypeUser.COUNTERPARTY);
 
         // sender => interaction TX_BROADCAST
-        SorobanInteraction payload4Interaction = (SorobanInteraction)cahootsSender.reply(account, contextSender, payload3);
+        SorobanInteraction payload4Interaction = (SorobanInteraction)cahootsSender.reply(contextSender, payload3);
 
         // sender => doSTONEWALLx2_4
         ManualCahootsMessage payload4 = (ManualCahootsMessage)payload4Interaction.getReplyAccept();
@@ -170,33 +170,33 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
 
         // sender => start multiCahoots
         long spendAmount = 5000;
-        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(spendAmount, "tb1qas00y34404zwx2fp2veekveks4c5crfjx802v3");
-        ManualCahootsMessage payload0 = cahootsSender.initiate(account, contextSender);
+        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(account, spendAmount, "tb1qas00y34404zwx2fp2veekveks4c5crfjx802v3");
+        ManualCahootsMessage payload0 = cahootsSender.initiate(contextSender);
         verify(EXPECTED_PAYLOADS[0], payload0, false, CahootsType.MULTI, CahootsTypeUser.SENDER);
 
         // counterparty
-        CahootsContext contextReceiver = CahootsContext.newCounterpartyMultiCahoots();
-        ManualCahootsMessage payload1 = (ManualCahootsMessage)cahootsReceiver.reply(account, contextReceiver, payload0);
+        CahootsContext contextReceiver = CahootsContext.newCounterpartyMultiCahoots(account);
+        ManualCahootsMessage payload1 = (ManualCahootsMessage)cahootsReceiver.reply(contextReceiver, payload0);
         verify(EXPECTED_PAYLOADS[1], payload1, false, CahootsType.MULTI, CahootsTypeUser.COUNTERPARTY);
 
         // sender
-        ManualCahootsMessage payload2 = (ManualCahootsMessage)cahootsSender.reply(account, contextSender, payload1);
+        ManualCahootsMessage payload2 = (ManualCahootsMessage)cahootsSender.reply(contextSender, payload1);
         verify(EXPECTED_PAYLOADS[2], payload2, false, CahootsType.MULTI, CahootsTypeUser.SENDER);
 
         // counterparty
-        ManualCahootsMessage payload3 = (ManualCahootsMessage)cahootsReceiver.reply(account, contextReceiver, payload2);
+        ManualCahootsMessage payload3 = (ManualCahootsMessage)cahootsReceiver.reply(contextReceiver, payload2);
         verify(EXPECTED_PAYLOADS[3], payload3, false, CahootsType.MULTI, CahootsTypeUser.COUNTERPARTY);
 
         // sender
-        ManualCahootsMessage payload4 = (ManualCahootsMessage)cahootsSender.reply(account, contextSender, payload3);
+        ManualCahootsMessage payload4 = (ManualCahootsMessage)cahootsSender.reply(contextSender, payload3);
         verify(EXPECTED_PAYLOADS[4], payload4, false, CahootsType.MULTI, CahootsTypeUser.SENDER);
 
         // counterparty
-        ManualCahootsMessage payload5 = (ManualCahootsMessage)cahootsReceiver.reply(account, contextReceiver, payload4);
+        ManualCahootsMessage payload5 = (ManualCahootsMessage)cahootsReceiver.reply(contextReceiver, payload4);
         verify(EXPECTED_PAYLOADS[5], payload5, false, CahootsType.MULTI, CahootsTypeUser.COUNTERPARTY);
 
         // sender => interaction TX_BROADCAST
-        TxBroadcastInteraction txBroadcastInteraction = (TxBroadcastInteraction)cahootsSender.reply(account, contextSender, payload5);
+        TxBroadcastInteraction txBroadcastInteraction = (TxBroadcastInteraction)cahootsSender.reply(contextSender, payload5);
         Assertions.assertEquals(TypeInteraction.TX_BROADCAST_MULTI, txBroadcastInteraction.getTypeInteraction());
 
         Transaction stowawayTx = ((MultiCahoots)payload5.getCahoots()).getStowaway().getTransaction();

@@ -37,9 +37,9 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
         this.typeInteractionBroadcast = typeInteractionBroadcast;
     }
 
-    public abstract T startInitiator(CahootsWallet cahootsWallet, int account, CahootsContext cahootsContext) throws Exception;
+    public abstract T startInitiator(CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception;
 
-    public abstract T startCollaborator(CahootsWallet cahootsWallet, int account, T payload0) throws Exception;
+    public abstract T startCollaborator(CahootsWallet cahootsWallet, CahootsContext cahootsContext, T payload0) throws Exception;
 
     public abstract T reply(CahootsWallet cahootsWallet, CahootsContext cahootsContext, T payload) throws Exception;
 
