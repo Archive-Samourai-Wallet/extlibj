@@ -184,15 +184,6 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
         return bipFormatSupplier.getTransactionOutput(receiveAddressString, amount, params);
     }
 
-    protected Triple<byte[], byte[], String> computeOutput(BipAddress bipAddress, byte[] fingerprint) {
-        HD_Address hdAddress = bipAddress.getHdAddress();
-        return computeOutput(hdAddress.getECKey().getPubKey(), fingerprint, hdAddress.getChainIndex(), hdAddress.getAddressIndex());
-    }
-
-    protected Triple<byte[], byte[], String> computeOutput(byte[] pubKey, byte[] fingerprint, int chainIdx, int addressIdx) {
-        return Triple.of(pubKey, fingerprint, "M/"+chainIdx+"/" + addressIdx);
-    }
-
     public BipFormatSupplier getBipFormatSupplier() {
         return bipFormatSupplier;
     }

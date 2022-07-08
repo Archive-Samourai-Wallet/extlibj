@@ -1,6 +1,8 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.wallet.SamouraiWalletConst;
+import com.samourai.wallet.bip69.BIP69InputComparator;
+import com.samourai.wallet.bip69.BIP69OutputComparator;
 import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.util.RandomUtil;
@@ -16,7 +18,10 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 // shared payload for 2x Cahoots: Stonewallx2 or Stowaway
 public abstract class Cahoots2x extends Cahoots {
@@ -64,7 +69,7 @@ public abstract class Cahoots2x extends Cahoots {
         this.strCollabChange = c.getCollabChange();
     }
 
-    public Cahoots2x(int type, NetworkParameters params, long spendAmount, String strDestination, int account) {
+    public Cahoots2x(int type, NetworkParameters params, long spendAmount, String strDestination, int account, byte[] fingerprint) {
         super(type, params);
         this.ts = System.currentTimeMillis() / 1000L;
         SecureRandom random = RandomUtil.getSecureRandom();
@@ -73,7 +78,10 @@ public abstract class Cahoots2x extends Cahoots {
         this.outpoints = new HashMap<String, Long>();
         this.strDestination = strDestination;
         this.account = account;
+        this.fingerprint = fingerprint;
     }
+
+    public abstract Cahoots2x copy();
 
     public long getTS() { return ts; }
 
@@ -150,10 +158,6 @@ public abstract class Cahoots2x extends Cahoots {
 
     public byte[] getFingerprint() {
         return fingerprint;
-    }
-
-    public void setFingerprint(byte[] fingerprint) {
-        this.fingerprint = fingerprint;
     }
 
     public byte[] getFingerprintCollab() {
@@ -309,5 +313,95 @@ public abstract class Cahoots2x extends Cahoots {
             requiredAmount += estimatedFee;
         }
         return requiredAmount;
+    }
+
+    //
+    // counterparty
+    //
+    public void doStep1(List<TransactionInput> inputs, List<TransactionOutput> outputs) throws Exception    {
+        if(this.getStep() != 0 || this.getSpendAmount() == 0L)   {
+            throw new Exception("Invalid step/amount");
+        }
+        if(outputs == null)    {
+            throw new Exception("Invalid outputs");
+        }
+
+        Transaction transaction = new Transaction(params);
+        transaction.setVersion(2);
+        appendTx(inputs, outputs, transaction);
+
+        this.setStep(1);
+    }
+
+    //
+    // sender
+    //
+    public void doStep2(List<TransactionInput> inputs, List<TransactionOutput> outputs) throws Exception    {
+        Transaction transaction = psbt.getTransaction();
+        if (log.isDebugEnabled()) {
+            log.debug("step2 tx:" + transaction.toString());
+            log.debug("step2 tx:" + Hex.toHexString(transaction.bitcoinSerialize()));
+        }
+
+        appendTx(inputs, outputs, transaction);
+
+        this.setStep(2);
+    }
+
+    //
+    // counterparty
+    //
+    public void doStep3(HashMap<String,ECKey> keyBag)    {
+        Transaction transaction = this.getTransaction();
+
+        // sort inputs
+        List<TransactionInput> inputs = new ArrayList<TransactionInput>();
+        inputs.addAll(transaction.getInputs());
+        Collections.sort(inputs, new BIP69InputComparator());
+        transaction.clearInputs();
+
+        // sort outputs
+        List<TransactionOutput> outputs = new ArrayList<TransactionOutput>();
+        outputs.addAll(transaction.getOutputs());
+        Collections.sort(outputs, new BIP69OutputComparator());
+        transaction.clearOutputs();
+
+        appendTx(inputs, outputs, transaction);
+
+        signTx(keyBag);
+
+        this.setStep(3);
+    }
+
+    //
+    // sender
+    //
+    public void doStep4(HashMap<String,ECKey> keyBag)    {
+        signTx(keyBag);
+
+        this.setStep(4);
+    }
+
+    protected void appendTx(List<TransactionInput> inputs, List<TransactionOutput> outputs, Transaction transaction) {
+        // append inputs
+        for(TransactionInput input : inputs)   {
+            input.setSequenceNumber(SEQUENCE_RBF_ENABLED);
+            transaction.addInput(input);
+            outpoints.put(input.getOutpoint().getHash().toString() + "-" + input.getOutpoint().getIndex(), input.getValue().longValue());
+        }
+
+        // append outputs
+        for(TransactionOutput output : outputs)   {
+            transaction.addOutput(output);
+        }
+
+        // used by Sparrow
+        String strBlockHeight = System.getProperty(BLOCK_HEIGHT_PROPERTY);
+        if(strBlockHeight != null) {
+            transaction.setLockTime(Long.parseLong(strBlockHeight));
+        }
+
+        // update psbt
+        this.psbt = new PSBT(transaction);
     }
 }

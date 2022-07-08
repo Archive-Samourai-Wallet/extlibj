@@ -21,11 +21,15 @@ public abstract class CahootsWallet {
     private static final Bech32UtilGeneric bech32Util = Bech32UtilGeneric.getInstance();
 
     private WalletSupplier walletSupplier;
+    private HD_Wallet hdWallet;
+    private BIP47Wallet bip47Wallet;
     private BipFormatSupplier bipFormatSupplier;
     private NetworkParameters params;
 
     public CahootsWallet(WalletSupplier walletSupplier, BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
         this.walletSupplier = walletSupplier;
+        this.hdWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84).getHdWallet();
+        this.bip47Wallet = new BIP47Wallet(hdWallet);
         this.bipFormatSupplier = bipFormatSupplier;
         this.params = params;
     }
@@ -72,8 +76,16 @@ public abstract class CahootsWallet {
         return params;
     }
 
+    public BIP47Wallet getBip47Wallet() {
+        return bip47Wallet;
+    }
+
+    public int getBip47Account() {
+        return 0;
+    }
+
     public byte[] getFingerprint() {
-        return walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84).getHdWallet().getFingerprint();
+        return hdWallet.getFingerprint();
     }
 
     public List<CahootsUtxo> getUtxosWpkhByAccount(int account) {
