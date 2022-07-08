@@ -34,6 +34,7 @@ public class BoltzmannUtil {
         return instance;
     }
 
+    // this will increment change index
     public Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> boltzmann(List<UTXO> utxos, List<UTXO> utxosBis, BigInteger spendAmount, String address, WhirlpoolAccount account, UtxoProvider utxoProvider, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb) {
 
         Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> set0 = boltzmannSet(utxos, spendAmount, address, null, account, null, utxoProvider, forcedChangeFormat, params, feePerKb);
@@ -92,6 +93,7 @@ public class BoltzmannUtil {
         return ret;
     }
 
+    // this will increment change index
     public Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> boltzmannSet(List<UTXO> utxos, BigInteger spendAmount, String address, List<MyTransactionOutPoint> firstPassOutpoints, WhirlpoolAccount account, List<TransactionOutput> outputs0, UtxoProvider utxoProvider, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb) {
 
         if(utxos == null || utxos.size() == 0)    {
@@ -294,7 +296,7 @@ public class BoltzmannUtil {
                 // type of address for 'mixed' amount must match type of address for destination
                 //
                 BipFormat mixedFormat = SpendBuilder.computeAddressFormat(forcedChangeFormat, address, bipFormatSupplier, params);
-                _address = utxoProvider.getChangeAddress(account, mixedFormat);
+                _address = utxoProvider.getNextChangeAddress(account, mixedFormat, true);
             }
             txSpendOutput = bipFormatSupplier.getTransactionOutput(_address, spendAmount.longValue(), params);
             txOutputs.add(txSpendOutput);
@@ -305,7 +307,7 @@ public class BoltzmannUtil {
             //
             String utxoAddress = utxos.get(0).getOutpoints().get(0).getAddress();
             BipFormat changeFormat = SpendBuilder.computeAddressFormat(forcedChangeFormat, utxoAddress, bipFormatSupplier, params);
-            String changeAddress = utxoProvider.getChangeAddress(account, changeFormat);
+            String changeAddress = utxoProvider.getNextChangeAddress(account, changeFormat, true);
             txChangeOutput = bipFormatSupplier.getTransactionOutput(changeAddress, changeDue.longValue(), params);
             txOutputs.add(txChangeOutput);
         }

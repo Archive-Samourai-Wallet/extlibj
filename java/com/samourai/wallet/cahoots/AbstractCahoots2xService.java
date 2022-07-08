@@ -4,11 +4,14 @@ import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.soroban.cahoots.TypeInteraction;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends AbstractCahootsService<T> {
@@ -78,4 +81,36 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends Abst
     }
 
     protected abstract long computeMaxSpendAmount(long minerFee, CahootsContext cahootsContext) throws Exception;
+
+    //
+    // receiver
+    //
+    public T doStep3(T cahoots2, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(cahoots2.getCounterpartyAccount());
+        HashMap<String, ECKey> keyBag_A = computeKeyBag(cahoots2, utxos);
+
+        T cahoots3 = (T)cahoots2.copy();
+        cahoots3.doStep3(keyBag_A);
+
+        // check verifiedSpendAmount
+        long verifiedSpendAmount = computeSpendAmount(keyBag_A, cahootsWallet, cahoots3, CahootsTypeUser.COUNTERPARTY);
+        checkMaxSpendAmount(verifiedSpendAmount, cahoots3.getFeeAmount(), cahootsContext);
+        return cahoots3;
+    }
+
+    //
+    // sender
+    //
+    public T doStep4(T cahoots3, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(cahoots3.getAccount());
+        HashMap<String, ECKey> keyBag_B = computeKeyBag(cahoots3, utxos);
+
+        T cahoots4 = (T)cahoots3.copy();
+        cahoots4.doStep4(keyBag_B);
+
+        // check verifiedSpendAmount
+        long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahootsWallet, cahoots4, CahootsTypeUser.SENDER);
+        checkMaxSpendAmount(verifiedSpendAmount, cahoots4.getFeeAmount(), cahootsContext);
+        return cahoots4;
+    }
 }

@@ -4,6 +4,8 @@ import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.bipWallet.BipWallet;
+import com.samourai.wallet.client.indexHandler.IIndexHandler;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.beans.SpendError;
@@ -25,18 +27,16 @@ import java.util.List;
 public class SpendBuilder {
     private static final Logger log = LoggerFactory.getLogger(SpendBuilder.class);
 
-    private NetworkParameters params;
     private UtxoProvider utxoProvider;
-    private Runnable restoreChangeIndexes; // may be null
 
-    public SpendBuilder(NetworkParameters params, UtxoProvider utxoProvider, Runnable restoreChangeIndexes) {
-        this.params = params;
+    public SpendBuilder(UtxoProvider utxoProvider) {
         this.utxoProvider = utxoProvider;
-        this.restoreChangeIndexes = restoreChangeIndexes;
     }
 
     // forcedChangeType may be null
-    public SpendTx preview(WhirlpoolAccount account, String address, long amount, boolean boltzmann, boolean rbfOptIn, BigInteger feePerKb, BipFormat forcedChangeFormat, List<MyTransactionOutPoint> preselectedInputs, long blockHeight) throws Exception {
+    public SpendTx preview(BipWallet spendWallet, BipWallet changeWallet, String address, long amount, boolean boltzmann, boolean rbfOptIn, BigInteger feePerKb, BipFormat forcedChangeFormat, List<MyTransactionOutPoint> preselectedInputs, long blockHeight) throws Exception {
+        WhirlpoolAccount account = spendWallet.getAccount();
+        NetworkParameters params = spendWallet.getParams();
         BipFormat addressFormat = computeAddressFormat(forcedChangeFormat, address, utxoProvider.getBipFormatSupplier(), params);
 
         // if possible, get UTXO by input 'type': p2pkh, p2sh-p2wpkh or p2wpkh, else get all UTXO
@@ -50,10 +50,10 @@ public class SpendBuilder {
         else {
             // get all UTXO
             Collection<UTXO> utxos = findUtxos(neededAmount, account, addressFormat);
-            spendSelection = computeUtxoSelection(account, address, boltzmann, amount, neededAmount, utxos, addressFormat, params, feePerKb, forcedChangeFormat);
+            spendSelection = computeUtxoSelection(spendWallet, changeWallet, address, boltzmann, amount, neededAmount, utxos, addressFormat, feePerKb, forcedChangeFormat);
         }
 
-        SpendTx spendTx = spendSelection.spendTx(amount, address, addressFormat, account, rbfOptIn, params, feePerKb, restoreChangeIndexes, utxoProvider, blockHeight);
+        SpendTx spendTx = spendSelection.spendTx(amount, address, addressFormat, account, rbfOptIn, params, feePerKb, utxoProvider, blockHeight);
         if (spendTx != null) {
             if (log.isDebugEnabled()) {
                 log.debug("spend type:" + spendSelection.getSpendType());
@@ -121,7 +121,9 @@ public class SpendBuilder {
         return new SpendSelectionSimple(utxoProvider.getBipFormatSupplier(), utxos);
     }
 
-    private SpendSelection computeUtxoSelection(WhirlpoolAccount account, String address, boolean boltzmann, long amount, long neededAmount, Collection<UTXO> utxos, BipFormat addressFormat, NetworkParameters params, BigInteger feePerKb, BipFormat forcedChangeFormat) throws SpendException {
+    private SpendSelection computeUtxoSelection(BipWallet spendWallet, BipWallet changeWallet, String address, boolean boltzmann, long amount, long neededAmount, Collection<UTXO> utxos, BipFormat addressFormat,  BigInteger feePerKb, BipFormat forcedChangeFormat) throws SpendException {
+        WhirlpoolAccount account = spendWallet.getAccount();
+        NetworkParameters params = spendWallet.getParams();
         long balance = UTXO.sumValue(utxos);
 
         // insufficient balance
@@ -141,7 +143,8 @@ public class SpendBuilder {
 
         // boltzmann spend
         if (boltzmann) {
-            SpendSelection spendSelection = SpendSelectionBoltzmann.compute(neededAmount, utxoProvider, addressFormat, amount, address, account, forcedChangeFormat, params, feePerKb, restoreChangeIndexes);
+            IIndexHandler changeIndexHandler = changeWallet.getIndexHandlerChange();
+            SpendSelection spendSelection = SpendSelectionBoltzmann.compute(neededAmount, utxoProvider, addressFormat, amount, address, account, forcedChangeFormat, params, feePerKb, changeIndexHandler);
             if (spendSelection != null) {
                 return spendSelection;
             }

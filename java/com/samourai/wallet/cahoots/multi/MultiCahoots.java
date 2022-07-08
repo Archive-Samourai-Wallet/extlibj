@@ -27,8 +27,8 @@ public class MultiCahoots extends Cahoots {
 
     public MultiCahoots(MultiCahoots multiCahoots)    {
         super(multiCahoots);
-        this.stonewallx2 = new STONEWALLx2(multiCahoots.stonewallx2);
-        this.stowaway = new Stowaway(multiCahoots.stowaway);
+        this.stonewallx2 = multiCahoots.stonewallx2.copy();
+        this.stowaway = multiCahoots.stowaway.copy();
 
         // keep stowaway unchanged once finished
         if (multiCahoots.stowaway.getStep() == ManualCahootsMessage.LAST_STEP) {

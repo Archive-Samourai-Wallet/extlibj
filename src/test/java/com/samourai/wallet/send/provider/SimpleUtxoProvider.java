@@ -68,9 +68,9 @@ public class SimpleUtxoProvider extends SimpleUtxoKeyProvider implements UtxoPro
   }
 
   @Override
-  public String getChangeAddress(WhirlpoolAccount account, BipFormat bipFormat) {
+  public String getNextChangeAddress(WhirlpoolAccount account, BipFormat bipFormat, boolean increment) {
     BipWallet bipWallet = walletSupplier.getWallet(account, bipFormat);
-    return bipWallet.getNextChangeAddress().getAddressString();
+    return bipWallet.getNextChangeAddress(increment).getAddressString();
   }
 
   @Override

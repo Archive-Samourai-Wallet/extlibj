@@ -2,24 +2,21 @@ package com.samourai.wallet.cahoots.stowaway;
 
 import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.SamouraiWalletConst;
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
-import com.samourai.wallet.cahoots.*;
+import com.samourai.wallet.cahoots.AbstractCahoots2xService;
+import com.samourai.wallet.cahoots.CahootsTypeUser;
+import com.samourai.wallet.cahoots.CahootsUtxo;
+import com.samourai.wallet.cahoots.CahootsWallet;
 import com.samourai.wallet.hd.BipAddress;
-import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.util.FeeUtil;
-import org.apache.commons.lang3.tuple.Triple;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.*;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     private static final Logger log = LoggerFactory.getLogger(StowawayService.class);
@@ -29,15 +26,15 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     }
 
     @Override
-    public Stowaway startInitiator(CahootsWallet cahootsWallet, int account, CahootsContext cahootsContext) throws Exception {
-        return startInitiator(cahootsWallet, cahootsContext.getAmount(), account);
+    public Stowaway startInitiator(CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+        return startInitiator(cahootsWallet, cahootsContext.getAmount(), cahootsContext.getAccount());
     }
 
     protected Stowaway startInitiator(CahootsWallet cahootsWallet, long amount, int account) throws Exception {
         if (amount <= 0) {
             throw new Exception("Invalid amount");
         }
-        byte[] fingerprint = cahootsWallet.getBip84Wallet().getFingerprint();
+        byte[] fingerprint = cahootsWallet.getFingerprint();
         Stowaway stowaway0 = doStowaway0(amount, account, fingerprint);
         if (log.isDebugEnabled()) {
             log.debug("# Stowaway INITIATOR => step="+stowaway0.getStep());
@@ -46,8 +43,8 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     }
 
     @Override
-    public Stowaway startCollaborator(CahootsWallet cahootsWallet, int account, Stowaway stowaway0) throws Exception {
-        Stowaway stowaway1 = doStowaway1(stowaway0, cahootsWallet, account);
+    public Stowaway startCollaborator(CahootsWallet cahootsWallet, CahootsContext cahootsContext, Stowaway stowaway0) throws Exception {
+        Stowaway stowaway1 = doStowaway1(stowaway0, cahootsWallet, cahootsContext.getAccount());
         if (log.isDebugEnabled()) {
             log.debug("# Stowaway COUNTERPARTY => step="+stowaway1.getStep());
         }
@@ -66,10 +63,10 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
                 payload = doStowaway2(stowaway, cahootsWallet);
                 break;
             case 2:
-                payload = doStowaway3(stowaway, cahootsWallet, cahootsContext);
+                payload = doStep3(stowaway, cahootsWallet, cahootsContext);
                 break;
             case 3:
-                payload = doStowaway4(stowaway, cahootsWallet, cahootsContext);
+                payload = doStep4(stowaway, cahootsWallet, cahootsContext);
                 break;
             default:
                 throw new Exception("Unrecognized #Cahoots step");
@@ -92,11 +89,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         // step0: B sends spend amount to A,  creates step0
         //
         //
-        if (log.isDebugEnabled()) {
-            log.debug("sender account (0):" + account);
-        }
-        Stowaway stowaway0 = new Stowaway(spendAmount, params, account);
-        stowaway0.setFingerprint(fingerprint);
+        Stowaway stowaway0 = new Stowaway(spendAmount, params, account, fingerprint);
         return stowaway0;
     }
 
@@ -104,7 +97,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     // receiver
     //
     public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, int account) throws Exception {
-        byte[] fingerprint = cahootsWallet.getBip84Wallet().getFingerprint();
+        byte[] fingerprint = cahootsWallet.getFingerprint();
         stowaway0.setFingerprintCollab(fingerprint);
 
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
@@ -150,36 +143,32 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
             throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
         }
 
-        NetworkParameters params = stowaway0.getParams();
-
         //
         //
         // step1: A utxos -> B (take largest that cover amount)
         //
         //
 
-        HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>> inputsA = new HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>>();
+        List<TransactionInput> inputsA = new LinkedList<>();
 
         for (CahootsUtxo utxo : selectedUTXO) {
-            MyTransactionOutPoint _outpoint = utxo.getOutpoint();
-            ECKey eckey = utxo.getKey();
-            String path = utxo.getPath();
-            inputsA.put(_outpoint, Triple.of(eckey.getPubKey(), stowaway0.getFingerprintCollab(), path));
+            TransactionInput input = utxo.getOutpoint().computeSpendInput();
+            inputsA.add(input);
         }
 
         // destination output
-        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(account, true);
+        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(account, true, BIP_FORMAT.SEGWIT_NATIVE);
         if (log.isDebugEnabled()) {
             log.debug("+output (CounterParty receive) = "+receiveAddress);
         }
-        HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsA = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
-        _TransactionOutput output_A0 = computeTxOutput(receiveAddress, stowaway0.getSpendAmount());
-        outputsA.put(output_A0, computeOutput(receiveAddress, stowaway0.getFingerprintCollab()));
+        List<TransactionOutput> outputsA = new LinkedList<>();
+        TransactionOutput output_A0 = computeTxOutput(receiveAddress, stowaway0.getSpendAmount());
+        outputsA.add(output_A0);
 
         stowaway0.setDestination(receiveAddress.getAddressString());
         stowaway0.setCounterpartyAccount(account);
 
-        Stowaway stowaway1 = new Stowaway(stowaway0);
+        Stowaway stowaway1 = stowaway0.copy();
         stowaway1.doStep1(inputsA, outputsA);
 
         return stowaway1;
@@ -282,77 +271,44 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
             log.debug("fee:" + fee);
         }
 
-        NetworkParameters params = stowaway1.getParams();
-
         //
         //
         // step2: B verif, utxos -> A (take smallest that cover amount)
         //
         //
 
-        HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>> inputsB = new HashMap<MyTransactionOutPoint, Triple<byte[], byte[], String>>();
-
+        List<TransactionInput> inputsB = new LinkedList<>();
         for (CahootsUtxo utxo : selectedUTXO) {
-            MyTransactionOutPoint _outpoint = utxo.getOutpoint();
-            ECKey eckey = utxo.getKey();
-            String path = utxo.getPath();
-            inputsB.put(_outpoint, Triple.of(eckey.getPubKey(), stowaway1.getFingerprint(), path));
+            TransactionInput input = utxo.getOutpoint().computeSpendInput();
+            inputsB.add(input);
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("inputsB:" + inputsB.size());
+        List<TransactionOutput> outputsB = new LinkedList<>();
+
+        // tx: modify spend output
+        long contributedAmount = 0L;
+        for(Long value : stowaway1.getOutpoints().values())   {
+            contributedAmount += value;
         }
+        long outputAmount = transaction.getOutput(0).getValue().longValue();
+        TransactionOutput spendOutput = transaction.getOutput(0);
+        spendOutput.setValue(Coin.valueOf(outputAmount + contributedAmount));
+        outputsB.add(spendOutput);
+        stowaway1.getTransaction().clearOutputs(); // replace spend output by the new one
 
         // change output
         BipAddress changeAddress = cahootsWallet.fetchAddressChange(stowaway1.getAccount(), true);
         if (log.isDebugEnabled()) {
             log.debug("+output (sender change) = "+changeAddress);
         }
-        HashMap<_TransactionOutput, Triple<byte[], byte[], String>> outputsB = new HashMap<_TransactionOutput, Triple<byte[], byte[], String>>();
-        _TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stowaway1.getSpendAmount()) - fee);
-        outputsB.put(output_B0, computeOutput(changeAddress, stowaway1.getFingerprint()));
+        TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stowaway1.getSpendAmount()) - fee);
+        outputsB.add(output_B0);
 
-        if (log.isDebugEnabled()) {
-            log.debug("outputsB:" + outputsB.size());
-        }
-
-        Stowaway stowaway2 = new Stowaway(stowaway1);
+        Stowaway stowaway2 = stowaway1.copy();
         stowaway2.doStep2(inputsB, outputsB);
         stowaway2.setFeeAmount(fee);
 
         return stowaway2;
-    }
-
-    //
-    // receiver
-    //
-    public Stowaway doStowaway3(Stowaway stowaway2, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway2.getCounterpartyAccount());
-        HashMap<String, ECKey> keyBag_A = computeKeyBag(stowaway2, utxos);
-
-        Stowaway stowaway3 = new Stowaway(stowaway2);
-        stowaway3.doStep3(keyBag_A);
-
-        // check verifiedSpendAmount
-        long verifiedSpendAmount = computeSpendAmount(keyBag_A, cahootsWallet, stowaway3, CahootsTypeUser.COUNTERPARTY);
-        checkMaxSpendAmount(verifiedSpendAmount, stowaway3.getFeeAmount(), cahootsContext);
-        return stowaway3;
-    }
-
-    //
-    // sender
-    //
-    public Stowaway doStowaway4(Stowaway stowaway3, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway3.getAccount());
-        HashMap<String, ECKey> keyBag_B = computeKeyBag(stowaway3, utxos);
-
-        Stowaway stowaway4 = new Stowaway(stowaway3);
-        stowaway4.doStep4(keyBag_B);
-
-        // check verifiedSpendAmount
-        long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahootsWallet, stowaway4, CahootsTypeUser.SENDER);
-        checkMaxSpendAmount(verifiedSpendAmount, stowaway4.getFeeAmount(), cahootsContext);
-        return stowaway4;
     }
 
     private long estimatedFee(int nbTotalSelectedOutPoints, int nbIncomingInputs, long feePerB) {

@@ -41,9 +41,9 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
         this.multiCahootsService = new MultiCahootsService(bipFormatSupplier, params, stonewallx2Service, stowawayService, xManagerClient);
     }
 
-    public ManualCahootsMessage initiate(int account, CahootsContext cahootsContext) throws Exception {
+    public ManualCahootsMessage initiate(CahootsContext cahootsContext) throws Exception {
         AbstractCahootsService cahootsService = getCahootsService(cahootsContext.getCahootsType());
-        Cahoots payload0 = cahootsService.startInitiator(cahootsWallet, account, cahootsContext);
+        Cahoots payload0 = cahootsService.startInitiator(cahootsWallet, cahootsContext);
         ManualCahootsMessage response = new ManualCahootsMessage(payload0);
 
         verifyResponse(cahootsContext, response, cahootsService, null);
@@ -55,22 +55,16 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
         return ManualCahootsMessage.parse(payload);
     }
 
-    public SorobanReply reply(int account, ManualCahootsMessage request) throws Exception {
-        return reply(account, null, request);
-    }
-
     @Override
-    public SorobanReply reply(int account, CahootsContext cahootsContext, ManualCahootsMessage request) throws Exception {
-        if (cahootsContext != null) {
-            verifyRequest(cahootsContext, request);
-        }
+    public SorobanReply reply(CahootsContext cahootsContext, ManualCahootsMessage request) throws Exception {
+        verifyRequest(cahootsContext, request);
 
         final AbstractCahootsService cahootsService = getCahootsService(request.getType());
         final Cahoots payload = request.getCahoots();
         SorobanReply response;
         if (payload.getStep() == 0) {
             // new Cahoots as counterparty/receiver
-            Cahoots cahootsResponse = cahootsService.startCollaborator(cahootsWallet, account, payload);
+            Cahoots cahootsResponse = cahootsService.startCollaborator(cahootsWallet, cahootsContext, payload);
             response = new ManualCahootsMessage(cahootsResponse);
         } else {
             // continue existing Cahoots
@@ -84,9 +78,7 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
             } else {
                 // standard reply
                 response = new ManualCahootsMessage(cahootsResponse);
-                if (cahootsContext != null) {
-                    verifyResponse(cahootsContext, (ManualCahootsMessage)response, cahootsService, request);
-                }
+                verifyResponse(cahootsContext, (ManualCahootsMessage)response, cahootsService, request);
             }
         }
         return response;

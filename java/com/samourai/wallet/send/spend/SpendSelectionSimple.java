@@ -5,6 +5,7 @@ import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
+import com.samourai.wallet.send.beans.SpendError;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
 import com.samourai.wallet.send.exceptions.SpendException;
@@ -94,7 +95,7 @@ public class SpendSelectionSimple extends SpendSelection {
     }
 
     @Override
-    public SpendTx spendTx(long amount, String address, BipFormat addressFormat, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, Runnable restoreChangeIndexes, UtxoProvider utxoProvider, long blockHeight) throws SpendException {
+    public SpendTx spendTx(long amount, String address, BipFormat addressFormat, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, UtxoProvider utxoProvider, long blockHeight) throws SpendException {
         List<MyTransactionOutPoint> outpoints = getSpendFrom();
         Triple<Integer, Integer, Integer> outpointTypes = FeeUtil.getInstance().getOutpointCount(new Vector(outpoints), params);
         BigInteger fee;
@@ -125,16 +126,19 @@ public class SpendSelectionSimple extends SpendSelection {
             receivers.put(address, amount);
 
             // add change output
-            String changeAddress = utxoProvider.getChangeAddress(account, addressFormat);
+            String changeAddress = utxoProvider.getNextChangeAddress(account, addressFormat, true);
+            if (changeAddress.equals(address)) {
+                // prevent erasing existing receiver
+                log.error("address and changeAddress are identical");
+                throw new SpendException(SpendError.MAKING);
+            }
             receivers.put(changeAddress, change);
         }
 
         //
         // fee sanity check
         //
-        if (restoreChangeIndexes != null) {
-            restoreChangeIndexes.run(); // TODO zeroleak
-        }
+        // TODO zeroleak restoreChangeIndexes?
         return new SpendTx(addressFormat, amount, fee.longValue(), change, this, receivers, rbfOptIn, utxoProvider, params, blockHeight);
     }
 }

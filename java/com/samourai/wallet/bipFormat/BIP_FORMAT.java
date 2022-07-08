@@ -124,6 +124,14 @@ public class BIP_FORMAT {
             witness.setPush(1, key.getPubKey());
             tx.setWitness(inputIndex, witness);
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof BipFormat) {
+                return ((BipFormat) obj).getId().equals(getId());
+            }
+            return super.equals(obj);
+        }
     };
 
     public static final BipFormat TAPROOT = new BipFormatImpl("TAPROOT", "Taproot (P2TR)") {

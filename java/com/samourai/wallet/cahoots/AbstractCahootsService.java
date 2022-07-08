@@ -5,11 +5,11 @@ import com.samourai.soroban.cahoots.ManualCahootsMessage;
 import com.samourai.soroban.cahoots.TxBroadcastInteraction;
 import com.samourai.soroban.cahoots.TypeInteraction;
 import com.samourai.soroban.client.SorobanInteraction;
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
+import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.HD_Address;
-import com.samourai.wallet.segwit.SegwitAddress;
-import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.RandomUtil;
 import com.samourai.wallet.whirlpool.WhirlpoolConst;
@@ -37,9 +37,9 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
         this.typeInteractionBroadcast = typeInteractionBroadcast;
     }
 
-    public abstract T startInitiator(CahootsWallet cahootsWallet, int account, CahootsContext cahootsContext) throws Exception;
+    public abstract T startInitiator(CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception;
 
-    public abstract T startCollaborator(CahootsWallet cahootsWallet, int account, T payload0) throws Exception;
+    public abstract T startCollaborator(CahootsWallet cahootsWallet, CahootsContext cahootsContext, T payload0) throws Exception;
 
     public abstract T reply(CahootsWallet cahootsWallet, CahootsContext cahootsContext, T payload) throws Exception;
 
@@ -115,8 +115,9 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
             }
         }
 
+        BipFormat altBipFormat = getBipFormatSupplier().findByAddress(cahoots.getDestination(), params);
         int myAccount = typeUser.equals(CahootsTypeUser.SENDER) ? cahoots.getAccount() : cahoots.getCounterpartyAccount();
-        List<String> myOutputAddresses = computeMyOutputAddresses(cahootsWallet, myAccount);
+        List<String> myOutputAddresses = computeMyOutputAddresses(cahootsWallet, myAccount, altBipFormat);
 
         for(TransactionOutput output : transaction.getOutputs()) {
             String outputAddress = bipFormatSupplier.getToAddress(output);
@@ -135,22 +136,28 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
         return spendAmount;
     }
 
-    protected List<String> computeMyOutputAddresses(CahootsWallet cahootsWallet, int myAccount) throws Exception {
+    protected List<String> computeMyOutputAddresses(CahootsWallet cahootsWallet, int myAccount, BipFormat altBipFormat) throws Exception {
         List<String> addresses = new LinkedList<String>();
 
         // compute change addresses
         BipAddress changeAddress = cahootsWallet.fetchAddressChange(myAccount, false);
-        addresses.addAll(computeMyOutputAddresses(cahootsWallet, changeAddress.getHdAddress()));
+        addresses.addAll(computeMyOutputAddresses(cahootsWallet, changeAddress.getHdAddress(), BIP_FORMAT.SEGWIT_NATIVE));
 
         // compute receive addresses
         if (myAccount != WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT) {
-            BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(myAccount, false);
-            addresses.addAll(computeMyOutputAddresses(cahootsWallet, receiveAddress.getHdAddress()));
+            // SEGWIT_NATIVE
+            BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(myAccount, false, BIP_FORMAT.SEGWIT_NATIVE);
+            addresses.addAll(computeMyOutputAddresses(cahootsWallet, receiveAddress.getHdAddress(), BIP_FORMAT.SEGWIT_NATIVE));
+            if (altBipFormat != null && !altBipFormat.equals(BIP_FORMAT.SEGWIT_NATIVE)) {
+                // additional format
+                receiveAddress = cahootsWallet.fetchAddressReceive(myAccount, false, altBipFormat);
+                addresses.addAll(computeMyOutputAddresses(cahootsWallet, receiveAddress.getHdAddress(), altBipFormat));
+            }
         }
         return addresses;
     }
 
-    private List<String> computeMyOutputAddresses(CahootsWallet cahootsWallet, HD_Address hdAddress) throws Exception {
+    private List<String> computeMyOutputAddresses(CahootsWallet cahootsWallet, HD_Address hdAddress, BipFormat bipFormat) throws Exception {
         int account = hdAddress.getAccountIndex();
         int idx = hdAddress.getAddressIndex();
         int chain = hdAddress.getChainIndex();
@@ -160,31 +167,21 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
 
         List<String> addresses = new LinkedList<String>();
         for (int i=0; i<NB_ADDRESSES_MAX; i++) {
-            SegwitAddress segwitAddress = cahootsWallet.getBip84Wallet().getSegwitAddressAt(account, chain, idx+i);
-            addresses.add(segwitAddress.getBech32AsString());
+            BipAddress receiveAddress = cahootsWallet.getReceiveWallet(account, bipFormat).getAddressAt(chain, idx+i);
+            addresses.add(receiveAddress.getAddressString());
             if (log.isDebugEnabled()) {
-                log.debug("myOutputAddress " + account + ":m/" + chain + "/" + (idx + i) + " = " + segwitAddress.getBech32AsString());
+                log.debug("myOutputAddress " + receiveAddress);
             }
         }
         return addresses;
     }
 
-    protected  _TransactionOutput computeTxOutput(BipAddress bipAddress, long amount) throws Exception{
+    protected  TransactionOutput computeTxOutput(BipAddress bipAddress, long amount) throws Exception{
         return computeTxOutput(bipAddress.getAddressString(), amount);
     }
 
-    protected Triple<byte[], byte[], String> computeOutput(BipAddress bipAddress, byte[] fingerprint) {
-        HD_Address hdAddress = bipAddress.getHdAddress();
-        return computeOutput(hdAddress.getECKey().getPubKey(), fingerprint, hdAddress.getChainIndex(), hdAddress.getAddressIndex());
-    }
-
-    protected  _TransactionOutput computeTxOutput(String receiveAddressString, long amount) throws Exception{
-        byte[] scriptPubKey_A0 = Bech32UtilGeneric.getInstance().computeScriptPubKey(receiveAddressString, params);
-        return new _TransactionOutput(params, null, Coin.valueOf(amount), scriptPubKey_A0);
-    }
-
-    protected Triple<byte[], byte[], String> computeOutput(byte[] pubKey, byte[] fingerprint, int chainIdx, int addressIdx) {
-        return Triple.of(pubKey, fingerprint, "M/"+chainIdx+"/" + addressIdx);
+    protected  TransactionOutput computeTxOutput(String receiveAddressString, long amount) throws Exception{
+        return bipFormatSupplier.getTransactionOutput(receiveAddressString, amount, params);
     }
 
     public BipFormatSupplier getBipFormatSupplier() {

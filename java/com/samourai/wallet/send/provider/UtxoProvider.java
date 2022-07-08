@@ -8,7 +8,7 @@ import java.util.Collection;
 
 public interface UtxoProvider extends UtxoKeyProvider {
 
-    String getChangeAddress(WhirlpoolAccount account, BipFormat bipFormat);
+    String getNextChangeAddress(WhirlpoolAccount account, BipFormat bipFormat, boolean increment);
 
     Collection<UTXO> getUtxos(WhirlpoolAccount account);
 

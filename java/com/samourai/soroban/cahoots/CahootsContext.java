@@ -7,42 +7,44 @@ import com.samourai.soroban.client.SorobanContext;
 public class CahootsContext implements SorobanContext {
     private CahootsTypeUser typeUser;
     private CahootsType cahootsType;
+    private int account;
     private Long amount;
     private String address;
 
-    private CahootsContext(CahootsTypeUser typeUser, CahootsType cahootsType, Long amount, String address) {
+    private CahootsContext(CahootsTypeUser typeUser, CahootsType cahootsType, int account, Long amount, String address) {
         this.typeUser = typeUser;
         this.cahootsType = cahootsType;
+        this.account = account;
         this.amount = amount;
         this.address = address;
     }
 
-    public static CahootsContext newCounterparty(CahootsType cahootsType) {
-        return new CahootsContext(CahootsTypeUser.COUNTERPARTY, cahootsType, null, null);
+    public static CahootsContext newCounterparty(CahootsType cahootsType, int account) {
+        return new CahootsContext(CahootsTypeUser.COUNTERPARTY, cahootsType, account, null, null);
     }
 
-    public static CahootsContext newCounterpartyStowaway() {
-        return newCounterparty(CahootsType.STOWAWAY);
+    public static CahootsContext newCounterpartyStowaway(int account) {
+        return newCounterparty(CahootsType.STOWAWAY, account);
     }
 
-    public static CahootsContext newCounterpartyStonewallx2() {
-        return newCounterparty(CahootsType.STONEWALLX2);
+    public static CahootsContext newCounterpartyStonewallx2(int account) {
+        return newCounterparty(CahootsType.STONEWALLX2, account);
     }
 
-    public static CahootsContext newCounterpartyMultiCahoots() {
-        return newCounterparty(CahootsType.MULTI);
+    public static CahootsContext newCounterpartyMultiCahoots(int account) {
+        return newCounterparty(CahootsType.MULTI, account);
     }
 
-    public static CahootsContext newInitiatorStowaway(long amount) {
-        return new CahootsContext(CahootsTypeUser.SENDER, CahootsType.STOWAWAY, amount, null);
+    public static CahootsContext newInitiatorStowaway(int account, long amount) {
+        return new CahootsContext(CahootsTypeUser.SENDER, CahootsType.STOWAWAY, account, amount, null);
     }
 
-    public static CahootsContext newInitiatorStonewallx2(long amount, String address) {
-        return new CahootsContext(CahootsTypeUser.SENDER, CahootsType.STONEWALLX2, amount, address);
+    public static CahootsContext newInitiatorStonewallx2(int account, long amount, String address) {
+        return new CahootsContext(CahootsTypeUser.SENDER, CahootsType.STONEWALLX2, account, amount, address);
     }
 
-    public static CahootsContext newInitiatorMultiCahoots(long amount, String address) {
-        return new CahootsContext(CahootsTypeUser.SENDER, CahootsType.MULTI, amount, address);
+    public static CahootsContext newInitiatorMultiCahoots(int account, long amount, String address) {
+        return new CahootsContext(CahootsTypeUser.SENDER, CahootsType.MULTI, account, amount, address);
     }
 
     public CahootsTypeUser getTypeUser() {
@@ -51,6 +53,10 @@ public class CahootsContext implements SorobanContext {
 
     public CahootsType getCahootsType() {
         return cahootsType;
+    }
+
+    public int getAccount() {
+        return account;
     }
 
     public Long getAmount() {

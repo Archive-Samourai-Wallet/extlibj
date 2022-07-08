@@ -32,21 +32,21 @@ public class Stonewallx2Example {
         // STEP 0: sender
         long spendAmount = 5000;
         String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
-        CahootsContext contextSender = CahootsContext.newInitiatorStonewallx2(spendAmount, address);
-        ManualCahootsMessage message0 = cahootsSender.initiate(senderAccount, contextSender);
+        CahootsContext contextSender = CahootsContext.newInitiatorStonewallx2(senderAccount, spendAmount, address);
+        ManualCahootsMessage message0 = cahootsSender.initiate(contextSender);
 
         // STEP 1: counterparty
-        CahootsContext contextReceiver = CahootsContext.newCounterpartyStonewallx2();
-        ManualCahootsMessage message1 = (ManualCahootsMessage)cahootsCounterparty.reply(receiverAccount, contextReceiver, message0);
+        CahootsContext contextReceiver = CahootsContext.newCounterpartyStonewallx2(receiverAccount);
+        ManualCahootsMessage message1 = (ManualCahootsMessage)cahootsCounterparty.reply(contextReceiver, message0);
 
         // STEP 2: sender
-        ManualCahootsMessage message2 = (ManualCahootsMessage)cahootsSender.reply(senderAccount, contextSender, message1);
+        ManualCahootsMessage message2 = (ManualCahootsMessage)cahootsSender.reply(contextSender, message1);
 
         // STEP 3: counterparty
-        ManualCahootsMessage message3 = (ManualCahootsMessage)cahootsCounterparty.reply(receiverAccount, contextReceiver, message2);
+        ManualCahootsMessage message3 = (ManualCahootsMessage)cahootsCounterparty.reply(contextReceiver, message2);
 
         // STEP 4: sender confirm TX_BROADCAST
-        TxBroadcastInteraction txBroadcastInteraction = (TxBroadcastInteraction)cahootsSender.reply(senderAccount, contextSender, message3);
+        TxBroadcastInteraction txBroadcastInteraction = (TxBroadcastInteraction)cahootsSender.reply(contextSender, message3);
         ManualCahootsMessage message4 = (ManualCahootsMessage)txBroadcastInteraction.getReplyAccept();
 
         // SUCCESS

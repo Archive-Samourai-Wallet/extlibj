@@ -31,21 +31,21 @@ public class StowawayExample {
 
         // STEP 0: sender
         long spendAmount = 5000;
-        CahootsContext contextSender = CahootsContext.newInitiatorStowaway(spendAmount);
-        ManualCahootsMessage message0 = cahootsSender.initiate(senderAccount, contextSender);
+        CahootsContext contextSender = CahootsContext.newInitiatorStowaway(senderAccount, spendAmount);
+        ManualCahootsMessage message0 = cahootsSender.initiate(contextSender);
 
         // STEP 1: receiver
-        CahootsContext contextReceiver = CahootsContext.newCounterpartyStowaway();
-        ManualCahootsMessage message1 = (ManualCahootsMessage)cahootsReceiver.reply(receiverAccount, contextReceiver, message0);
+        CahootsContext contextReceiver = CahootsContext.newCounterpartyStowaway(receiverAccount);
+        ManualCahootsMessage message1 = (ManualCahootsMessage)cahootsReceiver.reply(contextReceiver, message0);
 
         // STEP 2: sender
-        ManualCahootsMessage message2 = (ManualCahootsMessage)cahootsSender.reply(senderAccount, contextSender, message1);
+        ManualCahootsMessage message2 = (ManualCahootsMessage)cahootsSender.reply(contextSender, message1);
 
         // STEP 3: receiver
-        ManualCahootsMessage message3 = (ManualCahootsMessage)cahootsReceiver.reply(receiverAccount, contextReceiver, message2);
+        ManualCahootsMessage message3 = (ManualCahootsMessage)cahootsReceiver.reply(contextReceiver, message2);
 
         // STEP 4: sender
-        SorobanInteraction confirmTx = (SorobanInteraction)cahootsSender.reply(senderAccount, contextSender, message3);
+        SorobanInteraction confirmTx = (SorobanInteraction)cahootsSender.reply(contextSender, message3);
         ManualCahootsMessage message4 = (ManualCahootsMessage)confirmTx.getReplyAccept();
 
         // SUCCESS

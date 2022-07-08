@@ -3,10 +3,9 @@ package com.samourai.wallet.ricochet;
 import com.samourai.wallet.bipWallet.BipWallet;
 import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.wallet.test.AbstractTest;
-import com.samourai.wallet.util.JSONUtils;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class RicochetUtilGenericTest extends AbstractTest {
@@ -46,6 +45,7 @@ public class RicochetUtilGenericTest extends AbstractTest {
         }
     }
 
+    @Disabled
     @Test
     public void ricochet_bip47() throws Exception {
         utxoProvider.addUtxo(bipWalletSpend, 100000);
