@@ -1,9 +1,7 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.soroban.cahoots.CahootsContext;
-import com.samourai.wallet.bipWallet.WalletSupplierImpl;
-import com.samourai.wallet.hd.HD_Wallet;
-import com.samourai.wallet.util.TestUtil;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -113,23 +111,21 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
 
     @Test
     public void invalidStonewallExcetion() throws Exception {
-        final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
-        TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(new WalletSupplierImpl(indexHandlerSupplier, bip84WalletSender), bipFormatSupplier, params);
         long spendAmount = 5000;
         String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
 
         // throw Exception for 0 spend amount
         Assertions.assertThrows(Exception.class,
                 () -> {
-                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(0, address);
-                    stonewallx2Service.startInitiator(cahootsWalletSender, 0, cahootsContextSender);
+                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(0, 0, address);
+                    stonewallx2Service.startInitiator(cahootsWalletSender, cahootsContextSender);
                 });
 
         // throw Exception for blank address
         Assertions.assertThrows(Exception.class,
                 () -> {
-                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(0, "");
-                    stonewallx2Service.startInitiator(cahootsWalletSender, 0, cahootsContextSender);
+                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(0, 0, "");
+                    stonewallx2Service.startInitiator(cahootsWalletSender, cahootsContextSender);
                 });
     }
 }
