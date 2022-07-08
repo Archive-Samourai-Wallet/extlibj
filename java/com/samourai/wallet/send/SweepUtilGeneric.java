@@ -37,7 +37,7 @@ public class SweepUtilGeneric {
     }
 
     public Collection<SweepPreview> sweepPreviews(final PrivKeyReader privKeyReader, long feePerB, ISweepBackend sweepBackend) throws Exception {
-        Collection<BipFormat> bipFormats = Arrays.asList(BIP_FORMAT.LEGACY, BIP_FORMAT.SEGWIT_COMPAT, BIP_FORMAT.SEGWIT_NATIVE);
+        Collection<BipFormat> bipFormats = Arrays.asList(BIP_FORMAT.LEGACY, BIP_FORMAT.SEGWIT_COMPAT, BIP_FORMAT.SEGWIT_NATIVE, BIP_FORMAT.TAPROOT);
         return sweepPreviews(privKeyReader, feePerB, sweepBackend, bipFormats);
     }
 
