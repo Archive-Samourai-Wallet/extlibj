@@ -119,8 +119,6 @@ public class AbstractTest {
     if (log.isDebugEnabled()) {
       log.debug(tx.toString());
     }
-    Assertions.assertEquals(txid, tx.getHashAsString());
-    Assertions.assertEquals(raw, TxUtil.getInstance().getTxHex(tx));
 
     Map<String,Long> outputsActuals = new LinkedHashMap<>();
     for (TransactionOutput txOutput : tx.getOutputs()) {
@@ -134,6 +132,9 @@ public class AbstractTest {
       log.debug("outputsActuals: "+outputsActuals);
     }
     Assertions.assertEquals(outputsExpected, outputsActuals);
+
+    Assertions.assertEquals(txid, tx.getHashAsString());
+    Assertions.assertEquals(raw, TxUtil.getInstance().getTxHex(tx));
   }
 
   protected Map<String,Long> sortMapOutputs(Map<String,Long> map) {

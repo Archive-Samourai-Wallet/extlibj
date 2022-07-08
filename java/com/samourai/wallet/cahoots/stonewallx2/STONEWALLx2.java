@@ -4,9 +4,7 @@ import com.samourai.wallet.bip69.BIP69InputComparator;
 import com.samourai.wallet.bip69.BIP69OutputComparator;
 import com.samourai.wallet.cahoots.Cahoots2x;
 import com.samourai.wallet.cahoots.CahootsType;
-import com.samourai.wallet.cahoots._TransactionOutput;
 import com.samourai.wallet.cahoots.psbt.PSBT;
-import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.segwit.bech32.Bech32Segwit;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FormatsUtilGeneric;
@@ -46,7 +44,7 @@ public class STONEWALLx2 extends Cahoots2x {
     //
     // counterparty
     //
-    public void doStep1(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
+    public void doStep1(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
         if(this.getStep() != 0 || this.getSpendAmount() == 0L)   {
             throw new Exception("Invalid step/amount");
@@ -63,7 +61,7 @@ public class STONEWALLx2 extends Cahoots2x {
             transaction.addInput(input);
             outpoints.put(outpoint.getHash().toString() + "-" + outpoint.getIndex(), outpoint.getValue().longValue());
         }
-        for(_TransactionOutput output : outputs.keySet())   {
+        for(TransactionOutput output : outputs.keySet())   {
             transaction.addOutput(output);
         }
 
@@ -73,27 +71,6 @@ public class STONEWALLx2 extends Cahoots2x {
             transaction.setLockTime(Long.parseLong(strBlockHeight));
         }
 
-        PSBT psbt = new PSBT(transaction);
-        for(MyTransactionOutPoint outpoint : inputs.keySet())   {
-            Triple triple = inputs.get(outpoint);
-            // input type 1
-            SegwitAddress segwitAddress = new SegwitAddress((byte[])triple.getLeft(), params);
-            psbt.addInput(PSBT.PSBT_IN_WITNESS_UTXO, null, PSBT.writeSegwitInputUTXO(outpoint.getValue().longValue(), segwitAddress.segWitRedeemScript().getProgram()));
-            // input type 6
-            String[] s = ((String)triple.getRight()).split("/");
-            psbt.addInput(PSBT.PSBT_IN_BIP32_DERIVATION, (byte[])triple.getLeft(), PSBT.writeBIP32Derivation((byte[])triple.getMiddle(), 84, params instanceof TestNet3Params ? 1 : 0, cptyAccount, Integer.valueOf(s[1]), Integer.valueOf(s[2])));
-        }
-        for(_TransactionOutput output : outputs.keySet())   {
-            Triple triple = outputs.get(output);
-            // output type 2
-            String[] s = ((String)triple.getRight()).split("/");
-            psbt.addOutput(PSBT.PSBT_OUT_BIP32_DERIVATION, (byte[])triple.getLeft(), PSBT.writeBIP32Derivation((byte[])triple.getMiddle(), 84, params instanceof TestNet3Params ? 1 : 0, cptyAccount, Integer.valueOf(s[1]), Integer.valueOf(s[2])));
-        }
-
-        //
-        //
-        //
-//        this.psbt = psbt;
         this.psbt = new PSBT(transaction);
 
         this.setStep(1);
@@ -102,7 +79,7 @@ public class STONEWALLx2 extends Cahoots2x {
     //
     // sender
     //
-    public void doStep2(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<_TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
+    public void doStep2(HashMap<MyTransactionOutPoint,Triple<byte[],byte[],String>> inputs, HashMap<TransactionOutput,Triple<byte[],byte[],String>> outputs) throws Exception    {
 
         Transaction transaction = psbt.getTransaction();
         if (log.isDebugEnabled()) {
@@ -119,7 +96,7 @@ public class STONEWALLx2 extends Cahoots2x {
             transaction.addInput(input);
             outpoints.put(outpoint.getHash().toString() + "-" + outpoint.getIndex(), outpoint.getValue().longValue());
         }
-        for(_TransactionOutput output : outputs.keySet())   {
+        for(TransactionOutput output : outputs.keySet())   {
             transaction.addOutput(output);
         }
 
@@ -138,26 +115,6 @@ public class STONEWALLx2 extends Cahoots2x {
         }
         transaction.addOutput(_output);
 
-        for(MyTransactionOutPoint outpoint : inputs.keySet())   {
-            Triple triple = inputs.get(outpoint);
-            // input type 1
-            SegwitAddress segwitAddress = new SegwitAddress((byte[])triple.getLeft(), params);
-            psbt.addInput(PSBT.PSBT_IN_WITNESS_UTXO, null, PSBT.writeSegwitInputUTXO(outpoint.getValue().longValue(), segwitAddress.segWitRedeemScript().getProgram()));
-            // input type 6
-            String[] s = ((String)triple.getRight()).split("/");
-            psbt.addInput(PSBT.PSBT_IN_BIP32_DERIVATION, (byte[])triple.getLeft(), PSBT.writeBIP32Derivation((byte[])triple.getMiddle(), 84, params instanceof TestNet3Params ? 1 : 0, account, Integer.valueOf(s[1]), Integer.valueOf(s[2])));
-        }
-        for(_TransactionOutput output : outputs.keySet())   {
-            Triple triple = outputs.get(output);
-            // output type 2
-            String[] s = ((String)triple.getRight()).split("/");
-            psbt.addOutput(PSBT.PSBT_OUT_BIP32_DERIVATION, (byte[])triple.getLeft(), PSBT.writeBIP32Derivation((byte[])triple.getMiddle(), 84, params instanceof TestNet3Params ? 1 : 0, account, Integer.valueOf(s[1]), Integer.valueOf(s[2])));
-        }
-
-        //
-        //
-        //
-//        psbt.setTransaction(transaction);
         psbt = new PSBT(transaction);
 
         this.setStep(2);
@@ -184,10 +141,6 @@ public class STONEWALLx2 extends Cahoots2x {
             transaction.addOutput(output);
         }
 
-        //
-        //
-        //
-//        psbt.setTransaction(transaction);
         psbt = new PSBT(transaction);
 
         signTx(keyBag);

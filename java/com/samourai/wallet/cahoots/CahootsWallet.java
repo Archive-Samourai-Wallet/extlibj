@@ -1,6 +1,7 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
+import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.BipWallet;
 import com.samourai.wallet.bipWallet.WalletSupplier;
@@ -9,6 +10,7 @@ import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.whirlpool.WhirlpoolConst;
+import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.bitcoinj.core.NetworkParameters;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -18,41 +20,42 @@ import java.util.List;
 public abstract class CahootsWallet {
     private static final Bech32UtilGeneric bech32Util = Bech32UtilGeneric.getInstance();
 
-    private BipWallet depositWallet;
-    private BipWallet postmixWallet;
-    private BIP47Wallet bip47Wallet;
+    private WalletSupplier walletSupplier;
     private BipFormatSupplier bipFormatSupplier;
     private NetworkParameters params;
 
     public CahootsWallet(WalletSupplier walletSupplier, BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
-        this.depositWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84);
-        this.postmixWallet = walletSupplier.getWallet(BIP_WALLET.POSTMIX_BIP84);
-        this.bip47Wallet = new BIP47Wallet(depositWallet.getHdWallet());
+        this.walletSupplier = walletSupplier;
         this.bipFormatSupplier = bipFormatSupplier;
         this.params = params;
     }
 
     public abstract long fetchFeePerB();
 
-    public BipAddress fetchAddressReceive(int account, boolean increment) throws Exception {
-        if (account == 0) {
-            return depositWallet.getNextAddress(increment);
+    public BipWallet getReceiveWallet(int account, BipFormat bipFormat) throws Exception {
+        if (account == WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT) {
+            // force change chain / BIP84
+            return walletSupplier.getWallet(BIP_WALLET.POSTMIX_BIP84);
         }
-        else if (account == WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT) {
-            // force change chain
-            return postmixWallet.getNextChangeAddress(increment);
+        if (account == 0) {
+            // like bipFormat
+            return walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, bipFormat);
         }
         else {
             throw new Exception("Invalid account: "+account);
         }
     }
 
+    public BipAddress fetchAddressReceive(int account, boolean increment, BipFormat bipFormat) throws Exception {
+        return getReceiveWallet(account, bipFormat).getNextAddress(increment);
+    }
+
     public BipAddress fetchAddressChange(int account, boolean increment) throws Exception {
         if (account == 0) {
-            return depositWallet.getNextChangeAddress(increment);
+            return walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84).getNextChangeAddress(increment);
         }
         else if (account == WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT) {
-            return postmixWallet.getNextChangeAddress(increment);
+            return walletSupplier.getWallet(BIP_WALLET.POSTMIX_BIP84).getNextChangeAddress(increment);
         }
         else {
             throw new Exception("Invalid account: "+account);
@@ -69,20 +72,8 @@ public abstract class CahootsWallet {
         return params;
     }
 
-    public HD_Wallet getBip84Wallet() {
-        return depositWallet.getHdWallet();
-    }
-
-    protected BipWallet getDepositWallet() {
-        return depositWallet;
-    }
-
-    public BIP47Wallet getBip47Wallet() {
-        return bip47Wallet;
-    }
-
-    public int getBip47Account() {
-        return 0;
+    public byte[] getFingerprint() {
+        return walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84).getHdWallet().getFingerprint();
     }
 
     public List<CahootsUtxo> getUtxosWpkhByAccount(int account) {

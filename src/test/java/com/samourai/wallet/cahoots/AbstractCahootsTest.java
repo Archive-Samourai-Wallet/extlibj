@@ -2,12 +2,13 @@ package com.samourai.wallet.cahoots;
 
 import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.soroban.cahoots.ManualCahootsMessage;
+import com.samourai.wallet.bipWallet.WalletSupplier;
 import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.cahoots.multi.MultiCahootsService;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
-import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
 import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
+import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.wallet.hd.Chain;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.test.AbstractTest;
@@ -30,6 +31,8 @@ public abstract class AbstractCahootsTest extends AbstractTest {
 
     protected static String[] SENDER_RECEIVE_84;
     protected static String[] COUNTERPARTY_RECEIVE_84;
+    protected static String[] COUNTERPARTY_RECEIVE_44;
+    protected static String[] COUNTERPARTY_RECEIVE_49;
     protected static String[] SENDER_CHANGE_84;
     protected static String[] COUNTERPARTY_CHANGE_84;
 
@@ -56,29 +59,41 @@ public abstract class AbstractCahootsTest extends AbstractTest {
         super.setUp();
 
         final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
-        cahootsWalletSender = new TestCahootsWallet(new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletSender), bipFormatSupplier, params);
+        WalletSupplier walletSupplierSender = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletSender);
+        cahootsWalletSender = new TestCahootsWallet(walletSupplierSender, bipFormatSupplier, params);
 
         final HD_Wallet bip84WalletCounterparty = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
-        cahootsWalletCounterparty = new TestCahootsWallet(new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletCounterparty), bipFormatSupplier, params);
+        WalletSupplier walletSupplierCounterparty = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletCounterparty);
+        cahootsWalletCounterparty = new TestCahootsWallet(walletSupplierCounterparty, bipFormatSupplier, params);
 
         SENDER_RECEIVE_84 = new String[4];
         for (int i = 0; i < 4; i++) {
-            SENDER_RECEIVE_84[i] = cahootsWalletSender.getDepositWallet().getAddressAt(Chain.RECEIVE.getIndex(), i).getAddressString();
+            SENDER_RECEIVE_84[i] = walletSupplierSender.getWallet(BIP_WALLET.DEPOSIT_BIP84).getAddressAt(Chain.RECEIVE.getIndex(), i).getAddressString();
         }
 
         COUNTERPARTY_RECEIVE_84 = new String[4];
         for (int i = 0; i < 4; i++) {
-            COUNTERPARTY_RECEIVE_84[i] = cahootsWalletCounterparty.getDepositWallet().getAddressAt(Chain.RECEIVE.getIndex(), i).getAddressString();
+            COUNTERPARTY_RECEIVE_84[i] = walletSupplierCounterparty.getWallet(BIP_WALLET.DEPOSIT_BIP84).getAddressAt(Chain.RECEIVE.getIndex(), i).getAddressString();
+        }
+
+        COUNTERPARTY_RECEIVE_44 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            COUNTERPARTY_RECEIVE_44[i] = walletSupplierCounterparty.getWallet(BIP_WALLET.DEPOSIT_BIP44).getAddressAt(Chain.RECEIVE.getIndex(), i).getAddressString();
+        }
+
+        COUNTERPARTY_RECEIVE_49 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            COUNTERPARTY_RECEIVE_49[i] = walletSupplierCounterparty.getWallet(BIP_WALLET.DEPOSIT_BIP49).getAddressAt(Chain.RECEIVE.getIndex(), i).getAddressString();
         }
 
         SENDER_CHANGE_84 = new String[4];
         for (int i = 0; i < 4; i++) {
-            SENDER_CHANGE_84[i] = cahootsWalletSender.getDepositWallet().getAddressAt(Chain.CHANGE.getIndex(), i).getAddressString();
+            SENDER_CHANGE_84[i] = walletSupplierSender.getWallet(BIP_WALLET.DEPOSIT_BIP84).getAddressAt(Chain.CHANGE.getIndex(), i).getAddressString();
         }
 
         COUNTERPARTY_CHANGE_84 = new String[4];
         for (int i = 0; i < 4; i++) {
-            COUNTERPARTY_CHANGE_84[i] = cahootsWalletCounterparty.getDepositWallet().getAddressAt(Chain.CHANGE.getIndex(), i).getAddressString();
+            COUNTERPARTY_CHANGE_84[i] = walletSupplierCounterparty.getWallet(BIP_WALLET.DEPOSIT_BIP84).getAddressAt(Chain.CHANGE.getIndex(), i).getAddressString();
         }
     }
 
