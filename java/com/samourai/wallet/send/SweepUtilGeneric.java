@@ -76,6 +76,12 @@ public class SweepUtilGeneric {
 
         // find utxo
         final String address = bipFormat.getToAddress(privKeyReader.getKey(), params);
+        if (address == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("findUtxoToSweep: no address found for "+bipFormat);
+            }
+            return null;
+        }
         Collection<UnspentOutput> unspentOutputs = sweepBackend.fetchAddressForSweep(address);
         if (unspentOutputs.isEmpty()) {
             if (log.isDebugEnabled()) {

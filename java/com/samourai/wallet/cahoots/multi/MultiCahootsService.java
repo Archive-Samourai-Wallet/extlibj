@@ -235,7 +235,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots> {
             try {
                 address = getBipFormatSupplier().getToAddress(utxo);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("", e);
             }
             if(address != null && address.equals(stonewallx2.getCollabChange())) {
                 outputSum += amount;

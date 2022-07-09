@@ -114,13 +114,11 @@ public class BipFormatSupplierImplTest extends AbstractTest {
     address = BIP_FORMAT.SEGWIT_NATIVE.getToAddress(ecKey, mainNetParams);
     Assertions.assertEquals("bc1qalwlmdxd2ggue4290ekzxl9tetg56neexr6amw", address);
 
-    // P2TR - Currently failing. Seems to be a bug in BIP_FORMAT.TAPROOT.getToAddress(ecKey, params) TODO
+    // P2TR
     address = BIP_FORMAT.TAPROOT.getToAddress(ecKey, params);
-    Assertions.assertEquals("tb1pqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesf3hn0c", address); // fails with P2TR address
-    // Assertions.assertEquals("tb1qalwlmdxd2ggue4290ekzxl9tetg56neev9pwqa", address); // passes with native segwit address
+    Assertions.assertEquals("tb1p5cyxnuxmeuwuvkwfem96lqzszd02n6xdcjrs20cac6yqjjwudpxqp3mvzv", address);
 
     address = BIP_FORMAT.TAPROOT.getToAddress(ecKey, mainNetParams);
-    Assertions.assertEquals("bc1p8denc9m4sqe9hluasrvxkkdqgkydrk5ctxre5nkk4qwdvefn0sdsc6eqxe", address); // fails with P2TR address
-    // Assertions.assertEquals("bc1qalwlmdxd2ggue4290ekzxl9tetg56neexr6amw", address); // passes with native segwit address
+    Assertions.assertEquals("bc1p5cyxnuxmeuwuvkwfem96lqzszd02n6xdcjrs20cac6yqjjwudpxqkedrcr", address);
   }
 }

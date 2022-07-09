@@ -359,14 +359,20 @@ public abstract class Cahoots2x extends Cahoots {
         inputs.addAll(transaction.getInputs());
         Collections.sort(inputs, new BIP69InputComparator());
         transaction.clearInputs();
+        for(TransactionInput input : inputs)    {
+            transaction.addInput(input);
+        }
 
         // sort outputs
         List<TransactionOutput> outputs = new ArrayList<TransactionOutput>();
         outputs.addAll(transaction.getOutputs());
         Collections.sort(outputs, new BIP69OutputComparator());
         transaction.clearOutputs();
+        for(TransactionOutput output : outputs)    {
+            transaction.addOutput(output);
+        }
 
-        appendTx(inputs, outputs, transaction);
+        psbt = new PSBT(transaction);
 
         signTx(keyBag);
 

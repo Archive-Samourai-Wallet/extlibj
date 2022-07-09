@@ -97,19 +97,19 @@ public abstract class AbstractCahootsTest extends AbstractTest {
         }
     }
 
-    protected Cahoots cleanPayload(Cahoots payload) throws Exception {
-        Cahoots copy = Cahoots.parse(payload.toJSONString());
+    protected Cahoots cleanPayload(String payloadStr) throws Exception {
+        Cahoots copy = Cahoots.parse(payloadStr);
         CahootsTestUtil.cleanPayload(copy);
         return copy;
     }
 
-    protected void verify(String expectedPayload, Cahoots cahoots) throws Exception {
-        String payloadStr = cleanPayload(cahoots).toJSONString();
+    protected void verify(String expectedPayload, String payloadStr) throws Exception {
+        payloadStr = cleanPayload(payloadStr).toJSONString();
         Assertions.assertEquals(expectedPayload, payloadStr);
     }
 
     protected void verify(String expectedPayload, ManualCahootsMessage cahootsMessage, boolean lastStep, CahootsType type, CahootsTypeUser typeUser) throws Exception {
-        verify(expectedPayload, cahootsMessage.getCahoots());
+        verify(expectedPayload, cahootsMessage.getCahoots().toJSONString());
         Assertions.assertEquals(lastStep, cahootsMessage.isDone());
         Assertions.assertEquals(type, cahootsMessage.getType());
         Assertions.assertEquals(typeUser, cahootsMessage.getTypeUser());
@@ -119,18 +119,18 @@ public abstract class AbstractCahootsTest extends AbstractTest {
         int nbSteps = EXPECTED_PAYLOADS != null ? EXPECTED_PAYLOADS.length : ManualCahootsMessage.getNbSteps(cahootsContextSender.getCahootsType());
 
         // sender => _0
-        Cahoots lastPayload = cahootsService.startInitiator(cahootsWalletSender, cahootsContextSender);
+        String lastPayload = cahootsService.startInitiator(cahootsWalletSender, cahootsContextSender).toJSONString();
         if (log.isDebugEnabled()) {
-            log.debug("#0 SENDER => "+lastPayload.toJSONString());
+            log.debug("#0 SENDER => "+lastPayload);
         }
         if (EXPECTED_PAYLOADS != null) {
             verify(EXPECTED_PAYLOADS[0], lastPayload);
         }
 
         // counterparty => _1
-        lastPayload = cahootsService.startCollaborator(cahootsWalletCounterparty, cahootsContextCp, lastPayload);
+        lastPayload = cahootsService.startCollaborator(cahootsWalletCounterparty, cahootsContextCp, Cahoots.parse(lastPayload)).toJSONString();
         if (log.isDebugEnabled()) {
-            log.debug("#1 COUNTERPARTY => "+lastPayload.toJSONString());
+            log.debug("#1 COUNTERPARTY => "+lastPayload);
         }
         if (EXPECTED_PAYLOADS != null) {
             verify(EXPECTED_PAYLOADS[1], lastPayload);
@@ -139,21 +139,21 @@ public abstract class AbstractCahootsTest extends AbstractTest {
         for (int i=2; i<nbSteps; i++) {
             if (i%2 == 0) {
                 // sender
-                lastPayload = cahootsService.reply(cahootsWalletSender, cahootsContextSender, lastPayload);
+                lastPayload = cahootsService.reply(cahootsWalletSender, cahootsContextSender, Cahoots.parse(lastPayload)).toJSONString();
                 if (log.isDebugEnabled()) {
-                    log.debug("#"+i+" SENDER => "+lastPayload.toJSONString());
+                    log.debug("#"+i+" SENDER => "+lastPayload);
                 }
             } else {
                 // counterparty
-                lastPayload = cahootsService.reply(cahootsWalletCounterparty, cahootsContextCp, lastPayload);
+                lastPayload = cahootsService.reply(cahootsWalletCounterparty, cahootsContextCp, Cahoots.parse(lastPayload)).toJSONString();
                 if (log.isDebugEnabled()) {
-                    log.debug("#"+i+" COUNTERPARTY => "+lastPayload.toJSONString());
+                    log.debug("#"+i+" COUNTERPARTY => "+lastPayload);
                 }
             }
             if (EXPECTED_PAYLOADS != null) {
                 verify(EXPECTED_PAYLOADS[i], lastPayload);
             }
         }
-        return lastPayload;
+        return Cahoots.parse(lastPayload);
     }
 }
