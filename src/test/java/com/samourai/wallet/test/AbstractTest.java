@@ -17,6 +17,7 @@ import com.samourai.wallet.payload.PayloadUtilGeneric;
 import com.samourai.wallet.send.provider.SimpleUtxoProvider;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.TxUtil;
+import com.samourai.wallet.util.XPubUtil;
 import com.samourai.xmanager.client.XManagerClient;
 import com.samourai.xmanager.protocol.XManagerService;
 import org.bitcoinj.core.*;
@@ -39,6 +40,7 @@ public class AbstractTest {
   protected static final String ADDRESS_BIP44 = "muimRQFJKMJM1pTminJxiD5HrPgSu257tX";
   protected static final String ADDRESS_BIP49 = "2Mww8dCYPUpKHofjgcXcBCEGmniw9CoaiD2";
   protected static final String ADDRESS_BIP84 = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
+  protected static final String ADDRESS_XMANAGER = "tb1q6m3urxjc8j2l8fltqj93jarmzn0975nnxuymnx";
 
   protected NetworkParameters params = TestNet3Params.get();
   protected HD_WalletFactoryGeneric hdWalletFactory = HD_WalletFactoryGeneric.getInstance();
@@ -73,7 +75,7 @@ public class AbstractTest {
     xManagerClient = new XManagerClient(httpClient, true, false) {
       @Override
       public String getAddressOrDefault(XManagerService service) {
-        return "xm-"+service.name(); // mock
+        return ADDRESS_XMANAGER; // mock for reproductible tests
       }
     };
 
