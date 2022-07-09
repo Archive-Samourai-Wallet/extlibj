@@ -24,26 +24,31 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class AbstractCahootsService<T extends Cahoots> {
+public abstract class AbstractCahootsService<T extends Cahoots, C extends CahootsContext> {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahootsService.class);
 
+    private CahootsType cahootsType;
     private BipFormatSupplier bipFormatSupplier;
     protected NetworkParameters params;
     private TypeInteraction typeInteractionBroadcast;
 
-    public AbstractCahootsService(BipFormatSupplier bipFormatSupplier, NetworkParameters params, TypeInteraction typeInteractionBroadcast) {
+    public AbstractCahootsService(CahootsType cahootsType, BipFormatSupplier bipFormatSupplier, NetworkParameters params, TypeInteraction typeInteractionBroadcast) {
+        this.cahootsType = cahootsType;
         this.bipFormatSupplier = bipFormatSupplier;
         this.params = params;
         this.typeInteractionBroadcast = typeInteractionBroadcast;
     }
 
-    public abstract T startInitiator(CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception;
+    public abstract T startInitiator(CahootsWallet cahootsWallet, C cahootsContext) throws Exception;
 
-    public abstract T startCollaborator(CahootsWallet cahootsWallet, CahootsContext cahootsContext, T payload0) throws Exception;
+    public abstract T startCollaborator(CahootsWallet cahootsWallet, C cahootsContext, T payload0) throws Exception;
 
-    public abstract T reply(CahootsWallet cahootsWallet, CahootsContext cahootsContext, T payload) throws Exception;
+    public abstract T reply(CahootsWallet cahootsWallet, C cahootsContext, T payload) throws Exception;
 
-    public void verifyResponse(CahootsContext cahootsContext, T response, T request) throws Exception {
+    public void verifyResponse(C cahootsContext, T response, T request) throws Exception {
+        if (!cahootsContext.getCahootsType().equals(cahootsType)) {
+            throw new Exception("Invalid cahootsContext.type: "+cahootsContext.getCahootsType()+" vs "+cahootsType);
+        }
         if (request != null) {
             // properties should never change
             if (response.getType() != request.getType()) {
@@ -95,7 +100,7 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
 
     // verify
 
-    protected long computeSpendAmount(HashMap<String,ECKey> keyBag, CahootsWallet cahootsWallet, Cahoots2x cahoots, CahootsTypeUser typeUser) throws Exception {
+    protected long computeSpendAmount(HashMap<String,ECKey> keyBag, CahootsWallet cahootsWallet, Cahoots2x cahoots, CahootsContext cahootsContext) throws Exception {
         long spendAmount = 0;
 
         if (log.isDebugEnabled()) {
@@ -116,8 +121,9 @@ public abstract class AbstractCahootsService<T extends Cahoots> {
         }
 
         BipFormat altBipFormat = getBipFormatSupplier().findByAddress(cahoots.getDestination(), params);
-        int myAccount = typeUser.equals(CahootsTypeUser.SENDER) ? cahoots.getAccount() : cahoots.getCounterpartyAccount();
+        int myAccount = cahootsContext.getTypeUser().equals(CahootsTypeUser.SENDER) ? cahoots.getAccount() : cahoots.getCounterpartyAccount();
         List<String> myOutputAddresses = computeMyOutputAddresses(cahootsWallet, myAccount, altBipFormat);
+        myOutputAddresses.addAll(cahootsContext.getExternalAdresses());
 
         for(TransactionOutput output : transaction.getOutputs()) {
             String outputAddress = bipFormatSupplier.getToAddress(output);

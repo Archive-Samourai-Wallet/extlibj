@@ -3,6 +3,10 @@ package com.samourai.soroban.cahoots;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsTypeUser;
 import com.samourai.soroban.client.SorobanContext;
+import com.samourai.wallet.cahoots.multi.MultiCahootsContext;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class CahootsContext implements SorobanContext {
     private CahootsTypeUser typeUser;
@@ -10,16 +14,21 @@ public class CahootsContext implements SorobanContext {
     private int account;
     private Long amount;
     private String address;
+    private Set<String> externalAdresses;
 
-    private CahootsContext(CahootsTypeUser typeUser, CahootsType cahootsType, int account, Long amount, String address) {
+    protected CahootsContext(CahootsTypeUser typeUser, CahootsType cahootsType, int account, Long amount, String address) {
         this.typeUser = typeUser;
         this.cahootsType = cahootsType;
         this.account = account;
         this.amount = amount;
         this.address = address;
+        this.externalAdresses = new LinkedHashSet<>();
     }
 
     public static CahootsContext newCounterparty(CahootsType cahootsType, int account) {
+        if (CahootsType.MULTI.equals(cahootsType)) {
+            return new MultiCahootsContext(CahootsTypeUser.COUNTERPARTY, account, null, null);
+        }
         return new CahootsContext(CahootsTypeUser.COUNTERPARTY, cahootsType, account, null, null);
     }
 
@@ -44,7 +53,7 @@ public class CahootsContext implements SorobanContext {
     }
 
     public static CahootsContext newInitiatorMultiCahoots(int account, long amount, String address) {
-        return new CahootsContext(CahootsTypeUser.SENDER, CahootsType.MULTI, account, amount, address);
+        return new MultiCahootsContext(CahootsTypeUser.SENDER, account, amount, address);
     }
 
     public CahootsTypeUser getTypeUser() {
@@ -65,5 +74,13 @@ public class CahootsContext implements SorobanContext {
 
     public String getAddress() {
         return address;
+    }
+
+    public Set<String> getExternalAdresses() {
+        return externalAdresses;
+    }
+
+    public void addExternalAddress(String address) {
+        externalAdresses.add(address);
     }
 }

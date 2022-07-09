@@ -14,11 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends AbstractCahootsService<T> {
+public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends AbstractCahootsService<T,CahootsContext> {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahoots2xService.class);
 
-    public AbstractCahoots2xService(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
-        super(bipFormatSupplier, params, TypeInteraction.TX_BROADCAST);
+    public AbstractCahoots2xService(CahootsType cahootsType, BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
+        super(cahootsType, bipFormatSupplier, params, TypeInteraction.TX_BROADCAST);
     }
 
     @Override
@@ -93,7 +93,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends Abst
         cahoots3.doStep3(keyBag_A);
 
         // check verifiedSpendAmount
-        long verifiedSpendAmount = computeSpendAmount(keyBag_A, cahootsWallet, cahoots3, CahootsTypeUser.COUNTERPARTY);
+        long verifiedSpendAmount = computeSpendAmount(keyBag_A, cahootsWallet, cahoots3, cahootsContext);
         checkMaxSpendAmount(verifiedSpendAmount, cahoots3.getFeeAmount(), cahootsContext);
         return cahoots3;
     }
@@ -109,7 +109,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends Abst
         cahoots4.doStep4(keyBag_B);
 
         // check verifiedSpendAmount
-        long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahootsWallet, cahoots4, CahootsTypeUser.SENDER);
+        long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahootsWallet, cahoots4, cahootsContext);
         checkMaxSpendAmount(verifiedSpendAmount, cahoots4.getFeeAmount(), cahootsContext);
         return cahoots4;
     }

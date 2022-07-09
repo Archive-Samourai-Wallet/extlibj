@@ -5,7 +5,7 @@ import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.AbstractCahoots2xService;
-import com.samourai.wallet.cahoots.CahootsTypeUser;
+import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsUtxo;
 import com.samourai.wallet.cahoots.CahootsWallet;
 import com.samourai.wallet.hd.BipAddress;
@@ -16,13 +16,16 @@ import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     private static final Logger log = LoggerFactory.getLogger(StowawayService.class);
 
     public StowawayService(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
-        super(bipFormatSupplier, params);
+        super(CahootsType.STOWAWAY, bipFormatSupplier, params);
     }
 
     @Override
@@ -44,7 +47,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
 
     @Override
     public Stowaway startCollaborator(CahootsWallet cahootsWallet, CahootsContext cahootsContext, Stowaway stowaway0) throws Exception {
-        Stowaway stowaway1 = doStowaway1(stowaway0, cahootsWallet, cahootsContext.getAccount());
+        Stowaway stowaway1 = doStowaway1(stowaway0, cahootsWallet, cahootsContext);
         if (log.isDebugEnabled()) {
             log.debug("# Stowaway COUNTERPARTY => step="+stowaway1.getStep());
         }
@@ -60,7 +63,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         Stowaway payload;
         switch (step) {
             case 1:
-                payload = doStowaway2(stowaway, cahootsWallet);
+                payload = doStowaway2(stowaway, cahootsWallet, cahootsContext);
                 break;
             case 2:
                 payload = doStep3(stowaway, cahootsWallet, cahootsContext);
@@ -96,10 +99,11 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     //
     // receiver
     //
-    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, int account) throws Exception {
+    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
         byte[] fingerprint = cahootsWallet.getFingerprint();
         stowaway0.setFingerprintCollab(fingerprint);
 
+        int account = cahootsContext.getAccount();
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
         // sort in descending order by value
         Collections.sort(utxos, new UTXO.UTXOComparator());
@@ -177,7 +181,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     //
     // sender
     //
-    public Stowaway doStowaway2(Stowaway stowaway1, CahootsWallet cahootsWallet) throws Exception {
+    public Stowaway doStowaway2(Stowaway stowaway1, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
 
         if (log.isDebugEnabled()) {
             log.debug("sender account (2):" + stowaway1.getAccount());
