@@ -412,14 +412,14 @@ public class FormatsUtilGeneric {
 
 	public boolean isValidBIP47OpReturn(String op_return){
 
-		byte[] buf = Hex.decode(op_return);
+		try {
+			byte[] buf = Hex.decode(op_return);
 
-		if(buf.length == 80 && buf[0] == 0x01 && buf[1] == 0x00 && (buf[2] == 0x02 || buf[2] == 0x03))    {
-			return true;
-		}
-		else    {
-			return false;
-		}
+			if (buf.length == 80 && buf[0] == 0x01 && buf[1] == 0x00 && (buf[2] == 0x02 || buf[2] == 0x03)) {
+				return true;
+			}
+		} catch (Exception e) {}
+		return false;
 
 	}
 
