@@ -3,10 +3,12 @@ package com.samourai.wallet.cahoots.stonewallx2;
 import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
-import com.samourai.wallet.cahoots.*;
+import com.samourai.wallet.cahoots.AbstractCahoots2xService;
+import com.samourai.wallet.cahoots.CahootsType;
+import com.samourai.wallet.cahoots.CahootsUtxo;
+import com.samourai.wallet.cahoots.CahootsWallet;
 import com.samourai.wallet.cahoots.multi.Stonewallx2InputData;
 import com.samourai.wallet.hd.BipAddress;
-import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.FormatsUtilGeneric;
@@ -200,7 +202,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
         // contributor mix output: like-typed with destination
         BipFormat bipFormatDestination = getBipFormatSupplier().findByAddress(stonewall0.getDestination(), params);
         BipAddress receiveAddress = getContributorMixAddress(cahootsWallet, stonewall0, true, bipFormatDestination);
-        TransactionOutput mixOutput = computeTxOutput(receiveAddress, stonewall0.getSpendAmount());
+        TransactionOutput mixOutput = computeTxOutput(receiveAddress, stonewall0.getSpendAmount(), cahootsContext);
         if (log.isDebugEnabled()) {
             log.debug("+output (CounterParty Mix) = " + receiveAddress.getAddressString());
         }
@@ -216,8 +218,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
             String xmAddress = xManagerClient.getAddressOrDefault(XManagerService.STONEWALL, 3);
             if(!xmAddress.equals(XManagerService.STONEWALL.getDefaultAddress(params == TestNet3Params.get()))) {
                 log.info("EXTRACTING FUNDS TO EXTERNAL WALLET > " + xmAddress);
-                cahootsContext.addExternalAddress(xmAddress); // save external address for computeSpendAmount()
-                TransactionOutput mixOutput = computeTxOutput(xmAddress, stonewall0.getSpendAmount());
+                TransactionOutput mixOutput = computeTxOutput(xmAddress, stonewall0.getSpendAmount(), cahootsContext);
                 if (log.isDebugEnabled()) {
                     log.debug("+output (CounterParty Mix) = " + xmAddress);
                 }
@@ -243,7 +244,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
         if (log.isDebugEnabled()) {
             log.debug("+output (CounterParty change) = " + changeAddress);
         }
-        TransactionOutput output_A1 = computeTxOutput(changeAddress, inputData.getContributedAmount() - stonewall0.getSpendAmount());
+        TransactionOutput output_A1 = computeTxOutput(changeAddress, inputData.getContributedAmount() - stonewall0.getSpendAmount(), cahootsContext);
         outputsA.add(output_A1);
         stonewall0.setCollabChange(changeAddress.getAddressString());
 
@@ -401,7 +402,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
         if (log.isDebugEnabled()) {
             log.debug("+output (Spender change) = " + changeAddress);
         }
-        TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stonewall1.getSpendAmount()) - (fee / 2L));
+        TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stonewall1.getSpendAmount()) - (fee / 2L), cahootsContext);
         outputsB.add(output_B0);
 
         // destination output
