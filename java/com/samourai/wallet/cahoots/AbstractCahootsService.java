@@ -5,15 +5,10 @@ import com.samourai.soroban.cahoots.ManualCahootsMessage;
 import com.samourai.soroban.cahoots.TxBroadcastInteraction;
 import com.samourai.soroban.cahoots.TypeInteraction;
 import com.samourai.soroban.client.SorobanInteraction;
-import com.samourai.wallet.bipFormat.BIP_FORMAT;
-import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.hd.BipAddress;
-import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.RandomUtil;
-import com.samourai.wallet.whirlpool.WhirlpoolConst;
-import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 public abstract class AbstractCahootsService<T extends Cahoots, C extends CahootsContext> {
@@ -120,14 +114,9 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
             }
         }
 
-        BipFormat altBipFormat = getBipFormatSupplier().findByAddress(cahoots.getDestination(), params);
-        int myAccount = cahootsContext.getTypeUser().equals(CahootsTypeUser.SENDER) ? cahoots.getAccount() : cahoots.getCounterpartyAccount();
-        List<String> myOutputAddresses = computeMyOutputAddresses(cahootsWallet, myAccount, altBipFormat);
-        myOutputAddresses.addAll(cahootsContext.getExternalAdresses());
-
         for(TransactionOutput output : transaction.getOutputs()) {
             String outputAddress = bipFormatSupplier.getToAddress(output);
-            if (outputAddress != null && myOutputAddresses.contains(outputAddress)) {
+            if (outputAddress != null && cahootsContext.getOutputAddresses().contains(outputAddress)) {
                 if (output.getValue() != null) {
                     if (log.isDebugEnabled()) {
                         log.debug("computeSpendAmount: -output " + output.getValue().longValue()+" "+outputAddress);
@@ -137,56 +126,17 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug("computeSpendAmount = " + spendAmount+" (account="+myAccount+")");
+            log.debug("computeSpendAmount = " + spendAmount);
         }
         return spendAmount;
     }
 
-    protected List<String> computeMyOutputAddresses(CahootsWallet cahootsWallet, int myAccount, BipFormat altBipFormat) throws Exception {
-        List<String> addresses = new LinkedList<String>();
-
-        // compute change addresses
-        BipAddress changeAddress = cahootsWallet.fetchAddressChange(myAccount, false);
-        addresses.addAll(computeMyOutputAddresses(cahootsWallet, changeAddress.getHdAddress(), BIP_FORMAT.SEGWIT_NATIVE));
-
-        // compute receive addresses
-        if (myAccount != WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT) {
-            // SEGWIT_NATIVE
-            BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(myAccount, false, BIP_FORMAT.SEGWIT_NATIVE);
-            addresses.addAll(computeMyOutputAddresses(cahootsWallet, receiveAddress.getHdAddress(), BIP_FORMAT.SEGWIT_NATIVE));
-            if (altBipFormat != null && !altBipFormat.equals(BIP_FORMAT.SEGWIT_NATIVE)) {
-                // additional format
-                receiveAddress = cahootsWallet.fetchAddressReceive(myAccount, false, altBipFormat);
-                addresses.addAll(computeMyOutputAddresses(cahootsWallet, receiveAddress.getHdAddress(), altBipFormat));
-            }
-        }
-        return addresses;
+    protected  TransactionOutput computeTxOutput(BipAddress bipAddress, long amount, CahootsContext cahootsContext) throws Exception{
+        return computeTxOutput(bipAddress.getAddressString(), amount, cahootsContext);
     }
 
-    private List<String> computeMyOutputAddresses(CahootsWallet cahootsWallet, HD_Address hdAddress, BipFormat bipFormat) throws Exception {
-        int account = hdAddress.getAccountIndex();
-        int idx = hdAddress.getAddressIndex();
-        int chain = hdAddress.getChainIndex();
-
-        int NB_ADDRESSES_MAX=4;
-        idx = Math.max(0, idx-NB_ADDRESSES_MAX); // go back address index for verification
-
-        List<String> addresses = new LinkedList<String>();
-        for (int i=0; i<NB_ADDRESSES_MAX; i++) {
-            BipAddress receiveAddress = cahootsWallet.getReceiveWallet(account, bipFormat).getAddressAt(chain, idx+i);
-            addresses.add(receiveAddress.getAddressString());
-            if (log.isDebugEnabled()) {
-                log.debug("myOutputAddress " + receiveAddress);
-            }
-        }
-        return addresses;
-    }
-
-    protected  TransactionOutput computeTxOutput(BipAddress bipAddress, long amount) throws Exception{
-        return computeTxOutput(bipAddress.getAddressString(), amount);
-    }
-
-    protected  TransactionOutput computeTxOutput(String receiveAddressString, long amount) throws Exception{
+    protected  TransactionOutput computeTxOutput(String receiveAddressString, long amount, CahootsContext cahootsContext) throws Exception{
+        cahootsContext.addOutputAddress(receiveAddressString); // save output address for computeSpendAmount()
         return bipFormatSupplier.getTransactionOutput(receiveAddressString, amount, params);
     }
 

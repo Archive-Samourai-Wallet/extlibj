@@ -14,7 +14,7 @@ public class CahootsContext implements SorobanContext {
     private int account;
     private Long amount;
     private String address;
-    private Set<String> externalAdresses;
+    private Set<String> outputAddresses;
 
     protected CahootsContext(CahootsTypeUser typeUser, CahootsType cahootsType, int account, Long amount, String address) {
         this.typeUser = typeUser;
@@ -22,7 +22,7 @@ public class CahootsContext implements SorobanContext {
         this.account = account;
         this.amount = amount;
         this.address = address;
-        this.externalAdresses = new LinkedHashSet<>();
+        this.outputAddresses = new LinkedHashSet<>();
     }
 
     public static CahootsContext newCounterparty(CahootsType cahootsType, int account) {
@@ -76,11 +76,11 @@ public class CahootsContext implements SorobanContext {
         return address;
     }
 
-    public Set<String> getExternalAdresses() {
-        return externalAdresses;
+    public Set<String> getOutputAddresses() {
+        return outputAddresses;
     }
 
-    public void addExternalAddress(String address) {
-        externalAdresses.add(address);
+    public void addOutputAddress(String address) {
+        outputAddresses.add(address);
     }
 }

@@ -166,7 +166,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
             log.debug("+output (CounterParty receive) = "+receiveAddress);
         }
         List<TransactionOutput> outputsA = new LinkedList<>();
-        TransactionOutput output_A0 = computeTxOutput(receiveAddress, stowaway0.getSpendAmount());
+        TransactionOutput output_A0 = computeTxOutput(receiveAddress, stowaway0.getSpendAmount(), cahootsContext);
         outputsA.add(output_A0);
 
         stowaway0.setDestination(receiveAddress.getAddressString());
@@ -305,7 +305,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         if (log.isDebugEnabled()) {
             log.debug("+output (sender change) = "+changeAddress);
         }
-        TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stowaway1.getSpendAmount()) - fee);
+        TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stowaway1.getSpendAmount()) - fee, cahootsContext);
         outputsB.add(output_B0);
 
         Stowaway stowaway2 = stowaway1.copy();
