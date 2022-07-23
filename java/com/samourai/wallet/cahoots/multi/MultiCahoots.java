@@ -134,7 +134,7 @@ public class MultiCahoots extends Cahoots {
         }
 
         // push stonewallx2
-        String stonewallHex = TxUtil.getInstance().getTxHex(getStowawayTransaction());
+        String stonewallHex = TxUtil.getInstance().getTxHex(getStonewallTransaction());
         if (!pushTx.pushTx(stonewallHex).getLeft()) {
             throw new Exception("PushTx failed for stonewallx2: "+stonewallHex);
         }
