@@ -154,6 +154,8 @@ public abstract class AbstractCahootsTest extends AbstractTest {
                 verify(EXPECTED_PAYLOADS[i], lastPayload);
             }
         }
-        return Cahoots.parse(lastPayload);
+        Cahoots cahoots = Cahoots.parse(lastPayload);
+        cahoots.pushTx(pushTx);
+        return cahoots;
     }
 }

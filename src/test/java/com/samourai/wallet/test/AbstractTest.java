@@ -54,6 +54,7 @@ public class AbstractTest {
   protected SimpleUtxoProvider utxoProvider;
   protected XManagerClient xManagerClient;
   protected BIP47UtilGeneric bip47Util = Bip47UtilJava.getInstance();
+  protected MockPushTx pushTx = new MockPushTx(params);
 
   public AbstractTest() {
     try {

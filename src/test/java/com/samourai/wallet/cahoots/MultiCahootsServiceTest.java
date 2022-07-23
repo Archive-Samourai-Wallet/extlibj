@@ -62,6 +62,7 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
             outputs.put(COUNTERPARTY_RECEIVE_84[0], 10575L);
             outputs.put(SENDER_CHANGE_84[0], 7177L);
             verifyTx(tx, txid, raw, outputs);
+            pushTx.assertTx(txid, raw);
         }
 
         // verify stonewallx2
@@ -75,6 +76,7 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
             outputs.put(COUNTERPARTY_CHANGE_84[0], 4843L);
             outputs.put(SENDER_CHANGE_84[1], 4843L);
             verifyTx(tx, txid, raw, outputs);
+            pushTx.assertTx(txid, raw);
         }
     }
 
@@ -117,6 +119,7 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
             outputs.put(COUNTERPARTY_RECEIVE_84[0], 550000575L);
             outputs.put(SENDER_CHANGE_84[0], 7177L);
             verifyTx(tx, txid, raw, outputs);
+            pushTx.assertTx(txid, raw);
         }
 
         // verify stonewallx2
@@ -130,6 +133,7 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
             outputs.put(COUNTERPARTY_CHANGE_84[0], 4843L);
             outputs.put(SENDER_CHANGE_84[1], 4843L);
             verifyTx(tx, txid, raw, outputs);
+            pushTx.assertTx(txid, raw);
         }
     }
 
@@ -170,6 +174,7 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
             outputs.put(COUNTERPARTY_RECEIVE_84[0], 10575L);
             outputs.put(SENDER_CHANGE_84[0], 7177L);
             verifyTx(tx, txid, raw, outputs);
+            pushTx.assertTx(txid, raw);
         }
 
         // verify stonewallx2
@@ -183,6 +188,7 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
             outputs.put(COUNTERPARTY_CHANGE_84[0], 4843L);
             outputs.put(SENDER_CHANGE_84[1], 4843L);
             verifyTx(tx, txid, raw, outputs);
+            pushTx.assertTx(txid, raw);
         }
     }
 }

@@ -51,6 +51,7 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         outputs.put(COUNTERPARTY_CHANGE_84[0], 4843L);
         outputs.put(SENDER_CHANGE_84[0], 4843L);
         verifyTx(cahoots.getTransaction(), txid, raw, outputs);
+        pushTx.assertTx(txid, raw);
     }
 
     @Test
@@ -79,6 +80,7 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         outputs.put(COUNTERPARTY_CHANGE_84[0], 4843L);
         outputs.put(SENDER_CHANGE_84[0], 4843L);
         verifyTx(cahoots.getTransaction(), txid, raw, outputs);
+        pushTx.assertTx(txid, raw);
     }
 
     @Test
@@ -107,6 +109,7 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         outputs.put(COUNTERPARTY_CHANGE_84[0], 4843L);
         outputs.put(SENDER_CHANGE_84[0], 4843L);
         verifyTx(cahoots.getTransaction(), txid, raw, outputs);
+        pushTx.assertTx(txid, raw);
     }
 
     @Test

@@ -49,6 +49,7 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         outputs.put(COUNTERPARTY_RECEIVE_84[0], 15000L);
         outputs.put(SENDER_CHANGE_84[0], 4752L);
         verifyTx(cahoots.getTransaction(), txid, raw, outputs);
+        pushTx.assertTx(txid, raw);
     }
 
     @Test
