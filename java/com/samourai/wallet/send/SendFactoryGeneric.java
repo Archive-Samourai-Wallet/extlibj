@@ -13,7 +13,6 @@ import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.TxUtil;
 import org.bitcoinj.core.*;
-import org.bitcoinj.script.Script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,16 +88,28 @@ public class SendFactoryGeneric {
 
         List<TransactionInput> inputs = new ArrayList<>();
         for(MyTransactionOutPoint outPoint : unspent) {
-            Script script = outPoint.computeScript();
-            if(script.getScriptType() == Script.ScriptType.NO_TYPE) {
+            // check outpoint format
+            try {
+                bipFormatSupplier.getToAddress(outPoint.getScriptBytes(), params);
+                // ok, outpoint format is supported
+            } catch (Exception e) {
+                // outpoint format is not supported, skip it
+                log.error("skipping outPoint (unsupported type): "+outPoint);
                 continue;
             }
 
             TransactionInput input = outPoint.computeSpendInput();
-            if(rbfOptIn)    {
+            if (rbfOptIn) {
                 input.setSequenceNumber(SamouraiWalletConst.RBF_SEQUENCE_VAL.longValue());
             }
             inputs.add(input);
+        }
+
+        if (inputs.isEmpty()) {
+            throw new MakeTxException("TX has no inputs");
+        }
+        if (outputs.isEmpty()) {
+            throw new MakeTxException("TX has no outputs");
         }
 
         //

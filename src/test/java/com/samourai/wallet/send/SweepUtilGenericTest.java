@@ -59,6 +59,21 @@ public class SweepUtilGenericTest extends AbstractTest {
         assertSweepPreview(sweepPreview, 2871, "tb1qkz6870gwrtp4unx9yw4qvz27tagd5wykynufyq", BIP_FORMAT.SEGWIT_NATIVE, 129, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
     }
 
+    @Test
+    public void sweepAndSign_taproot() throws Exception {
+        String pk = "cUe6J7Fs5mxg6jLwXE27xcDpaTPXfQZ9oKDbxs5PP6EpYMFHab2T";
+
+        // preview sweep
+        PrivKeyReader privKeyReader = new PrivKeyReader(pk, params);
+        BackendApi backendApi = computeBackendApi(params);
+        SweepPreview sweepPreview = sweepUtil.sweepPreview(privKeyReader, 1, backendApi, BIP_FORMAT.TAPROOT);
+
+        Assertions.assertEquals("tb1p05x44esc62dpr0c5ssyy56kz6vyrnw26c7p5gsw2un0rhtjzn0lq2p3mha", sweepPreview.getAddress());
+
+        // sign & pushtx
+        sweepUtil.sweep(sweepPreview, ADDRESS_BIP84, backendApi, bipFormatSupplier, true, 999999);
+    }
+
     /*@Test
     public void sweepPreview_WIF_compressed() throws Exception {
         // WIF, compressed
