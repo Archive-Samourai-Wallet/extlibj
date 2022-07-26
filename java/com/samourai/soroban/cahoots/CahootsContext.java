@@ -1,14 +1,18 @@
 package com.samourai.soroban.cahoots;
 
+import com.samourai.soroban.client.SorobanContext;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsTypeUser;
-import com.samourai.soroban.client.SorobanContext;
 import com.samourai.wallet.cahoots.multi.MultiCahootsContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class CahootsContext implements SorobanContext {
+    private static final Logger log = LoggerFactory.getLogger(CahootsContext.class);
+
     private CahootsTypeUser typeUser;
     private CahootsType cahootsType;
     private int account;
@@ -28,6 +32,10 @@ public class CahootsContext implements SorobanContext {
     public static CahootsContext newCounterparty(CahootsType cahootsType, int account) {
         if (CahootsType.MULTI.equals(cahootsType)) {
             return new MultiCahootsContext(CahootsTypeUser.COUNTERPARTY, account, null, null);
+        }
+        if (cahootsType.STOWAWAY.equals(cahootsType)) {
+            // force account #0 for Stowaway counterparty
+            account = 0;
         }
         return new CahootsContext(CahootsTypeUser.COUNTERPARTY, cahootsType, account, null, null);
     }
