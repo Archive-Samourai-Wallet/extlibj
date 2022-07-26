@@ -148,11 +148,14 @@ public class BIP_FORMAT {
         @Override
         public void sign(Transaction tx, int inputIndex, ECKey key) throws Exception {
             ECKey tweakedKey = BIP340Util.getTweakedPrivKey(key, null);
-            byte[][] inputScriptPubKeys = new byte[tx.getInputs().size()][];
-            Coin[] inputValues = new Coin[tx.getInputs().size()];
-            for(TransactionInput input : tx.getInputs()) {
-                inputScriptPubKeys[inputIndex] = input.getConnectedOutput().getScriptPubKey().getProgram();
-                inputValues[inputIndex] = input.getValue();
+            int nbInputs = tx.getInputs().size();
+            byte[][] inputScriptPubKeys = new byte[nbInputs][];
+            Coin[] inputValues = new Coin[nbInputs];
+
+            for(int i=0; i<nbInputs; i++) {
+                TransactionInput input = tx.getInput(i);
+                inputScriptPubKeys[i] = input.getConnectedOutput().getScriptPubKey().getProgram();
+                inputValues[i] = input.getValue();
             }
 
             Sha256Hash sigHash = tx.hashForTaprootWitnessSignature(inputIndex, Transaction.SigHash.ALL, inputScriptPubKeys, inputValues, false);
