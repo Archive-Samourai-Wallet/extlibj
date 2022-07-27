@@ -226,6 +226,10 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
             }
         }
 
+        log.info("inputSum = " + inputSum);
+        log.info("outputSum = " + outputSum);
+        log.info("input-output: " + (inputSum-outputSum));
+        log.info("fee: " + (stonewallx2.getFeeAmount()/2L));
         return (inputSum - outputSum) == (stonewallx2.getFeeAmount()/2L) && inputSum != 0 && outputSum != 0;
     }
 
