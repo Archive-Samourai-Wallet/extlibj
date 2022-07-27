@@ -198,6 +198,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
         long inputSum = 0;
         long outputSum = 0;
 
+        log.info(stonewallx2.getTransaction().toString());
         for(int i = 0; i < stonewallx2.getTransaction().getInputs().size(); i++) {
             TransactionInput input = stonewallx2.getTransaction().getInput(i);
             for(CahootsUtxo cahootsUtxo : utxos) {
