@@ -30,7 +30,7 @@ public class MultiCahootsContext extends CahootsContext {
     }
 
     private long computeMultiCahootsFee(long amount) {
-        long stowawayFee = (long)(amount * 0.035d) + 400;
+        long stowawayFee = (long)(amount * 0.035d);
         if(stowawayFee > 1000000) {
             stowawayFee = 1000000;
         }
