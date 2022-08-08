@@ -178,13 +178,6 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
     // counterparty
     //
     private MultiCahoots doMultiCahoots5_Stonewallx23(MultiCahoots multiCahoots6, CahootsWallet cahootsWallet, MultiCahootsContext cahootsContext) throws Exception {
-        int account = multiCahoots6.getStonewallx2().getCounterpartyAccount();
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
-
-        boolean noExtraFee = checkForNoExtraFee(multiCahoots6.getStonewallx2(), utxos);
-        if(!noExtraFee) {
-            throw new Exception("Cannot compose #Cahoots: extra fee is being taken from us");
-        }
         CahootsContext stonewallContext = cahootsContext.getStonewallx2Context();
         STONEWALLx2 stonewall3 = stonewallx2Service.doStep3(multiCahoots6.getStonewallx2(), cahootsWallet, stonewallContext);
 
@@ -192,41 +185,6 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
         multiCahoots7.setStonewallx2(stonewall3);
         multiCahoots7.setStep(5);
         return multiCahoots7;
-    }
-
-    private boolean checkForNoExtraFee(STONEWALLx2 stonewallx2, List<CahootsUtxo> utxos) {
-        long inputSum = 0;
-        long outputSum = 0;
-
-        for(int i = 0; i < stonewallx2.getTransaction().getInputs().size(); i++) {
-            TransactionInput input = stonewallx2.getTransaction().getInput(i);
-            for(CahootsUtxo cahootsUtxo : utxos) {
-                int outpointIndex = cahootsUtxo.getOutpoint().getTxOutputN();
-                Sha256Hash outpointHash = cahootsUtxo.getOutpoint().getTxHash();
-                if(input != null && input.getOutpoint().getHash().equals(outpointHash) && input.getOutpoint().getIndex() == outpointIndex) {
-                    long amount = cahootsUtxo.getValue();
-                    inputSum += amount;
-                    break;
-                }
-            }
-        }
-        for(int i = 0; i < stonewallx2.getTransaction().getOutputs().size(); i++) {
-            TransactionOutput utxo = stonewallx2.getTransaction().getOutput(i);
-            long amount = utxo.getValue().value;
-            String address = null;
-            try {
-                address = getBipFormatSupplier().getToAddress(utxo);
-            } catch (Exception e) {
-                log.error("", e);
-            }
-            if(address != null && address.equals(stonewallx2.getCollabChange())) {
-                outputSum += amount;
-            } else if(address != null && amount == stonewallx2.getSpendAmount() && !address.equals(stonewallx2.getDestination())) {
-                outputSum += amount;
-            }
-        }
-
-        return (inputSum - outputSum) == (stonewallx2.getFeeAmount()/2L) && inputSum != 0 && outputSum != 0;
     }
 
     //
