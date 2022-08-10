@@ -10,18 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 public class SimpleCahootsWallet extends CahootsWallet {
-    private long feePerB;
     private Map<Integer,List<CahootsUtxo>> utxosByAccount;
 
-    public SimpleCahootsWallet(WalletSupplier walletSupplier, BipFormatSupplier bipFormatSupplier, NetworkParameters params, long feePerB) throws Exception {
+    public SimpleCahootsWallet(WalletSupplier walletSupplier, BipFormatSupplier bipFormatSupplier, NetworkParameters params) throws Exception {
         super(walletSupplier, bipFormatSupplier, params);
-        this.feePerB = feePerB;
         this.utxosByAccount = new HashMap<Integer, List<CahootsUtxo>>();
-    }
-
-    @Override
-    public long fetchFeePerB() {
-        return feePerB;
     }
 
     @Override

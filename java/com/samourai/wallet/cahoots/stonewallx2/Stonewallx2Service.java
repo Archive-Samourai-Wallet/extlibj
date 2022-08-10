@@ -282,7 +282,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
             }
         }
 
-        long feePerB = cahootsWallet.fetchFeePerB();
+        long feePerB = cahootsContext.getFeePerB();
 
         List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
         long totalSelectedAmount = 0L;

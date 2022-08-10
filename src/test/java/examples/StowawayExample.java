@@ -30,8 +30,9 @@ public class StowawayExample {
         ManualCahootsService cahootsReceiver = new ManualCahootsService(cahootsWalletCounterparty, xManagerClient);
 
         // STEP 0: sender
+        long feePerB = 1;
         long spendAmount = 5000;
-        CahootsContext contextSender = CahootsContext.newInitiatorStowaway(senderAccount, spendAmount);
+        CahootsContext contextSender = CahootsContext.newInitiatorStowaway(senderAccount, feePerB, spendAmount);
         ManualCahootsMessage message0 = cahootsSender.initiate(contextSender);
 
         // STEP 1: receiver

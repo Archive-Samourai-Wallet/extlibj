@@ -34,8 +34,6 @@ public abstract class CahootsWallet {
         this.params = params;
     }
 
-    public abstract long fetchFeePerB();
-
     public BipWallet getReceiveWallet(int account, BipFormat bipFormat) throws Exception {
         if (account == WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT) {
             // force change chain / BIP84

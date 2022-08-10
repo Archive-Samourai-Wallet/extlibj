@@ -37,9 +37,10 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         cahootsWalletCounterparty.addUtxo(account, "counterpartyTx2", 1, 9000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // setup Cahoots
+        long feePerB = 1;
         long spendAmount = 5000;
         String address = ADDRESS_BIP84;
-        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(account, spendAmount, address);
+        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(account, feePerB, spendAmount, address);
         CahootsContext contextCp = CahootsContext.newCounterpartyMultiCahoots(account);
 
         final String[] EXPECTED_PAYLOADS = {
@@ -94,9 +95,10 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         cahootsWalletCounterparty.addUtxo(account, "counterpartyTx3", 1, 550000000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // setup Cahoots
+        long feePerB = 1;
         long spendAmount = 5000;
         String address = ADDRESS_BIP84;
-        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(account, spendAmount, address);
+        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(account, feePerB, spendAmount, address);
         CahootsContext contextCp = CahootsContext.newCounterpartyMultiCahoots(account);
 
         final String[] EXPECTED_PAYLOADS = {
@@ -149,9 +151,10 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         cahootsWalletCounterparty.addUtxo(account, "counterpartyTx2", 1, 9000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // setup Cahoots
+        long feePerB = 1;
         long spendAmount = 5000;
         String address = ADDRESS_BIP44;
-        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(account, spendAmount, address);
+        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(account, feePerB, spendAmount, address);
         CahootsContext contextCp = CahootsContext.newCounterpartyMultiCahoots(account);
 
         final String[] EXPECTED_PAYLOADS = {
