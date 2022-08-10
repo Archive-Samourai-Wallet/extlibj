@@ -25,6 +25,7 @@ public abstract class AbstractCahootsTest extends AbstractTest {
     private static final String SEED_WORDS = "all all all all all all all all all all all all";
     private static final String SEED_PASSPHRASE_INITIATOR = "initiator";
     private static final String SEED_PASSPHRASE_COUNTERPARTY = "counterparty";
+    protected static final int FEE_PER_B = 1;
 
     protected TestCahootsWallet cahootsWalletSender;
     protected TestCahootsWallet cahootsWalletCounterparty;

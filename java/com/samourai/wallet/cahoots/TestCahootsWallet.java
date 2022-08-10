@@ -13,10 +13,9 @@ import org.bouncycastle.util.encoders.Hex;
 import java.math.BigInteger;
 
 public class TestCahootsWallet extends SimpleCahootsWallet {
-    public static final int FEE_PER_B = 1;
 
     public TestCahootsWallet(WalletSupplier walletSupplier, BipFormatSupplier bipFormatSupplier, NetworkParameters params) throws Exception {
-        super(walletSupplier, bipFormatSupplier, params, FEE_PER_B);
+        super(walletSupplier, bipFormatSupplier, params);
     }
 
     public void addUtxo(int account, String txid, int n, long value, String address) {

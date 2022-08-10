@@ -30,9 +30,10 @@ public class Stonewallx2Example {
         ManualCahootsService cahootsCounterparty = new ManualCahootsService(cahootsWalletCounterparty, xManagerClient);
 
         // STEP 0: sender
+        long feePerB = 1;
         long spendAmount = 5000;
         String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
-        CahootsContext contextSender = CahootsContext.newInitiatorStonewallx2(senderAccount, spendAmount, address);
+        CahootsContext contextSender = CahootsContext.newInitiatorStonewallx2(senderAccount, feePerB, spendAmount, address);
         ManualCahootsMessage message0 = cahootsSender.initiate(contextSender);
 
         // STEP 1: counterparty

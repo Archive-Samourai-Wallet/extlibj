@@ -8,8 +8,8 @@ public class MultiCahootsContext extends CahootsContext {
     private CahootsContext stonewallx2Context;
     private CahootsContext stowawayContext;
 
-    public MultiCahootsContext(CahootsTypeUser typeUser, int account, Long amount, String address) {
-        super(typeUser, CahootsType.MULTI, account, amount, address);
+    public MultiCahootsContext(CahootsTypeUser typeUser, int account, Long feePerB, Long amount, String address) {
+        super(typeUser, CahootsType.MULTI, account, feePerB, amount, address);
         this.stonewallx2Context = computeStonewallContext();
         this.stowawayContext = computeStowawayContext();
     }
@@ -18,7 +18,7 @@ public class MultiCahootsContext extends CahootsContext {
         if (getTypeUser().equals(CahootsTypeUser.COUNTERPARTY)) {
             return CahootsContext.newCounterpartyStonewallx2(getAccount());
         }
-        return CahootsContext.newInitiatorStonewallx2(getAccount(), getAmount(), getAddress());
+        return CahootsContext.newInitiatorStonewallx2(getAccount(), getFeePerB(), getAmount(), getAddress());
     }
 
     private CahootsContext computeStowawayContext() {
@@ -26,7 +26,7 @@ public class MultiCahootsContext extends CahootsContext {
             return CahootsContext.newCounterpartyStowaway(getAccount());
         }
         long stowawayFee = computeMultiCahootsFee(getAmount());
-        return CahootsContext.newInitiatorStowaway(getAccount(), stowawayFee);
+        return CahootsContext.newInitiatorStowaway(getAccount(), getFeePerB(), stowawayFee);
     }
 
     private long computeMultiCahootsFee(long amount) {
