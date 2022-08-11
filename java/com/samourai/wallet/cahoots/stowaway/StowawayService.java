@@ -99,17 +99,17 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     // receiver
     //
     public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, CahootsContext cahootsContext, boolean prioritizeNonWhirlpool) throws Exception {
+        boolean isSaaSCounterparty = cahootsContext.getCahootsType() == CahootsType.MULTI && cahootsContext.getTypeUser() == CahootsTypeUser.COUNTERPARTY;
         byte[] fingerprint = cahootsWallet.getFingerprint();
         stowaway0.setFingerprintCollab(fingerprint);
 
         int account = cahootsContext.getAccount();
         stowaway0.setCounterpartyAccount(account);
 
-        log.debug("ACCOUNT:: " + account);
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway0.getCounterpartyAccount());
         // sort in ascending order by value
         ArrayList<CahootsUtxo> filteredUtxos = new ArrayList<>();
-        if(prioritizeNonWhirlpool && cahootsContext.getTypeUser() == CahootsTypeUser.COUNTERPARTY && cahootsContext.getCahootsType() == CahootsType.MULTI) {
+        if(prioritizeNonWhirlpool && isSaaSCounterparty) {
             log.debug("Inside non-Whirlpool prioritization");
             for (CahootsUtxo cahootsUtxo : utxos) {
                 long value = cahootsUtxo.getValue();
@@ -184,8 +184,9 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
             inputsA.add(input);
         }
 
+        int receiveAccount = isSaaSCounterparty ? SamouraiAccountIndex.DEPOSIT : account;
         // destination output
-        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(account, true, BIP_FORMAT.SEGWIT_NATIVE);
+        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(receiveAccount, true, BIP_FORMAT.SEGWIT_NATIVE);
         if (log.isDebugEnabled()) {
             log.debug("+output (CounterParty receive) = "+receiveAddress);
         }
