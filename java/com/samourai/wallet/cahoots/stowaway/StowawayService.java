@@ -34,9 +34,6 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     }
 
     protected Stowaway startInitiator(CahootsWallet cahootsWallet, long amount, int account) throws Exception {
-        if (amount <= 0) {
-            throw new Exception("Invalid amount");
-        }
         byte[] fingerprint = cahootsWallet.getFingerprint();
         Stowaway stowaway0 = doStowaway0(amount, account, fingerprint);
         if (log.isDebugEnabled()) {
@@ -47,6 +44,10 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
 
     @Override
     public Stowaway startCollaborator(CahootsWallet cahootsWallet, CahootsContext cahootsContext, Stowaway stowaway0) throws Exception {
+        if (stowaway0.getSpendAmount() <= 0) {
+            // this check used to be the initiator portion, but with the introduction of MultiCahoots, it remains -1 until the Stonewallx2 finishes, so we can get an accurate amount, so the check is here now.
+            throw new Exception("Invalid amount");
+        }
         Stowaway stowaway1 = doStowaway1(stowaway0, cahootsWallet, cahootsContext, new ArrayList<>());
         if (log.isDebugEnabled()) {
             log.debug("# Stowaway COUNTERPARTY => step="+stowaway1.getStep());
