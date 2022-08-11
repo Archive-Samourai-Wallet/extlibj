@@ -173,7 +173,8 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
             filteredUtxos.addAll(utxos);
         }
 
-        Stowaway stowaway1 = stowawayService.doStowaway1(stowaway0, cahootsWallet, stowawayContext, filteredUtxos, stonewallContext.getAccount(), seenTxs);
+        int receiveAccount = SamouraiAccountIndex.DEPOSIT; //counterparty should always receive Stowaway to DEPOSIT
+        Stowaway stowaway1 = stowawayService.doStowaway1(stowaway0, cahootsWallet, stowawayContext, filteredUtxos, receiveAccount, seenTxs);
 
         STONEWALLx2 stonewall3 = stonewallx2Service.doStep3(multiCahoots2.getStonewallx2(), cahootsWallet, stonewallContext);
 
