@@ -138,7 +138,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
 
         CahootsContext stonewallContext = cahootsContext.getStonewallx2Context();
         CahootsContext stowawayContext = cahootsContext.getStowawayContext();
-        long multiCahootsFee = MultiCahootsContext.computeMultiCahootsFee(stonewallContext.getAmount());
+        long multiCahootsFee = MultiCahootsContext.computeMultiCahootsFee(multiCahoots2.stonewallx2.getSpendAmount());
         long stonewallFee = multiCahoots2.getStonewallx2().getFeeAmount() / 2L;
         long totalFee = multiCahootsFee + stonewallFee;
         log.debug("Stonewall fee: " + stonewallFee);
