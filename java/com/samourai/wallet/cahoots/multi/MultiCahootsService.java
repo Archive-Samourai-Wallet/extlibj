@@ -219,7 +219,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
         if (multiCahoots.getStep() <= 4) {
             // validate stonewallx2
             CahootsContext stonewallContext = cahootsContext.getStonewallx2Context();
-            stonewallx2Service.verifyResponse(stonewallContext, multiCahoots.stonewallx2, request.stonewallx2);
+            stonewallx2Service.verifyResponse(stonewallContext, multiCahoots.stonewallx2, (request!=null?request.stonewallx2:null));
         }
 
         if (multiCahoots.getStep() >= 3) {
