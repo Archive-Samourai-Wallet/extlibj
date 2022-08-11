@@ -47,7 +47,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
 
     @Override
     public Stowaway startCollaborator(CahootsWallet cahootsWallet, CahootsContext cahootsContext, Stowaway stowaway0) throws Exception {
-        Stowaway stowaway1 = doStowaway1(stowaway0, cahootsWallet, cahootsContext);
+        Stowaway stowaway1 = doStowaway1(stowaway0, cahootsWallet, cahootsContext, new ArrayList<>());
         if (log.isDebugEnabled()) {
             log.debug("# Stowaway COUNTERPARTY => step="+stowaway1.getStep());
         }
@@ -63,7 +63,11 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         Stowaway payload;
         switch (step) {
             case 1:
-                payload = doStowaway2(stowaway, cahootsWallet, cahootsContext);
+                List<String> seenTxs = new ArrayList<>();
+                for(TransactionInput input : stowaway.getTransaction().getInputs()) {
+                    seenTxs.add(input.getOutpoint().getHash().toString());
+                }
+                payload = doStowaway2(stowaway, cahootsWallet, cahootsContext, seenTxs);
                 break;
             case 2:
                 payload = doStep3(stowaway, cahootsWallet, cahootsContext);
@@ -99,7 +103,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     //
     // receiver
     //
-    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, CahootsContext cahootsContext, List<String> seenTxs) throws Exception {
         byte[] fingerprint = cahootsWallet.getFingerprint();
         stowaway0.setFingerprintCollab(fingerprint);
 
@@ -111,12 +115,16 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
             log.debug("BIP84 utxos:" + utxos.size());
         }
 
+        List<String> _seenTxs = seenTxs;
         List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
         long totalContributedAmount = 0L;
         List<CahootsUtxo> highUTXO = new ArrayList<CahootsUtxo>();
         for (CahootsUtxo utxo : utxos) {
             if (utxo.getValue() > stowaway0.getSpendAmount() + SamouraiWalletConst.bDust.longValue()) {
-                highUTXO.add(utxo);
+                if (!_seenTxs.contains(utxo.getOutpoint().getHash().toString())) {
+                    _seenTxs.add(utxo.getOutpoint().getHash().toString());
+                    highUTXO.add(utxo);
+                }
             }
         }
         if(highUTXO.size() > 0)    {
@@ -129,13 +137,16 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         }
         if (selectedUTXO.size() == 0) {
             for (CahootsUtxo utxo : utxos) {
-                selectedUTXO.add(utxo);
-                totalContributedAmount += utxo.getValue();
-                if (log.isDebugEnabled()) {
-                    log.debug("BIP84 selected utxo: " + utxo);
-                }
-                if (stowaway0.isContributedAmountSufficient(totalContributedAmount)) {
-                    break;
+                if (!_seenTxs.contains(utxo.getOutpoint().getHash().toString())) {
+                    _seenTxs.add(utxo.getOutpoint().getHash().toString());
+                    selectedUTXO.add(utxo);
+                    totalContributedAmount += utxo.getValue();
+                    if (log.isDebugEnabled()) {
+                        log.debug("BIP84 selected utxo: " + utxo);
+                    }
+                    if (stowaway0.isContributedAmountSufficient(totalContributedAmount)) {
+                        break;
+                    }
                 }
             }
         }
@@ -181,7 +192,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     //
     // sender
     //
-    public Stowaway doStowaway2(Stowaway stowaway1, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+    public Stowaway doStowaway2(Stowaway stowaway1, CahootsWallet cahootsWallet, CahootsContext cahootsContext, List<String> seenTxs) throws Exception {
 
         if (log.isDebugEnabled()) {
             log.debug("sender account (2):" + stowaway1.getAccount());
@@ -202,13 +213,17 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
             log.debug("BIP84 utxos:" + utxos.size());
         }
 
+        List<String> _seenTxs = seenTxs;
         List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
         int nbTotalSelectedOutPoints = 0;
         long totalSelectedAmount = 0L;
         List<CahootsUtxo> lowUTXO = new ArrayList<CahootsUtxo>();
         for (CahootsUtxo utxo : utxos) {
             if(utxo.getValue() < stowaway1.getSpendAmount())    {
-                lowUTXO.add(utxo);
+                if (!_seenTxs.contains(utxo.getOutpoint().getHash().toString())) {
+                    _seenTxs.add(utxo.getOutpoint().getHash().toString());
+                    lowUTXO.add(utxo);
+                }
             }
         }
 
@@ -220,13 +235,17 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         listOfLists.add(utxos);
         for(List<CahootsUtxo> list : listOfLists)   {
 
+            _seenTxs = seenTxs;
             selectedUTXO.clear();
             totalSelectedAmount = 0L;
             nbTotalSelectedOutPoints = 0;
 
             for (CahootsUtxo utxo : list) {
-                selectedUTXO.add(utxo);
-                totalSelectedAmount += utxo.getValue();
+                if (!_seenTxs.contains(utxo.getOutpoint().getHash().toString())) {
+                    _seenTxs.add(utxo.getOutpoint().getHash().toString());
+                    selectedUTXO.add(utxo);
+                    totalSelectedAmount += utxo.getValue();
+                }
                 if (log.isDebugEnabled()) {
                     log.debug("BIP84 selected utxo: " + utxo);
                 }

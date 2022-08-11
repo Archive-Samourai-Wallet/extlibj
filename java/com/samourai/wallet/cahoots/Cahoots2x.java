@@ -109,6 +109,10 @@ public abstract class Cahoots2x extends Cahoots {
         return spendAmount;
     }
 
+    public void setSpendAmount(long spendAmount) {
+        this.spendAmount = spendAmount;
+    }
+
     @Override
     public long getFeeAmount() {
         return feeAmount;

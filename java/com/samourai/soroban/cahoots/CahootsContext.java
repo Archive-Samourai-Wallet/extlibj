@@ -62,8 +62,8 @@ public class CahootsContext implements SorobanContext {
         return new CahootsContext(CahootsTypeUser.SENDER, CahootsType.STONEWALLX2, account, feePerB, amount, address);
     }
 
-    public static CahootsContext newInitiatorMultiCahoots(int account, long feePerB, long amount, String address) {
-        return new MultiCahootsContext(CahootsTypeUser.SENDER, account, feePerB, amount, address);
+    public static CahootsContext newInitiatorMultiCahoots(int account, long feePerB, String address) {
+        return new MultiCahootsContext(CahootsTypeUser.SENDER, account, feePerB, -1L, address);
     }
 
     public CahootsTypeUser getTypeUser() {
@@ -84,6 +84,10 @@ public class CahootsContext implements SorobanContext {
 
     public Long getAmount() {
         return amount;
+    }
+
+    public void setAmount(Long amount) {
+        this.amount = amount;
     }
 
     public String getAddress() {

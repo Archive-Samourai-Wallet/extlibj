@@ -188,7 +188,8 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
         // sender => start multiCahoots
         long spendAmount = 5000;
         String address = ADDRESS_BIP84;
-        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(account, FEE_PER_B, spendAmount, address);
+        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(account, FEE_PER_B, address);
+        contextSender.setAmount(spendAmount);
         ManualCahootsMessage payload0 = cahootsSender.initiate(contextSender);
         verify(EXPECTED_PAYLOADS[0], payload0, false, CahootsType.MULTI, CahootsTypeUser.SENDER);
 
