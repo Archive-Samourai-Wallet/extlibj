@@ -23,7 +23,7 @@ public class MultiCahootsContext extends CahootsContext {
 
     private CahootsContext computeStowawayContext() {
         if (getTypeUser().equals(CahootsTypeUser.COUNTERPARTY)) {
-            return CahootsContext.newCounterpartyStowaway(getAccount());
+            return CahootsContext.newCounterpartyStowawayMulti(getAccount());
         }
         long stowawayFee = computeMultiCahootsFee(getAmount());
         return CahootsContext.newInitiatorStowaway(getAccount(), getFeePerB(), stowawayFee);
