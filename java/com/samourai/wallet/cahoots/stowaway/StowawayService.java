@@ -246,11 +246,11 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
                     _seenTxs.add(utxo.getOutpoint().getHash().toString());
                     selectedUTXO.add(utxo);
                     totalSelectedAmount += utxo.getValue();
+                    if (log.isDebugEnabled()) {
+                        log.debug("BIP84 selected utxo: " + utxo);
+                    }
+                    nbTotalSelectedOutPoints ++;
                 }
-                if (log.isDebugEnabled()) {
-                    log.debug("BIP84 selected utxo: " + utxo);
-                }
-                nbTotalSelectedOutPoints ++;
                 if (stowaway1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB))) {
 
                     // discard "extra" utxo, if any
