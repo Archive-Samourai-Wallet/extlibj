@@ -12,11 +12,10 @@ import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
 import com.samourai.wallet.util.TxUtil;
+import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import com.samourai.xmanager.client.XManagerClient;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.TransactionInput;
-import org.bitcoinj.core.TransactionOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +101,33 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
     //
     private MultiCahoots doMultiCahoots1_Stowaway1(MultiCahoots multiCahoots0, CahootsWallet cahootsWallet, MultiCahootsContext cahootsContext) throws Exception {
         CahootsContext stowawayContext = cahootsContext.getStowawayContext();
-        Stowaway stowaway1 = stowawayService.doStowaway1(multiCahoots0.getStowaway(), cahootsWallet, stowawayContext);
+        Stowaway stowaway0 = multiCahoots0.getStowaway();
+
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowawayContext.getAccount());
+        ArrayList<CahootsUtxo> filteredUtxos = new ArrayList<>();
+
+        // Filter out all Whirlpool UTXOs from all tiers (0.001, 0.01, 0.05, 0.5), so that change and other mixed UTXOs are included
+        for (CahootsUtxo cahootsUtxo : utxos) {
+            long value = cahootsUtxo.getValue();
+            if (value != 100000 && value != 1000000 && value != 5000000 && value != 50000000) {
+                filteredUtxos.add(cahootsUtxo);
+            }
+        }
+
+        // If it can't find any, it then adds all UTXOs from account 0 (deposit)
+        if(filteredUtxos.isEmpty()) {
+            filteredUtxos.addAll(cahootsWallet.getUtxosWpkhByAccount(SamouraiAccountIndex.DEPOSIT));
+            stowaway0.setCounterpartyAccount(SamouraiAccountIndex.DEPOSIT);
+        }
+
+        // If it's still empty after that, then it uses Whirlpool UTXOs as a last resort
+        if(filteredUtxos.isEmpty()) {
+            filteredUtxos.addAll(utxos);
+        }
+
+        // always receive to DEPOSIT
+        int receiveAccount = SamouraiAccountIndex.DEPOSIT;
+        Stowaway stowaway1 = stowawayService.doStowaway1(multiCahoots0.getStowaway(), cahootsWallet, stowawayContext, filteredUtxos, receiveAccount);
 
         MultiCahoots multiCahoots1 = new MultiCahoots(multiCahoots0);
         multiCahoots1.setStowaway(stowaway1);

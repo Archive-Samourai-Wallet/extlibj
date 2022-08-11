@@ -100,12 +100,16 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     // receiver
     //
     public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+        int account = cahootsContext.getAccount();
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
+        return doStowaway1(stowaway0, cahootsWallet, cahootsContext, utxos, account);
+    }
+
+    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, CahootsContext cahootsContext, List<CahootsUtxo> utxos, int receiveAccount) throws Exception {
         byte[] fingerprint = cahootsWallet.getFingerprint();
         stowaway0.setFingerprintCollab(fingerprint);
 
-        int account = cahootsContext.getAccount();
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
-        // sort in descending order by value
+        // sort in ascending order by value
         Collections.sort(utxos, new UTXO.UTXOComparator());
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
@@ -161,7 +165,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         }
 
         // destination output
-        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(account, true, BIP_FORMAT.SEGWIT_NATIVE);
+        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(receiveAccount, true, BIP_FORMAT.SEGWIT_NATIVE);
         if (log.isDebugEnabled()) {
             log.debug("+output (CounterParty receive) = "+receiveAddress);
         }
@@ -170,7 +174,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         outputsA.add(output_A0);
 
         stowaway0.setDestination(receiveAddress.getAddressString());
-        stowaway0.setCounterpartyAccount(account);
+        stowaway0.setCounterpartyAccount(cahootsContext.getAccount());
 
         Stowaway stowaway1 = stowaway0.copy();
         stowaway1.doStep1(inputsA, outputsA);
