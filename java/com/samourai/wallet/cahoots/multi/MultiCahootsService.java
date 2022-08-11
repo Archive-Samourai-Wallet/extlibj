@@ -216,18 +216,18 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
             // validate stonewallx2
             CahootsContext stonewallContext = cahootsContext.getStonewallx2Context();
             stonewallx2Service.verifyResponse(stonewallContext, multiCahoots.stonewallx2, request.stonewallx2);
-        } else {
-            // stowaway should keep unchanged once finished
-            if (!TxUtil.getInstance().getTxHex(multiCahoots.getStowawayTransaction())
-                    .equals(TxUtil.getInstance().getTxHex(request.getStowawayTransaction()))) {
-                throw new Exception("Invalid alterated stowaway tx");
-            }
         }
 
         if (multiCahoots.getStep() >= 3) {
             // validate stowaway
             CahootsContext stowawayContext = cahootsContext.getStowawayContext();
             stowawayService.verifyResponse(stowawayContext, multiCahoots.stowaway, (request!=null?request.stowaway:null));
+        } else {
+            // stowaway should keep unchanged once finished
+            if (!TxUtil.getInstance().getTxHex(multiCahoots.getStowawayTransaction())
+                    .equals(TxUtil.getInstance().getTxHex(request.getStowawayTransaction()))) {
+                throw new Exception("Invalid alterated stowaway tx");
+            }
         }
     }
 }
