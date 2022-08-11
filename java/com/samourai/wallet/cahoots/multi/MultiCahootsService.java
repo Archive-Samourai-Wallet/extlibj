@@ -227,10 +227,14 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
             CahootsContext stowawayContext = cahootsContext.getStowawayContext();
             stowawayService.verifyResponse(stowawayContext, multiCahoots.stowaway, (request!=null?request.stowaway:null));
         } else {
-            // stowaway should keep unchanged once finished
-            if (!TxUtil.getInstance().getTxHex(multiCahoots.getStowawayTransaction())
-                    .equals(TxUtil.getInstance().getTxHex(request.getStowawayTransaction()))) {
-                throw new Exception("Invalid alterated stowaway tx");
+            Transaction multiCahootsStowawayTx = multiCahoots.getStowawayTransaction();
+            Transaction requestStowawayTx = request != null ? request.getStowawayTransaction() : null;
+            if(multiCahootsStowawayTx != null && requestStowawayTx != null) {
+                // stowaway should keep unchanged once finished
+                if (!TxUtil.getInstance().getTxHex(multiCahootsStowawayTx)
+                        .equals(TxUtil.getInstance().getTxHex(requestStowawayTx))) {
+                    throw new Exception("Invalid alterated stowaway tx");
+                }
             }
         }
     }
