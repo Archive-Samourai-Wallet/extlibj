@@ -40,8 +40,7 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         long feePerB = 1;
         long spendAmount = 5000;
         String address = ADDRESS_BIP84;
-        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(account, feePerB, address);
-        contextSender.setAmount(spendAmount);
+        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(account, feePerB, spendAmount, address);
         CahootsContext contextCp = CahootsContext.newCounterpartyMultiCahoots(account);
 
         final String[] EXPECTED_PAYLOADS = {
@@ -99,8 +98,7 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         long feePerB = 1;
         long spendAmount = 5000;
         String address = ADDRESS_BIP84;
-        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(account, feePerB, address);
-        contextSender.setAmount(spendAmount);
+        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(account, feePerB, spendAmount, address);
         CahootsContext contextCp = CahootsContext.newCounterpartyMultiCahoots(account);
 
         final String[] EXPECTED_PAYLOADS = {
@@ -156,8 +154,7 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         long feePerB = 1;
         long spendAmount = 5000;
         String address = ADDRESS_BIP44;
-        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(account, feePerB, address);
-        contextSender.setAmount(spendAmount);
+        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(account, feePerB, spendAmount, address);
         CahootsContext contextCp = CahootsContext.newCounterpartyMultiCahoots(account);
 
         final String[] EXPECTED_PAYLOADS = {
