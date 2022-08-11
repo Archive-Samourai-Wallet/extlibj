@@ -232,7 +232,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
             }
         }
 
-        long feePerB = cahootsWallet.fetchFeePerB();
+        long feePerB = cahootsContext.getFeePerB();
 
         List<List<CahootsUtxo>> listOfLists = new ArrayList<List<CahootsUtxo>>();
         shuffleUtxos(lowUTXO);
