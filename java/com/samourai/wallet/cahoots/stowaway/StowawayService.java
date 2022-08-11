@@ -4,10 +4,7 @@ import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
-import com.samourai.wallet.cahoots.AbstractCahoots2xService;
-import com.samourai.wallet.cahoots.CahootsType;
-import com.samourai.wallet.cahoots.CahootsUtxo;
-import com.samourai.wallet.cahoots.CahootsWallet;
+import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.util.FeeUtil;
@@ -47,7 +44,8 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
 
     @Override
     public Stowaway startCollaborator(CahootsWallet cahootsWallet, CahootsContext cahootsContext, Stowaway stowaway0) throws Exception {
-        Stowaway stowaway1 = doStowaway1(stowaway0, cahootsWallet, cahootsContext);
+        boolean prioritizeNonWhirlpool = cahootsContext.getTypeUser() == CahootsTypeUser.COUNTERPARTY && cahootsContext.getCahootsType() == CahootsType.MULTI;
+        Stowaway stowaway1 = doStowaway1(stowaway0, cahootsWallet, cahootsContext, prioritizeNonWhirlpool);
         if (log.isDebugEnabled()) {
             log.debug("# Stowaway COUNTERPARTY => step="+stowaway1.getStep());
         }
@@ -99,22 +97,42 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     //
     // receiver
     //
-    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, CahootsContext cahootsContext, boolean prioritizeNonWhirlpool) throws Exception {
         byte[] fingerprint = cahootsWallet.getFingerprint();
         stowaway0.setFingerprintCollab(fingerprint);
 
         int account = cahootsContext.getAccount();
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
-        // sort in descending order by value
-        Collections.sort(utxos, new UTXO.UTXOComparator());
+        // sort in ascending order by value
+        ArrayList<CahootsUtxo> filteredUtxos = new ArrayList<>();
+        if(prioritizeNonWhirlpool && cahootsContext.getTypeUser() == CahootsTypeUser.COUNTERPARTY && cahootsContext.getCahootsType() == CahootsType.MULTI) {
+            for (CahootsUtxo cahootsUtxo : utxos) {
+                long value = cahootsUtxo.getValue();
+                if (value != 100000 && value != 1000000 && value != 5000000 && value != 50000000) {
+                    filteredUtxos.add(cahootsUtxo);
+                }
+            }
+
+            if(filteredUtxos.isEmpty()) {
+                filteredUtxos.addAll(cahootsWallet.getUtxosWpkhByAccount(0)); // get utxos from deposit account, this should only happen for SaaS counterparty wallet, not normal users
+            }
+
+            if(filteredUtxos.isEmpty()) {
+                // add all utxos like normal as last resort
+                filteredUtxos.addAll(utxos);
+            }
+        } else {
+            filteredUtxos.addAll(utxos);
+        }
+        Collections.sort(filteredUtxos, new UTXO.UTXOComparator());
         if (log.isDebugEnabled()) {
-            log.debug("BIP84 utxos:" + utxos.size());
+            log.debug("BIP84 utxos:" + filteredUtxos.size());
         }
 
         List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
         long totalContributedAmount = 0L;
         List<CahootsUtxo> highUTXO = new ArrayList<CahootsUtxo>();
-        for (CahootsUtxo utxo : utxos) {
+        for (CahootsUtxo utxo : filteredUtxos) {
             if (utxo.getValue() > stowaway0.getSpendAmount() + SamouraiWalletConst.bDust.longValue()) {
                 highUTXO.add(utxo);
             }
@@ -128,7 +146,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
             totalContributedAmount = utxo.getValue();
         }
         if (selectedUTXO.size() == 0) {
-            for (CahootsUtxo utxo : utxos) {
+            for (CahootsUtxo utxo : filteredUtxos) {
                 selectedUTXO.add(utxo);
                 totalContributedAmount += utxo.getValue();
                 if (log.isDebugEnabled()) {

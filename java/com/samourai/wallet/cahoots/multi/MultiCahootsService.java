@@ -102,7 +102,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
     //
     private MultiCahoots doMultiCahoots1_Stowaway1(MultiCahoots multiCahoots0, CahootsWallet cahootsWallet, MultiCahootsContext cahootsContext) throws Exception {
         CahootsContext stowawayContext = cahootsContext.getStowawayContext();
-        Stowaway stowaway1 = stowawayService.doStowaway1(multiCahoots0.getStowaway(), cahootsWallet, stowawayContext);
+        Stowaway stowaway1 = stowawayService.doStowaway1(multiCahoots0.getStowaway(), cahootsWallet, stowawayContext, true);
 
         MultiCahoots multiCahoots1 = new MultiCahoots(multiCahoots0);
         multiCahoots1.setStowaway(stowaway1);
