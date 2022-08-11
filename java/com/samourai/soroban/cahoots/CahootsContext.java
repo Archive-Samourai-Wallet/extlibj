@@ -46,6 +46,11 @@ public class CahootsContext implements SorobanContext {
         return newCounterparty(CahootsType.STOWAWAY, account);
     }
 
+    public static CahootsContext newCounterpartyStowawayMulti(int account) {
+        // allow non-zero account for Stowaway MULTI
+        return new CahootsContext(CahootsTypeUser.COUNTERPARTY, CahootsType.STOWAWAY, account, null,null, null);
+    }
+
     public static CahootsContext newCounterpartyStonewallx2(int account) {
         return newCounterparty(CahootsType.STONEWALLX2, account);
     }

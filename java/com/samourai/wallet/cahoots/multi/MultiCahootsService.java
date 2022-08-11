@@ -12,6 +12,7 @@ import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
 import com.samourai.wallet.util.TxUtil;
+import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import com.samourai.xmanager.client.XManagerClient;
 import org.bitcoinj.core.*;
 import org.slf4j.Logger;
@@ -145,12 +146,33 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
         log.debug("Total fee:: " + totalFee);
         stowawayContext.setAmount(totalFee);
         Stowaway stowaway0 = multiCahoots2.getStowaway();
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowawayContext.getAccount());
+        ArrayList<CahootsUtxo> filteredUtxos = new ArrayList<>();
+
+        // Filter out all Whirlpool UTXOs from all tiers (0.001, 0.01, 0.05, 0.5), so that change and other mixed UTXOs are included
+        for (CahootsUtxo cahootsUtxo : utxos) {
+            long value = cahootsUtxo.getValue();
+            if (value != 100000 && value != 1000000 && value != 5000000 && value != 50000000) {
+                filteredUtxos.add(cahootsUtxo);
+            }
+        }
+
+        // If it can't find any, it then adds all UTXOs from account 0 (deposit)
+        if(filteredUtxos.isEmpty()) {
+            filteredUtxos.addAll(cahootsWallet.getUtxosWpkhByAccount(SamouraiAccountIndex.DEPOSIT));
+            stowaway0.setCounterpartyAccount(SamouraiAccountIndex.DEPOSIT);
+        }
+
+        // If it's still empty after that, then it uses Whirlpool UTXOs as a last resort
+        if(filteredUtxos.isEmpty()) {
+            filteredUtxos.addAll(utxos);
+        }
         stowaway0.setSpendAmount(totalFee);
         if (stowaway0.getSpendAmount() <= 0 || stowaway0.getSpendAmount() != totalFee) {
             // this check used to be the initiator portion, but with the introduction of MultiCahoots, it remains -1 until the Stonewallx2 finishes, so we can get an accurate amount, so the check is here now.
             throw new Exception("Invalid amount");
         }
-        Stowaway stowaway1 = stowawayService.doStowaway1(stowaway0, cahootsWallet, stowawayContext, seenTxs);
+        Stowaway stowaway1 = stowawayService.doStowaway1(stowaway0, cahootsWallet, stowawayContext, filteredUtxos, seenTxs);
 
         STONEWALLx2 stonewall3 = stonewallx2Service.doStep3(multiCahoots2.getStonewallx2(), cahootsWallet, stonewallContext);
 
