@@ -146,6 +146,11 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
         log.debug("Total fee:: " + totalFee);
         stowawayContext.setAmount(totalFee);
         Stowaway stowaway0 = multiCahoots2.getStowaway();
+        stowaway0.setSpendAmount(totalFee);
+        if (stowaway0.getSpendAmount() <= 0 || stowaway0.getSpendAmount() != totalFee) {
+            // this check used to be the initiator portion, but with the introduction of MultiCahoots, it remains -1 until the Stonewallx2 finishes, so we can get an accurate amount, so the check is here now.
+            throw new Exception("Invalid amount");
+        }
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowawayContext.getAccount());
         ArrayList<CahootsUtxo> filteredUtxos = new ArrayList<>();
 
@@ -167,12 +172,8 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
         if(filteredUtxos.isEmpty()) {
             filteredUtxos.addAll(utxos);
         }
-        stowaway0.setSpendAmount(totalFee);
-        if (stowaway0.getSpendAmount() <= 0 || stowaway0.getSpendAmount() != totalFee) {
-            // this check used to be the initiator portion, but with the introduction of MultiCahoots, it remains -1 until the Stonewallx2 finishes, so we can get an accurate amount, so the check is here now.
-            throw new Exception("Invalid amount");
-        }
-        Stowaway stowaway1 = stowawayService.doStowaway1(stowaway0, cahootsWallet, stowawayContext, filteredUtxos, seenTxs);
+
+        Stowaway stowaway1 = stowawayService.doStowaway1(stowaway0, cahootsWallet, stowawayContext, filteredUtxos, stonewallContext.getAccount(), seenTxs);
 
         STONEWALLx2 stonewall3 = stonewallx2Service.doStep3(multiCahoots2.getStonewallx2(), cahootsWallet, stonewallContext);
 
