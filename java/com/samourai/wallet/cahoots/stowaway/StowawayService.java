@@ -102,6 +102,8 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         stowaway0.setFingerprintCollab(fingerprint);
 
         int account = cahootsContext.getAccount();
+        stowaway0.setCounterpartyAccount(account);
+
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
         // sort in ascending order by value
         ArrayList<CahootsUtxo> filteredUtxos = new ArrayList<>();
@@ -115,6 +117,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
 
             if(filteredUtxos.isEmpty()) {
                 filteredUtxos.addAll(cahootsWallet.getUtxosWpkhByAccount(0)); // get utxos from deposit account, this should only happen for SaaS counterparty wallet, not normal users
+                stowaway0.setCounterpartyAccount(0);
             }
 
             if(filteredUtxos.isEmpty()) {
@@ -188,7 +191,6 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         outputsA.add(output_A0);
 
         stowaway0.setDestination(receiveAddress.getAddressString());
-        stowaway0.setCounterpartyAccount(account);
 
         Stowaway stowaway1 = stowaway0.copy();
         stowaway1.doStep1(inputsA, outputsA);
