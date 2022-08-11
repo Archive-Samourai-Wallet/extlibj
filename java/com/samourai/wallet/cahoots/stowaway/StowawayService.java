@@ -45,8 +45,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
 
     @Override
     public Stowaway startCollaborator(CahootsWallet cahootsWallet, CahootsContext cahootsContext, Stowaway stowaway0) throws Exception {
-        boolean prioritizeNonWhirlpool = cahootsContext.getTypeUser() == CahootsTypeUser.COUNTERPARTY && cahootsContext.getCahootsType() == CahootsType.MULTI;
-        Stowaway stowaway1 = doStowaway1(stowaway0, cahootsWallet, cahootsContext, prioritizeNonWhirlpool);
+        Stowaway stowaway1 = doStowaway1(stowaway0, cahootsWallet, cahootsContext, false);
         if (log.isDebugEnabled()) {
             log.debug("# Stowaway COUNTERPARTY => step="+stowaway1.getStep());
         }
@@ -98,8 +97,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     //
     // receiver
     //
-    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, CahootsContext cahootsContext, boolean prioritizeNonWhirlpool) throws Exception {
-        boolean isSaaSCounterparty = cahootsContext.getCahootsType() == CahootsType.MULTI && cahootsContext.getTypeUser() == CahootsTypeUser.COUNTERPARTY;
+    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, CahootsContext cahootsContext, boolean isSaaSCounterparty) throws Exception {
         byte[] fingerprint = cahootsWallet.getFingerprint();
         stowaway0.setFingerprintCollab(fingerprint);
 
@@ -109,7 +107,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway0.getCounterpartyAccount());
         // sort in ascending order by value
         ArrayList<CahootsUtxo> filteredUtxos = new ArrayList<>();
-        if(prioritizeNonWhirlpool && isSaaSCounterparty) {
+        if(isSaaSCounterparty) {
             log.debug("Inside non-Whirlpool prioritization");
             for (CahootsUtxo cahootsUtxo : utxos) {
                 long value = cahootsUtxo.getValue();
