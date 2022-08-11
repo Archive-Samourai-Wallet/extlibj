@@ -109,6 +109,10 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
     // counterparty
     //
     private Stonewallx2InputData getInputData(CahootsWallet cahootsWallet, STONEWALLx2 stonewall0, int account, List<String> seenTxs) throws Exception {
+        stonewall0.setCounterpartyAccount(account);
+        byte[] fingerprint = cahootsWallet.getFingerprint();
+        stonewall0.setFingerprintCollab(fingerprint);
+
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
         shuffleUtxos(utxos);
 
@@ -207,10 +211,6 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
 
     public STONEWALLx2 doSTONEWALLx2_1_Multi(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, CahootsContext cahootsContext, List<String> seenTxs, XManagerClient xManagerClient) throws Exception {
         int account = cahootsContext.getAccount();
-        stonewall0.setCounterpartyAccount(account);
-        byte[] fingerprint = cahootsWallet.getFingerprint();
-        stonewall0.setFingerprintCollab(fingerprint);
-
         Coin balance = CahootsUtxo.sumValue(cahootsWallet.getUtxosWpkhByAccount(account));
         boolean isBech32Destination = FormatsUtilGeneric.getInstance().isValidBech32(stonewall0.getDestination());
         if(balance.isGreaterThan(THRESHOLD) && isBech32Destination) {

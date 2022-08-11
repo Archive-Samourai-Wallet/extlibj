@@ -4,11 +4,13 @@ import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
-import com.samourai.wallet.cahoots.*;
+import com.samourai.wallet.cahoots.AbstractCahoots2xService;
+import com.samourai.wallet.cahoots.CahootsType;
+import com.samourai.wallet.cahoots.CahootsUtxo;
+import com.samourai.wallet.cahoots.CahootsWallet;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.util.FeeUtil;
-import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import org.bitcoinj.core.*;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
@@ -45,7 +47,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
 
     @Override
     public Stowaway startCollaborator(CahootsWallet cahootsWallet, CahootsContext cahootsContext, Stowaway stowaway0) throws Exception {
-        Stowaway stowaway1 = doStowaway1(stowaway0, cahootsWallet, cahootsContext, false);
+        Stowaway stowaway1 = doStowaway1(stowaway0, cahootsWallet, cahootsContext);
         if (log.isDebugEnabled()) {
             log.debug("# Stowaway COUNTERPARTY => step="+stowaway1.getStep());
         }
@@ -97,46 +99,26 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     //
     // receiver
     //
-    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, CahootsContext cahootsContext, boolean isSaaSCounterparty) throws Exception {
+    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+        int account = cahootsContext.getAccount();
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
+        return doStowaway1(stowaway0, cahootsWallet, cahootsContext, utxos, account);
+    }
+
+    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, CahootsContext cahootsContext, List<CahootsUtxo> utxos, int receiveAccount) throws Exception {
         byte[] fingerprint = cahootsWallet.getFingerprint();
         stowaway0.setFingerprintCollab(fingerprint);
 
-        int account = cahootsContext.getAccount();
-        stowaway0.setCounterpartyAccount(account);
-
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway0.getCounterpartyAccount());
         // sort in ascending order by value
-        ArrayList<CahootsUtxo> filteredUtxos = new ArrayList<>();
-        if(isSaaSCounterparty) {
-            log.debug("Inside non-Whirlpool prioritization");
-            for (CahootsUtxo cahootsUtxo : utxos) {
-                long value = cahootsUtxo.getValue();
-                if (value != 100000 && value != 1000000 && value != 5000000 && value != 50000000) {
-                    filteredUtxos.add(cahootsUtxo);
-                }
-            }
-
-            if(filteredUtxos.isEmpty()) {
-                filteredUtxos.addAll(cahootsWallet.getUtxosWpkhByAccount(SamouraiAccountIndex.DEPOSIT)); // get utxos from deposit account, this should only happen for SaaS counterparty wallet, not normal users
-                stowaway0.setCounterpartyAccount(SamouraiAccountIndex.DEPOSIT);
-            }
-
-            if(filteredUtxos.isEmpty()) {
-                // add all utxos like normal as last resort
-                filteredUtxos.addAll(utxos);
-            }
-        } else {
-            filteredUtxos.addAll(utxos);
-        }
-        Collections.sort(filteredUtxos, new UTXO.UTXOComparator());
+        Collections.sort(utxos, new UTXO.UTXOComparator());
         if (log.isDebugEnabled()) {
-            log.debug("BIP84 utxos:" + filteredUtxos.size());
+            log.debug("BIP84 utxos:" + utxos.size());
         }
 
         List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
         long totalContributedAmount = 0L;
         List<CahootsUtxo> highUTXO = new ArrayList<CahootsUtxo>();
-        for (CahootsUtxo utxo : filteredUtxos) {
+        for (CahootsUtxo utxo : utxos) {
             if (utxo.getValue() > stowaway0.getSpendAmount() + SamouraiWalletConst.bDust.longValue()) {
                 highUTXO.add(utxo);
             }
@@ -150,7 +132,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
             totalContributedAmount = utxo.getValue();
         }
         if (selectedUTXO.size() == 0) {
-            for (CahootsUtxo utxo : filteredUtxos) {
+            for (CahootsUtxo utxo : utxos) {
                 selectedUTXO.add(utxo);
                 totalContributedAmount += utxo.getValue();
                 if (log.isDebugEnabled()) {
@@ -182,7 +164,6 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
             inputsA.add(input);
         }
 
-        int receiveAccount = isSaaSCounterparty ? SamouraiAccountIndex.DEPOSIT : account;
         // destination output
         BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(receiveAccount, true, BIP_FORMAT.SEGWIT_NATIVE);
         if (log.isDebugEnabled()) {
@@ -193,6 +174,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         outputsA.add(output_A0);
 
         stowaway0.setDestination(receiveAddress.getAddressString());
+        stowaway0.setCounterpartyAccount(cahootsContext.getAccount());
 
         Stowaway stowaway1 = stowaway0.copy();
         stowaway1.doStep1(inputsA, outputsA);
