@@ -8,6 +8,7 @@ import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.util.FeeUtil;
+import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import org.bitcoinj.core.*;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
@@ -104,10 +105,12 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         int account = cahootsContext.getAccount();
         stowaway0.setCounterpartyAccount(account);
 
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
+        log.debug("ACCOUNT:: " + account);
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway0.getCounterpartyAccount());
         // sort in ascending order by value
         ArrayList<CahootsUtxo> filteredUtxos = new ArrayList<>();
         if(prioritizeNonWhirlpool && cahootsContext.getTypeUser() == CahootsTypeUser.COUNTERPARTY && cahootsContext.getCahootsType() == CahootsType.MULTI) {
+            log.debug("Inside non-Whirlpool prioritization");
             for (CahootsUtxo cahootsUtxo : utxos) {
                 long value = cahootsUtxo.getValue();
                 if (value != 100000 && value != 1000000 && value != 5000000 && value != 50000000) {
@@ -116,8 +119,8 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
             }
 
             if(filteredUtxos.isEmpty()) {
-                filteredUtxos.addAll(cahootsWallet.getUtxosWpkhByAccount(0)); // get utxos from deposit account, this should only happen for SaaS counterparty wallet, not normal users
-                stowaway0.setCounterpartyAccount(0);
+                filteredUtxos.addAll(cahootsWallet.getUtxosWpkhByAccount(SamouraiAccountIndex.DEPOSIT)); // get utxos from deposit account, this should only happen for SaaS counterparty wallet, not normal users
+                stowaway0.setCounterpartyAccount(SamouraiAccountIndex.DEPOSIT);
             }
 
             if(filteredUtxos.isEmpty()) {
