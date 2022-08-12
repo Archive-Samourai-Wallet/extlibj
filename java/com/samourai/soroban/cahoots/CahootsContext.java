@@ -91,6 +91,10 @@ public class CahootsContext implements SorobanContext {
         return amount;
     }
 
+    public void setAmount(Long amount) {
+        this.amount = amount;
+    }
+
     public String getAddress() {
         return address;
     }

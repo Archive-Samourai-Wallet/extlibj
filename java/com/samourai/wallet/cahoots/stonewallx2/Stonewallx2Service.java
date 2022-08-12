@@ -109,10 +109,6 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
     // counterparty
     //
     private Stonewallx2InputData getInputData(CahootsWallet cahootsWallet, STONEWALLx2 stonewall0, int account, List<String> seenTxs) throws Exception {
-        stonewall0.setCounterpartyAccount(account);
-        byte[] fingerprint = cahootsWallet.getFingerprint();
-        stonewall0.setFingerprintCollab(fingerprint);
-
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
         shuffleUtxos(utxos);
 
@@ -196,18 +192,6 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
         }
         return receiveAddress;
     }
-    private STONEWALLx2 doSTONEWALLx2_1(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
-        List<String> seenTxs = new ArrayList<>();
-
-        // contributor mix output: like-typed with destination
-        BipFormat bipFormatDestination = getBipFormatSupplier().findByAddress(stonewall0.getDestination(), params);
-        BipAddress receiveAddress = getContributorMixAddress(cahootsWallet, stonewall0, true, bipFormatDestination);
-        TransactionOutput mixOutput = computeTxOutput(receiveAddress, stonewall0.getSpendAmount(), cahootsContext);
-        if (log.isDebugEnabled()) {
-            log.debug("+output (CounterParty Mix) = " + receiveAddress.getAddressString());
-        }
-        return doSTONEWALLx2_1(mixOutput, cahootsWallet, stonewall0, cahootsContext, seenTxs);
-    }
 
     public STONEWALLx2 doSTONEWALLx2_1_Multi(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, CahootsContext cahootsContext, List<String> seenTxs, XManagerClient xManagerClient) throws Exception {
         int account = cahootsContext.getAccount();
@@ -228,6 +212,22 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
 
         // regular STONEWALLx2
         return doSTONEWALLx2_1(stonewall0, cahootsWallet, cahootsContext);
+    }
+
+    private STONEWALLx2 doSTONEWALLx2_1(STONEWALLx2 stonewall0, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+        stonewall0.setCounterpartyAccount(cahootsContext.getAccount());
+        byte[] fingerprint = cahootsWallet.getFingerprint();
+        stonewall0.setFingerprintCollab(fingerprint);
+
+        List<String> seenTxs = new ArrayList<>();
+        // contributor mix output: like-typed with destination
+        BipFormat bipFormatDestination = getBipFormatSupplier().findByAddress(stonewall0.getDestination(), params);
+        BipAddress receiveAddress = getContributorMixAddress(cahootsWallet, stonewall0, true, bipFormatDestination);
+        TransactionOutput mixOutput = computeTxOutput(receiveAddress, stonewall0.getSpendAmount(), cahootsContext);
+        if (log.isDebugEnabled()) {
+            log.debug("+output (CounterParty Mix) = " + receiveAddress.getAddressString());
+        }
+        return doSTONEWALLx2_1(mixOutput, cahootsWallet, stonewall0, cahootsContext, seenTxs);
     }
 
     private STONEWALLx2 doSTONEWALLx2_1(TransactionOutput mixOutput, CahootsWallet cahootsWallet, STONEWALLx2 stonewall0, CahootsContext cahootsContext, List<String> seenTxs) throws Exception {
