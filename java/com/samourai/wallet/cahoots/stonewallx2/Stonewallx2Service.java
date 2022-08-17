@@ -223,6 +223,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
         List<String> seenTxs = new ArrayList<>();
         // contributor mix output: like-typed with destination
         BipFormat bipFormatDestination = getBipFormatSupplier().findByAddress(stonewall0.getDestination(), params);
+        log.debug("BIP FORMAT:: " + bipFormatDestination.getId());
         BipAddress receiveAddress = getContributorMixAddress(cahootsWallet, stonewall0, true, bipFormatDestination);
         TransactionOutput mixOutput = computeTxOutput(receiveAddress, stonewall0.getSpendAmount(), cahootsContext);
         if (log.isDebugEnabled()) {
