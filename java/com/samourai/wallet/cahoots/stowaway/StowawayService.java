@@ -325,7 +325,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         stowaway1.getTransaction().clearOutputs(); // replace spend output by the new one
 
         // change output
-        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stowaway1.getAccount(), true);
+        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stowaway1.getAccount(), true, BIP_FORMAT.SEGWIT_NATIVE);
         if (log.isDebugEnabled()) {
             log.debug("+output (sender change) = "+changeAddress);
         }
