@@ -43,9 +43,11 @@ public class WalletSupplierImpl implements WalletSupplier {
 
     // register Samourai derivations
     for (BIP_WALLET bip : BIP_WALLET.values()) {
-      BipWallet bipWallet = new BipWallet(bip44w, indexHandlerSupplier, bip);
-      register(bipWallet);
-      walletsByAccountByAddressType.get(bip.getAccount()).put(bip.getBipFormat(), bipWallet);
+      for(BipFormat bipFormat : bip.getBipFormats()) {
+        BipWallet bipWallet = new BipWallet(bip44w, indexHandlerSupplier, bip, bipFormat);
+        register(bipWallet);
+        walletsByAccountByAddressType.get(bip.getAccount()).put(bipFormat, bipWallet);
+      }
     }
   }
 
