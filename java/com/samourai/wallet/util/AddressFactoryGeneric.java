@@ -98,7 +98,11 @@ public class AddressFactoryGeneric {
     }
 
     public Pair<Integer, String> getAddress(WALLET_INDEX walletIndex) {
-        return getAddress(walletIndex, walletIndex.getBipWallet().getBipFormat(), false);
+        if(walletIndex == WALLET_INDEX.POSTMIX_CHANGE || walletIndex == WALLET_INDEX.POSTMIX_RECEIVE) {
+            return getAddress(walletIndex, BIP_FORMAT.SEGWIT_NATIVE, false);
+        } else {
+            return getAddress(walletIndex, walletIndex.getBipWallet().getBipFormats().get(0), false);
+        }
     }
 
     public Pair<Integer, String> getAddress(WALLET_INDEX walletIndex, BipFormat bipFormat) {
@@ -106,7 +110,11 @@ public class AddressFactoryGeneric {
     }
 
     public Pair<Integer, String> getAddressAndIncrement(WALLET_INDEX walletIndex) {
-        return getAddress(walletIndex, walletIndex.getBipWallet().getBipFormat(), true);
+        if(walletIndex == WALLET_INDEX.POSTMIX_CHANGE || walletIndex == WALLET_INDEX.POSTMIX_RECEIVE) {
+            return getAddress(walletIndex, BIP_FORMAT.SEGWIT_NATIVE, true);
+        } else {
+            return getAddress(walletIndex, walletIndex.getBipWallet().getBipFormats().get(0), true);
+        }
     }
 
     public Pair<Integer, String> getAddressAndIncrement(WALLET_INDEX walletIndex, BipFormat bipFormat) {
@@ -152,7 +160,12 @@ public class AddressFactoryGeneric {
     protected HD_Chain getHdCHain(WALLET_INDEX walletIndex) {
         int account = walletIndex.getBipWallet().getBipDerivation().getAccountIndex();
         int chain = walletIndex.getChainIndex();
-        HD_Wallet hdWallet = getHdWallet(walletIndex.getBipWallet().getBipFormat());
+        HD_Wallet hdWallet = null;
+        if(walletIndex == WALLET_INDEX.POSTMIX_CHANGE || walletIndex == WALLET_INDEX.POSTMIX_RECEIVE) {
+            hdWallet = getHdWallet(BIP_FORMAT.SEGWIT_NATIVE);
+        } else {
+            hdWallet = getHdWallet(walletIndex.getBipWallet().getBipFormats().get(0));
+        }
         if (hdWallet == null) {
             // may happen on wallet startup
             return null;

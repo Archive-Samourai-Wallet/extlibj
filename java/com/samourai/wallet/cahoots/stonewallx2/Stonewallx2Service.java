@@ -1,6 +1,7 @@
 package com.samourai.wallet.cahoots.stonewallx2;
 
 import com.samourai.soroban.cahoots.CahootsContext;
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.AbstractCahoots2xService;
@@ -186,9 +187,9 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
         return new Stonewallx2InputData(totalContributedAmount, utxos, inputsA);
     }
     private BipAddress getContributorMixAddress(CahootsWallet cahootsWallet, STONEWALLx2 stonewall0, boolean increment, BipFormat bipFormat) throws Exception {
-        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), increment, bipFormat);
+        BipAddress receiveAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), increment, bipFormat);
         if (receiveAddress.getAddressString().equalsIgnoreCase(stonewall0.getDestination())) {
-            receiveAddress = cahootsWallet.fetchAddressReceive(stonewall0.getCounterpartyAccount(), increment, bipFormat);
+            receiveAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), increment, bipFormat);
         }
         return receiveAddress;
     }
@@ -222,6 +223,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
         List<String> seenTxs = new ArrayList<>();
         // contributor mix output: like-typed with destination
         BipFormat bipFormatDestination = getBipFormatSupplier().findByAddress(stonewall0.getDestination(), params);
+        log.debug("BIP FORMAT:: " + bipFormatDestination.getId());
         BipAddress receiveAddress = getContributorMixAddress(cahootsWallet, stonewall0, true, bipFormatDestination);
         TransactionOutput mixOutput = computeTxOutput(receiveAddress, stonewall0.getSpendAmount(), cahootsContext);
         if (log.isDebugEnabled()) {
@@ -240,7 +242,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
         outputsA.add(mixOutput);
 
         // contributor change output
-        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), true);
+        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), true, BIP_FORMAT.SEGWIT_NATIVE);
         if (log.isDebugEnabled()) {
             log.debug("+output (CounterParty change) = " + changeAddress);
         }
@@ -398,7 +400,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2> {
 
         // spender change output
         List<TransactionOutput> outputsB = new LinkedList<>();
-        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall1.getAccount(), true);
+        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall1.getAccount(), true, BIP_FORMAT.SEGWIT_NATIVE);
         if (log.isDebugEnabled()) {
             log.debug("+output (Spender change) = " + changeAddress);
         }

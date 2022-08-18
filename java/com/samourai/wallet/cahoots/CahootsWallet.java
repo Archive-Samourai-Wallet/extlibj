@@ -35,33 +35,21 @@ public abstract class CahootsWallet {
     }
 
     public BipWallet getReceiveWallet(int account, BipFormat bipFormat) throws Exception {
-        if (account == WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT) {
-            // force change chain / BIP84
-            return walletSupplier.getWallet(BIP_WALLET.POSTMIX_BIP84);
+        switch(account) {
+            case WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT:
+                return walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, bipFormat);
+            case 0:
+                return walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, bipFormat);
         }
-        if (account == 0) {
-            // like bipFormat
-            return walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, bipFormat);
-        }
-        else {
-            throw new Exception("Invalid account: "+account);
-        }
+        throw new Exception("Invalid account: "+account);
     }
 
     public BipAddress fetchAddressReceive(int account, boolean increment, BipFormat bipFormat) throws Exception {
         return getReceiveWallet(account, bipFormat).getNextAddress(increment);
     }
 
-    public BipAddress fetchAddressChange(int account, boolean increment) throws Exception {
-        if (account == 0) {
-            return walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84).getNextChangeAddress(increment);
-        }
-        else if (account == WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT) {
-            return walletSupplier.getWallet(BIP_WALLET.POSTMIX_BIP84).getNextChangeAddress(increment);
-        }
-        else {
-            throw new Exception("Invalid account: "+account);
-        }
+    public BipAddress fetchAddressChange(int account, boolean increment, BipFormat bipFormat) throws Exception {
+        return getReceiveWallet(account, bipFormat).getNextChangeAddress(increment);
     }
 
     protected abstract List<CahootsUtxo> fetchUtxos(int account);
