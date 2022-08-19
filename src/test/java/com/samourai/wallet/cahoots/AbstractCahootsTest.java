@@ -2,6 +2,7 @@ package com.samourai.wallet.cahoots;
 
 import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.soroban.cahoots.ManualCahootsMessage;
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipWallet.WalletSupplier;
 import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.cahoots.multi.MultiCahootsService;
@@ -34,8 +35,14 @@ public abstract class AbstractCahootsTest extends AbstractTest {
     protected static String[] COUNTERPARTY_RECEIVE_84;
     protected static String[] COUNTERPARTY_RECEIVE_44;
     protected static String[] COUNTERPARTY_RECEIVE_49;
+    protected static String[] COUNTERPARTY_RECEIVE_POSTMIX_84;
     protected static String[] SENDER_CHANGE_84;
+    protected static String[] SENDER_CHANGE_POSTMIX_84;
+    protected static String[] COUNTERPARTY_CHANGE_44;
+    protected static String[] COUNTERPARTY_CHANGE_49;
     protected static String[] COUNTERPARTY_CHANGE_84;
+    protected static String[] COUNTERPARTY_CHANGE_POSTMIX_44;
+    protected static String[] COUNTERPARTY_CHANGE_POSTMIX_84;
 
     protected Stonewallx2Service stonewallx2Service = new Stonewallx2Service(bipFormatSupplier, params) {
         @Override
@@ -87,14 +94,44 @@ public abstract class AbstractCahootsTest extends AbstractTest {
             COUNTERPARTY_RECEIVE_49[i] = walletSupplierCounterparty.getWallet(BIP_WALLET.DEPOSIT_BIP49).getAddressAt(Chain.RECEIVE.getIndex(), i).getAddressString();
         }
 
+        COUNTERPARTY_RECEIVE_POSTMIX_84 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            COUNTERPARTY_RECEIVE_POSTMIX_84[i] = BIP_FORMAT.SEGWIT_NATIVE.getAddressString(walletSupplierCounterparty.getWallet(BIP_WALLET.POSTMIX_BIP84).getAddressAt(Chain.RECEIVE.getIndex(), i).getHdAddress());
+        }
+
         SENDER_CHANGE_84 = new String[4];
         for (int i = 0; i < 4; i++) {
             SENDER_CHANGE_84[i] = walletSupplierSender.getWallet(BIP_WALLET.DEPOSIT_BIP84).getAddressAt(Chain.CHANGE.getIndex(), i).getAddressString();
         }
 
+        SENDER_CHANGE_POSTMIX_84 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            SENDER_CHANGE_POSTMIX_84[i] = BIP_FORMAT.SEGWIT_NATIVE.getAddressString(walletSupplierSender.getWallet(BIP_WALLET.POSTMIX_BIP84).getAddressAt(Chain.CHANGE.getIndex(), i).getHdAddress());
+        }
+
+        COUNTERPARTY_CHANGE_44 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            COUNTERPARTY_CHANGE_44[i] = walletSupplierCounterparty.getWallet(BIP_WALLET.DEPOSIT_BIP44).getAddressAt(Chain.CHANGE.getIndex(), i).getAddressString();
+        }
+
+        COUNTERPARTY_CHANGE_49 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            COUNTERPARTY_CHANGE_49[i] = walletSupplierCounterparty.getWallet(BIP_WALLET.DEPOSIT_BIP49).getAddressAt(Chain.CHANGE.getIndex(), i).getAddressString();
+        }
+
         COUNTERPARTY_CHANGE_84 = new String[4];
         for (int i = 0; i < 4; i++) {
             COUNTERPARTY_CHANGE_84[i] = walletSupplierCounterparty.getWallet(BIP_WALLET.DEPOSIT_BIP84).getAddressAt(Chain.CHANGE.getIndex(), i).getAddressString();
+        }
+
+        COUNTERPARTY_CHANGE_POSTMIX_84 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            COUNTERPARTY_CHANGE_POSTMIX_84[i] = BIP_FORMAT.SEGWIT_NATIVE.getAddressString(walletSupplierCounterparty.getWallet(BIP_WALLET.POSTMIX_BIP84).getAddressAt(Chain.CHANGE.getIndex(), i).getHdAddress());
+        }
+
+        COUNTERPARTY_CHANGE_POSTMIX_44 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            COUNTERPARTY_CHANGE_POSTMIX_44[i] = BIP_FORMAT.LEGACY.getAddressString(walletSupplierCounterparty.getWallet(BIP_WALLET.POSTMIX_BIP84).getAddressAt(Chain.CHANGE.getIndex(), i).getHdAddress());
         }
     }
 
