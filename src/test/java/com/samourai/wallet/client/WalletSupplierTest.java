@@ -9,14 +9,16 @@ import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.wallet.hd.HD_Account;
 import com.samourai.wallet.test.AbstractTest;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
-import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
+
 public class WalletSupplierTest extends AbstractTest {
+  private static final int NB_WALLETS = 9;
 
   private static final String ZPUB_DEPOSIT =
       "vpub5YEQpEDPAZWVTkmWASSHyaUMsae7uV9FnRrhZ3cqV6RFbBQx7wjVsUfLqSE3hgNY8WQixurkbWNkfV2sRE7LPfNKQh2t3s5une4QZthwdCu";
@@ -27,13 +29,14 @@ public class WalletSupplierTest extends AbstractTest {
 
   @Test
   public void getWallet() throws Exception {
-    Assertions.assertEquals(7, walletSupplier.getWallets().size());
     Assertions.assertEquals("m/44'/1'/0", walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP44).getDerivation().getPathAccount(params));
     Assertions.assertEquals("m/49'/1'/0", walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP49).getDerivation().getPathAccount(params));
     Assertions.assertEquals("m/84'/1'/0", walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84).getDerivation().getPathAccount(params));
     Assertions.assertEquals("m/84'/1'/2147483644", walletSupplier.getWallet(BIP_WALLET.BADBANK_BIP84).getDerivation().getPathAccount(params));
     Assertions.assertEquals("m/84'/1'/2147483645", walletSupplier.getWallet(BIP_WALLET.PREMIX_BIP84).getDerivation().getPathAccount(params));
     Assertions.assertEquals("m/84'/1'/2147483646", walletSupplier.getWallet(BIP_WALLET.POSTMIX_BIP84).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/2147483646", walletSupplier.getWallet(BIP_WALLET.POSTMIX_BIP84_AS_BIP49).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/2147483646", walletSupplier.getWallet(BIP_WALLET.POSTMIX_BIP84_AS_BIP44).getDerivation().getPathAccount(params));
     Assertions.assertEquals("m/84'/1'/2147483647", walletSupplier.getWallet(BIP_WALLET.RICOCHET_BIP84).getDerivation().getPathAccount(params));
   }
 
@@ -45,6 +48,8 @@ public class WalletSupplierTest extends AbstractTest {
     Assertions.assertEquals("m/84'/1'/2147483644", walletSupplier.getWallet(WhirlpoolAccount.BADBANK, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount(params));
     Assertions.assertEquals("m/84'/1'/2147483645", walletSupplier.getWallet(WhirlpoolAccount.PREMIX, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount(params));
     Assertions.assertEquals("m/84'/1'/2147483646", walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/2147483646", walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, BIP_FORMAT.SEGWIT_COMPAT).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("m/84'/1'/2147483646", walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, BIP_FORMAT.LEGACY).getDerivation().getPathAccount(params));
     Assertions.assertEquals("m/84'/1'/2147483647", walletSupplier.getWallet(WhirlpoolAccount.RICOCHET, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount(params));
   }
 
@@ -56,21 +61,35 @@ public class WalletSupplierTest extends AbstractTest {
   }
 
   @Test
+  public void getWallets() throws Exception {
+    Collection<BipWallet> wallets = walletSupplier.getWallets();
+    Assertions.assertEquals(NB_WALLETS, wallets.size());
+  }
+
+  @Test
   public void getPubs() throws Exception {
     // all
-    String pubs = StringUtils.join(walletSupplier.getPubs(true),";");
-    Assertions.assertEquals("tpubDC9KwqYcT3e9Kp4W72ByimMVpfVGbJB6vDUfhBDtjQvSJGVjnY5HE1yxE8cNPBJrCG72m6jRgCnvWeswZAcMtV3efHbWGBodmiaBmWSQLwY;upub5DrJcSvsRHYBWUrtoaCjygVQXsBNR4iofB2hUnTMiNBz7axZb2Tfa4j3JV79thdmcm6YzAfwMPH9YK7y2EKyNY4UqgjCxVyfSa9uVUb938D;vpub5YEQpEDPAZWVTkmWASSHyaUMsae7uV9FnRrhZ3cqV6RFbBQx7wjVsUfLqSE3hgNY8WQixurkbWNkfV2sRE7LPfNKQh2t3s5une4QZthwdCu;vpub5YEQpEDXWE3TW21vo2zdDK9PZgKqnonnomB2b18dadRTgtnB5F8SZg1reqvMHEDKq1k3oHz1AXbsD6MCfNcw77BqfZxWmZm4nn16XNC84mL;vpub5YEQpEDXWE3TawqjQNFt5o4sBM1RP1B1mtVZr8ysEA9hFLsZZ4RB8oxE4Sfkumc47jnVPUgRL9hJf3sWpTYBKtdkP3UK6J8p1n2ykmjHnrW;vpub5YEQpEDXWE3TUJkJddzPVbcMBwTwwvqWNTWNxnHQotZzQocFiXvnVVuiYVb9ZYR58PMnSCUxvHTzpVSCm3ttSLXfVviBJspozHYtu6oNtNY;vpub5YEQpEDXWE3TcFX9JXj73TaBskrDTy5pdw3HNujngNKfAYtgx1ynNd6ri92A8Jdgccm9BX4S8yo45hsK4oiCar15pqA7MHM9XtkzNySdknj", pubs);
+    String[] pubs = walletSupplier.getPubs(true);
+    Assertions.assertEquals("tpubDC9KwqYcT3e9Kp4W72ByimMVpfVGbJB6vDUfhBDtjQvSJGVjnY5HE1yxE8cNPBJrCG72m6jRgCnvWeswZAcMtV3efHbWGBodmiaBmWSQLwY", pubs[0]); //DEPOSIT_BIP44
+    Assertions.assertEquals("upub5DrJcSvsRHYBWUrtoaCjygVQXsBNR4iofB2hUnTMiNBz7axZb2Tfa4j3JV79thdmcm6YzAfwMPH9YK7y2EKyNY4UqgjCxVyfSa9uVUb938D", pubs[1]); //DEPOSIT_BIP49
+    Assertions.assertEquals("vpub5YEQpEDPAZWVTkmWASSHyaUMsae7uV9FnRrhZ3cqV6RFbBQx7wjVsUfLqSE3hgNY8WQixurkbWNkfV2sRE7LPfNKQh2t3s5une4QZthwdCu", pubs[2]); //DEPOSIT_BIP84
+    Assertions.assertEquals("vpub5YEQpEDXWE3TW21vo2zdDK9PZgKqnonnomB2b18dadRTgtnB5F8SZg1reqvMHEDKq1k3oHz1AXbsD6MCfNcw77BqfZxWmZm4nn16XNC84mL", pubs[3]); //PREMIX_BIP84
+    Assertions.assertEquals("vpub5YEQpEDXWE3TawqjQNFt5o4sBM1RP1B1mtVZr8ysEA9hFLsZZ4RB8oxE4Sfkumc47jnVPUgRL9hJf3sWpTYBKtdkP3UK6J8p1n2ykmjHnrW", pubs[4]); //POSTMIX_BIP84
+    Assertions.assertEquals("upub5DQ9WZYcMYVyjeeca1UFshyN1NrySPBWrmyM4k5yr9mpCF4LJQFcWkJ63EiAurx8i6fge15rsVLkmmFx6m8AXex9WhmtWPKKk3yLN6dDTKP", pubs[5]); //POSTMIX_BIP84_AS_BIP49
+    Assertions.assertEquals("tpubDCGZwoP3Ws5sZLQpXGpDhtbErQPyFdf59k8JmUpnL5fM6qAj8bbPXNwLLtfiS5s8ivZ1W1PQnaET7obFeiDSooTFBKcTweS29BkgHwhhsQD", pubs[6]); //POSTMIX_BIP84_AS_BIP44
+    Assertions.assertEquals("vpub5YEQpEDXWE3TUJkJddzPVbcMBwTwwvqWNTWNxnHQotZzQocFiXvnVVuiYVb9ZYR58PMnSCUxvHTzpVSCm3ttSLXfVviBJspozHYtu6oNtNY", pubs[7]); //BADBANK_BIP84
+    Assertions.assertEquals("vpub5YEQpEDXWE3TcFX9JXj73TaBskrDTy5pdw3HNujngNKfAYtgx1ynNd6ri92A8Jdgccm9BX4S8yo45hsK4oiCar15pqA7MHM9XtkzNySdknj", pubs[8]); //RICOCHET_BIP84
 
     // all
-    Assertions.assertEquals(7, walletSupplier.getPubs(true).length);
-    Assertions.assertEquals(7, walletSupplier.getPubs(true, null).length);
+    Assertions.assertEquals(NB_WALLETS, walletSupplier.getPubs(true).length);
+    Assertions.assertEquals(NB_WALLETS, walletSupplier.getPubs(true, null).length);
 
     // actives
-    Assertions.assertEquals(5, walletSupplier.getPubs(false, null).length);
+    Assertions.assertEquals(7, walletSupplier.getPubs(false, null).length);
 
     // by format
-    Assertions.assertEquals(1, walletSupplier.getPubs(true, BIP_FORMAT.LEGACY).length);
-    Assertions.assertEquals(1, walletSupplier.getPubs(true, BIP_FORMAT.SEGWIT_COMPAT).length);
+    Assertions.assertEquals(2, walletSupplier.getPubs(true, BIP_FORMAT.LEGACY).length);
+    Assertions.assertEquals(2, walletSupplier.getPubs(true, BIP_FORMAT.SEGWIT_COMPAT).length);
     Assertions.assertEquals(5, walletSupplier.getPubs(true, BIP_FORMAT.SEGWIT_NATIVE).length);
 
   }
