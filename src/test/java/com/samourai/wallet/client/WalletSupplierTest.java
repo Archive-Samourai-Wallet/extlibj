@@ -20,12 +20,13 @@ import java.util.Collection;
 public class WalletSupplierTest extends AbstractTest {
   private static final int NB_WALLETS = 9;
 
-  private static final String ZPUB_DEPOSIT =
+  private static final String ZPUB_DEPOSIT_BIP84 =
       "vpub5YEQpEDPAZWVTkmWASSHyaUMsae7uV9FnRrhZ3cqV6RFbBQx7wjVsUfLqSE3hgNY8WQixurkbWNkfV2sRE7LPfNKQh2t3s5une4QZthwdCu";
-  private static final String ZPUB_PREMIX =
+  private static final String ZPUB_PREMIX_BIP84 =
       "vpub5YEQpEDXWE3TW21vo2zdDK9PZgKqnonnomB2b18dadRTgtnB5F8SZg1reqvMHEDKq1k3oHz1AXbsD6MCfNcw77BqfZxWmZm4nn16XNC84mL";
-  private static final String ZPUB_POSTMIX =
+  private static final String ZPUB_POSTMIX_BIP84 =
       "vpub5YEQpEDXWE3TawqjQNFt5o4sBM1RP1B1mtVZr8ysEA9hFLsZZ4RB8oxE4Sfkumc47jnVPUgRL9hJf3sWpTYBKtdkP3UK6J8p1n2ykmjHnrW";
+  private static final String ZPUB_POSTMIX_BIP84_AS_BIP49 = "upub5DQ9WZYcMYVyjeeca1UFshyN1NrySPBWrmyM4k5yr9mpCF4LJQFcWkJ63EiAurx8i6fge15rsVLkmmFx6m8AXex9WhmtWPKKk3yLN6dDTKP";
 
   @Test
   public void getWallet() throws Exception {
@@ -42,22 +43,23 @@ public class WalletSupplierTest extends AbstractTest {
 
   @Test
   public void getWalletByFormat() throws Exception {
-    Assertions.assertEquals("m/44'/1'/0", walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, BIP_FORMAT.LEGACY).getDerivation().getPathAccount(params));
-    Assertions.assertEquals("m/49'/1'/0", walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, BIP_FORMAT.SEGWIT_COMPAT).getDerivation().getPathAccount(params));
-    Assertions.assertEquals("m/84'/1'/0", walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount(params));
-    Assertions.assertEquals("m/84'/1'/2147483644", walletSupplier.getWallet(WhirlpoolAccount.BADBANK, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount(params));
-    Assertions.assertEquals("m/84'/1'/2147483645", walletSupplier.getWallet(WhirlpoolAccount.PREMIX, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount(params));
-    Assertions.assertEquals("m/84'/1'/2147483646", walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount(params));
-    Assertions.assertEquals("m/84'/1'/2147483646", walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, BIP_FORMAT.SEGWIT_COMPAT).getDerivation().getPathAccount(params));
-    Assertions.assertEquals("m/84'/1'/2147483646", walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, BIP_FORMAT.LEGACY).getDerivation().getPathAccount(params));
-    Assertions.assertEquals("m/84'/1'/2147483647", walletSupplier.getWallet(WhirlpoolAccount.RICOCHET, BIP_FORMAT.SEGWIT_NATIVE).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("DEPOSIT_BIP44", walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, BIP_FORMAT.LEGACY).getId());
+    Assertions.assertEquals("DEPOSIT_BIP49", walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, BIP_FORMAT.SEGWIT_COMPAT).getId());
+    Assertions.assertEquals("DEPOSIT_BIP84", walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, BIP_FORMAT.SEGWIT_NATIVE).getId());
+    Assertions.assertEquals("BADBANK_BIP84", walletSupplier.getWallet(WhirlpoolAccount.BADBANK, BIP_FORMAT.SEGWIT_NATIVE).getId());
+    Assertions.assertEquals("PREMIX_BIP84", walletSupplier.getWallet(WhirlpoolAccount.PREMIX, BIP_FORMAT.SEGWIT_NATIVE).getId());
+    Assertions.assertEquals("POSTMIX_BIP84", walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, BIP_FORMAT.SEGWIT_NATIVE).getId());
+    Assertions.assertEquals("POSTMIX_BIP84_AS_BIP49", walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, BIP_FORMAT.SEGWIT_COMPAT).getId());
+    Assertions.assertEquals("POSTMIX_BIP84_AS_BIP44", walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, BIP_FORMAT.LEGACY).getId());
+    Assertions.assertEquals("RICOCHET_BIP84", walletSupplier.getWallet(WhirlpoolAccount.RICOCHET, BIP_FORMAT.SEGWIT_NATIVE).getId());
   }
 
   @Test
   public void getWalletByPub() throws Exception {
-    Assertions.assertEquals("m/84'/1'/0", walletSupplier.getWalletByPub(ZPUB_DEPOSIT).getDerivation().getPathAccount(params));
-    Assertions.assertEquals("m/84'/1'/2147483645", walletSupplier.getWalletByPub(ZPUB_PREMIX).getDerivation().getPathAccount(params));
-    Assertions.assertEquals("m/84'/1'/2147483646", walletSupplier.getWalletByPub(ZPUB_POSTMIX).getDerivation().getPathAccount(params));
+    Assertions.assertEquals("DEPOSIT_BIP84", walletSupplier.getWalletByPub(ZPUB_DEPOSIT_BIP84).getId());
+    Assertions.assertEquals("PREMIX_BIP84", walletSupplier.getWalletByPub(ZPUB_PREMIX_BIP84).getId());
+    Assertions.assertEquals("POSTMIX_BIP84", walletSupplier.getWalletByPub(ZPUB_POSTMIX_BIP84).getId());
+    Assertions.assertEquals("POSTMIX_BIP84_AS_BIP49", walletSupplier.getWalletByPub(ZPUB_POSTMIX_BIP84_AS_BIP49).getId());
   }
 
   @Test
@@ -72,10 +74,10 @@ public class WalletSupplierTest extends AbstractTest {
     String[] pubs = walletSupplier.getPubs(true);
     Assertions.assertEquals("tpubDC9KwqYcT3e9Kp4W72ByimMVpfVGbJB6vDUfhBDtjQvSJGVjnY5HE1yxE8cNPBJrCG72m6jRgCnvWeswZAcMtV3efHbWGBodmiaBmWSQLwY", pubs[0]); //DEPOSIT_BIP44
     Assertions.assertEquals("upub5DrJcSvsRHYBWUrtoaCjygVQXsBNR4iofB2hUnTMiNBz7axZb2Tfa4j3JV79thdmcm6YzAfwMPH9YK7y2EKyNY4UqgjCxVyfSa9uVUb938D", pubs[1]); //DEPOSIT_BIP49
-    Assertions.assertEquals("vpub5YEQpEDPAZWVTkmWASSHyaUMsae7uV9FnRrhZ3cqV6RFbBQx7wjVsUfLqSE3hgNY8WQixurkbWNkfV2sRE7LPfNKQh2t3s5une4QZthwdCu", pubs[2]); //DEPOSIT_BIP84
-    Assertions.assertEquals("vpub5YEQpEDXWE3TW21vo2zdDK9PZgKqnonnomB2b18dadRTgtnB5F8SZg1reqvMHEDKq1k3oHz1AXbsD6MCfNcw77BqfZxWmZm4nn16XNC84mL", pubs[3]); //PREMIX_BIP84
-    Assertions.assertEquals("vpub5YEQpEDXWE3TawqjQNFt5o4sBM1RP1B1mtVZr8ysEA9hFLsZZ4RB8oxE4Sfkumc47jnVPUgRL9hJf3sWpTYBKtdkP3UK6J8p1n2ykmjHnrW", pubs[4]); //POSTMIX_BIP84
-    Assertions.assertEquals("upub5DQ9WZYcMYVyjeeca1UFshyN1NrySPBWrmyM4k5yr9mpCF4LJQFcWkJ63EiAurx8i6fge15rsVLkmmFx6m8AXex9WhmtWPKKk3yLN6dDTKP", pubs[5]); //POSTMIX_BIP84_AS_BIP49
+    Assertions.assertEquals(ZPUB_DEPOSIT_BIP84, pubs[2]); //DEPOSIT_BIP84
+    Assertions.assertEquals(ZPUB_PREMIX_BIP84, pubs[3]); //PREMIX_BIP84
+    Assertions.assertEquals(ZPUB_POSTMIX_BIP84, pubs[4]); //POSTMIX_BIP84
+    Assertions.assertEquals(ZPUB_POSTMIX_BIP84_AS_BIP49, pubs[5]); //POSTMIX_BIP84_AS_BIP49
     Assertions.assertEquals("tpubDCGZwoP3Ws5sZLQpXGpDhtbErQPyFdf59k8JmUpnL5fM6qAj8bbPXNwLLtfiS5s8ivZ1W1PQnaET7obFeiDSooTFBKcTweS29BkgHwhhsQD", pubs[6]); //POSTMIX_BIP84_AS_BIP44
     Assertions.assertEquals("vpub5YEQpEDXWE3TUJkJddzPVbcMBwTwwvqWNTWNxnHQotZzQocFiXvnVVuiYVb9ZYR58PMnSCUxvHTzpVSCm3ttSLXfVviBJspozHYtu6oNtNY", pubs[7]); //BADBANK_BIP84
     Assertions.assertEquals("vpub5YEQpEDXWE3TcFX9JXj73TaBskrDTy5pdw3HNujngNKfAYtgx1ynNd6ri92A8Jdgccm9BX4S8yo45hsK4oiCar15pqA7MHM9XtkzNySdknj", pubs[8]); //RICOCHET_BIP84
