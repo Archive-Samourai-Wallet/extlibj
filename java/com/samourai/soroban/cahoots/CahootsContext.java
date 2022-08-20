@@ -36,7 +36,7 @@ public class CahootsContext implements SorobanContext {
             return new MultiCahootsContext(CahootsTypeUser.COUNTERPARTY, account, null,null, null);
         }
         if (cahootsType.STOWAWAY.equals(cahootsType)) {
-            // force account #0 for Stowaway counterparty
+            // force account #0 for Stowaway counterparty (MULTI uses newCounterpartyStowawayMulti() to bypass it)
             account = 0;
         }
         return new CahootsContext(CahootsTypeUser.COUNTERPARTY, cahootsType, account, null,null, null);

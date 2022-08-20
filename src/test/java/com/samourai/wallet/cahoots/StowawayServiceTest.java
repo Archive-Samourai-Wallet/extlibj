@@ -31,7 +31,7 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         // setup Cahoots
         long spendAmount = 5000;
         CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(account, FEE_PER_B, spendAmount);
-        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStonewallx2(account);
+        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStowaway(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stowawayService, cahootsContextSender, cahootsContextCp, null);
 
@@ -47,7 +47,7 @@ public class StowawayServiceTest extends AbstractCahootsTest {
     }
 
     @Test
-    public void Stowaway_POSTMIX() throws Exception {
+    public void Stowaway_MULTI_POSTMIX() throws Exception {
         int account = SamouraiAccountIndex.POSTMIX;
 
         // setup wallets
@@ -57,7 +57,7 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         // setup Cahoots
         long spendAmount = 5000;
         CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(account, FEE_PER_B, spendAmount);
-        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStonewallx2(account);
+        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStowawayMulti(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stowawayService, cahootsContextSender, cahootsContextCp, null);
 
@@ -73,21 +73,11 @@ public class StowawayServiceTest extends AbstractCahootsTest {
     }
 
     @Test
-    public void invalidStonewallExcetion() throws Exception {
-        long spendAmount = 5000;
-        String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
-
+    public void invalidStowawayExcetion() throws Exception {
         // throw Exception for 0 spend amount
         Assertions.assertThrows(Exception.class,
                 () -> {
-                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(0, FEE_PER_B, 0, address);
-                    stonewallx2Service.startInitiator(cahootsWalletSender, cahootsContextSender);
-                });
-
-        // throw Exception for blank address
-        Assertions.assertThrows(Exception.class,
-                () -> {
-                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(0, FEE_PER_B, 0, "");
+                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(0, FEE_PER_B, 0);
                     stonewallx2Service.startInitiator(cahootsWalletSender, cahootsContextSender);
                 });
     }
