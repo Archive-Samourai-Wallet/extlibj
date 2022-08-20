@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 public class AsyncUtilTest {
@@ -18,7 +20,13 @@ public class AsyncUtilTest {
   }
 
   @Test
-  public void blockingSingle() throws Exception {
+  public void blockingSingle_success() throws Exception {
+    int result = asyncUtil.blockingSingle(Observable.fromArray(123));
+    Assertions.assertEquals(123, result);
+  }
+
+  @Test
+  public void blockingSingle_error() throws Exception {
     try {
       asyncUtil.blockingSingle(Observable.error(new IllegalArgumentException("test")));
       Assertions.assertTrue(false);
@@ -28,7 +36,26 @@ public class AsyncUtilTest {
   }
 
   @Test
-  public void blockingAwait() throws Exception {
+  public void blockingLast_error() throws Exception {
+    try {
+      asyncUtil.blockingLast(Observable.error(new IllegalArgumentException("test")), message -> {});
+      Assertions.assertTrue(false);
+    } catch (IllegalArgumentException e) {
+      Assertions.assertEquals("test",e.getMessage());
+    }
+  }
+
+  @Test
+  public void blockingLast_success() throws Exception {
+    Integer[] sources = new Integer[]{1,2,3};
+    Set<Integer> received = new LinkedHashSet<>();
+    int result = asyncUtil.blockingLast(Observable.fromArray(sources), message -> received.add(message));
+    Assertions.assertEquals(3, result);
+    Assertions.assertArrayEquals(sources, received.toArray());
+  }
+
+  @Test
+  public void blockingAwait_error() throws Exception {
     try {
       asyncUtil.blockingAwait(Completable.fromCallable(() -> {
         throw new IllegalArgumentException("test");
