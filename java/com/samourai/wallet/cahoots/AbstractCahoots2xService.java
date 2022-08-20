@@ -85,7 +85,8 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends Abst
     //
     // receiver
     //
-    public T doStep3(T cahoots2, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+    public T doStep3(T cahoots2, CahootsContext cahootsContext) throws Exception {
+        CahootsWallet cahootsWallet = cahootsContext.getCahootsWallet();
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(cahoots2.getCounterpartyAccount());
         HashMap<String, ECKey> keyBag_A = computeKeyBag(cahoots2, utxos);
 
@@ -93,7 +94,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends Abst
         cahoots3.doStep3(keyBag_A);
 
         // check verifiedSpendAmount
-        long verifiedSpendAmount = computeSpendAmount(keyBag_A, cahootsWallet, cahoots3, cahootsContext);
+        long verifiedSpendAmount = computeSpendAmount(keyBag_A, cahoots3, cahootsContext);
         checkMaxSpendAmount(verifiedSpendAmount, cahoots3.getFeeAmount(), cahootsContext);
         return cahoots3;
     }
@@ -101,7 +102,8 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends Abst
     //
     // sender
     //
-    public T doStep4(T cahoots3, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+    public T doStep4(T cahoots3, CahootsContext cahootsContext) throws Exception {
+        CahootsWallet cahootsWallet = cahootsContext.getCahootsWallet();
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(cahoots3.getAccount());
         HashMap<String, ECKey> keyBag_B = computeKeyBag(cahoots3, utxos);
 
@@ -109,7 +111,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends Abst
         cahoots4.doStep4(keyBag_B);
 
         // check verifiedSpendAmount
-        long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahootsWallet, cahoots4, cahootsContext);
+        long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahoots4, cahootsContext);
         checkMaxSpendAmount(verifiedSpendAmount, cahoots4.getFeeAmount(), cahootsContext);
         return cahoots4;
     }

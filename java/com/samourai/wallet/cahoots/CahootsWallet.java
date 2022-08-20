@@ -1,6 +1,8 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.wallet.bip47.rpc.BIP47Account;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
+import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.BipWallet;
@@ -66,8 +68,16 @@ public abstract class CahootsWallet {
         return bip47Wallet;
     }
 
-    public int getBip47Account() {
+    public int getBip47AccountIndex() {
         return 0;
+    }
+
+    public BIP47Account getBip47Account() {
+        return bip47Wallet.getAccount(getBip47AccountIndex());
+    }
+
+    public PaymentCode getPaymentCode() {
+        return new PaymentCode(getBip47Account().getPaymentCode());
     }
 
     public byte[] getFingerprint() {

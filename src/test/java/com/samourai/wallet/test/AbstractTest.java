@@ -17,7 +17,6 @@ import com.samourai.wallet.payload.PayloadUtilGeneric;
 import com.samourai.wallet.send.provider.SimpleUtxoProvider;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.TxUtil;
-import com.samourai.wallet.util.XPubUtil;
 import com.samourai.xmanager.client.XManagerClient;
 import com.samourai.xmanager.protocol.XManagerService;
 import org.bitcoinj.core.*;
@@ -28,7 +27,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class AbstractTest {

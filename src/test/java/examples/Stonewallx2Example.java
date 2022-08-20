@@ -6,8 +6,11 @@ import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.soroban.cahoots.ManualCahootsMessage;
 import com.samourai.soroban.cahoots.ManualCahootsService;
 import com.samourai.soroban.cahoots.TxBroadcastInteraction;
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.CahootsWallet;
-import com.samourai.xmanager.client.XManagerClient;
+import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.params.TestNet3Params;
 
 import java.util.Optional;
 
@@ -19,35 +22,37 @@ public class Stonewallx2Example {
     public void Stonewallx2() throws Exception {
         // configure xManagerClient
         IHttpClient httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
-        XManagerClient xManagerClient = new XManagerClient(httpClient, true, false);
+
+        // instanciate service
+        BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;
+        NetworkParameters params = TestNet3Params.get();
+        ManualCahootsService cahootsService = new ManualCahootsService(bipFormatSupplier, params);
 
         // instanciate sender
         int senderAccount = 0;
-        ManualCahootsService cahootsSender = new ManualCahootsService(cahootsWalletSender, xManagerClient);
 
         // instanciate counterparty
         int receiverAccount = 0;
-        ManualCahootsService cahootsCounterparty = new ManualCahootsService(cahootsWalletCounterparty, xManagerClient);
 
         // STEP 0: sender
         long feePerB = 1;
         long spendAmount = 5000;
         String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
-        CahootsContext contextSender = CahootsContext.newInitiatorStonewallx2(senderAccount, feePerB, spendAmount, address);
-        ManualCahootsMessage message0 = cahootsSender.initiate(contextSender);
+        CahootsContext contextSender = CahootsContext.newInitiatorStonewallx2(cahootsWalletSender, senderAccount, feePerB, spendAmount, address);
+        ManualCahootsMessage message0 = cahootsService.initiate(contextSender);
 
         // STEP 1: counterparty
-        CahootsContext contextReceiver = CahootsContext.newCounterpartyStonewallx2(receiverAccount);
-        ManualCahootsMessage message1 = (ManualCahootsMessage)cahootsCounterparty.reply(contextReceiver, message0);
+        CahootsContext contextReceiver = CahootsContext.newCounterpartyStonewallx2(cahootsWalletCounterparty, receiverAccount);
+        ManualCahootsMessage message1 = (ManualCahootsMessage)cahootsService.reply(contextReceiver, message0);
 
         // STEP 2: sender
-        ManualCahootsMessage message2 = (ManualCahootsMessage)cahootsSender.reply(contextSender, message1);
+        ManualCahootsMessage message2 = (ManualCahootsMessage)cahootsService.reply(contextSender, message1);
 
         // STEP 3: counterparty
-        ManualCahootsMessage message3 = (ManualCahootsMessage)cahootsCounterparty.reply(contextReceiver, message2);
+        ManualCahootsMessage message3 = (ManualCahootsMessage)cahootsService.reply(contextReceiver, message2);
 
         // STEP 4: sender confirm TX_BROADCAST
-        TxBroadcastInteraction txBroadcastInteraction = (TxBroadcastInteraction)cahootsSender.reply(contextSender, message3);
+        TxBroadcastInteraction txBroadcastInteraction = (TxBroadcastInteraction)cahootsService.reply(contextSender, message3);
         ManualCahootsMessage message4 = (ManualCahootsMessage)txBroadcastInteraction.getReplyAccept();
 
         // SUCCESS

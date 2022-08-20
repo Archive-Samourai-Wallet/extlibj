@@ -30,10 +30,10 @@ public class StowawayServiceTest extends AbstractCahootsTest {
 
         // setup Cahoots
         long spendAmount = 5000;
-        CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(account, FEE_PER_B, spendAmount);
-        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStowaway(account);
+        CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(cahootsWalletSender, account, FEE_PER_B, spendAmount);
+        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStowaway(cahootsWalletCounterparty, account);
 
-        Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stowawayService, cahootsContextSender, cahootsContextCp, null);
+        Cahoots cahoots = doCahoots(stowawayService, cahootsContextSender, cahootsContextCp, null);
 
         // verify TX
         String txid = "f14c1d6fab6e9217aa5d6d5af951f6287a75cbb0567f87e8ed77c99aa9f0b1f5";
@@ -56,10 +56,10 @@ public class StowawayServiceTest extends AbstractCahootsTest {
 
         // setup Cahoots
         long spendAmount = 5000;
-        CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(account, FEE_PER_B, spendAmount);
-        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStowawayMulti(account);
+        CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(cahootsWalletSender, account, FEE_PER_B, spendAmount);
+        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStowawayMulti(cahootsWalletCounterparty, account);
 
-        Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stowawayService, cahootsContextSender, cahootsContextCp, null);
+        Cahoots cahoots = doCahoots(stowawayService, cahootsContextSender, cahootsContextCp, null);
 
         // verify TX
         String txid = "e1e25ead2d9202addb0d678c2c114560587f1202b0e6b5d21f8c10a860709ea1";
@@ -77,8 +77,8 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         // throw Exception for 0 spend amount
         Assertions.assertThrows(Exception.class,
                 () -> {
-                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(0, FEE_PER_B, 0);
-                    stonewallx2Service.startInitiator(cahootsWalletSender, cahootsContextSender);
+                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(cahootsWalletSender, 0, FEE_PER_B, 0);
+                    stonewallx2Service.startInitiator(cahootsContextSender);
                 });
     }
 }

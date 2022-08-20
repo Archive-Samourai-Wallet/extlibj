@@ -25,7 +25,11 @@ public class SimpleCahootsWallet extends CahootsWallet {
 
     @Override
     protected List<CahootsUtxo> fetchUtxos(int account) {
-        return utxosByAccount.get(account);
+        List<CahootsUtxo> utxos = utxosByAccount.get(account);
+        if (utxos == null) {
+            utxos = new LinkedList<>();
+        }
+        return utxos;
     }
 
     public void addUtxo(int account, CahootsUtxo utxo) {
