@@ -1,6 +1,7 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.soroban.cahoots.CahootsContext;
+import com.samourai.wallet.send.UTXO;
 import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,8 +26,8 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         int account = 0;
 
         // setup wallets
-        cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+        utxoProviderSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // setup Cahoots
         long spendAmount = 5000;
@@ -51,8 +52,8 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         int account = SamouraiAccountIndex.POSTMIX;
 
         // setup wallets
-        cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+        utxoProviderSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // setup Cahoots
         long spendAmount = 5000;

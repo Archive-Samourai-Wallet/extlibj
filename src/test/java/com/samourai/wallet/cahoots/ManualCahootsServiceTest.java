@@ -43,10 +43,10 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
         };
 
         // mock sender wallet
-        cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "senderAddress1");
+        utxoProviderSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
 
         // mock receiver wallet
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "counterpartyAddress1");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // sender => start Stowaway
         long spendAmount = 5000;
@@ -98,15 +98,15 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
         };
 
         // mock sender wallet
-        cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "senderAddress1");
+        utxoProviderSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
 
         // mock counterparty wallet
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "counterpartyAddress1");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // sender => start Stonewallx2
         long spendAmount = 5000;
         String address = ADDRESS_BIP84;
-            CahootsContext contextSender = CahootsContext.newInitiatorStonewallx2(cahootsWalletSender, account, FEE_PER_B, spendAmount, address);
+        CahootsContext contextSender = CahootsContext.newInitiatorStonewallx2(cahootsWalletSender, account, FEE_PER_B, spendAmount, address);
         ManualCahootsMessage payload0 = manualCahootsService.initiate(contextSender);
         verify(EXPECTED_PAYLOADS[0], payload0, false, CahootsType.STONEWALLX2, CahootsTypeUser.SENDER);
 
@@ -156,16 +156,12 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
         };
 
         // mock sender wallet
-        final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
-        TestCahootsWallet cahootsWalletSender = new TestCahootsWallet(new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletSender), bipFormatSupplier, params);
-        cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
-        cahootsWalletSender.addUtxo(account, "senderTx2", 1, 8000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        utxoProviderSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        utxoProviderSender.addUtxo(account, "senderTx2", 1, 8000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
 
         // mock receiver wallet
-        final HD_Wallet bip84WalletCounterparty = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
-        TestCahootsWallet cahootsWalletCounterparty = new TestCahootsWallet(new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletCounterparty), bipFormatSupplier, params);
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx2", 1, 9000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx2", 1, 9000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // sender => start multiCahoots
         long spendAmount = 5000;
