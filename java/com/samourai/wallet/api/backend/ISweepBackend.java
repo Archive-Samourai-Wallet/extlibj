@@ -4,7 +4,6 @@ import com.samourai.wallet.api.backend.beans.UnspentOutput;
 
 import java.util.Collection;
 
-public interface ISweepBackend {
+public interface ISweepBackend extends IPushTx {
     Collection<UnspentOutput> fetchAddressForSweep(String address) throws Exception;
-    String pushTx(String txHex) throws Exception;
 }

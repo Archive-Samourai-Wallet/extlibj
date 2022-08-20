@@ -180,9 +180,6 @@ public abstract class Cahoots {
 
     public void pushTx(IPushTx pushTx) throws Exception {
         String txHex = TxUtil.getInstance().getTxHex(getTransaction());
-        boolean success = pushTx.pushTx(txHex).getLeft();
-        if (!success) {
-            throw new Exception("PushTx failed: "+txHex);
-        }
+        pushTx.pushTx(txHex);
     }
 }

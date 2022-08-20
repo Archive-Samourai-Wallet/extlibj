@@ -129,14 +129,10 @@ public class MultiCahoots extends Cahoots {
     public void pushTx(IPushTx pushTx) throws Exception {
         // push stonewallx2
         String stonewallHex = TxUtil.getInstance().getTxHex(getStonewallTransaction());
-        if (!pushTx.pushTx(stonewallHex).getLeft()) {
-            throw new Exception("PushTx failed for stonewallx2: "+stonewallHex);
-        }
+        pushTx.pushTx(stonewallHex);
 
         // push stowaway
         String stowawayHex = TxUtil.getInstance().getTxHex(getStowawayTransaction());
-        if (!pushTx.pushTx(stowawayHex).getLeft()) {
-            throw new Exception("PushTx failed for stowaway: "+stowawayHex);
-        }
+        pushTx.pushTx(stowawayHex);
     }
 }
