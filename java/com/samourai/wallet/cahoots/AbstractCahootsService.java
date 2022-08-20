@@ -85,7 +85,7 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
             String key = outpoint.getHash().toString() + "-" + outpoint.getIndex();
             if (utxosByHash.containsKey(key)) {
                 CahootsUtxo utxo = utxosByHash.get(key);
-                ECKey eckey = utxo.getKey();
+                ECKey eckey = ECKey.fromPrivate(utxo.getKey());
                 keyBag.put(outpoint.toString(), eckey);
             }
         }
