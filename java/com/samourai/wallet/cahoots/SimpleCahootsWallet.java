@@ -2,6 +2,8 @@ package com.samourai.wallet.cahoots;
 
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.WalletSupplier;
+import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
+import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.bitcoinj.core.NetworkParameters;
 
 import java.util.HashMap;
@@ -14,7 +16,11 @@ public class SimpleCahootsWallet extends CahootsWallet {
 
     public SimpleCahootsWallet(WalletSupplier walletSupplier, BipFormatSupplier bipFormatSupplier, NetworkParameters params) throws Exception {
         super(walletSupplier, bipFormatSupplier, params);
-        this.utxosByAccount = new HashMap<Integer, List<CahootsUtxo>>();
+        this.utxosByAccount = new HashMap<>();
+        for (WhirlpoolAccount whirlpoolAccount : WhirlpoolAccount.values()) {
+            int accountIndex = SamouraiAccountIndex.find(whirlpoolAccount);
+            this.utxosByAccount.put(accountIndex, new LinkedList<>());
+        }
     }
 
     @Override
@@ -23,9 +29,6 @@ public class SimpleCahootsWallet extends CahootsWallet {
     }
 
     public void addUtxo(int account, CahootsUtxo utxo) {
-        if (!utxosByAccount.containsKey(account)) {
-            utxosByAccount.put(account, new LinkedList<CahootsUtxo>());
-        }
         utxosByAccount.get(account).add(utxo);
     }
 }

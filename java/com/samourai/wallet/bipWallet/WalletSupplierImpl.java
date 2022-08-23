@@ -43,17 +43,17 @@ public class WalletSupplierImpl implements WalletSupplier {
 
     // register Samourai derivations
     for (BIP_WALLET bip : BIP_WALLET.values()) {
-      for(BipFormat bipFormat : bip.getBipFormats()) {
-        BipWallet bipWallet = new BipWallet(bip44w, indexHandlerSupplier, bip, bipFormat);
-        register(bipWallet);
-        walletsByAccountByAddressType.get(bip.getAccount()).put(bipFormat, bipWallet);
-      }
+      BipWallet bipWallet = new BipWallet(bip44w, indexHandlerSupplier, bip);
+      register(bipWallet);
+      walletsByAccountByAddressType.get(bip.getAccount()).put(bip.getBipFormat(), bipWallet);
     }
   }
 
   public void register(BipWallet bipWallet) {
+    walletsByAccount.get(bipWallet.getAccount()).add(bipWallet);
     walletsByPub.put(bipWallet.getPub(), bipWallet);
     walletsById.put(bipWallet.getId(), bipWallet);
+    // no walletsByAccountByAddressType here
   }
 
   public void register(String id, HD_Wallet bip44w, WhirlpoolAccount whirlpoolAccount, BipDerivation derivation, BipFormat bipFormat) {
@@ -63,21 +63,12 @@ public class WalletSupplierImpl implements WalletSupplier {
 
   @Override
   public Collection<BipWallet> getWallets() {
-
-    return getAllWallets();
+    return walletsByPub.values();
   }
 
   @Override
   public Collection<BipWallet> getWallets(WhirlpoolAccount whirlpoolAccount) {
-    return walletsByAccountByAddressType.get(whirlpoolAccount).values();
-  }
-
-  private Collection<BipWallet> getAllWallets() {
-    ArrayList<BipWallet> bipWallets = new ArrayList<>();
-    for(Map<BipFormat, BipWallet> wallets : walletsByAccountByAddressType.values()) {
-      bipWallets.addAll(wallets.values());
-    }
-    return bipWallets;
+    return walletsByAccount.get(whirlpoolAccount);
   }
 
   @Override

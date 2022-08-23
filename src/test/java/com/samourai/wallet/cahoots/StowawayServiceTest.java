@@ -1,6 +1,7 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.soroban.cahoots.CahootsContext;
+import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,16 +31,9 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         // setup Cahoots
         long spendAmount = 5000;
         CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(account, FEE_PER_B, spendAmount);
-        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStonewallx2(account);
+        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStowaway(account);
 
-        final String[] EXPECTED_PAYLOADS = {
-                "{\"cahoots\":{\"psbt\":\"\",\"cpty_account\":0,\"spend_amount\":5000,\"outpoints\":[],\"type\":1,\"params\":\"testnet\",\"dest\":\"\",\"version\":2,\"fee_amount\":0,\"fingerprint\":\"eed8a1cd\",\"step\":0,\"collabChange\":\"\",\"id\":\"testID\",\"account\":0,\"ts\":123456}}",
-                "{\"cahoots\":{\"fingerprint_collab\":\"f0d70870\",\"psbt\":\"\",\"cpty_account\":0,\"spend_amount\":5000,\"outpoints\":[{\"value\":10000,\"outpoint\":\"9407b31fd0159dc4dd3f5377e3b18e4b4aafef2977a52e76b95c3f899cbb05ad-1\"}],\"type\":1,\"params\":\"testnet\",\"dest\":\"tb1q9z5slgl572zlc6yl8zg32vndh7tfzltzz3pw8w\",\"version\":2,\"fee_amount\":0,\"fingerprint\":\"eed8a1cd\",\"step\":1,\"collabChange\":\"\",\"id\":\"testID\",\"account\":0,\"ts\":123456}}",
-                "{\"cahoots\":{\"fingerprint_collab\":\"f0d70870\",\"psbt\":\"\",\"cpty_account\":0,\"spend_amount\":5000,\"outpoints\":[{\"value\":10000,\"outpoint\":\"14cf9c6be92efcfe628aabd32b02c85e763615ddd430861bc18f6d366e4c4fd5-1\"},{\"value\":10000,\"outpoint\":\"9407b31fd0159dc4dd3f5377e3b18e4b4aafef2977a52e76b95c3f899cbb05ad-1\"}],\"type\":1,\"params\":\"testnet\",\"dest\":\"tb1q9z5slgl572zlc6yl8zg32vndh7tfzltzz3pw8w\",\"version\":2,\"fee_amount\":248,\"fingerprint\":\"eed8a1cd\",\"step\":2,\"collabChange\":\"\",\"id\":\"testID\",\"account\":0,\"ts\":123456}}",
-                "{\"cahoots\":{\"fingerprint_collab\":\"f0d70870\",\"psbt\":\"\",\"cpty_account\":0,\"spend_amount\":5000,\"outpoints\":[{\"value\":10000,\"outpoint\":\"14cf9c6be92efcfe628aabd32b02c85e763615ddd430861bc18f6d366e4c4fd5-1\"},{\"value\":10000,\"outpoint\":\"9407b31fd0159dc4dd3f5377e3b18e4b4aafef2977a52e76b95c3f899cbb05ad-1\"}],\"type\":1,\"params\":\"testnet\",\"dest\":\"tb1q9z5slgl572zlc6yl8zg32vndh7tfzltzz3pw8w\",\"version\":2,\"fee_amount\":248,\"fingerprint\":\"eed8a1cd\",\"step\":3,\"collabChange\":\"\",\"id\":\"testID\",\"account\":0,\"ts\":123456}}",
-                "{\"cahoots\":{\"fingerprint_collab\":\"f0d70870\",\"psbt\":\"\",\"cpty_account\":0,\"spend_amount\":5000,\"outpoints\":[{\"value\":10000,\"outpoint\":\"14cf9c6be92efcfe628aabd32b02c85e763615ddd430861bc18f6d366e4c4fd5-1\"},{\"value\":10000,\"outpoint\":\"9407b31fd0159dc4dd3f5377e3b18e4b4aafef2977a52e76b95c3f899cbb05ad-1\"}],\"type\":1,\"params\":\"testnet\",\"dest\":\"tb1q9z5slgl572zlc6yl8zg32vndh7tfzltzz3pw8w\",\"version\":2,\"fee_amount\":248,\"fingerprint\":\"eed8a1cd\",\"step\":4,\"collabChange\":\"\",\"id\":\"testID\",\"account\":0,\"ts\":123456}}"
-        };
-        Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stowawayService, cahootsContextSender, cahootsContextCp, EXPECTED_PAYLOADS);
+        Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stowawayService, cahootsContextSender, cahootsContextCp, null);
 
         // verify TX
         String txid = "f14c1d6fab6e9217aa5d6d5af951f6287a75cbb0567f87e8ed77c99aa9f0b1f5";
@@ -53,21 +47,37 @@ public class StowawayServiceTest extends AbstractCahootsTest {
     }
 
     @Test
-    public void invalidStonewallExcetion() throws Exception {
-        long spendAmount = 5000;
-        String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
+    public void Stowaway_MULTI_POSTMIX() throws Exception {
+        int account = SamouraiAccountIndex.POSTMIX;
 
+        // setup wallets
+        cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+
+        // setup Cahoots
+        long spendAmount = 5000;
+        CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(account, FEE_PER_B, spendAmount);
+        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStowawayMulti(account);
+
+        Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stowawayService, cahootsContextSender, cahootsContextCp, null);
+
+        // verify TX
+        String txid = "e1e25ead2d9202addb0d678c2c114560587f1202b0e6b5d21f8c10a860709ea1";
+        String raw = "02000000000102d54f4c6e366d8fc11b8630d4dd1536765ec8022bd3ab8a62fefc2ee96b9ccf140100000000fdffffffad05bb9c893f5cb9762ea57729efaf4a4b8eb1e377533fddc49d15d01fb307940100000000fdffffff029012000000000000160014c92e53e44ae5d9d392aecf1ce7a980b073b01cd6983a0000000000001600143bdff7532977f4f8094cfa8ccff2574cc71eebe702473044022017167cfdfb40864da9bc40b2cfd65fc3c4bca8ac388c9c8a6ca757e3dc013f2902206bb427ff871452e2f89f6ce5957c61b45725db6eb7742b1c36d69fc1b6612fd5012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f20247304402202d2dc89c9881d4273dfd5877382998ca758cb32590a59f947f895257b84abdf0022078dc9c251b14376560728d3daa5204d1a59a3f00275628750d84b05c396ef04e012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f200000000";
+
+        Map<String,Long> outputs = new LinkedHashMap<>();
+        outputs.put(COUNTERPARTY_RECEIVE_POSTMIX_84[0], 15000L);
+        outputs.put(SENDER_CHANGE_POSTMIX_84[0], 4752L);
+        verifyTx(cahoots.getTransaction(), txid, raw, outputs);
+        pushTx.assertTx(txid, raw);
+    }
+
+    @Test
+    public void invalidStowawayExcetion() throws Exception {
         // throw Exception for 0 spend amount
         Assertions.assertThrows(Exception.class,
                 () -> {
-                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(0, FEE_PER_B, 0, address);
-                    stonewallx2Service.startInitiator(cahootsWalletSender, cahootsContextSender);
-                });
-
-        // throw Exception for blank address
-        Assertions.assertThrows(Exception.class,
-                () -> {
-                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(0, FEE_PER_B, 0, "");
+                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(0, FEE_PER_B, 0);
                     stonewallx2Service.startInitiator(cahootsWalletSender, cahootsContextSender);
                 });
     }

@@ -115,6 +115,7 @@ public class BackendApiTest extends AbstractTest {
     }
   }
 
+  @Disabled // TODO
   @Test
   public void fetchAddressForSweep() throws Exception {
     String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";

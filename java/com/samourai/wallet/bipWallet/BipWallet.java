@@ -23,11 +23,7 @@ public class BipWallet {
   private String pub;
 
   public BipWallet(HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, BIP_WALLET bip) {
-    this(bip.name(), bip44w, indexHandlerSupplier, bip.getAccount(), bip.getBipDerivation(), bip.getBipFormats().get(0));
-  }
-
-  public BipWallet(HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, BIP_WALLET bip, BipFormat bipFormat) {
-    this(bip.name(), bip44w, indexHandlerSupplier, bip.getAccount(), bip.getBipDerivation(), bipFormat);
+    this(bip.name(), bip44w, indexHandlerSupplier, bip.getAccount(), bip.getBipDerivation(), bip.getBipFormat());
   }
 
   public BipWallet(String id, HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, WhirlpoolAccount whirlpoolAccount, BipDerivation derivation, BipFormat bipFormat) {
