@@ -6,9 +6,7 @@ import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.util.TxUtil;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.*;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
 import org.json.JSONException;
@@ -166,7 +164,7 @@ public abstract class Cahoots {
 
     // getters below are used by Android review fragment
 
-    public abstract long getFeeAmount();
+    public abstract long getFeeAmount(); // fee amount expected
 
     public abstract HashMap<String, Long> getOutpoints();
 

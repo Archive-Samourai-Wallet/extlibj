@@ -140,6 +140,32 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
         return bipFormatSupplier.getTransactionOutput(receiveAddressString, amount, params);
     }
 
+    private long computeFeeAmountActual(Cahoots cahoots) {
+        Transaction tx = cahoots.getTransaction();
+        long fee = 0;
+        for (TransactionInput txInput : tx.getInputs()) {
+            TransactionOutPoint txOut = txInput.getOutpoint();
+            long value = cahoots.getOutpoints().get(txOut.getHash().toString()+"-"+txOut.getIndex());
+            fee += value;
+        }
+        for (TransactionOutput txOut : tx.getOutputs()) {
+            fee -= txOut.getValue().getValue();
+        }
+        return fee;
+    }
+
+    protected void checkFee(Cahoots cahoots) throws Exception {
+        long feeActual = computeFeeAmountActual(cahoots);
+        long feeExpected = cahoots.getFeeAmount();
+        if (log.isDebugEnabled()) {
+            log.debug("checkFee: feeActual="+feeActual+", feeExpected="+feeExpected);
+        }
+        int PRECISION = 2;
+        if (Math.abs(feeActual - feeExpected) > PRECISION) {
+            throw new Exception("Invalid Cahoots fee: actual="+feeActual+", expected="+feeExpected);
+        }
+    }
+
     public BipFormatSupplier getBipFormatSupplier() {
         return bipFormatSupplier;
     }

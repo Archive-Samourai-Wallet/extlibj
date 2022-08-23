@@ -111,6 +111,9 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends Abst
         // check verifiedSpendAmount
         long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahootsWallet, cahoots4, cahootsContext);
         checkMaxSpendAmount(verifiedSpendAmount, cahoots4.getFeeAmount(), cahootsContext);
+
+        // check fee
+        checkFee(cahoots3);
         return cahoots4;
     }
 }
