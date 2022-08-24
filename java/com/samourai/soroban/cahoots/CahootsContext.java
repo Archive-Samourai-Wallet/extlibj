@@ -1,8 +1,10 @@
 package com.samourai.soroban.cahoots;
 
 import com.samourai.soroban.client.SorobanContext;
+import com.samourai.wallet.cahoots.Cahoots;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsTypeUser;
+import com.samourai.wallet.cahoots.multi.MultiCahootsContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +30,27 @@ public abstract class CahootsContext implements SorobanContext {
         this.amount = amount;
         this.address = address;
         this.outputAddresses = new LinkedHashSet<>();
+    }
+
+    public static CahootsContext newCounterparty(CahootsType cahootsType, int account) throws Exception {
+        CahootsContext cahootsContext = null;
+        switch (cahootsType) {
+            case MULTI:
+                cahootsContext = MultiCahootsContext.newCounterparty(account);
+                break;
+
+            case STONEWALLX2:
+                cahootsContext = Stonewallx2Context.newCounterparty(account);
+                break;
+
+            case STOWAWAY:
+                cahootsContext = StowawayContext.newCounterparty(account);
+                break;
+
+            default:
+                throw new Exception("Unknown Cahoots type");
+        }
+        return cahootsContext;
     }
 
     public CahootsTypeUser getTypeUser() {
