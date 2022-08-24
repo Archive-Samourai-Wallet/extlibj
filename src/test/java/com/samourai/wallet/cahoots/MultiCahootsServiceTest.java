@@ -1,15 +1,8 @@
 package com.samourai.wallet.cahoots;
 
-import com.samourai.soroban.cahoots.CahootsContext;
-import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.cahoots.multi.MultiCahoots;
 import com.samourai.wallet.cahoots.multi.MultiCahootsContext;
-import com.samourai.wallet.hd.HD_Wallet;
-import com.samourai.wallet.util.TestUtil;
-import com.samourai.wallet.util.TxUtil;
 import org.bitcoinj.core.Transaction;
-import org.bitcoinj.core.TransactionOutput;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -41,7 +34,7 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         long feePerB = 1;
         long spendAmount = 5000;
         String address = ADDRESS_BIP84;
-        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address);
+        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address, null);
         MultiCahootsContext contextCp = MultiCahootsContext.newCounterparty(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, multiCahootsService, contextSender, contextCp, null);
@@ -90,7 +83,7 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         long feePerB = 1;
         long spendAmount = 5000;
         String address = ADDRESS_BIP84;
-        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address);
+        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address, null);
         MultiCahootsContext contextCp = MultiCahootsContext.newCounterparty(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, multiCahootsService, contextSender, contextCp, null);
@@ -137,7 +130,7 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         long feePerB = 1;
         long spendAmount = 5000;
         String address = ADDRESS_BIP44;
-        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address);
+        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address, null);
         MultiCahootsContext contextCp = MultiCahootsContext.newCounterparty(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, multiCahootsService, contextSender, contextCp, null);

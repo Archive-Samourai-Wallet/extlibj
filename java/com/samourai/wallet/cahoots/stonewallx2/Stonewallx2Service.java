@@ -34,11 +34,23 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
     }
 
     @Override
-    public STONEWALLx2 startInitiator(CahootsWallet cahootsWallet, Stonewallx2Context cahootsContext) throws Exception {
-        return startInitiator(cahootsWallet, cahootsContext.getAmount(), cahootsContext.getAccount(), cahootsContext.getAddress());
+    public void verifyResponse(Stonewallx2Context cahootsContext, STONEWALLx2 cahoots, STONEWALLx2 request) throws Exception {
+        super.verifyResponse(cahootsContext, cahoots, request);
+
+        if (request != null) {
+            // properties should never change once set
+            if (!StringUtils.equals(cahoots.paynymDestination, request.paynymDestination)) {
+                throw new Exception("Invalid altered Cahoots strPayNymDestination");
+            }
+        }
     }
 
-    protected STONEWALLx2 startInitiator(CahootsWallet cahootsWallet, long amount, int account, String address) throws Exception {
+    @Override
+    public STONEWALLx2 startInitiator(CahootsWallet cahootsWallet, Stonewallx2Context cahootsContext) throws Exception {
+        return startInitiator(cahootsWallet, cahootsContext.getAmount(), cahootsContext.getAccount(), cahootsContext.getAddress(), cahootsContext.getPaynymDestination());
+    }
+
+    protected STONEWALLx2 startInitiator(CahootsWallet cahootsWallet, long amount, int account, String address, String paynymDestination) throws Exception {
         if (amount <= 0) {
             throw new Exception("Invalid amount");
         }
@@ -46,7 +58,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
             throw new Exception("Invalid address");
         }
         byte[] fingerprint = cahootsWallet.getFingerprint();
-        STONEWALLx2 stonewall0 = doSTONEWALLx2_0(amount, address, account, fingerprint);
+        STONEWALLx2 stonewall0 = doSTONEWALLx2_0(amount, address, paynymDestination, account, fingerprint);
         if (log.isDebugEnabled()) {
             log.debug("# STONEWALLx2 INITIATOR => step="+stonewall0.getStep());
         }
@@ -94,13 +106,13 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
     //
     // sender
     //
-    private STONEWALLx2 doSTONEWALLx2_0(long spendAmount, String address, int account, byte[] fingerprint) {
+    private STONEWALLx2 doSTONEWALLx2_0(long spendAmount, String address, String paynymDestination, int account, byte[] fingerprint) {
         //
         //
         // step0: B sends spend amount to A,  creates step0
         //
         //
-        STONEWALLx2 stonewall0 = new STONEWALLx2(spendAmount, address, params, account, fingerprint);
+        STONEWALLx2 stonewall0 = new STONEWALLx2(spendAmount, address, paynymDestination, params, account, fingerprint);
         return stonewall0;
     }
 

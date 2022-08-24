@@ -30,7 +30,8 @@ public class Stonewallx2Example {
         long feePerB = 1;
         long spendAmount = 5000;
         String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
-        Stonewallx2Context contextSender = Stonewallx2Context.newInitiator(senderAccount, feePerB, spendAmount, address);
+        String paynymDestination = null;
+        Stonewallx2Context contextSender = Stonewallx2Context.newInitiator(senderAccount, feePerB, spendAmount, address, paynymDestination);
         ManualCahootsMessage message0 = cahootsSender.initiate(contextSender);
 
         // STEP 1: counterparty

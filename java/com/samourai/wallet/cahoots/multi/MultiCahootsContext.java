@@ -5,31 +5,30 @@ import com.samourai.soroban.cahoots.Stonewallx2Context;
 import com.samourai.soroban.cahoots.StowawayContext;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsTypeUser;
-import com.samourai.wallet.cahoots.stowaway.Stowaway;
 
 public class MultiCahootsContext extends CahootsContext {
     private Stonewallx2Context stonewallx2Context;
     private StowawayContext stowawayContext;
 
-    protected MultiCahootsContext(CahootsTypeUser typeUser, int account, Long feePerB, Long amount, String address) {
+    protected MultiCahootsContext(CahootsTypeUser typeUser, int account, Long feePerB, Long amount, String address, String paynymDestination) {
         super(typeUser, CahootsType.MULTI, account, feePerB, amount, address);
-        this.stonewallx2Context = computeStonewallContext();
+        this.stonewallx2Context = computeStonewallContext(paynymDestination);
         this.stowawayContext = computeStowawayContext();
     }
 
-    public static MultiCahootsContext newInitiator(int account, long feePerB, long amount, String address) {
-        return new MultiCahootsContext(CahootsTypeUser.SENDER, account, feePerB, amount, address);
+    public static MultiCahootsContext newInitiator(int account, long feePerB, long amount, String address, String paynymDestination) {
+        return new MultiCahootsContext(CahootsTypeUser.SENDER, account, feePerB, amount, address, paynymDestination);
     }
 
     public static MultiCahootsContext newCounterparty(int account) {
-        return new MultiCahootsContext(CahootsTypeUser.COUNTERPARTY, account, null,null, null);
+        return new MultiCahootsContext(CahootsTypeUser.COUNTERPARTY, account, null,null, null, null);
     }
 
-    private Stonewallx2Context computeStonewallContext() {
+    private Stonewallx2Context computeStonewallContext(String paynymDestination) {
         if (getTypeUser().equals(CahootsTypeUser.COUNTERPARTY)) {
             return Stonewallx2Context.newCounterparty(getAccount());
         }
-        return Stonewallx2Context.newInitiator(getAccount(), getFeePerB(), getAmount(), getAddress());
+        return Stonewallx2Context.newInitiator(getAccount(), getFeePerB(), getAmount(), getAddress(), paynymDestination);
     }
 
     private StowawayContext computeStowawayContext() {
