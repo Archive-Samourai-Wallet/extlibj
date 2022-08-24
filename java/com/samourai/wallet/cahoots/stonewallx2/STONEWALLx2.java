@@ -2,7 +2,6 @@ package com.samourai.wallet.cahoots.stonewallx2;
 
 import com.samourai.wallet.cahoots.Cahoots2x;
 import com.samourai.wallet.cahoots.CahootsType;
-import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import org.bitcoinj.core.NetworkParameters;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -13,8 +12,8 @@ public class STONEWALLx2 extends Cahoots2x {
 
     private STONEWALLx2()    { ; }
 
-    private STONEWALLx2(STONEWALLx2 stonewall)    {
-        super(stonewall);
+    private STONEWALLx2(STONEWALLx2 c)    {
+        super(c);
     }
 
     public STONEWALLx2(JSONObject obj)    {

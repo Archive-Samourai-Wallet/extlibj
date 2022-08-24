@@ -2,10 +2,7 @@ package examples;
 
 import com.samourai.http.client.IHttpClient;
 import com.samourai.http.client.JettyHttpClient;
-import com.samourai.soroban.cahoots.CahootsContext;
-import com.samourai.soroban.cahoots.ManualCahootsMessage;
-import com.samourai.soroban.cahoots.ManualCahootsService;
-import com.samourai.soroban.cahoots.TxBroadcastInteraction;
+import com.samourai.soroban.cahoots.*;
 import com.samourai.wallet.cahoots.CahootsWallet;
 import com.samourai.xmanager.client.XManagerClient;
 
@@ -33,11 +30,11 @@ public class Stonewallx2Example {
         long feePerB = 1;
         long spendAmount = 5000;
         String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
-        CahootsContext contextSender = CahootsContext.newInitiatorStonewallx2(senderAccount, feePerB, spendAmount, address);
+        Stonewallx2Context contextSender = Stonewallx2Context.newInitiator(senderAccount, feePerB, spendAmount, address);
         ManualCahootsMessage message0 = cahootsSender.initiate(contextSender);
 
         // STEP 1: counterparty
-        CahootsContext contextReceiver = CahootsContext.newCounterpartyStonewallx2(receiverAccount);
+        StowawayContext contextReceiver = StowawayContext.newCounterparty(receiverAccount);
         ManualCahootsMessage message1 = (ManualCahootsMessage)cahootsCounterparty.reply(contextReceiver, message0);
 
         // STEP 2: sender

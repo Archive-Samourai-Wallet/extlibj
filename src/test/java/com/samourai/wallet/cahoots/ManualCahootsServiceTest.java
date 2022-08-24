@@ -4,6 +4,7 @@ import com.samourai.soroban.cahoots.*;
 import com.samourai.soroban.client.SorobanInteraction;
 import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.cahoots.multi.MultiCahoots;
+import com.samourai.wallet.cahoots.multi.MultiCahootsContext;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
@@ -56,12 +57,12 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
 
         // sender => start Stowaway
         long spendAmount = 5000;
-        CahootsContext contextSender = CahootsContext.newInitiatorStowaway(account, FEE_PER_B, spendAmount);
+        StowawayContext contextSender = StowawayContext.newInitiator(account, FEE_PER_B, spendAmount);
         ManualCahootsMessage payload0 = cahootsSender.initiate(contextSender);
         verify(EXPECTED_PAYLOADS[0], payload0, false, CahootsType.STOWAWAY, CahootsTypeUser.SENDER);
 
         // receiver => doStowaway1
-        CahootsContext contextReceiver = CahootsContext.newCounterpartyStowaway(account);
+        StowawayContext contextReceiver = StowawayContext.newCounterparty(account);
         ManualCahootsMessage payload1 = (ManualCahootsMessage)cahootsReceiver.reply(contextReceiver, payload0);
         verify(EXPECTED_PAYLOADS[1], payload1, false, CahootsType.STOWAWAY, CahootsTypeUser.COUNTERPARTY);
 
@@ -118,12 +119,12 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
         // sender => start Stonewallx2
         long spendAmount = 5000;
         String address = ADDRESS_BIP84;
-            CahootsContext contextSender = CahootsContext.newInitiatorStonewallx2(account, FEE_PER_B, spendAmount, address);
+        Stonewallx2Context contextSender = Stonewallx2Context.newInitiator(account, FEE_PER_B, spendAmount, address);
         ManualCahootsMessage payload0 = cahootsSender.initiate(contextSender);
         verify(EXPECTED_PAYLOADS[0], payload0, false, CahootsType.STONEWALLX2, CahootsTypeUser.SENDER);
 
         // counterparty => doSTONEWALLx2_1
-        CahootsContext contextCounterparty = CahootsContext.newCounterpartyStonewallx2(account);
+        Stonewallx2Context contextCounterparty = Stonewallx2Context.newCounterparty(account);
         ManualCahootsMessage payload1 = (ManualCahootsMessage)cahootsCounterparty.reply(contextCounterparty, payload0);
         verify(EXPECTED_PAYLOADS[1], payload1, false, CahootsType.STONEWALLX2, CahootsTypeUser.COUNTERPARTY);
 
@@ -188,12 +189,12 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
         // sender => start multiCahoots
         long spendAmount = 5000;
         String address = ADDRESS_BIP84;
-        CahootsContext contextSender = CahootsContext.newInitiatorMultiCahoots(account, FEE_PER_B, spendAmount, address);
+        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, FEE_PER_B, spendAmount, address);
         ManualCahootsMessage payload0 = cahootsSender.initiate(contextSender);
         verify(EXPECTED_PAYLOADS[0], payload0, false, CahootsType.MULTI, CahootsTypeUser.SENDER);
 
         // counterparty
-        CahootsContext contextReceiver = CahootsContext.newCounterpartyMultiCahoots(account);
+        MultiCahootsContext contextReceiver = MultiCahootsContext.newCounterparty(account);
         ManualCahootsMessage payload1 = (ManualCahootsMessage)cahootsReceiver.reply(contextReceiver, payload0);
         verify(EXPECTED_PAYLOADS[1], payload1, false, CahootsType.MULTI, CahootsTypeUser.COUNTERPARTY);
 

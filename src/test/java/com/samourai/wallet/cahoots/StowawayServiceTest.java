@@ -1,6 +1,6 @@
 package com.samourai.wallet.cahoots;
 
-import com.samourai.soroban.cahoots.CahootsContext;
+import com.samourai.soroban.cahoots.StowawayContext;
 import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,8 +30,8 @@ public class StowawayServiceTest extends AbstractCahootsTest {
 
         // setup Cahoots
         long spendAmount = 5000;
-        CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(account, FEE_PER_B, spendAmount);
-        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStowaway(account);
+        StowawayContext cahootsContextSender = StowawayContext.newInitiator(account, FEE_PER_B, spendAmount);
+        StowawayContext cahootsContextCp = StowawayContext.newCounterparty(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stowawayService, cahootsContextSender, cahootsContextCp, null);
 
@@ -56,8 +56,8 @@ public class StowawayServiceTest extends AbstractCahootsTest {
 
         // setup Cahoots
         long spendAmount = 5000;
-        CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(account, FEE_PER_B, spendAmount);
-        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStowawayMulti(account);
+        StowawayContext cahootsContextSender = StowawayContext.newInitiator(account, FEE_PER_B, spendAmount);
+        StowawayContext cahootsContextCp = StowawayContext.newCounterpartyMulti(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stowawayService, cahootsContextSender, cahootsContextCp, null);
 
@@ -70,15 +70,5 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         outputs.put(SENDER_CHANGE_POSTMIX_84[0], 4752L);
         verifyTx(cahoots.getTransaction(), txid, raw, outputs);
         pushTx.assertTx(txid, raw);
-    }
-
-    @Test
-    public void invalidStowawayExcetion() throws Exception {
-        // throw Exception for 0 spend amount
-        Assertions.assertThrows(Exception.class,
-                () -> {
-                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(0, FEE_PER_B, 0);
-                    stonewallx2Service.startInitiator(cahootsWalletSender, cahootsContextSender);
-                });
     }
 }

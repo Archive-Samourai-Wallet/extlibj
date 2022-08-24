@@ -1,6 +1,6 @@
 package com.samourai.wallet.cahoots;
 
-import com.samourai.soroban.cahoots.CahootsContext;
+import com.samourai.soroban.cahoots.Stonewallx2Context;
 import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,8 +30,8 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         // setup Cahoots
         long spendAmount = 5000;
         String address = ADDRESS_BIP84;
-        CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(account, FEE_PER_B, spendAmount, address);
-        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStonewallx2(account);
+        Stonewallx2Context cahootsContextSender = Stonewallx2Context.newInitiator(account, FEE_PER_B, spendAmount, address);
+        Stonewallx2Context cahootsContextCp = Stonewallx2Context.newCounterparty(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
 
@@ -59,8 +59,8 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         // setup Cahoots
         long spendAmount = 5000;
         String address = ADDRESS_BIP84;
-        CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(account, FEE_PER_B, spendAmount, address);
-        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStonewallx2(account);
+        Stonewallx2Context cahootsContextSender = Stonewallx2Context.newInitiator(account, FEE_PER_B, spendAmount, address);
+        Stonewallx2Context cahootsContextCp = Stonewallx2Context.newCounterparty(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
 
@@ -88,8 +88,8 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         // setup Cahoots
         long spendAmount = 5000;
         String address = ADDRESS_BIP44;
-        CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(account, FEE_PER_B, spendAmount, address);
-        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStonewallx2(account);
+        Stonewallx2Context cahootsContextSender = Stonewallx2Context.newInitiator(account, FEE_PER_B, spendAmount, address);
+        Stonewallx2Context cahootsContextCp = Stonewallx2Context.newCounterparty(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
 
@@ -117,8 +117,8 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         // setup Cahoots
         long spendAmount = 5000;
         String address = ADDRESS_BIP44;
-        CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(account, FEE_PER_B, spendAmount, address);
-        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStonewallx2(account);
+        Stonewallx2Context cahootsContextSender = Stonewallx2Context.newInitiator(account, FEE_PER_B, spendAmount, address);
+        Stonewallx2Context cahootsContextCp = Stonewallx2Context.newCounterparty(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
 
@@ -146,8 +146,8 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         // setup Cahoots
         long spendAmount = 5000;
         String address = ADDRESS_BIP49;
-        CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(account, FEE_PER_B, spendAmount, address);
-        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStonewallx2(account);
+        Stonewallx2Context cahootsContextSender = Stonewallx2Context.newInitiator(account, FEE_PER_B, spendAmount, address);
+        Stonewallx2Context cahootsContextCp = Stonewallx2Context.newCounterparty(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
 
@@ -172,14 +172,14 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         // throw Exception for 0 spend amount
         Assertions.assertThrows(Exception.class,
                 () -> {
-                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(0, FEE_PER_B, 0, address);
+                    Stonewallx2Context cahootsContextSender = Stonewallx2Context.newInitiator(0, FEE_PER_B, 0, address);
                     stonewallx2Service.startInitiator(cahootsWalletSender, cahootsContextSender);
                 });
 
         // throw Exception for blank address
         Assertions.assertThrows(Exception.class,
                 () -> {
-                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStonewallx2(0, FEE_PER_B, 0, "");
+                    Stonewallx2Context cahootsContextSender = Stonewallx2Context.newInitiator(0, FEE_PER_B, 0, "");
                     stonewallx2Service.startInitiator(cahootsWalletSender, cahootsContextSender);
                 });
     }

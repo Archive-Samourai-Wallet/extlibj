@@ -1,6 +1,6 @@
 package com.samourai.wallet.cahoots.stowaway;
 
-import com.samourai.soroban.cahoots.CahootsContext;
+import com.samourai.soroban.cahoots.StowawayContext;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class StowawayService extends AbstractCahoots2xService<Stowaway> {
+public class StowawayService extends AbstractCahoots2xService<Stowaway, StowawayContext> {
     private static final Logger log = LoggerFactory.getLogger(StowawayService.class);
 
     public StowawayService(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
@@ -29,7 +29,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     }
 
     @Override
-    public Stowaway startInitiator(CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+    public Stowaway startInitiator(CahootsWallet cahootsWallet, StowawayContext cahootsContext) throws Exception {
         return startInitiator(cahootsWallet, cahootsContext.getAmount(), cahootsContext.getAccount());
     }
 
@@ -43,7 +43,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     }
 
     @Override
-    public Stowaway startCollaborator(CahootsWallet cahootsWallet, CahootsContext cahootsContext, Stowaway stowaway0) throws Exception {
+    public Stowaway startCollaborator(CahootsWallet cahootsWallet, StowawayContext cahootsContext, Stowaway stowaway0) throws Exception {
         if (stowaway0.getSpendAmount() <= 0) {
             // this check used to be the initiator portion, but with the introduction of MultiCahoots, it remains -1 until the Stonewallx2 finishes, so we can get an accurate amount, so the check is here now.
             throw new Exception("Invalid amount");
@@ -56,7 +56,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     }
 
     @Override
-    public Stowaway reply(CahootsWallet cahootsWallet, CahootsContext cahootsContext, Stowaway stowaway) throws Exception {
+    public Stowaway reply(CahootsWallet cahootsWallet, StowawayContext cahootsContext, Stowaway stowaway) throws Exception {
         int step = stowaway.getStep();
         if (log.isDebugEnabled()) {
             log.debug("# Stowaway <= step="+step);
@@ -104,13 +104,13 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     //
     // receiver
     //
-    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, CahootsContext cahootsContext, List<String> seenTxs) throws Exception {
+    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, StowawayContext cahootsContext, List<String> seenTxs) throws Exception {
         int account = cahootsContext.getAccount();
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
         return doStowaway1(stowaway0, cahootsWallet, cahootsContext, utxos, account, seenTxs);
     }
 
-    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, CahootsContext cahootsContext, List<CahootsUtxo> utxos, int receiveAccount, List<String> seenTxs) throws Exception {
+    public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, StowawayContext cahootsContext, List<CahootsUtxo> utxos, int receiveAccount, List<String> seenTxs) throws Exception {
         byte[] fingerprint = cahootsWallet.getFingerprint();
         stowaway0.setFingerprintCollab(fingerprint);
 
@@ -197,7 +197,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     //
     // sender
     //
-    public Stowaway doStowaway2(Stowaway stowaway1, CahootsWallet cahootsWallet, CahootsContext cahootsContext, List<String> seenTxs) throws Exception {
+    public Stowaway doStowaway2(Stowaway stowaway1, CahootsWallet cahootsWallet, StowawayContext cahootsContext, List<String> seenTxs) throws Exception {
 
         if (log.isDebugEnabled()) {
             log.debug("sender account (2):" + stowaway1.getAccount());
@@ -344,7 +344,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     }
 
     @Override
-    protected long computeMaxSpendAmount(long minerFee, CahootsContext cahootsContext) throws Exception {
+    protected long computeMaxSpendAmount(long minerFee, StowawayContext cahootsContext) throws Exception {
         long maxSpendAmount;
         switch (cahootsContext.getTypeUser()) {
             case SENDER:

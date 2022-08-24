@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends AbstractCahootsService<T,CahootsContext> {
+public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends CahootsContext> extends AbstractCahootsService<T,C> {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahoots2xService.class);
 
     public AbstractCahoots2xService(CahootsType cahootsType, BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
@@ -22,7 +22,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends Abst
     }
 
     @Override
-    public void verifyResponse(CahootsContext cahootsContext, T cahoots, T request) throws Exception {
+    public void verifyResponse(C cahootsContext, T cahoots, T request) throws Exception {
         super.verifyResponse(cahootsContext, cahoots, request);
 
         if (request != null) {
@@ -67,7 +67,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends Abst
         }
     }
 
-    protected void checkMaxSpendAmount(long verifiedSpendAmount, long feeAmount, CahootsContext cahootsContext) throws Exception {
+    protected void checkMaxSpendAmount(long verifiedSpendAmount, long feeAmount, C cahootsContext) throws Exception {
         long maxSpendAmount = computeMaxSpendAmount(feeAmount, cahootsContext);
         if (log.isDebugEnabled()) {
             log.debug(cahootsContext.getTypeUser()+" verifiedSpendAmount="+verifiedSpendAmount+", maxSpendAmount="+maxSpendAmount);
@@ -80,12 +80,12 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends Abst
         }
     }
 
-    protected abstract long computeMaxSpendAmount(long minerFee, CahootsContext cahootsContext) throws Exception;
+    protected abstract long computeMaxSpendAmount(long minerFee, C cahootsContext) throws Exception;
 
     //
     // receiver
     //
-    public T doStep3(T cahoots2, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+    public T doStep3(T cahoots2, CahootsWallet cahootsWallet, C cahootsContext) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(cahoots2.getCounterpartyAccount());
         HashMap<String, ECKey> keyBag_A = computeKeyBag(cahoots2, utxos);
 
@@ -101,7 +101,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x> extends Abst
     //
     // sender
     //
-    public T doStep4(T cahoots3, CahootsWallet cahootsWallet, CahootsContext cahootsContext) throws Exception {
+    public T doStep4(T cahoots3, CahootsWallet cahootsWallet, C cahootsContext) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(cahoots3.getAccount());
         HashMap<String, ECKey> keyBag_B = computeKeyBag(cahoots3, utxos);
 
