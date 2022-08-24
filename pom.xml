@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.samourai.code.wallet</groupId>
 	<artifactId>extlibj</artifactId>
-	<version>0.0.33.9-cahoots-to-paynym-SNAPSHOT</version>
+	<version>0.0.33.10-cahoots-to-paynym-SNAPSHOT</version>
 	<name>extlibj</name>
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -179,10 +179,6 @@
 						</goals>
 					</execution>
 				</executions>
-                <configuration>
-                    <source>9</source>
-                    <target>9</target>
-                </configuration>
             </plugin>
 		</plugins>
 	</build>
