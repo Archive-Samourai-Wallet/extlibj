@@ -32,3 +32,9 @@ Later, we will expose such URLs from a decentralized Dojo hosting system.
 
 4. implement DexConfigProvider.load() to load values from whirlpool-server
 
+- more details coming soon (remote loading, signature verification...)
+
+
+5. EXPOSE SamouraiConfig from decentralized Dojo and load it with DexConfigProvider.load()
+
+- more details coming soon
