@@ -7,6 +7,12 @@ public class FeeUtilTest {
   private static final FeeUtil feeUtil = FeeUtil.getInstance();
 
   @Test
+  public void estimatedSizeSegwitCahoots() throws Exception {
+    // returns 486 instead of 420
+    Assertions.assertEquals(420, feeUtil.estimatedSizeSegwit(0, 0, 4, 4, 0));
+  }
+
+  @Test
   public void estimatedSizeSegwit() throws Exception {
     Assertions.assertEquals(129, feeUtil.estimatedSizeSegwit(0, 0, 1, 1, 0));
     Assertions.assertEquals(202, feeUtil.estimatedSizeSegwit(1, 0, 0, 1, 0));
