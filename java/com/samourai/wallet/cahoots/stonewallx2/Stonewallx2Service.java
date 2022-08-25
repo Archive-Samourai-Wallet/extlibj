@@ -347,18 +347,15 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
                 break;
             }
         }
-        long estimatedFee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB);
-        if (log.isDebugEnabled()) {
-            log.debug(selectedUTXO.size()+" selected utxos, totalContributedAmount="+totalSelectedAmount+", requiredAmount="+stonewall1.computeRequiredAmount(estimatedFee));
-        }
-        if (!stonewall1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee)) {
-            throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
-        }
-
         long fee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB);
         if (log.isDebugEnabled()) {
             log.debug("fee:" + fee);
+            log.debug(selectedUTXO.size()+" selected utxos, totalContributedAmount="+totalSelectedAmount+", requiredAmount="+stonewall1.computeRequiredAmount(fee));
         }
+        if (!stonewall1.isContributedAmountSufficient(totalSelectedAmount, fee)) {
+            throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
+        }
+
         if (fee % 2L != 0) {
             fee++;
         }
