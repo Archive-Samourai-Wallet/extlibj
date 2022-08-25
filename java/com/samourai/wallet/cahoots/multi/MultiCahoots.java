@@ -48,6 +48,11 @@ public class MultiCahoots extends Cahoots {
     }
 
     @Override
+    public String getPaynymDestination() {
+        return stonewallx2.getPaynymDestination();
+    }
+
+    @Override
     public JSONObject toJSON() {
         JSONObject jsonObject = super.toJSON();
         jsonObject.put("stonewallx2", stonewallx2.toJSON());

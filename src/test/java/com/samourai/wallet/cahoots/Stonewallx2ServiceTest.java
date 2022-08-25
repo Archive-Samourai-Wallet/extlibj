@@ -195,7 +195,7 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         pushTx.assertTx(txid, raw);
 
         // verify paynym
-        Assertions.assertEquals(paynymDestination, ((STONEWALLx2)cahoots).getPaynymDestination());
+        Assertions.assertEquals(paynymDestination, cahoots.getPaynymDestination());
     }
 
     @Test

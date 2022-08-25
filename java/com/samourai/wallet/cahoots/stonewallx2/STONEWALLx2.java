@@ -48,6 +48,7 @@ public class STONEWALLx2 extends Cahoots2x {
         this.paynymDestination = obj.getString("destPaynym");
     }
 
+    @Override
     public String getPaynymDestination() {
         return paynymDestination;
     }

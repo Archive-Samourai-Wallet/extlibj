@@ -170,6 +170,11 @@ public abstract class Cahoots {
 
     public abstract String getDestination();
 
+    // android checks getPaynymDestination() to increment paynym counter after successfull broadcast
+    public String getPaynymDestination() {
+        return null; // overridable
+    }
+
     public abstract long getSpendAmount();
 
     public abstract Transaction getTransaction();
