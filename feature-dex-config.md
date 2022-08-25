@@ -27,7 +27,8 @@ Later, we will expose such URLs from a decentralized Dojo hosting system.
 
 3. EXPOSE SamouraiConfig from whirlpool-server (use branch "features/dex-config")
 
-- create a new Controller to expose SamouraiConfig from: GET <whirlpool-server>/rest/dex-config
+- create a new Controller to expose SamouraiConfig as simple JSON structure 
+  from: GET <whirlpool-server>/rest/dex-config
 
 
 4. implement DexConfigProvider.load() to load values from whirlpool-server
