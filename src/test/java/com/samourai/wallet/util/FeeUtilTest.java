@@ -8,8 +8,9 @@ public class FeeUtilTest {
 
   @Test
   public void estimatedSizeSegwitCahoots() throws Exception {
-    // returns 486 instead of 420
-    Assertions.assertEquals(420, feeUtil.estimatedSizeSegwit(0, 0, 4, 4, 0));
+    // returns 486 instead of 406
+    // see
+    Assertions.assertEquals(406, feeUtil.estimatedSizeSegwit(0, 0, 4, 4, 0));
   }
 
   @Test
