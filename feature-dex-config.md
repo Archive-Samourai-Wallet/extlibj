@@ -21,19 +21,20 @@ Later, we will expose such URLs from a decentralized Dojo hosting system.
 
 2. EXTERNALIZE each critical URL to SamouraiConfig
 
-- create entries in SamouraiConfig
-- update BackendServer
+- see how BackendServer was connected to DexConfigProvider as example
+- connect SorobanServer to DexConfigProvider as well
 
 
-3. EXPOSE SamouraiConfig from whirlpool-server (use branch "features/dex-config")
+3. EXPOSE SamouraiConfig from whirlpool-server
 
-- create a new Controller to expose SamouraiConfig as simple JSON structure 
-  from: GET <whirlpool-server>/rest/dex-config
+- Waiting for Dojo DEX hosting, SamouraiConfig will be exposed to https://pool.whirl.mx:8081/rest/dex-config
+  => ask zeroleak to update whirlpool-server for reflecting last ExtLibJ changes
 
 
 4. implement DexConfigProvider.load() to load values from whirlpool-server
 
-- more details coming soon (remote loading, signature verification...)
+- load values from https://pool.whirl.mx:8081/rest/dex-config
+- verify payload signature (more details coming soon)
 
 
 5. EXPOSE SamouraiConfig from decentralized Dojo and load it with DexConfigProvider.load()
