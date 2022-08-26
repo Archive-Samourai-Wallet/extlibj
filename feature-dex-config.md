@@ -46,7 +46,12 @@ DexConfigResponse.signature should be signing DexConfigResponse.samouraiConfig w
 - use DexConfigProviderTest for testing it
 
 
+5. Integrate ExtLibJ update to whirlpool-client
 
-5. EXPOSE SamouraiConfig from decentralized Dojo and load it with DexConfigProvider.load()
+
+6. Integrate ExtLibJ+whirlpool-client updates to samourai-wallet-android
+
+
+7. EXPOSE SamouraiConfig from decentralized Dojo and load it with DexConfigProvider.load()
 
 - more details coming soon
