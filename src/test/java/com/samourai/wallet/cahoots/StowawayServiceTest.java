@@ -1,6 +1,6 @@
 package com.samourai.wallet.cahoots;
 
-import com.samourai.soroban.cahoots.CahootsContext;
+import com.samourai.soroban.cahoots.StowawayContext;
 import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,18 +30,18 @@ public class StowawayServiceTest extends AbstractCahootsTest {
 
         // setup Cahoots
         long spendAmount = 5000;
-        CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(account, FEE_PER_B, spendAmount);
-        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStowaway(account);
+        StowawayContext cahootsContextSender = StowawayContext.newInitiator(account, FEE_PER_B, spendAmount);
+        StowawayContext cahootsContextCp = StowawayContext.newCounterparty(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stowawayService, cahootsContextSender, cahootsContextCp, null);
 
         // verify TX
-        String txid = "f14c1d6fab6e9217aa5d6d5af951f6287a75cbb0567f87e8ed77c99aa9f0b1f5";
-        String raw = "02000000000102d54f4c6e366d8fc11b8630d4dd1536765ec8022bd3ab8a62fefc2ee96b9ccf140100000000fdffffffad05bb9c893f5cb9762ea57729efaf4a4b8eb1e377533fddc49d15d01fb307940100000000fdffffff0290120000000000001600144e4fed51986dbaf322d2b36e690b8638fa0f0204983a00000000000016001428a90fa3f4f285fc689f389115326dbf96917d620247304402204455b847d7dab36f2dd55f214cfd3b6d59fba4f5d1d6bda50b3518d77c09591902207f2cd102830b886a5ff0baa63adebff63cc48bf033d04ffdd0119c3b8b65c5ef012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f202483045022100e3d10f18644199a3c66c8740469a4a537635a099ca9e61804f5a3c12620858ff022011c9cb215a97822f16fd7818f155c25bb133f7bb314472f78ca56f94cf4e4657012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f200000000";
+        String txid = "68288513bc233a9cba0ec25b9905978594abe9d58c08b4dd343b62735cb796a0";
+        String raw = "02000000000102d54f4c6e366d8fc11b8630d4dd1536765ec8022bd3ab8a62fefc2ee96b9ccf140100000000fdffffffad05bb9c893f5cb9762ea57729efaf4a4b8eb1e377533fddc49d15d01fb307940100000000fdffffff02b2120000000000001600144e4fed51986dbaf322d2b36e690b8638fa0f0204983a00000000000016001428a90fa3f4f285fc689f389115326dbf96917d6202483045022100cc5c9e084dd91109876133fa72ebed55407617a21853d9b05af7d96bdbe6616d022062ddf2ee0b44c3062a490dde0738ec21a87b182da12d4291a13a8c86c9033d9a012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f202473044022061bd1c152021eb9c8ed6d51a76333ac26b43fc1ba6544fdd95d779955e1af89402200b9b0c98e62aef73a877e977d09a33c52e9a661ea2bf4d2aa3c4c51113d1000f012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f200000000";
 
         Map<String,Long> outputs = new LinkedHashMap<>();
         outputs.put(COUNTERPARTY_RECEIVE_84[0], 15000L);
-        outputs.put(SENDER_CHANGE_84[0], 4752L);
+        outputs.put(SENDER_CHANGE_84[0], 4786L);
         verifyTx(cahoots.getTransaction(), txid, raw, outputs);
         pushTx.assertTx(txid, raw);
     }
@@ -56,29 +56,19 @@ public class StowawayServiceTest extends AbstractCahootsTest {
 
         // setup Cahoots
         long spendAmount = 5000;
-        CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(account, FEE_PER_B, spendAmount);
-        CahootsContext cahootsContextCp = CahootsContext.newCounterpartyStowawayMulti(account);
+        StowawayContext cahootsContextSender = StowawayContext.newInitiator(account, FEE_PER_B, spendAmount);
+        StowawayContext cahootsContextCp = StowawayContext.newCounterpartyMulti(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stowawayService, cahootsContextSender, cahootsContextCp, null);
 
         // verify TX
-        String txid = "e1e25ead2d9202addb0d678c2c114560587f1202b0e6b5d21f8c10a860709ea1";
-        String raw = "02000000000102d54f4c6e366d8fc11b8630d4dd1536765ec8022bd3ab8a62fefc2ee96b9ccf140100000000fdffffffad05bb9c893f5cb9762ea57729efaf4a4b8eb1e377533fddc49d15d01fb307940100000000fdffffff029012000000000000160014c92e53e44ae5d9d392aecf1ce7a980b073b01cd6983a0000000000001600143bdff7532977f4f8094cfa8ccff2574cc71eebe702473044022017167cfdfb40864da9bc40b2cfd65fc3c4bca8ac388c9c8a6ca757e3dc013f2902206bb427ff871452e2f89f6ce5957c61b45725db6eb7742b1c36d69fc1b6612fd5012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f20247304402202d2dc89c9881d4273dfd5877382998ca758cb32590a59f947f895257b84abdf0022078dc9c251b14376560728d3daa5204d1a59a3f00275628750d84b05c396ef04e012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f200000000";
+        String txid = "6bf8505a55315c50e5a7d8d4f88be002585307e689da486eb2fa86e08ac4e7d4";
+        String raw = "02000000000102d54f4c6e366d8fc11b8630d4dd1536765ec8022bd3ab8a62fefc2ee96b9ccf140100000000fdffffffad05bb9c893f5cb9762ea57729efaf4a4b8eb1e377533fddc49d15d01fb307940100000000fdffffff02b212000000000000160014c92e53e44ae5d9d392aecf1ce7a980b073b01cd6983a0000000000001600143bdff7532977f4f8094cfa8ccff2574cc71eebe702483045022100b1e33a8b31c8babca206a22b0514b6df812cad7453c4075da06ddcc14e8451ae02205d53aeaabfbaf67e209b4e65ad824899c9c5ca7bbfba7f563c053b625890fe7d012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f202473044022076cceac9d0ac555b32a077ee3a54831b13b32d36d5071bbfd282ab44ab86ab0002202932c130b0cfa2d36a8c282ab10a60e9a66d88b45540f6555d773c56af9f961a012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f200000000";
 
         Map<String,Long> outputs = new LinkedHashMap<>();
         outputs.put(COUNTERPARTY_RECEIVE_POSTMIX_84[0], 15000L);
-        outputs.put(SENDER_CHANGE_POSTMIX_84[0], 4752L);
+        outputs.put(SENDER_CHANGE_POSTMIX_84[0], 4786L);
         verifyTx(cahoots.getTransaction(), txid, raw, outputs);
         pushTx.assertTx(txid, raw);
-    }
-
-    @Test
-    public void invalidStowawayExcetion() throws Exception {
-        // throw Exception for 0 spend amount
-        Assertions.assertThrows(Exception.class,
-                () -> {
-                    CahootsContext cahootsContextSender = CahootsContext.newInitiatorStowaway(0, FEE_PER_B, 0);
-                    stonewallx2Service.startInitiator(cahootsWalletSender, cahootsContextSender);
-                });
     }
 }
