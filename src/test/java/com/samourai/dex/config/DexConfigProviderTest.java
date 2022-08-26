@@ -1,6 +1,7 @@
 package com.samourai.dex.config;
 
 import com.samourai.wallet.test.AbstractTest;
+import com.samourai.wallet.util.MessageSignUtilGeneric;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
