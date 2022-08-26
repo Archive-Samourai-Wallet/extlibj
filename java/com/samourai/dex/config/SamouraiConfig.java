@@ -8,6 +8,12 @@ public class SamouraiConfig {
     private String backendServerMainnetOnion = "http://d2oagweysnavqgcfsfawqwql2rwxend7xxpriq676lzsmtfwbt75qbqd.onion/v2";
     private String backendServerTestnetClear = "https://api.samouraiwallet.com/test/v2";
     private String backendServerTestnetOnion = "http://d2oagweysnavqgcfsfawqwql2rwxend7xxpriq676lzsmtfwbt75qbqd.onion/test/v2";
+
+    private String sorobanServerTestnetClear = "https://soroban.samouraiwallet.com/test";
+    private String sorobanServerTestnetOnion = "http://sorob4sg7yiopktgz4eom7hl5mcodr6quvhmdpljl5qqhmt6po7oebid.onion/test";
+    private String sorobanServerMainnetClear = "https://soroban.samouraiwallet.com";
+    private String getSorobanServerMainnetOnion = "http://sorob4sg7yiopktgz4eom7hl5mcodr6quvhmdpljl5qqhmt6po7oebid.onion";
+
     // TODO extlibj: SorobanServer
 
     public SamouraiConfig() {
@@ -43,5 +49,36 @@ public class SamouraiConfig {
 
     public void setBackendServerTestnetOnion(String backendServerTestnetOnion) {
         this.backendServerTestnetOnion = backendServerTestnetOnion;
+    }
+    public String getSorobanServerTestnetClear() {
+        return sorobanServerTestnetClear;
+    }
+
+    public void setSorobanServerTestnetClear(String sorobanServerTestnetClear) {
+        this.sorobanServerTestnetClear = sorobanServerTestnetClear;
+    }
+
+    public String getSorobanServerTestnetOnion() {
+        return sorobanServerTestnetOnion;
+    }
+
+    public void setSorobanServerTestnetOnion(String sorobanServerTestnetOnion) {
+        this.sorobanServerTestnetOnion = sorobanServerTestnetOnion;
+    }
+
+    public String getSorobanServerMainnetClear() {
+        return sorobanServerMainnetClear;
+    }
+
+    public void setSorobanServerMainnetClear(String sorobanServerMainnetClear) {
+        this.sorobanServerMainnetClear = sorobanServerMainnetClear;
+    }
+
+    public String getGetSorobanServerMainnetOnion() {
+        return getSorobanServerMainnetOnion;
+    }
+
+    public void setGetSorobanServerMainnetOnion(String getSorobanServerMainnetOnion) {
+        this.getSorobanServerMainnetOnion = getSorobanServerMainnetOnion;
     }
 }
