@@ -18,7 +18,7 @@ public class DexConfigProvider {
     }
 
     protected void load() {
-        // config will be loaded from remote server here
+        // TODO load remote config here, fallback to default if any issue
     }
 
     public SamouraiConfig getSamouraiConfig() {

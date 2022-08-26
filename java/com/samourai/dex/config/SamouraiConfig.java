@@ -1,7 +1,8 @@
 package com.samourai.dex.config;
 
-public class SamouraiConfig {
+import com.samourai.wallet.util.JSONUtils;
 
+public class SamouraiConfig {
     // extlibj: BackendServer
     private String backendServerMainnetClear = "https://api.samouraiwallet.com/v2";
     private String backendServerMainnetOnion = "http://d2oagweysnavqgcfsfawqwql2rwxend7xxpriq676lzsmtfwbt75qbqd.onion/v2";
