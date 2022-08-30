@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import java.math.BigInteger;
 import java.util.Vector;
 
+import com.samourai.wallet.segwit.bech32.Bech32Segwit;
+
 public class FeeUtil {
   private static final Logger log = LoggerFactory.getLogger(FeeUtil.class);
 
@@ -33,7 +35,7 @@ public class FeeUtil {
     return instance;
   }
 
-  public int estimatedSizeSegwit(
+  public int estimatedSizeSegwit  (
       int inputsP2PKH,
       int inputsP2SHP2WPKH,
       int inputsP2WPKH,
@@ -71,9 +73,56 @@ public class FeeUtil {
     return txSize;
   }
 
+  public int estimatedSizeSegwit  (
+      int inputsP2PKH,
+      int inputsP2SHP2WPKH,
+      int inputsP2WPKH,
+      int outputsNonTaproot,
+      int outputsTaproot,
+      int outputsOpReturn) {
+
+    int txSize =
+            + (outputsTaproot * ESTIMATED_OUTPUT_P2TR_LEN)
+            + (outputsNonTaproot * ESTIMATED_OUTPUT_LEN)
+            + (outputsOpReturn * ESTIMATED_OPRETURN_LEN)
+            + (inputsP2PKH * ESTIMATED_INPUT_LEN_P2PKH)
+            + (inputsP2SHP2WPKH * ESTIMATED_INPUT_LEN_P2SH_P2WPKH)
+            + (inputsP2WPKH * ESTIMATED_INPUT_LEN_P2WPKH)
+            + inputsP2PKH
+            + inputsP2SHP2WPKH
+            + inputsP2WPKH
+            + 8
+            + 1
+            + 1;
+    if (log.isTraceEnabled()) {
+      log.trace(
+          "tx size estimation: "
+              + txSize
+              + "b ("
+              + inputsP2PKH
+              + " insP2PKH, "
+              + inputsP2SHP2WPKH
+              + " insP2SHP2WPKH, "
+              + inputsP2WPKH
+              + " insP2WPKH, "
+              + outputsNonTaproot
+              + " outsNonTaproot, "
+              + outputsTaproot
+              + " outsTaproot, "
+              + outputsOpReturn
+              + " outsOpReturn)");
+    }
+    return txSize;
+  }
+
   public BigInteger estimatedFeeSegwit(int inputsP2PKH, int inputsP2SHP2WPKH, int inputsP2WPKH, int outputsNonOpReturn, int outputsOpReturn, BigInteger feePerKb)   {
     int size = estimatedSizeSegwit(inputsP2PKH, inputsP2SHP2WPKH, inputsP2WPKH, outputsNonOpReturn, outputsOpReturn);
     return calculateFee(size, feePerKb);
+  }
+
+  public BigInteger estimatedFeeSegwit(int inputsP2PKH, int inputsP2SHP2WPKH, int inputsP2WPKH, int outputsNonTaproot, int outputsTaproot, int outputsOpReturn, BigInteger feePerKb)   {
+      int size = estimatedSizeSegwit(inputsP2PKH, inputsP2SHP2WPKH, inputsP2WPKH, outputsNonTaproot, outputsTaproot, outputsOpReturn);
+      return calculateFee(size, feePerKb);
   }
 
   public long estimatedFeeSegwit(
@@ -86,6 +135,24 @@ public class FeeUtil {
     int size =
         estimatedSizeSegwit(
             inputsP2PKH, inputsP2SHP2WPKH, inputsP2WPKH, outputsNonOpReturn, outputsOpReturn);
+    long minerFee = calculateFee(size, feePerB);
+    if (log.isTraceEnabled()) {
+      log.trace("minerFee = " + minerFee + " (size=" + size + "b, feePerB=" + feePerB + "s/b)");
+    }
+    return minerFee;
+  }
+
+  public long estimatedFeeSegwit(
+      int inputsP2PKH,
+      int inputsP2SHP2WPKH,
+      int inputsP2WPKH,
+      int outputsNonTaproot,
+      int outputsTaproot,
+      int outputsOpReturn,
+      long feePerB) {
+    int size =
+        estimatedSizeSegwit(
+            inputsP2PKH, inputsP2SHP2WPKH, inputsP2WPKH, outputsNonTaproot, outputsTaproot, outputsOpReturn);
     long minerFee = calculateFee(size, feePerB);
     if (log.isTraceEnabled()) {
       log.trace("minerFee = " + minerFee + " (size=" + size + "b, feePerB=" + feePerB + "s/b)");
@@ -123,13 +190,13 @@ public class FeeUtil {
 
   public Triple<Integer,Integer,Integer> getOutpointCount(Vector<MyTransactionOutPoint> outpoints, NetworkParameters params) {
 
-    int p2wpkh = 0;
+    int p2wpkh_p2tr = 0;
     int p2sh_p2wpkh = 0;
     int p2pkh = 0;
 
     for(MyTransactionOutPoint out : outpoints)   {
       if(FormatsUtilGeneric.getInstance().isValidBech32(out.getAddress()))    {
-        p2wpkh++;
+        p2wpkh_p2tr++;
       }
       else if(Address.fromBase58(params, out.getAddress()).isP2SHAddress())    {
         p2sh_p2wpkh++;
@@ -139,6 +206,23 @@ public class FeeUtil {
       }
     }
 
-    return Triple.of(p2pkh, p2sh_p2wpkh, p2wpkh);
+    return Triple.of(p2pkh, p2sh_p2wpkh, p2wpkh_p2tr);
   }
+
+  public int getOutpointCountP2TR(Vector<MyTransactionOutPoint> outpoints) {
+
+    int count = 0;
+
+    for(MyTransactionOutPoint out : outpoints)   {
+      if(FormatsUtilGeneric.getInstance().isValidBech32(out.getAddress()))    {
+        org.apache.commons.lang3.tuple.Pair<Byte, byte[]> pair = Bech32Segwit.decode(out.getAddress().substring(0, 2), out.getAddress());
+        if(pair.getLeft() == (byte)0x01)    {
+          count++;
+        }
+      }
+    }
+
+    return count;
+  }
+
 }
