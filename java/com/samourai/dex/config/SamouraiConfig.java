@@ -13,7 +13,7 @@ public class SamouraiConfig {
     private String sorobanServerTestnetClear = "https://soroban.samouraiwallet.com/test";
     private String sorobanServerTestnetOnion = "http://sorob4sg7yiopktgz4eom7hl5mcodr6quvhmdpljl5qqhmt6po7oebid.onion/test";
     private String sorobanServerMainnetClear = "https://soroban.samouraiwallet.com";
-    private String getSorobanServerMainnetOnion = "http://sorob4sg7yiopktgz4eom7hl5mcodr6quvhmdpljl5qqhmt6po7oebid.onion";
+    private String sorobanServerMainnetOnion = "http://sorob4sg7yiopktgz4eom7hl5mcodr6quvhmdpljl5qqhmt6po7oebid.onion";
 
 
     public SamouraiConfig() {
@@ -74,11 +74,11 @@ public class SamouraiConfig {
         this.sorobanServerMainnetClear = sorobanServerMainnetClear;
     }
 
-    public String getGetSorobanServerMainnetOnion() {
-        return getSorobanServerMainnetOnion;
+    public String getSorobanServerMainnetOnion() {
+        return sorobanServerMainnetOnion;
     }
 
-    public void setGetSorobanServerMainnetOnion(String getSorobanServerMainnetOnion) {
-        this.getSorobanServerMainnetOnion = getSorobanServerMainnetOnion;
+    public void setSorobanServerMainnetOnion(String sorobanServerMainnetOnion) {
+        this.sorobanServerMainnetOnion = sorobanServerMainnetOnion;
     }
 }

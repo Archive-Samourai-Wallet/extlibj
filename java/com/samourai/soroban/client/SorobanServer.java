@@ -15,7 +15,7 @@ public enum SorobanServer {
           TestNet3Params.get()),
   MAINNET(
           DexConfigProvider.getInstance().getSamouraiConfig().getSorobanServerMainnetClear(),
-          DexConfigProvider.getInstance().getSamouraiConfig().getGetSorobanServerMainnetOnion(),
+          DexConfigProvider.getInstance().getSamouraiConfig().getSorobanServerMainnetOnion(),
           MainNetParams.get());
 
   private String serverUrlClear;
