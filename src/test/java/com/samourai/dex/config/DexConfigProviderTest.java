@@ -32,6 +32,6 @@ public class DexConfigProviderTest extends AbstractTest {
   public void load() throws Exception {
     httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
     dexConfigProvider.load(httpClient, params);
-    Assertions.assertEquals("https://api.samouraiwallet.com/test/v2?whirlpoolServer=true", dexConfigProvider.getSamouraiConfig().getSorobanServerTestnetClear());
+    Assertions.assertEquals("https://soroban.samouraiwallet.com/test?whirlpoolServer=true", dexConfigProvider.getSamouraiConfig().getSorobanServerTestnetClear());
   }
 }
