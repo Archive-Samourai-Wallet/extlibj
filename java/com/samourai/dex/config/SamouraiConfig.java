@@ -10,7 +10,7 @@ public class SamouraiConfig {
     private String backendServerTestnetOnion = "http://d2oagweysnavqgcfsfawqwql2rwxend7xxpriq676lzsmtfwbt75qbqd.onion/test/v2";
 
     // extlibj: SorobanServer
-    private String sorobanServerTestnetClear = "https://api.samouraiwallet.com/test/v2?whirlpoolServer=true";
+    private String sorobanServerTestnetClear = "https://soroban.samouraiwallet.com/test";
     private String sorobanServerTestnetOnion = "http://sorob4sg7yiopktgz4eom7hl5mcodr6quvhmdpljl5qqhmt6po7oebid.onion/test";
     private String sorobanServerMainnetClear = "https://soroban.samouraiwallet.com";
     private String getSorobanServerMainnetOnion = "http://sorob4sg7yiopktgz4eom7hl5mcodr6quvhmdpljl5qqhmt6po7oebid.onion";
