@@ -22,21 +22,18 @@ public class DexConfigProvider {
         this.samouraiConfig = new SamouraiConfig();
     }
 
-    public void load(IBackendClient httpClient, NetworkParameters networkParameters) {
-        // TODO load remote config here, fallback to default if any issue
+    public void load(IBackendClient httpClient, NetworkParameters networkParameters) throws Exception {
         String dexURL = "https://pool.whirl.mx:8081/rest/dex-config";
-        try {
-            DexConfigResponse dexConfigResponse = httpClient.getJson(dexURL, DexConfigResponse.class, null);
+        DexConfigResponse dexConfigResponse = httpClient.getJson(dexURL, DexConfigResponse.class, null);
 
-            if (MessageSignUtilGeneric.getInstance().verifySignedMessage(
-                    DexConfigResponse.SIGNING_ADDRESS,
-                    dexConfigResponse.getSamouraiConfig(),
-                    dexConfigResponse.getSignature(),
-                    networkParameters)) {
-                this.samouraiConfig = JSONUtils.getInstance().getObjectMapper().readValue(dexConfigResponse.getSamouraiConfig(), SamouraiConfig.class);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if (MessageSignUtilGeneric.getInstance().verifySignedMessage(
+                DexConfigResponse.SIGNING_ADDRESS,
+                dexConfigResponse.getSamouraiConfig(),
+                dexConfigResponse.getSignature(),
+                networkParameters)) {
+            this.samouraiConfig = JSONUtils.getInstance().getObjectMapper().readValue(dexConfigResponse.getSamouraiConfig(), SamouraiConfig.class);
+        } else {
+            throw new Exception("Invalid DexConfig signature");
         }
     }
 
