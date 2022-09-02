@@ -50,6 +50,35 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
     }
 
     @Test
+    public void STONEWALLx2_P2TR() throws Exception {
+        int account = 0;
+
+        // setup wallets
+        cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+
+        // setup Cahoots
+        long spendAmount = 5000;
+        String address = ADDRESS_P2TR;
+        Stonewallx2Context cahootsContextSender = Stonewallx2Context.newInitiator(account, FEE_PER_B, spendAmount, address, null);
+        Stonewallx2Context cahootsContextCp = Stonewallx2Context.newCounterparty(account);
+
+        Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
+
+        // verify TX
+        String txid = "dc4b56a2e9a107c0083cb22fb0bf6d61399c5715977adef99033c7dc6b740550";
+        String raw = "02000000000102d54f4c6e366d8fc11b8630d4dd1536765ec8022bd3ab8a62fefc2ee96b9ccf140100000000fdffffffad05bb9c893f5cb9762ea57729efaf4a4b8eb1e377533fddc49d15d01fb307940100000000fdffffff04f71200000000000016001440852bf6ea044204b826a182d1b75528364fd0bdf7120000000000001600144e4fed51986dbaf322d2b36e690b8638fa0f02048813000000000000160014657b6afdeef6809fdabce7face295632fbd94feb8813000000000000225120000000c4a5cad46221b2a187905e5266362b99d5e91c6ce24d165dab93e86433024830450221008b3289086d657fbcba55e803df06f0b120ef3af5a3808a98a6ee556f9307e3f702201a6cb1987f1ad0e45c6f17670008eda3ebc8120a7ed37d395c2004e65b583c19012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f202483045022100cc088ecb5870f25148b0f8eb8a797de8273c66f84371d6922f907d391b6f1aa9022049b3d7fc91c57587495126c73ca94be6e32bd71cdc818158223094a8eef5acbc012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f200000000";
+
+        Map<String,Long> outputs = new LinkedHashMap<>();
+        outputs.put(address, spendAmount);
+        outputs.put(COUNTERPARTY_CHANGE_84[0], spendAmount); // counterparty mix
+        outputs.put(COUNTERPARTY_CHANGE_84[1], 4855L);
+        outputs.put(SENDER_CHANGE_84[0], 4855L);
+        verifyTx(cahoots.getTransaction(), txid, raw, outputs);
+        pushTx.assertTx(txid, raw);
+    }
+
+    @Test
     public void STONEWALLx2_BIP84_POSTMIX() throws Exception {
         int account = SamouraiAccountIndex.POSTMIX;
 
