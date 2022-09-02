@@ -41,36 +41,7 @@ public class FeeUtil {
       int inputsP2WPKH,
       int outputsNonOpReturn,
       int outputsOpReturn) {
-
-    int txSize =
-        (outputsNonOpReturn * ESTIMATED_OUTPUT_LEN)
-            + (outputsOpReturn * ESTIMATED_OPRETURN_LEN)
-            + (inputsP2PKH * ESTIMATED_INPUT_LEN_P2PKH)
-            + (inputsP2SHP2WPKH * ESTIMATED_INPUT_LEN_P2SH_P2WPKH)
-            + (inputsP2WPKH * ESTIMATED_INPUT_LEN_P2WPKH)
-            + inputsP2PKH
-            + inputsP2SHP2WPKH
-            + inputsP2WPKH
-            + 8
-            + 1
-            + 1;
-    if (log.isTraceEnabled()) {
-      log.trace(
-          "tx size estimation: "
-              + txSize
-              + "b ("
-              + inputsP2PKH
-              + " insP2PKH, "
-              + inputsP2SHP2WPKH
-              + " insP2SHP2WPKH, "
-              + inputsP2WPKH
-              + " insP2WPKH, "
-              + outputsNonOpReturn
-              + " outsNonOpReturn, "
-              + outputsOpReturn
-              + " outsOpReturn)");
-    }
-    return txSize;
+    return estimatedSizeSegwit(inputsP2PKH, inputsP2SHP2WPKH, inputsP2WPKH, outputsNonOpReturn, 0, outputsOpReturn);
   }
 
   public int estimatedSizeSegwit  (
@@ -132,14 +103,7 @@ public class FeeUtil {
       int outputsNonOpReturn,
       int outputsOpReturn,
       long feePerB) {
-    int size =
-        estimatedSizeSegwit(
-            inputsP2PKH, inputsP2SHP2WPKH, inputsP2WPKH, outputsNonOpReturn, outputsOpReturn);
-    long minerFee = calculateFee(size, feePerB);
-    if (log.isTraceEnabled()) {
-      log.trace("minerFee = " + minerFee + " (size=" + size + "b, feePerB=" + feePerB + "s/b)");
-    }
-    return minerFee;
+    return estimatedFeeSegwit(inputsP2PKH, inputsP2SHP2WPKH, inputsP2WPKH, outputsNonOpReturn, 0, outputsOpReturn, feePerB);
   }
 
   public long estimatedFeeSegwit(
