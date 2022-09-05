@@ -47,13 +47,19 @@ public class Point  {
         return pair.getRight();
     }
 
-    public static BigInteger getX(Point P) {
-//        assert(!P.isInfinite());
+    public static BigInteger getX(Point P) throws Exception {
+        // assert(!P.isInfinite());
+        if(P.isInfinite()) {
+          throw new Exception("getX(): P is infinite");
+        }
         return P.getX();
     }
 
-    public static BigInteger getY(Point P) {
-//        assert(!P.isInfinite());
+    public static BigInteger getY(Point P) throws Exception {
+        // assert(!P.isInfinite());
+        if(P.isInfinite()) {
+          throw new Exception("getY(): P is infinite");
+        }
         return P.getY();
     }
 
@@ -132,12 +138,16 @@ public class Point  {
         return x.modPow(p.subtract(BigInteger.ONE).mod(BigInteger_TWO), p).longValue() == 1L;
     }
 
-    public boolean hasSquareY() {
+    public boolean hasSquareY() throws Exception {
+        // assert(!isInfinite(P));
         return hasSquareY(this);
     }
 
-    public static boolean hasSquareY(Point P) {
-//        assert(!isInfinite(P));
+    public static boolean hasSquareY(Point P) throws Exception {
+        // assert(!isInfinite(P));
+        if(P.isInfinite()) {
+          throw new Exception("hasSquareY(): P is infinite");
+        }
         return isSquare(P.getY());
     }
 

@@ -29,6 +29,7 @@ public class FormatsUtilGenericTest {
   private static final String YPUB_1 =
           "ypub6Wxqk9Q6GMUkwVdwGRxMdn7NZupDoBJsHyCCRUke6k58sYUwaJbw55rxWYrozKNeEGeyXFaGXJh5k1W4RF9fyuKqNe5x4mHiW1vG5JX2Wmv";
   private static final String XPRV = "xprv9ycwhF2CmmqHd8Cxtyjv43M9iNbbzd9ktjTCNo2fnw2het4G6FcucAFTpb5GFnN8YvjAGruX3UEMNxdfQeYHm2UUcmCLppaAT6BvB7NJbBi";
+  private static final String BTC_ADDRESS_P2TR = "tb1pqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesf3hn0c";
   private static final String BTC_ADDRESS_BECH32 = "bc1qgzpm6qefpaxqzyl428xztm49duxxv8uys9f8hu";
   private static final String BTC_ADDRESS_P2SH = "3ANptnTAD8eQNRz9gVmNPZcf1d2LyFJJZz";
   private static final String BTC_ADDRESS_P2PKH = "1FWQiwK27EnGXb6BiBMRLJvunJQZZPMcGd";
@@ -96,9 +97,12 @@ public class FormatsUtilGenericTest {
     Assertions.assertEquals(BTC_ADDRESS_BECH32, formatsUtil.validateBitcoinAddress(BTC_ADDRESS_BECH32, params));
     Assertions.assertEquals(BTC_ADDRESS_P2SH, formatsUtil.validateBitcoinAddress(BTC_ADDRESS_P2SH, params));
     Assertions.assertEquals(BTC_ADDRESS_P2PKH, formatsUtil.validateBitcoinAddress(BTC_ADDRESS_P2PKH, params));
+    Assertions.assertEquals(BTC_ADDRESS_P2TR, formatsUtil.validateBitcoinAddress(BTC_ADDRESS_P2TR, params));
 
     Assertions.assertNotEquals(BTC_ADDRESS_P2SH, formatsUtil.validateBitcoinAddress(BTC_ADDRESS_P2SH+"foo", params));
     Assertions.assertNotEquals(BTC_ADDRESS_P2PKH, formatsUtil.validateBitcoinAddress(BTC_ADDRESS_P2PKH +"foo", params));
+    Assertions.assertNotEquals(BTC_ADDRESS_BECH32, formatsUtil.validateBitcoinAddress(BTC_ADDRESS_BECH32+"foo", params));
+    Assertions.assertNotEquals(BTC_ADDRESS_P2TR, formatsUtil.validateBitcoinAddress(BTC_ADDRESS_P2TR+"foo", params));
   }
 
   @Test
@@ -130,9 +134,19 @@ public class FormatsUtilGenericTest {
   @Test
   public void isValidBech32() throws Exception {
     Assertions.assertTrue(formatsUtil.isValidBech32(BTC_ADDRESS_BECH32));
+    Assertions.assertTrue(formatsUtil.isValidP2TR(BTC_ADDRESS_P2TR));
 
     Assertions.assertFalse(formatsUtil.isValidBech32(BTC_ADDRESS_P2SH));
     Assertions.assertFalse(formatsUtil.isValidBech32(BTC_ADDRESS_P2PKH));
+  }
+
+  @Test
+  public void isValidP2TR() throws Exception {
+    Assertions.assertTrue(formatsUtil.isValidP2TR(BTC_ADDRESS_P2TR));
+
+    Assertions.assertFalse(formatsUtil.isValidP2TR(BTC_ADDRESS_BECH32));
+    Assertions.assertFalse(formatsUtil.isValidP2TR(BTC_ADDRESS_P2SH));
+    Assertions.assertFalse(formatsUtil.isValidP2TR(BTC_ADDRESS_P2PKH));
   }
 
   @Test

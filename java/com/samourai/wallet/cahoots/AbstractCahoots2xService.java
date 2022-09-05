@@ -76,7 +76,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
             throw new Exception("Cahoots spendAmount verification failed");
         }
         if (verifiedSpendAmount > maxSpendAmount) {
-            throw new Exception("Cahoots verifiedSpendAmount mismatch: " + verifiedSpendAmount);
+            throw new Exception("Cahoots verifiedSpendAmount mismatch: " + verifiedSpendAmount+" > "+maxSpendAmount);
         }
     }
 

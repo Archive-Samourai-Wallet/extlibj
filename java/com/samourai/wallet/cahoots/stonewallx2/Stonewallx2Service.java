@@ -297,6 +297,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         }
 
         long feePerB = cahootsContext.getFeePerB();
+        String destination = stonewall1.getDestination();
 
         List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
         long totalSelectedAmount = 0L;
@@ -339,15 +340,15 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
                     }
                 }
 
-                if (stonewall1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB))) {
+                if (stonewall1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, destination, feePerB))) {
                     break;
                 }
             }
-            if (stonewall1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB))) {
+            if (stonewall1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, destination, feePerB))) {
                 break;
             }
         }
-        long fee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB);
+        long fee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, destination, feePerB);
         if (log.isDebugEnabled()) {
             log.debug("fee:" + fee);
             log.debug(selectedUTXO.size()+" selected utxos, totalContributedAmount="+totalSelectedAmount+", requiredAmount="+stonewall1.computeRequiredAmount(fee));
@@ -426,8 +427,15 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         return stonewall2;
     }
 
-    private long estimatedFee(int nbTotalSelectedOutPoints, int nbIncomingInputs, long feePerB) {
-        return FeeUtil.getInstance().estimatedFeeSegwit(0, 0, nbTotalSelectedOutPoints + nbIncomingInputs, 4, 0, feePerB);
+    private long estimatedFee(int nbTotalSelectedOutPoints, int nbIncomingInputs, String destination, long feePerB) {
+        int outputsNonP2TR = 4;
+        int outputsP2TR = 0;
+        if (FormatsUtilGeneric.getInstance().isValidP2TR(destination)) {
+            // destination is P2TR, contributor mix output is SEGWIT_NATIVE (no like-typed output for P2TR)
+            outputsNonP2TR--;
+            outputsP2TR++;
+        }
+        return FeeUtil.getInstance().estimatedFeeSegwit(0, 0, nbTotalSelectedOutPoints + nbIncomingInputs, outputsNonP2TR, outputsP2TR, 0, feePerB);
     }
 
     @Override

@@ -275,6 +275,18 @@ public class FormatsUtilGeneric {
 		return ret;
 	}
 
+	public boolean isValidP2TR(final String address) {
+
+		if(isValidBech32(address))    {
+				Pair<Byte, byte[]> pair = Bech32Segwit.decode(address.substring(0, 2), address);
+				if(pair.getLeft() == (byte)0x01)    {
+						return true;
+				}
+		}
+
+		return false;
+	}
+
 	public boolean isValidXpub(String xpub){
 		return isValidXpub(xpub, MAGIC_XPUB, MAGIC_TPUB, MAGIC_YPUB, MAGIC_UPUB, MAGIC_ZPUB, MAGIC_VPUB);
 	}
