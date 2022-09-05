@@ -342,11 +342,6 @@ public abstract class Cahoots2x extends Cahoots {
     //
     public void doStep2(List<TransactionInput> inputs, List<TransactionOutput> outputs) throws Exception    {
         Transaction transaction = psbt.getTransaction();
-        if (log.isDebugEnabled()) {
-            log.debug("step2 tx:" + transaction.toString());
-            log.debug("step2 tx:" + Hex.toHexString(transaction.bitcoinSerialize()));
-        }
-
         appendTx(inputs, outputs, transaction);
 
         this.setStep(2);

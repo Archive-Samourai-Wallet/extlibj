@@ -78,7 +78,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
     public STONEWALLx2 reply(CahootsWallet cahootsWallet, Stonewallx2Context cahootsContext, STONEWALLx2 stonewall) throws Exception {
         int step = stonewall.getStep();
         if (log.isDebugEnabled()) {
-            log.debug("# STONEWALLx2 <= step="+step);
+            log.debug("# STONEWALLx2 "+cahootsContext.getTypeUser()+" <= step="+step);
         }
         STONEWALLx2 payload;
         switch (step) {
@@ -98,7 +98,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
             throw new Exception("Cannot compose #Cahoots");
         }
         if (log.isDebugEnabled()) {
-            log.debug("# STONEWALLx2 => step="+payload.getStep());
+            log.debug("# STONEWALLx2 "+cahootsContext.getTypeUser()+" => step="+payload.getStep());
         }
         return payload;
     }
@@ -245,6 +245,8 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
     }
 
     private STONEWALLx2 doSTONEWALLx2_1(TransactionOutput mixOutput, CahootsWallet cahootsWallet, STONEWALLx2 stonewall0, Stonewallx2Context cahootsContext, List<String> seenTxs) throws Exception {
+        debug("BEGIN doSTONEWALLx2_1", stonewall0, cahootsContext);
+
         int account = cahootsContext.getAccount();
         Stonewallx2InputData inputData = getInputData(cahootsWallet, stonewall0, account, seenTxs);
 
@@ -265,6 +267,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         STONEWALLx2 stonewall1 = stonewall0.copy();
         stonewall1.doStep1(inputsA, outputsA);
 
+        debug("END doSTONEWALLx2_1", stonewall1, cahootsContext);
         return stonewall1;
     }
 
@@ -275,6 +278,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         return doSTONEWALLx2_2(stonewall1, cahootsWallet, cahootsContext, new ArrayList<>());
     }
     public STONEWALLx2 doSTONEWALLx2_2(STONEWALLx2 stonewall1, CahootsWallet cahootsWallet, Stonewallx2Context cahootsContext, List<String> seenTxs) throws Exception {
+        debug("BEGIN doSTONEWALLx2_2", stonewall1, cahootsContext);
 
         Transaction transaction = stonewall1.getTransaction();
         if (log.isDebugEnabled()) {
@@ -424,6 +428,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         STONEWALLx2 stonewall2 = stonewall1.copy();
         stonewall2.doStep2(inputsB, outputsB);
 
+        debug("END doSTONEWALLx2_2",stonewall2, cahootsContext);
         return stonewall2;
     }
 
@@ -443,14 +448,21 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         // shares minerFee
         long maxSpendAmount;
         long sharedMinerFee = minerFee / 2;
+        String prefix = "["+cahootsContext.getCahootsType()+"/"+cahootsContext.getTypeUser()+"] ";
         switch (cahootsContext.getTypeUser()) {
             case SENDER:
-                // spends amount + minerFee
+                // spends amount + sharedMinerFee
                 maxSpendAmount = cahootsContext.getAmount()+sharedMinerFee;
+                if (log.isDebugEnabled()) {
+                    log.debug(prefix+"maxSpendAmount = "+maxSpendAmount+": amount="+cahootsContext.getAmount()+" + sharedMinerFee="+sharedMinerFee);
+                }
                 break;
             case COUNTERPARTY:
-                // receives money (maxSpendAmount < 0)
+                // shares minerFee
                 maxSpendAmount = sharedMinerFee;
+                if (log.isDebugEnabled()) {
+                    log.debug(prefix+"maxSpendAmount = "+maxSpendAmount+": sharedMinerFee="+sharedMinerFee);
+                }
                 break;
             default:
                 throw new Exception("Unknown typeUser");
