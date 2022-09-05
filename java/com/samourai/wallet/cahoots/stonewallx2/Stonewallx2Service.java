@@ -121,7 +121,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
     //
     // counterparty
     //
-    private Stonewallx2InputData getInputData(CahootsWallet cahootsWallet, STONEWALLx2 stonewall0, int account, List<String> seenTxs) throws Exception {
+    private Stonewallx2InputData getInputData(CahootsWallet cahootsWallet, Stonewallx2Context cahootsContext, STONEWALLx2 stonewall0, int account, List<String> seenTxs) throws Exception {
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
         shuffleUtxos(utxos);
 
@@ -194,6 +194,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         for (CahootsUtxo utxo : selectedUTXO) {
             TransactionInput input = utxo.getOutpoint().computeSpendInput();
             inputsA.add(input);
+            cahootsContext.addInput(utxo);
         }
 
         return new Stonewallx2InputData(totalContributedAmount, utxos, inputsA);
@@ -248,7 +249,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         debug("BEGIN doSTONEWALLx2_1", stonewall0, cahootsContext);
 
         int account = cahootsContext.getAccount();
-        Stonewallx2InputData inputData = getInputData(cahootsWallet, stonewall0, account, seenTxs);
+        Stonewallx2InputData inputData = getInputData(cahootsWallet, cahootsContext, stonewall0, account, seenTxs);
 
         List<TransactionInput> inputsA = inputData.getInputs();
 
@@ -410,6 +411,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         for (CahootsUtxo utxo : selectedUTXO) {
             TransactionInput input = utxo.getOutpoint().computeSpendInput();
             inputsB.add(input);
+            cahootsContext.addInput(utxo);
         }
 
         // spender change output

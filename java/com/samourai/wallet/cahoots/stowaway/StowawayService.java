@@ -176,6 +176,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         for (CahootsUtxo utxo : selectedUTXO) {
             TransactionInput input = utxo.getOutpoint().computeSpendInput();
             inputsA.add(input);
+            cahootsContext.addInput(utxo);
         }
 
         // destination output
@@ -309,6 +310,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         for (CahootsUtxo utxo : selectedUTXO) {
             TransactionInput input = utxo.getOutpoint().computeSpendInput();
             inputsB.add(input);
+            cahootsContext.addInput(utxo);
         }
 
         List<TransactionOutput> outputsB = new LinkedList<>();
