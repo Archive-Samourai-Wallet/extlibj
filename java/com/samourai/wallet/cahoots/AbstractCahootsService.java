@@ -97,8 +97,9 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
     protected long computeSpendAmount(HashMap<String,ECKey> keyBag, CahootsWallet cahootsWallet, Cahoots2x cahoots, C cahootsContext) throws Exception {
         long spendAmount = 0;
 
+        String prefix = "["+cahootsContext.getCahootsType()+"/"+cahootsContext.getTypeUser()+"] ";
         if (log.isDebugEnabled()) {
-            log.debug("computeSpendAmount: keyBag="+keyBag.keySet());
+            log.debug(prefix+"computeSpendAmount: keyBag="+keyBag.keySet());
         }
         Transaction transaction = cahoots.getTransaction();
         for(TransactionInput input : transaction.getInputs()) {
@@ -107,7 +108,7 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
                 Long inputValue = cahoots.getOutpoints().get(outpoint.getHash().toString() + "-" + outpoint.getIndex());
                 if (inputValue != null) {
                     if (log.isDebugEnabled()) {
-                        log.debug("computeSpendAmount: +input "+inputValue + " "+outpoint.toString());
+                        log.debug(prefix+"computeSpendAmount: +input "+inputValue + " "+outpoint.toString());
                     }
                     spendAmount += inputValue;
                 }
@@ -119,14 +120,14 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
             if (outputAddress != null && cahootsContext.getOutputAddresses().contains(outputAddress)) {
                 if (output.getValue() != null) {
                     if (log.isDebugEnabled()) {
-                        log.debug("computeSpendAmount: -output " + output.getValue().longValue()+" "+outputAddress);
+                        log.debug(prefix+"computeSpendAmount: -output " + output.getValue().longValue()+" "+outputAddress);
                     }
                     spendAmount -= output.getValue().longValue();
                 }
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug("computeSpendAmount = " + spendAmount);
+            log.debug(prefix+"computeSpendAmount = " + spendAmount);
         }
         return spendAmount;
     }

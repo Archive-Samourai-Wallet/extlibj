@@ -4,11 +4,14 @@ import com.samourai.soroban.client.SorobanContext;
 import com.samourai.wallet.cahoots.Cahoots;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsTypeUser;
+import com.samourai.wallet.cahoots.CahootsUtxo;
 import com.samourai.wallet.cahoots.multi.MultiCahootsContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 public abstract class CahootsContext implements SorobanContext {
@@ -21,6 +24,7 @@ public abstract class CahootsContext implements SorobanContext {
     private Long amount; // only set for initiator
     private String address; // only set for initiator
     private Set<String> outputAddresses;
+    private List<CahootsUtxo> inputs;
 
     protected CahootsContext(CahootsTypeUser typeUser, CahootsType cahootsType, int account, Long feePerB, Long amount, String address) {
         this.typeUser = typeUser;
@@ -30,6 +34,7 @@ public abstract class CahootsContext implements SorobanContext {
         this.amount = amount;
         this.address = address;
         this.outputAddresses = new LinkedHashSet<>();
+        this.inputs = new LinkedList<>();
     }
 
     public static CahootsContext newCounterparty(CahootsType cahootsType, int account) throws Exception {
@@ -87,5 +92,13 @@ public abstract class CahootsContext implements SorobanContext {
 
     public void addOutputAddress(String address) {
         outputAddresses.add(address);
+    }
+
+    public void addInput(CahootsUtxo cahootsUtxo) {
+        inputs.add(cahootsUtxo);
+    }
+
+    public List<CahootsUtxo> getInputs() {
+        return inputs;
     }
 }

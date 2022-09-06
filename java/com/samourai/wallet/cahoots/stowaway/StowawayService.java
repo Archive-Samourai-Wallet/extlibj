@@ -59,7 +59,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
     public Stowaway reply(CahootsWallet cahootsWallet, StowawayContext cahootsContext, Stowaway stowaway) throws Exception {
         int step = stowaway.getStep();
         if (log.isDebugEnabled()) {
-            log.debug("# Stowaway <= step="+step);
+            log.debug("# Stowaway "+cahootsContext.getTypeUser()+" <= step="+step);
         }
         Stowaway payload;
         switch (step) {
@@ -83,7 +83,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
             throw new Exception("Cannot compose #Cahoots");
         }
         if (log.isDebugEnabled()) {
-            log.debug("# Stowaway => step="+payload.getStep());
+            log.debug("# Stowaway "+cahootsContext.getTypeUser()+" => step="+payload.getStep());
         }
         return payload;
     }
@@ -111,6 +111,8 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
     }
 
     public Stowaway doStowaway1(Stowaway stowaway0, CahootsWallet cahootsWallet, StowawayContext cahootsContext, List<CahootsUtxo> utxos, int receiveAccount, List<String> seenTxs) throws Exception {
+        debug("BEGIN doStowaway1", stowaway0, cahootsContext);
+
         byte[] fingerprint = cahootsWallet.getFingerprint();
         stowaway0.setFingerprintCollab(fingerprint);
 
@@ -174,6 +176,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         for (CahootsUtxo utxo : selectedUTXO) {
             TransactionInput input = utxo.getOutpoint().computeSpendInput();
             inputsA.add(input);
+            cahootsContext.addInput(utxo);
         }
 
         // destination output
@@ -191,6 +194,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         Stowaway stowaway1 = stowaway0.copy();
         stowaway1.doStep1(inputsA, outputsA);
 
+        debug("END doStowaway1", stowaway1, cahootsContext);
         return stowaway1;
     }
 
@@ -198,6 +202,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
     // sender
     //
     public Stowaway doStowaway2(Stowaway stowaway1, CahootsWallet cahootsWallet, StowawayContext cahootsContext, List<String> seenTxs) throws Exception {
+        debug("BEGIN doStowaway2", stowaway1, cahootsContext);
 
         if (log.isDebugEnabled()) {
             log.debug("sender account (2):" + stowaway1.getAccount());
@@ -305,6 +310,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         for (CahootsUtxo utxo : selectedUTXO) {
             TransactionInput input = utxo.getOutpoint().computeSpendInput();
             inputsB.add(input);
+            cahootsContext.addInput(utxo);
         }
 
         List<TransactionOutput> outputsB = new LinkedList<>();
@@ -332,6 +338,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         stowaway2.doStep2(inputsB, outputsB);
         stowaway2.setFeeAmount(fee);
 
+        debug("END doStowaway2", stowaway2, cahootsContext);
         return stowaway2;
     }
 
@@ -342,14 +349,21 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
     @Override
     protected long computeMaxSpendAmount(long minerFee, StowawayContext cahootsContext) throws Exception {
         long maxSpendAmount;
+        String prefix = "["+cahootsContext.getCahootsType()+"/"+cahootsContext.getTypeUser()+"] ";
         switch (cahootsContext.getTypeUser()) {
             case SENDER:
                 // spends amount + minerFee
                 maxSpendAmount = cahootsContext.getAmount()+minerFee;
+                if (log.isDebugEnabled()) {
+                    log.debug(prefix+"maxSpendAmount = "+maxSpendAmount+": amount="+cahootsContext.getAmount()+" + minerFee="+minerFee);
+                }
                 break;
             case COUNTERPARTY:
                 // receives money (<0)
                 maxSpendAmount = 0;
+                if (log.isDebugEnabled()) {
+                    log.debug(prefix+"maxSpendAmount = 0 (receives money)");
+                }
                 break;
             default:
                 throw new Exception("Unknown typeUser");
