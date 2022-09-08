@@ -81,6 +81,9 @@ public class Bech32UtilGeneric {
         // decode bech32
         String hrp = getHrp(params);
         Pair<Byte, byte[]> pair = Bech32Segwit.decode(hrp, address);
+        if (pair == null) {
+            throw new Exception("Bech32Segwit.decode() failed for address="+(address!=null ? address : "null"));
+        }
 
         // get scriptPubkey
         return Bech32Segwit.getScriptPubkey(pair.getLeft(), pair.getRight());
