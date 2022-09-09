@@ -17,7 +17,7 @@ import com.samourai.wallet.payload.PayloadUtilGeneric;
 import com.samourai.wallet.send.provider.SimpleUtxoProvider;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.TxUtil;
-import com.samourai.wallet.util.XPubUtil;
+import com.samourai.wallet.util.Z85;
 import com.samourai.xmanager.client.XManagerClient;
 import com.samourai.xmanager.protocol.XManagerService;
 import org.bitcoinj.core.*;
@@ -28,7 +28,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class AbstractTest {
@@ -56,6 +58,7 @@ public class AbstractTest {
   protected XManagerClient xManagerClient;
   protected BIP47UtilGeneric bip47Util = Bip47UtilJava.getInstance();
   protected MockPushTx pushTx = new MockPushTx(params);
+  protected Z85 z85 = Z85.getInstance();
 
   public AbstractTest() {
     try {
