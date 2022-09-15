@@ -5,14 +5,20 @@ import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
-import org.bitcoinj.core.*;
-import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.wallet.KeyChain;
-import org.bitcoinj.wallet.KeyChainGroup;
+import org.bitcoinj.core.Coin;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionInput;
+import org.bitcoinj.core.TransactionOutPoint;
+import org.bitcoinj.core.TransactionOutput;
+
+import java.math.BigInteger;
 
 public class CryptoTestUtil {
     private static final HD_WalletFactoryGeneric hdWalletFactory = HD_WalletFactoryGeneric.getInstance();
     private CryptoTestUtil() {}
+    private static final ECKey ecKey = ECKey.fromPrivate(new BigInteger("45292090369707310635285627500870691371399357286012942906204494584441273561412"));
 
     private static CryptoTestUtil instance = null;
     public static CryptoTestUtil getInstance() {
@@ -43,9 +49,7 @@ public class CryptoTestUtil {
     }
 
     public SegwitAddress generateSegwitAddress(NetworkParameters params) {
-        KeyChainGroup kcg = new KeyChainGroup(params);
-        DeterministicKey utxoKey = kcg.freshKey(KeyChain.KeyPurpose.RECEIVE_FUNDS);
-        SegwitAddress segwitAddress = new SegwitAddress(utxoKey, params);
+        SegwitAddress segwitAddress = new SegwitAddress(ecKey, params);
         return segwitAddress;
     }
 
