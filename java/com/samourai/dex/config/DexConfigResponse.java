@@ -1,9 +1,5 @@
 package com.samourai.dex.config;
 
-import com.samourai.wallet.util.JSONUtils;
-import com.samourai.wallet.util.MessageSignUtilGeneric;
-import org.bitcoinj.core.ECKey;
-
 /**
  * This class is exposed by whirlpool-server on <whirlpool-server>/rest/dex-config
  */
@@ -17,9 +13,9 @@ public class DexConfigResponse {
     }
 
     // used by whirlpool-server
-    public DexConfigResponse(SamouraiConfig samouraiConfig, ECKey signingKey) throws Exception {
-        this.samouraiConfig = JSONUtils.getInstance().getObjectMapper().writeValueAsString(samouraiConfig);
-        this.signature = MessageSignUtilGeneric.getInstance().signMessage(signingKey, this.samouraiConfig);
+    public DexConfigResponse(String samouraiConfig, String signature) {
+        this.samouraiConfig = samouraiConfig;
+        this.signature = signature;
     }
 
     public String getSamouraiConfig() {
