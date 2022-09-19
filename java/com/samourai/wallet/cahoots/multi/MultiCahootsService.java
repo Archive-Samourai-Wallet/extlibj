@@ -33,7 +33,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
     private StowawayService stowawayService;
     private XManagerClient xManagerClient;
 
-    private long threshold = 200000000;
+    private long threshold = -1;
 
     public MultiCahootsService(BipFormatSupplier bipFormatSupplier, NetworkParameters params, Stonewallx2Service stonewallx2Service, StowawayService stowawayService, XManagerClient xManagerClient) {
         super(CahootsType.MULTI, bipFormatSupplier, params, TypeInteraction.TX_BROADCAST_MULTI);
@@ -56,7 +56,10 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
 
     @Override
     public MultiCahoots startCollaborator(CahootsWallet cahootsWallet, MultiCahootsContext cahootsContext, MultiCahoots stonewall0) throws Exception {
-        this.threshold = getSaasThreshold();
+        if(this.threshold == -1) {
+            this.threshold = getSaasThreshold();
+            log.debug("SaaS Threshold: " + this.threshold);
+        }
         MultiCahoots stonewall1 = doMultiCahoots1_Stonewallx21(stonewall0, cahootsWallet, cahootsContext);
         if (log.isDebugEnabled()) {
             log.debug("# MultiCahoots COUNTERPARTY => step="+stonewall1.getStep());
@@ -304,6 +307,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
     }
 
     public long getSaasThreshold() throws IOException, NumberFormatException {
+        log.debug("Getting SaaS Threshold...");
         Properties prop = new Properties();
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream stream = loader.getResourceAsStream("/whirlpool-cli-config.properties");
