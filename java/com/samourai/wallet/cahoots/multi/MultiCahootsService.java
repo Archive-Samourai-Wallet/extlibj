@@ -21,8 +21,11 @@ import org.bitcoinj.core.TransactionInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -309,10 +312,9 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
     public long getSaasThreshold() throws IOException, NumberFormatException {
         log.debug("Getting SaaS Threshold...");
         Properties prop = new Properties();
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream stream = loader.getResourceAsStream("/whirlpool-cli-config.properties");
+        InputStream stream = Files.newInputStream(new File("whirlpool-cli-config.properties").toPath());
         prop.load(stream);
-        String threshold = prop.getProperty("cli.threshold", "200000000");
+        String threshold = prop.getProperty("cli.threshold", Stonewallx2Service.THRESHOLD.toString());
         return Long.parseLong(threshold);
     }
 }
