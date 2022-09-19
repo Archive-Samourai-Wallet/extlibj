@@ -21,14 +21,19 @@ import org.bitcoinj.core.TransactionInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, MultiCahootsContext> {
     private static final Logger log = LoggerFactory.getLogger(MultiCahootsService.class);
     private Stonewallx2Service stonewallx2Service;
     private StowawayService stowawayService;
     private XManagerClient xManagerClient;
+
+    private long threshold = 200000000;
 
     public MultiCahootsService(BipFormatSupplier bipFormatSupplier, NetworkParameters params, Stonewallx2Service stonewallx2Service, StowawayService stowawayService, XManagerClient xManagerClient) {
         super(CahootsType.MULTI, bipFormatSupplier, params, TypeInteraction.TX_BROADCAST_MULTI);
@@ -51,6 +56,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
 
     @Override
     public MultiCahoots startCollaborator(CahootsWallet cahootsWallet, MultiCahootsContext cahootsContext, MultiCahoots stonewall0) throws Exception {
+        this.threshold = getSaasThreshold();
         MultiCahoots stonewall1 = doMultiCahoots1_Stonewallx21(stonewall0, cahootsWallet, cahootsContext);
         if (log.isDebugEnabled()) {
             log.debug("# MultiCahoots COUNTERPARTY => step="+stonewall1.getStep());
@@ -105,7 +111,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
         debug("BEGIN doMultiCahoots1", multiCahoots0, cahootsContext);
 
         Stonewallx2Context stonewallContext = cahootsContext.getStonewallx2Context();
-        STONEWALLx2 stonewall1 = stonewallx2Service.doSTONEWALLx2_1_Multi(multiCahoots0.getStonewallx2(), cahootsWallet, stonewallContext, new ArrayList<>(), xManagerClient);
+        STONEWALLx2 stonewall1 = stonewallx2Service.doSTONEWALLx2_1_Multi(multiCahoots0.getStonewallx2(), cahootsWallet, stonewallContext, new ArrayList<>(), xManagerClient, this.threshold);
 
         MultiCahoots multiCahoots1 = new MultiCahoots(multiCahoots0);
         multiCahoots1.setStonewallx2(stonewall1);
@@ -295,5 +301,14 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
         if (log.isDebugEnabled()) {
             log.debug("###### " +info+" "+cahootsContext.getCahootsType()+"/"+cahootsContext.getTypeUser());
         }
+    }
+
+    public long getSaasThreshold() throws IOException, NumberFormatException {
+        Properties prop = new Properties();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream stream = loader.getResourceAsStream("/whirlpool-cli-config.properties");
+        prop.load(stream);
+        String threshold = prop.getProperty("cli.threshold", "200000000");
+        return Long.parseLong(threshold);
     }
 }
