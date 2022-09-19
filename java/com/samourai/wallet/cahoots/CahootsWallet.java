@@ -3,6 +3,7 @@ package com.samourai.wallet.cahoots;
 import com.samourai.wallet.bip47.rpc.BIP47Account;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.bip47.rpc.PaymentCode;
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.BipWallet;
@@ -17,7 +18,7 @@ import org.bitcoinj.core.NetworkParameters;
 
 import java.util.List;
 
-public abstract class CahootsWallet {
+public class CahootsWallet {
     private WalletSupplier walletSupplier;
     private BipFormatSupplier bipFormatSupplier;
     private NetworkParameters params;
@@ -37,6 +38,10 @@ public abstract class CahootsWallet {
     }
 
     public BipWallet getReceiveWallet(int account, BipFormat bipFormat) throws Exception {
+        if (bipFormat == BIP_FORMAT.TAPROOT) {
+            // like-typed output is not implemented for TAPROOT => handle TAPROOT mix output as SEGWIT_NATIVE
+            bipFormat = BIP_FORMAT.SEGWIT_NATIVE;
+        }
         switch(account) {
             case WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT:
                 return walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, bipFormat);

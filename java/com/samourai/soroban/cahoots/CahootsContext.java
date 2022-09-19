@@ -3,16 +3,17 @@ package com.samourai.soroban.cahoots;
 import com.samourai.soroban.client.SorobanContext;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsTypeUser;
+import com.samourai.wallet.cahoots.CahootsUtxo;
 import com.samourai.wallet.cahoots.CahootsWallet;
-import com.samourai.wallet.cahoots.multi.MultiCahootsContext;
-import com.samourai.xmanager.client.XManagerClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
-public class CahootsContext implements SorobanContext {
+public abstract class CahootsContext implements SorobanContext {
     private static final Logger log = LoggerFactory.getLogger(CahootsContext.class);
 
     private CahootsWallet cahootsWallet;
@@ -23,6 +24,7 @@ public class CahootsContext implements SorobanContext {
     private Long amount; // only set for initiator
     private String address; // only set for initiator
     private Set<String> outputAddresses;
+    private List<CahootsUtxo> inputs;
 
     protected CahootsContext(CahootsWallet cahootsWallet, CahootsTypeUser typeUser, CahootsType cahootsType, int account, Long feePerB, Long amount, String address) {
         this.cahootsWallet = cahootsWallet;
@@ -33,48 +35,28 @@ public class CahootsContext implements SorobanContext {
         this.amount = amount;
         this.address = address;
         this.outputAddresses = new LinkedHashSet<>();
+        this.inputs = new LinkedList<>();
     }
 
-    public static CahootsContext newCounterparty(CahootsWallet cahootsWallet, CahootsType cahootsType, int account) {
-        if (CahootsType.MULTI.equals(cahootsType)) {
-            // MULTI counterparty is reserved to SAAS backend
-            // via newCounterpartyMultiCahoots()
-            throw new RuntimeException("MULTI counterparty is reserved to SAAS backend");
+    public static CahootsContext newCounterparty(CahootsWallet cahootsWallet, CahootsType cahootsType, int account) throws Exception {
+        CahootsContext cahootsContext = null;
+        switch (cahootsType) {
+            case MULTI:
+                // MULTI counterparty is reserved to SAAS backend via newCounterpartyMultiCahoots()
+                throw new RuntimeException("MULTI counterparty is reserved to SAAS backend");
+
+            case STONEWALLX2:
+                cahootsContext = Stonewallx2Context.newCounterparty(cahootsWallet, account);
+                break;
+
+            case STOWAWAY:
+                cahootsContext = StowawayContext.newCounterparty(cahootsWallet, account);
+                break;
+
+            default:
+                throw new Exception("Unknown Cahoots type");
         }
-        if (cahootsType.STOWAWAY.equals(cahootsType)) {
-            // force account #0 for Stowaway counterparty (MULTI uses newCounterpartyStowawayMulti() to bypass it)
-            account = 0;
-        }
-        return new CahootsContext(cahootsWallet, CahootsTypeUser.COUNTERPARTY, cahootsType, account, null,null, null);
-    }
-
-    public static CahootsContext newCounterpartyStowaway(CahootsWallet cahootsWallet, int account) {
-        return newCounterparty(cahootsWallet, CahootsType.STOWAWAY, account);
-    }
-
-    public static CahootsContext newCounterpartyStowawayMulti(CahootsWallet cahootsWallet, int account) {
-        // allow non-zero account for Stowaway MULTI
-        return new CahootsContext(cahootsWallet, CahootsTypeUser.COUNTERPARTY, CahootsType.STOWAWAY, account, null,null, null);
-    }
-
-    public static CahootsContext newCounterpartyStonewallx2(CahootsWallet cahootsWallet, int account) {
-        return newCounterparty(cahootsWallet, CahootsType.STONEWALLX2, account);
-    }
-
-    public static CahootsContext newCounterpartyMultiCahoots(CahootsWallet cahootsWallet, int account, XManagerClient xManagerClient) {
-        return new MultiCahootsContext(cahootsWallet, CahootsTypeUser.COUNTERPARTY, account, null, null, null, xManagerClient);
-    }
-
-    public static CahootsContext newInitiatorStowaway(CahootsWallet cahootsWallet, int account, long feePerB, long amount) {
-        return new CahootsContext(cahootsWallet, CahootsTypeUser.SENDER, CahootsType.STOWAWAY, account, feePerB, amount, null);
-    }
-
-    public static CahootsContext newInitiatorStonewallx2(CahootsWallet cahootsWallet, int account, long feePerB, long amount, String address) {
-        return new CahootsContext(cahootsWallet, CahootsTypeUser.SENDER, CahootsType.STONEWALLX2, account, feePerB, amount, address);
-    }
-
-    public static CahootsContext newInitiatorMultiCahoots(CahootsWallet cahootsWallet, int account, long feePerB, long amount, String address) {
-        return new MultiCahootsContext(cahootsWallet, CahootsTypeUser.SENDER, account, feePerB, amount, address, null);
+        return cahootsContext;
     }
 
     public CahootsWallet getCahootsWallet() {
@@ -115,5 +97,13 @@ public class CahootsContext implements SorobanContext {
 
     public void addOutputAddress(String address) {
         outputAddresses.add(address);
+    }
+
+    public void addInput(CahootsUtxo cahootsUtxo) {
+        inputs.add(cahootsUtxo);
+    }
+
+    public List<CahootsUtxo> getInputs() {
+        return inputs;
     }
 }

@@ -8,12 +8,16 @@ import com.samourai.wallet.bip47.BIP47UtilGeneric;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.bip47.rpc.java.Bip47UtilJava;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
+import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
 import com.samourai.wallet.payload.PayloadUtilGeneric;
+import com.samourai.wallet.send.UTXO;
+import com.samourai.wallet.send.beans.SpendTx;
+import com.samourai.wallet.send.beans.SpendType;
 import com.samourai.wallet.send.provider.SimpleUtxoProvider;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.TxUtil;
@@ -28,9 +32,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class AbstractTest {
@@ -42,6 +45,7 @@ public class AbstractTest {
   protected static final String ADDRESS_BIP44 = "muimRQFJKMJM1pTminJxiD5HrPgSu257tX";
   protected static final String ADDRESS_BIP49 = "2Mww8dCYPUpKHofjgcXcBCEGmniw9CoaiD2";
   protected static final String ADDRESS_BIP84 = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
+  protected static final String ADDRESS_P2TR = "tb1pqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesf3hn0c";
   protected static final String ADDRESS_XMANAGER = "tb1q6m3urxjc8j2l8fltqj93jarmzn0975nnxuymnx";
 
   protected NetworkParameters params = TestNet3Params.get();
@@ -146,5 +150,24 @@ public class AbstractTest {
   protected Map<String,Long> sortMapOutputs(Map<String,Long> map) {
     return map.entrySet().stream().sorted(Map.Entry.comparingByKey())
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+  }
+
+  protected void verifySpendTx(SpendTx spendTx, SpendType spendType, Collection<com.samourai.wallet.send.UTXO> utxos, long fee, long amount, long change, BipFormat changeFormat) throws Exception {
+    Assertions.assertEquals(spendType, spendTx.getSpendType());
+    assertEquals(utxos, spendTx.getSpendFrom());
+    Assertions.assertEquals(fee, spendTx.getFee());
+    Assertions.assertEquals(amount, spendTx.getAmount());
+    Assertions.assertEquals(change, spendTx.getChange());
+    Assertions.assertEquals(changeFormat, spendTx.getChangeFormat());
+  }
+
+  protected void assertEquals(Collection<UTXO> utxos1, Collection<? extends TransactionOutPoint> utxos2) {
+    Function<UTXO,String> utxoToString = u -> {
+      TransactionOutPoint outPoint = u.getOutpoints().get(0);
+      return outPoint.getHash().toString()+"-"+outPoint.getIndex();
+    };
+    Collection<String> utxos1Str = utxos1.stream().map(utxoToString).collect(Collectors.toList());
+    Collection<String> utxos2Str = utxos1.stream().map(utxoToString).collect(Collectors.toList());
+    Assertions.assertEquals(utxos1Str, utxos2Str);
   }
 }

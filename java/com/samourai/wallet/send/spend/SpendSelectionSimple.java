@@ -111,6 +111,11 @@ public class SpendSelectionSimple extends SpendSelection {
             amount -= fee.longValue();
 
             // add recipient output
+            if (receivers.containsKey(address)) {
+                // prevent erasing existing receiver
+                log.error("receiver already set");
+                throw new SpendException(SpendError.MAKING);
+            }
             receivers.put(address, amount);
             change = 0;
         } else{
@@ -123,6 +128,11 @@ public class SpendSelectionSimple extends SpendSelection {
             change = computeChange(amount, fee);
 
             // add recipient output
+            if (receivers.containsKey(address)) {
+                // prevent erasing existing receiver
+                log.error("receiver already set");
+                throw new SpendException(SpendError.MAKING);
+            }
             receivers.put(address, amount);
 
             // add change output
@@ -139,6 +149,7 @@ public class SpendSelectionSimple extends SpendSelection {
         // fee sanity check
         //
         // TODO zeroleak restoreChangeIndexes?
-        return new SpendTx(addressFormat, amount, fee.longValue(), change, this, receivers, rbfOptIn, utxoProvider, params, blockHeight);
+        SpendTx spendTx = computeSpendTx(addressFormat, amount, fee.longValue(), change, receivers, rbfOptIn, utxoProvider, params, blockHeight);
+        return spendTx;
     }
 }

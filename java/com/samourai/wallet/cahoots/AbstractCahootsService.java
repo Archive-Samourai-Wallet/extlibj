@@ -94,11 +94,12 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
 
     // verify
 
-    protected long computeSpendAmount(HashMap<String,ECKey> keyBag, Cahoots2x cahoots, CahootsContext cahootsContext) throws Exception {
+    protected long computeSpendAmount(HashMap<String,ECKey> keyBag, Cahoots2x cahoots, C cahootsContext) throws Exception {
         long spendAmount = 0;
 
+        String prefix = "["+cahootsContext.getCahootsType()+"/"+cahootsContext.getTypeUser()+"] ";
         if (log.isDebugEnabled()) {
-            log.debug("computeSpendAmount: keyBag="+keyBag.keySet());
+            log.debug(prefix+"computeSpendAmount: keyBag="+keyBag.keySet());
         }
         Transaction transaction = cahoots.getTransaction();
         for(TransactionInput input : transaction.getInputs()) {
@@ -107,7 +108,7 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
                 Long inputValue = cahoots.getOutpoints().get(outpoint.getHash().toString() + "-" + outpoint.getIndex());
                 if (inputValue != null) {
                     if (log.isDebugEnabled()) {
-                        log.debug("computeSpendAmount: +input "+inputValue + " "+outpoint.toString());
+                        log.debug(prefix+"computeSpendAmount: +input "+inputValue + " "+outpoint.toString());
                     }
                     spendAmount += inputValue;
                 }
@@ -119,25 +120,51 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
             if (outputAddress != null && cahootsContext.getOutputAddresses().contains(outputAddress)) {
                 if (output.getValue() != null) {
                     if (log.isDebugEnabled()) {
-                        log.debug("computeSpendAmount: -output " + output.getValue().longValue()+" "+outputAddress);
+                        log.debug(prefix+"computeSpendAmount: -output " + output.getValue().longValue()+" "+outputAddress);
                     }
                     spendAmount -= output.getValue().longValue();
                 }
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug("computeSpendAmount = " + spendAmount);
+            log.debug(prefix+"computeSpendAmount = " + spendAmount);
         }
         return spendAmount;
     }
 
-    protected  TransactionOutput computeTxOutput(BipAddress bipAddress, long amount, CahootsContext cahootsContext) throws Exception{
+    protected  TransactionOutput computeTxOutput(BipAddress bipAddress, long amount, C cahootsContext) throws Exception{
         return computeTxOutput(bipAddress.getAddressString(), amount, cahootsContext);
     }
 
-    protected  TransactionOutput computeTxOutput(String receiveAddressString, long amount, CahootsContext cahootsContext) throws Exception{
+    protected  TransactionOutput computeTxOutput(String receiveAddressString, long amount, C cahootsContext) throws Exception{
         cahootsContext.addOutputAddress(receiveAddressString); // save output address for computeSpendAmount()
         return bipFormatSupplier.getTransactionOutput(receiveAddressString, amount, params);
+    }
+
+    private long computeFeeAmountActual(Cahoots cahoots) {
+        Transaction tx = cahoots.getTransaction();
+        long fee = 0;
+        for (TransactionInput txInput : tx.getInputs()) {
+            TransactionOutPoint txOut = txInput.getOutpoint();
+            long value = cahoots.getOutpoints().get(txOut.getHash().toString()+"-"+txOut.getIndex());
+            fee += value;
+        }
+        for (TransactionOutput txOut : tx.getOutputs()) {
+            fee -= txOut.getValue().getValue();
+        }
+        return fee;
+    }
+
+    protected void checkFee(Cahoots cahoots) throws Exception {
+        long feeActual = computeFeeAmountActual(cahoots);
+        long feeExpected = cahoots.getFeeAmount();
+        if (log.isDebugEnabled()) {
+            log.debug("checkFee: feeActual="+feeActual+", feeExpected="+feeExpected);
+        }
+        int PRECISION = 2;
+        if (Math.abs(feeActual - feeExpected) > PRECISION) {
+            throw new Exception("Invalid Cahoots fee: actual="+feeActual+", expected="+feeExpected);
+        }
     }
 
     public BipFormatSupplier getBipFormatSupplier() {

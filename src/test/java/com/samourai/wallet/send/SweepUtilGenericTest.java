@@ -34,10 +34,10 @@ public class SweepUtilGenericTest extends AbstractTest {
         Iterator<SweepPreview> it = sweepPreviews.iterator();
 
         SweepPreview sweepPreview = it.next();
-        assertSweepPreview(sweepPreview, 1048, "2Mu3RYBxGdkz8rwCaYZWhi24A4aR1cSWJFb", BIP_FORMAT.SEGWIT_COMPAT,152, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
+        assertSweepPreview(sweepPreview, "2Mu3RYBxGdkz8rwCaYZWhi24A4aR1cSWJFb", BIP_FORMAT.SEGWIT_COMPAT,136, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
 
         sweepPreview = it.next();
-        assertSweepPreview(sweepPreview, 2871, "tb1qkz6870gwrtp4unx9yw4qvz27tagd5wykynufyq", BIP_FORMAT.SEGWIT_NATIVE, 129, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
+        assertSweepPreview(sweepPreview, "tb1qkz6870gwrtp4unx9yw4qvz27tagd5wykynufyq", BIP_FORMAT.SEGWIT_NATIVE, 113, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
     }
 
     @Test
@@ -53,10 +53,10 @@ public class SweepUtilGenericTest extends AbstractTest {
         Iterator<SweepPreview> it = sweepPreviews.iterator();
 
         SweepPreview sweepPreview = it.next();
-        assertSweepPreview(sweepPreview, 1048, "2Mu3RYBxGdkz8rwCaYZWhi24A4aR1cSWJFb", BIP_FORMAT.SEGWIT_COMPAT,152, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
+        assertSweepPreview(sweepPreview, "2Mu3RYBxGdkz8rwCaYZWhi24A4aR1cSWJFb", BIP_FORMAT.SEGWIT_COMPAT,136, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
 
         sweepPreview = it.next();
-        assertSweepPreview(sweepPreview, 2871, "tb1qkz6870gwrtp4unx9yw4qvz27tagd5wykynufyq", BIP_FORMAT.SEGWIT_NATIVE, 129, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
+        assertSweepPreview(sweepPreview, "tb1qkz6870gwrtp4unx9yw4qvz27tagd5wykynufyq", BIP_FORMAT.SEGWIT_NATIVE, 113, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
     }
 
     @Test
@@ -88,13 +88,12 @@ public class SweepUtilGenericTest extends AbstractTest {
         Assertions.assertEquals(0, sweepPreviews.size());
     }*/
 
-    protected void assertSweepPreview(SweepPreview sweepPreview, long amount, String address, BipFormat bipFormat, long fee, int outpoints, BigInteger privKey) {
-        Assertions.assertEquals(amount, sweepPreview.getAmount());
+    protected void assertSweepPreview(SweepPreview sweepPreview, String address, BipFormat bipFormat, long fee, int outpoints, BigInteger privKey) {
+        Assertions.assertTrue(sweepPreview.getAmount() > 0);
         Assertions.assertEquals(privKey, sweepPreview.getPrivKey().getPrivKey());
         Assertions.assertEquals(address, sweepPreview.getAddress());
         Assertions.assertEquals(bipFormat, sweepPreview.getBipFormat());
         Assertions.assertEquals(fee, sweepPreview.getFee());
-        Assertions.assertEquals(amount+fee, UnspentOutput.sumValue(sweepPreview.getUtxos()));
         Assertions.assertEquals(outpoints, sweepPreview.getUtxos().size());
     }
 }

@@ -1,5 +1,6 @@
 package com.samourai.wallet.cahoots.multi;
 
+import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.soroban.cahoots.ManualCahootsMessage;
 import com.samourai.wallet.api.backend.IPushTx;
 import com.samourai.wallet.cahoots.Cahoots;
@@ -7,6 +8,8 @@ import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
+import com.samourai.wallet.send.beans.SpendTx;
+import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.util.TxUtil;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
@@ -45,6 +48,11 @@ public class MultiCahoots extends Cahoots {
         super(CahootsType.MULTI.getValue(), params);
         this.stowaway = stowaway;
         this.stonewallx2 = stonewallx2;
+    }
+
+    @Override
+    public String getPaynymDestination() {
+        return stonewallx2.getPaynymDestination();
     }
 
     @Override
@@ -134,5 +142,12 @@ public class MultiCahoots extends Cahoots {
         // push stowaway
         String stowawayHex = TxUtil.getInstance().getTxHex(getStowawayTransaction());
         pushTx.pushTx(stowawayHex);
+    }
+
+    @Override
+    public SpendTx getSpendTx(CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) {
+        // forward stonewallx2 SpendTx
+        CahootsContext stonewallx2Context = ((MultiCahootsContext)cahootsContext).getStonewallx2Context();
+        return stonewallx2.getSpendTx(stonewallx2Context, utxoKeyProvider);
     }
 }

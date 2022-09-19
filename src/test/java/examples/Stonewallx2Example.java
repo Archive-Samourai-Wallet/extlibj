@@ -2,10 +2,7 @@ package examples;
 
 import com.samourai.http.client.IHttpClient;
 import com.samourai.http.client.JettyHttpClient;
-import com.samourai.soroban.cahoots.CahootsContext;
-import com.samourai.soroban.cahoots.ManualCahootsMessage;
-import com.samourai.soroban.cahoots.ManualCahootsService;
-import com.samourai.soroban.cahoots.TxBroadcastInteraction;
+import com.samourai.soroban.cahoots.*;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.CahootsWallet;
@@ -16,8 +13,8 @@ import java.util.Optional;
 
 public class Stonewallx2Example {
     // TODO instanciate real wallets here!
-    private static final CahootsWallet cahootsWalletSender = null; // new SimpleCahootsWallet(...)
-    private static final CahootsWallet cahootsWalletCounterparty = null; // new SimpleCahootsWallet(...)
+    private static final CahootsWallet cahootsWalletSender = null; // new CahootsWallet(...)
+    private static final CahootsWallet cahootsWalletCounterparty = null; // new CahootsWallet(...)
 
     public void Stonewallx2() throws Exception {
         // configure xManagerClient
@@ -38,11 +35,12 @@ public class Stonewallx2Example {
         long feePerB = 1;
         long spendAmount = 5000;
         String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
-        CahootsContext contextSender = CahootsContext.newInitiatorStonewallx2(cahootsWalletSender, senderAccount, feePerB, spendAmount, address);
+        String paynymDestination = null;
+        Stonewallx2Context contextSender = Stonewallx2Context.newInitiator(cahootsWalletSender, senderAccount, feePerB, spendAmount, address, paynymDestination);
         ManualCahootsMessage message0 = cahootsService.initiate(contextSender);
 
         // STEP 1: counterparty
-        CahootsContext contextReceiver = CahootsContext.newCounterpartyStonewallx2(cahootsWalletCounterparty, receiverAccount);
+        StowawayContext contextReceiver = StowawayContext.newCounterparty(cahootsWalletCounterparty, receiverAccount);
         ManualCahootsMessage message1 = (ManualCahootsMessage)cahootsService.reply(contextReceiver, message0);
 
         // STEP 2: sender

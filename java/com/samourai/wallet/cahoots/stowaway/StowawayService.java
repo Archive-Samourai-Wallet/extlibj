@@ -1,6 +1,6 @@
 package com.samourai.wallet.cahoots.stowaway;
 
-import com.samourai.soroban.cahoots.CahootsContext;
+import com.samourai.soroban.cahoots.StowawayContext;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class StowawayService extends AbstractCahoots2xService<Stowaway> {
+public class StowawayService extends AbstractCahoots2xService<Stowaway, StowawayContext> {
     private static final Logger log = LoggerFactory.getLogger(StowawayService.class);
 
     public StowawayService(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
@@ -29,7 +29,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     }
 
     @Override
-    public Stowaway startInitiator(CahootsContext cahootsContext) throws Exception {
+    public Stowaway startInitiator(StowawayContext cahootsContext) throws Exception {
         CahootsWallet cahootsWallet = cahootsContext.getCahootsWallet();
         long amount = cahootsContext.getAmount();
         int account = cahootsContext.getAccount();
@@ -43,7 +43,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     }
 
     @Override
-    public Stowaway startCollaborator(CahootsContext cahootsContext, Stowaway stowaway0) throws Exception {
+    public Stowaway startCollaborator(StowawayContext cahootsContext, Stowaway stowaway0) throws Exception {
         if (stowaway0.getSpendAmount() <= 0) {
             // this check used to be the initiator portion, but with the introduction of MultiCahoots, it remains -1 until the Stonewallx2 finishes, so we can get an accurate amount, so the check is here now.
             throw new Exception("Invalid amount");
@@ -56,10 +56,10 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     }
 
     @Override
-    public Stowaway reply(CahootsContext cahootsContext, Stowaway stowaway) throws Exception {
+    public Stowaway reply(StowawayContext cahootsContext, Stowaway stowaway) throws Exception {
         int step = stowaway.getStep();
         if (log.isDebugEnabled()) {
-            log.debug("# Stowaway <= step="+step);
+            log.debug("# Stowaway "+cahootsContext.getTypeUser()+" <= step="+step);
         }
         Stowaway payload;
         switch (step) {
@@ -83,7 +83,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
             throw new Exception("Cannot compose #Cahoots");
         }
         if (log.isDebugEnabled()) {
-            log.debug("# Stowaway => step="+payload.getStep());
+            log.debug("# Stowaway "+cahootsContext.getTypeUser()+" => step="+payload.getStep());
         }
         return payload;
     }
@@ -104,14 +104,16 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     //
     // receiver
     //
-    public Stowaway doStowaway1(Stowaway stowaway0, CahootsContext cahootsContext, List<String> seenTxs) throws Exception {
+    public Stowaway doStowaway1(Stowaway stowaway0, StowawayContext cahootsContext, List<String> seenTxs) throws Exception {
         CahootsWallet cahootsWallet = cahootsContext.getCahootsWallet();
         int account = cahootsContext.getAccount();
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
         return doStowaway1(stowaway0, cahootsContext, utxos, account, seenTxs);
     }
 
-    public Stowaway doStowaway1(Stowaway stowaway0, CahootsContext cahootsContext, List<CahootsUtxo> utxos, int receiveAccount, List<String> seenTxs) throws Exception {
+    public Stowaway doStowaway1(Stowaway stowaway0, StowawayContext cahootsContext, List<CahootsUtxo> utxos, int receiveAccount, List<String> seenTxs) throws Exception {
+        debug("BEGIN doStowaway1", stowaway0, cahootsContext);
+
         CahootsWallet cahootsWallet = cahootsContext.getCahootsWallet();
         byte[] fingerprint = cahootsWallet.getFingerprint();
         stowaway0.setFingerprintCollab(fingerprint);
@@ -176,6 +178,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         for (CahootsUtxo utxo : selectedUTXO) {
             TransactionInput input = utxo.getOutpoint().computeSpendInput();
             inputsA.add(input);
+            cahootsContext.addInput(utxo);
         }
 
         // destination output
@@ -193,13 +196,15 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         Stowaway stowaway1 = stowaway0.copy();
         stowaway1.doStep1(inputsA, outputsA);
 
+        debug("END doStowaway1", stowaway1, cahootsContext);
         return stowaway1;
     }
 
     //
     // sender
     //
-    public Stowaway doStowaway2(Stowaway stowaway1, CahootsContext cahootsContext, List<String> seenTxs) throws Exception {
+    public Stowaway doStowaway2(Stowaway stowaway1, StowawayContext cahootsContext, List<String> seenTxs) throws Exception {
+        debug("BEGIN doStowaway2", stowaway1, cahootsContext);
 
         if (log.isDebugEnabled()) {
             log.debug("sender account (2):" + stowaway1.getAccount());
@@ -289,17 +294,13 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
             }
         }
 
-        long estimatedFee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB);
-        if (log.isDebugEnabled()) {
-            log.debug(selectedUTXO.size()+" selected utxos, totalContributedAmount="+totalSelectedAmount+", requiredAmount="+stowaway1.computeRequiredAmount(estimatedFee));
-        }
-        if (!stowaway1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee)) {
-            throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
-        }
-
         long fee = estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB);
         if (log.isDebugEnabled()) {
             log.debug("fee:" + fee);
+            log.debug(selectedUTXO.size()+" selected utxos, totalContributedAmount="+totalSelectedAmount+", requiredAmount="+stowaway1.computeRequiredAmount(fee));
+        }
+        if (!stowaway1.isContributedAmountSufficient(totalSelectedAmount, fee)) {
+            throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
         }
 
         //
@@ -312,6 +313,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         for (CahootsUtxo utxo : selectedUTXO) {
             TransactionInput input = utxo.getOutpoint().computeSpendInput();
             inputsB.add(input);
+            cahootsContext.addInput(utxo);
         }
 
         List<TransactionOutput> outputsB = new LinkedList<>();
@@ -339,6 +341,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
         stowaway2.doStep2(inputsB, outputsB);
         stowaway2.setFeeAmount(fee);
 
+        debug("END doStowaway2", stowaway2, cahootsContext);
         return stowaway2;
     }
 
@@ -347,16 +350,23 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway> {
     }
 
     @Override
-    protected long computeMaxSpendAmount(long minerFee, CahootsContext cahootsContext) throws Exception {
+    protected long computeMaxSpendAmount(long minerFee, StowawayContext cahootsContext) throws Exception {
         long maxSpendAmount;
+        String prefix = "["+cahootsContext.getCahootsType()+"/"+cahootsContext.getTypeUser()+"] ";
         switch (cahootsContext.getTypeUser()) {
             case SENDER:
                 // spends amount + minerFee
                 maxSpendAmount = cahootsContext.getAmount()+minerFee;
+                if (log.isDebugEnabled()) {
+                    log.debug(prefix+"maxSpendAmount = "+maxSpendAmount+": amount="+cahootsContext.getAmount()+" + minerFee="+minerFee);
+                }
                 break;
             case COUNTERPARTY:
                 // receives money (<0)
                 maxSpendAmount = 0;
+                if (log.isDebugEnabled()) {
+                    log.debug(prefix+"maxSpendAmount = 0 (receives money)");
+                }
                 break;
             default:
                 throw new Exception("Unknown typeUser");

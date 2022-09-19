@@ -1,16 +1,18 @@
 package com.samourai.wallet.segwit.bech32;
 
+import com.samourai.wallet.util.Triple;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import com.samourai.wallet.util.Triple;
 
 public class Bech32Segwit {
 
   public static Pair<Byte, byte[]> decode(String hrp, String addr)  {
+
+      if (addr == null) {
+          return null;
+      }
 
       Triple<String, byte[], Integer> p = Bech32.bech32Decode(addr);
       if(p == null)  {

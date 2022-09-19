@@ -1,12 +1,17 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bip69.BIP69InputComparator;
 import com.samourai.wallet.bip69.BIP69OutputComparator;
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.segwit.SegwitAddress;
+import com.samourai.wallet.send.beans.SpendTx;
+import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.util.RandomUtil;
 import com.samourai.wallet.util.Z85;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.*;
 import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.script.Script;
@@ -18,10 +23,8 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 // shared payload for 2x Cahoots: Stonewallx2 or Stowaway
 public abstract class Cahoots2x extends Cahoots {
@@ -342,11 +345,6 @@ public abstract class Cahoots2x extends Cahoots {
     //
     public void doStep2(List<TransactionInput> inputs, List<TransactionOutput> outputs) throws Exception    {
         Transaction transaction = psbt.getTransaction();
-        if (log.isDebugEnabled()) {
-            log.debug("step2 tx:" + transaction.toString());
-            log.debug("step2 tx:" + Hex.toHexString(transaction.bitcoinSerialize()));
-        }
-
         appendTx(inputs, outputs, transaction);
 
         this.setStep(2);
@@ -413,5 +411,33 @@ public abstract class Cahoots2x extends Cahoots {
 
         // update psbt
         this.psbt = new PSBT(transaction);
+    }
+
+    @Override
+    public SpendTx getSpendTx(CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) {
+        long changeAmount = 0L; //TODO
+        List<TransactionOutPoint> spendFrom = getTransaction().getInputs().stream()
+                .map(transactionInput -> transactionInput.getOutpoint())
+                .filter(
+                        outPoint -> {
+                    try {
+                        return utxoKeyProvider._getPrivKey(outPoint.getHash().toString(), (int) outPoint.getIndex()) != null;
+                    } catch (Exception e) {
+                        return false;
+                    }
+                }).collect(Collectors.toList());
+        Map<String,Long> receivers = getTransaction().getOutputs().stream()
+                .map(transactionOutput -> {
+                    try {
+                        String toAddress = utxoKeyProvider.getBipFormatSupplier().getToAddress(transactionOutput);
+                        if (toAddress != null && cahootsContext.getOutputAddresses().contains(toAddress)) {
+                            return Pair.of(toAddress, transactionOutput.getValue().value);
+                        }
+                    } catch (Exception e) {}
+                    return null;
+                }).filter(pair -> pair != null)
+        .collect(Collectors.toMap(pair -> pair.getLeft(), pair -> pair.getRight()));
+        CahootsType cahootsType = CahootsType.find(getType()).get();
+        return new SpendTx(cahootsType.getSpendType(), BIP_FORMAT.SEGWIT_NATIVE, getSpendAmount(), getFeeAmount(), changeAmount, spendFrom, receivers, getTransaction());
     }
 }

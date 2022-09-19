@@ -2,9 +2,9 @@ package examples;
 
 import com.samourai.http.client.IHttpClient;
 import com.samourai.http.client.JettyHttpClient;
-import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.soroban.cahoots.ManualCahootsMessage;
 import com.samourai.soroban.cahoots.ManualCahootsService;
+import com.samourai.soroban.cahoots.StowawayContext;
 import com.samourai.soroban.client.SorobanInteraction;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
@@ -35,12 +35,12 @@ public class StowawayExample {
         int senderAccount = 0;
         long feePerB = 1;
         long spendAmount = 5000;
-        CahootsContext contextSender = CahootsContext.newInitiatorStowaway(cahootsWalletSender, senderAccount, feePerB, spendAmount);
+        StowawayContext contextSender = StowawayContext.newInitiator(cahootsWalletSender, senderAccount, feePerB, spendAmount);
         ManualCahootsMessage message0 = cahootsService.initiate(contextSender);
 
         // STEP 1: receiver
         int receiverAccount = 0;
-        CahootsContext contextReceiver = CahootsContext.newCounterpartyStowaway(cahootsWalletCounterparty, receiverAccount);
+        StowawayContext contextReceiver = StowawayContext.newCounterparty(cahootsWalletCounterparty, receiverAccount);
         ManualCahootsMessage message1 = (ManualCahootsMessage)cahootsService.reply(contextReceiver, message0);
 
         // STEP 2: sender

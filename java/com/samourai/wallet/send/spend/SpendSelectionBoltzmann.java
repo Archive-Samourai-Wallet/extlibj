@@ -217,7 +217,8 @@ public class SpendSelectionBoltzmann extends SpendSelection {
 
         BigInteger fee = BigInteger.valueOf(inputAmount - outputAmount);
         long change = computeChange(amount, fee);
-        return new SpendTx(changeFormat, amount, fee.longValue(), change, this, receivers, rbfOptIn, utxoProvider, params, blockHeight);
+        SpendTx spendTx = computeSpendTx(changeFormat, amount, fee.longValue(), change, receivers, rbfOptIn, utxoProvider, params, blockHeight);
+        return spendTx;
     }
 
     public static void _setTestMode(boolean testMode) {
