@@ -308,11 +308,16 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
         }
     }
 
-    public long getSaasThreshold() throws IOException, NumberFormatException {
+    public long getSaasThreshold() throws NumberFormatException {
         log.debug("Getting SaaS Threshold...");
         Properties prop = new Properties();
-        InputStream stream = Files.newInputStream(new File("whirlpool-cli-config.properties").toPath());
-        prop.load(stream);
+        InputStream stream = null;
+        try {
+            stream = Files.newInputStream(new File("whirlpool-cli-config.properties").toPath());
+            prop.load(stream);
+        } catch (IOException e) {
+            return 200000000; // default value of 2 BTC
+        }
         String threshold = prop.getProperty("cli.threshold", Stonewallx2Service.THRESHOLD.toString());
         return Long.parseLong(threshold);
     }
