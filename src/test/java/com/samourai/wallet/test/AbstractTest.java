@@ -18,7 +18,7 @@ import com.samourai.wallet.payload.PayloadUtilGeneric;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
-import com.samourai.wallet.send.provider.SimpleUtxoProvider;
+import com.samourai.wallet.send.provider.MockUtxoProvider;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.TxUtil;
 import com.samourai.wallet.util.Z85;
@@ -57,7 +57,7 @@ public class AbstractTest {
   protected HD_Wallet bip44w;
   protected BIP47Wallet bip47Wallet;
   protected BackendApi backendApi;
-  protected SimpleUtxoProvider utxoProvider;
+  protected MockUtxoProvider utxoProvider;
   protected XManagerClient xManagerClient;
   protected BIP47UtilGeneric bip47Util = Bip47UtilJava.getInstance();
   protected MockPushTx pushTx = new MockPushTx(params);
@@ -79,7 +79,7 @@ public class AbstractTest {
     bip44w = hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE, params);
     bip47Wallet = new BIP47Wallet(bip44w);
     walletSupplier = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip44w);
-    utxoProvider = new SimpleUtxoProvider(bip44w.getParams(), walletSupplier);
+    utxoProvider = new MockUtxoProvider(bip44w.getParams(), walletSupplier);
     xManagerClient = new XManagerClient(httpClient, true, false) {
       @Override
       public String getAddressOrDefault(XManagerService service) {

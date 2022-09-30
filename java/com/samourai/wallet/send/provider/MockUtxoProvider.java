@@ -19,7 +19,10 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SimpleUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvider {
+/**
+ * utxo provider reserved for tests
+ */
+public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvider {
 
   private NetworkParameters params;
   private Map<WhirlpoolAccount, List<UTXO>> utxosByAccount;
@@ -27,7 +30,7 @@ public class SimpleUtxoProvider extends SimpleUtxoKeyProvider implements UtxoPro
   private CahootsUtxoProvider cahootsUtxoProvider;
   private int nbUtxos = 0;
 
-  public SimpleUtxoProvider(NetworkParameters params, WalletSupplier walletSupplier) {
+  public MockUtxoProvider(NetworkParameters params, WalletSupplier walletSupplier) {
     this.params = params;
     this.walletSupplier = walletSupplier;
     this.cahootsUtxoProvider = new SimpleCahootsUtxoProvider(this);

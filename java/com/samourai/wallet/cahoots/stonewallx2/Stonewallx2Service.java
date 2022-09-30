@@ -210,12 +210,13 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         return receiveAddress;
     }
 
-    public STONEWALLx2 doSTONEWALLx2_1_Multi(STONEWALLx2 stonewall0, Stonewallx2Context cahootsContext, List<String> seenTxs, XManagerClient xManagerClient) throws Exception {
+    public STONEWALLx2 doSTONEWALLx2_1_Multi(STONEWALLx2 stonewall0, Stonewallx2Context cahootsContext, List<String> seenTxs, XManagerClient xManagerClient, long threshold) throws Exception {
+        Coin thresholdAsCoin = Coin.valueOf(threshold);
         int account = cahootsContext.getAccount();
         CahootsWallet cahootsWallet = cahootsContext.getCahootsWallet();
         Coin balance = CahootsUtxo.sumValue(cahootsWallet.getUtxosWpkhByAccount(account));
         boolean isBech32Destination = FormatsUtilGeneric.getInstance().isValidBech32(stonewall0.getDestination());
-        if(balance.isGreaterThan(THRESHOLD) && isBech32Destination && xManagerClient != null) {
+        if(balance.isGreaterThan(thresholdAsCoin) && isBech32Destination && xManagerClient != null) {
             // mix to external
             String xmAddress = xManagerClient.getAddressOrDefault(XManagerService.STONEWALL, 3);
             if(!xmAddress.equals(XManagerService.STONEWALL.getDefaultAddress(params == TestNet3Params.get()))) {

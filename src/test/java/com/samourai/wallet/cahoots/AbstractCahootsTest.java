@@ -13,7 +13,7 @@ import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
 import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.wallet.hd.Chain;
 import com.samourai.wallet.hd.HD_Wallet;
-import com.samourai.wallet.send.provider.SimpleUtxoProvider;
+import com.samourai.wallet.send.provider.MockUtxoProvider;
 import com.samourai.wallet.test.AbstractTest;
 import com.samourai.wallet.util.TestUtil;
 import org.junit.jupiter.api.Assertions;
@@ -33,8 +33,8 @@ public abstract class AbstractCahootsTest extends AbstractTest {
     protected CahootsWallet cahootsWalletSender;
     protected CahootsWallet cahootsWalletCounterparty;
 
-    protected SimpleUtxoProvider utxoProviderSender;
-    protected SimpleUtxoProvider utxoProviderCounterparty;
+    protected MockUtxoProvider utxoProviderSender;
+    protected MockUtxoProvider utxoProviderCounterparty;
 
     protected static String[] SENDER_RECEIVE_84;
     protected static String[] COUNTERPARTY_RECEIVE_84;
@@ -74,12 +74,12 @@ public abstract class AbstractCahootsTest extends AbstractTest {
 
         final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
         WalletSupplier walletSupplierSender = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletSender);
-        utxoProviderSender = new SimpleUtxoProvider(params, walletSupplierSender);
+        utxoProviderSender = new MockUtxoProvider(params, walletSupplierSender);
         cahootsWalletSender = new CahootsWallet(walletSupplierSender, bipFormatSupplier, params, utxoProviderSender.getCahootsUtxoProvider());
 
         final HD_Wallet bip84WalletCounterparty = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
         WalletSupplier walletSupplierCounterparty = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletCounterparty);
-        utxoProviderCounterparty = new SimpleUtxoProvider(params, walletSupplierCounterparty);
+        utxoProviderCounterparty = new MockUtxoProvider(params, walletSupplierCounterparty);
         cahootsWalletCounterparty = new CahootsWallet(walletSupplierCounterparty, bipFormatSupplier, params, utxoProviderCounterparty.getCahootsUtxoProvider());
 
         SENDER_RECEIVE_84 = new String[4];

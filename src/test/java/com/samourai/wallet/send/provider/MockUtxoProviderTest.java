@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SimpleUtxoProviderTest extends AbstractTest {
-    private static final Logger log = LoggerFactory.getLogger(SimpleUtxoProviderTest.class);
+public class MockUtxoProviderTest extends AbstractTest {
+    private static final Logger log = LoggerFactory.getLogger(MockUtxoProviderTest.class);
 
     @Test
     public void addUtxo() throws Exception {
