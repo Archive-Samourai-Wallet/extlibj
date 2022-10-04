@@ -2,6 +2,7 @@ package com.samourai.wallet.util;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
@@ -16,6 +17,18 @@ public class AsyncUtil {
             instance = new AsyncUtil();
         }
         return instance;
+    }
+
+    public <T> T blockingSingle(Single<T> o) throws Exception {
+        try {
+            return o.blockingGet();
+        } catch (RuntimeException e) {
+            // blockingGet wraps errors with RuntimeException, unwrap it
+            if (e.getCause() != null && e instanceof Exception) {
+                throw (Exception)e.getCause();
+            }
+            throw e;
+        }
     }
 
     public <T> T blockingSingle(Observable<T> o) throws Exception {
