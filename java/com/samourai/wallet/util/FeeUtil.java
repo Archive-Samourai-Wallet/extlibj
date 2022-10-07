@@ -179,12 +179,8 @@ public class FeeUtil {
     int count = 0;
 
     for(MyTransactionOutPoint out : outpoints)   {
-      if(FormatsUtilGeneric.getInstance().isValidBech32(out.getAddress()))    {
-        org.apache.commons.lang3.tuple.Pair<Byte, byte[]> pair = Bech32Segwit.decode(out.getAddress().substring(0, 2), out.getAddress());
-        com.samourai.wallet.util.Triple<String, byte[], Integer> triple = Bech32.bech32Decode(out.getAddress());
-        if(pair.getLeft() == (byte)0x01 && triple.getRight() == Bech32.BECH32M)    {
-          count++;
-        }
+      if(FormatsUtilGeneric.getInstance().isValidP2TR(out.getAddress()))    {
+        count++;
       }
     }
 
@@ -196,12 +192,8 @@ public class FeeUtil {
     int count = 0;
 
     for(MyTransactionOutPoint out : outpoints)   {
-      if(FormatsUtilGeneric.getInstance().isValidBech32(out.getAddress()))    {
-        org.apache.commons.lang3.tuple.Pair<Byte, byte[]> pair = Bech32Segwit.decode(out.getAddress().substring(0, 2), out.getAddress());
-        com.samourai.wallet.util.Triple<String, byte[], Integer> triple = Bech32.bech32Decode(out.getAddress());
-        if(pair.getLeft() == (byte)0x00 && triple.getRight() == Bech32.BECH32)    {
-          count++;
-        }
+      if(FormatsUtilGeneric.getInstance().isValidP2WSH(out.getAddress()))    {
+        count++;
       }
     }
 

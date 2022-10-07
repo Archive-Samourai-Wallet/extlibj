@@ -280,7 +280,7 @@ public class FormatsUtilGeneric {
 		if(isValidBech32(address))    {
 				Pair<Byte, byte[]> pair = Bech32Segwit.decode(address.substring(0, 2), address);
 				com.samourai.wallet.util.Triple<String, byte[], Integer> triple = Bech32.bech32Decode(address);
-				if(pair.getLeft() == (byte)0x01 && triple.getRight() == Bech32.BECH32M)    {
+				if(pair.getLeft() == (byte)0x01 && pair.getRight().length == 32 && triple.getRight() == Bech32.BECH32M)    {
 						return true;
 				}
 		}
