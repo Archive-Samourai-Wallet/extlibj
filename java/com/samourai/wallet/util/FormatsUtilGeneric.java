@@ -279,12 +279,32 @@ public class FormatsUtilGeneric {
 
 		if(isValidBech32(address))    {
 				Pair<Byte, byte[]> pair = Bech32Segwit.decode(address.substring(0, 2), address);
-				if(pair.getLeft() == (byte)0x01)    {
+				com.samourai.wallet.util.Triple<String, byte[], Integer> triple = Bech32.bech32Decode(address);
+				if(pair.getLeft() == (byte)0x01 && pair.getRight().length == 32 && triple.getRight() == Bech32.BECH32M)    {
 						return true;
 				}
 		}
 
 		return false;
+	}
+
+	public boolean isValidP2WSH(final String address) {
+
+		if(isValidBech32(address))    {
+				Pair<Byte, byte[]> pair = Bech32Segwit.decode(address.substring(0, 2), address);
+				com.samourai.wallet.util.Triple<String, byte[], Integer> triple = Bech32.bech32Decode(address);
+				if(pair.getLeft() == (byte)0x00 && pair.getRight().length == 32 && triple.getRight() == Bech32.BECH32)    {
+						return true;
+				}
+		}
+
+		return false;
+	}
+
+	public boolean isValidP2WSH_P2TR(final String address) {
+
+		return isValidP2TR(address) || isValidP2WSH(address);
+
 	}
 
 	public boolean isValidXpub(String xpub){

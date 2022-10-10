@@ -443,14 +443,14 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
     }
 
     private long estimatedFee(int nbTotalSelectedOutPoints, int nbIncomingInputs, String destination, long feePerB) {
-        int outputsNonP2TR = 4;
-        int outputsP2TR = 0;
-        if (FormatsUtilGeneric.getInstance().isValidP2TR(destination)) {
-            // destination is P2TR, contributor mix output is SEGWIT_NATIVE (no like-typed output for P2TR)
-            outputsNonP2TR--;
-            outputsP2TR++;
+        int outputsNonP2WSH_P2TR = 4;
+        int outputsP2WSH_P2TR = 0;
+        if (FormatsUtilGeneric.getInstance().isValidP2WSH_P2TR(destination)) {
+            // destination is P2TR or P2WSH, contributor mix output is SEGWIT_NATIVE (no like-typed output for P2TR)
+            outputsNonP2WSH_P2TR--;
+            outputsP2WSH_P2TR++;
         }
-        return FeeUtil.getInstance().estimatedFeeSegwit(0, 0, nbTotalSelectedOutPoints + nbIncomingInputs, outputsNonP2TR, outputsP2TR, 0, feePerB);
+        return FeeUtil.getInstance().estimatedFeeSegwit(0, 0, nbTotalSelectedOutPoints + nbIncomingInputs, outputsNonP2WSH_P2TR, outputsP2WSH_P2TR, 0, feePerB);
     }
 
     @Override
