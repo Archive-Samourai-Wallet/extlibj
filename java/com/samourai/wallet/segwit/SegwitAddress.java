@@ -16,11 +16,13 @@ public class SegwitAddress {
 
     public static final int TYPE_P2SH_P2WPKH = 0;
     public static final int TYPE_P2WPKH = 1;
+    public static final int TYPE_P2WSH = 2;
+    public static final int TYPE_P2TR = 3;
 
-    private int DEFAULT_TO = TYPE_P2SH_P2WPKH;
+    protected int DEFAULT_TO = TYPE_P2SH_P2WPKH;
 
-    private ECKey ecKey = null;
-    private NetworkParameters params = null;
+    protected ECKey ecKey = null;
+    protected NetworkParameters params = null;
 
     private SegwitAddress()   { ; }
 
