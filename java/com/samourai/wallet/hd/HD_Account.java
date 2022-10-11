@@ -95,6 +95,10 @@ public class HD_Account {
         return (idx == 0) ? mReceive : mChange;
     }
 
+    public HD_Chain getChainAt(int idx) {
+      return new HD_Chain(mParams, aKey, mAID, idx);
+    }
+
     public JSONObject toJSON(int purpose) {
         try {
             JSONObject obj = new JSONObject();
