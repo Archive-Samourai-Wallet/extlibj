@@ -43,7 +43,7 @@ public class XManagerClient {
     String address = null;
     try {
       Single<Optional<AddressResponse>> responseObservable = getAddressResponse(service);
-      address = asyncUtil.blockingSingle(responseObservable).get().address;
+      address = asyncUtil.blockingGet(responseObservable).get().address;
     } catch (Exception e) {
       log.error("getAddressResponse(" + service.name() + ") failed", e);
     }
@@ -82,7 +82,7 @@ public class XManagerClient {
     try {
       Single<Optional<AddressIndexResponse>> responseObservable =
           getAddressIndexResponse(service);
-      response = asyncUtil.blockingSingle(responseObservable).get();
+      response = asyncUtil.blockingGet(responseObservable).get();
     } catch (Exception e) {
       log.error("getAddressIndexResponse(" + service.name() + ") failed", e);
     }
@@ -116,7 +116,7 @@ public class XManagerClient {
     try {
       Single<Optional<VerifyAddressIndexResponse>> responseObservable =
           verifyAddressIndexResponseAsync(service, address, index);
-      return asyncUtil.blockingSingle(responseObservable).get().valid;
+      return asyncUtil.blockingGet(responseObservable).get().valid;
     } catch (Exception e) {
       log.error("verifyAddressIndexResponse(" + service.name() + ") failed", e);
       throw e;

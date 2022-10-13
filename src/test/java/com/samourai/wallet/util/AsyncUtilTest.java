@@ -2,6 +2,7 @@ package com.samourai.wallet.util;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,22 @@ public class AsyncUtilTest {
   }
 
   @Test
+  public void blockingGet_error() throws Exception {
+    try {
+      asyncUtil.blockingGet(Single.error(new IllegalArgumentException("test")));
+      Assertions.assertTrue(false);
+    } catch (IllegalArgumentException e) {
+      Assertions.assertEquals("test",e.getMessage());
+    }
+  }
+
+  @Test
+  public void blockingGet_success() throws Exception {
+    int result = asyncUtil.blockingGet(Single.just(123));
+    Assertions.assertEquals(123, result);
+  }
+
+  @Test
   public void blockingSingle_error() throws Exception {
     try {
       asyncUtil.blockingSingle(Observable.error(new IllegalArgumentException("test")));
@@ -38,7 +55,7 @@ public class AsyncUtilTest {
   @Test
   public void blockingLast_error() throws Exception {
     try {
-      asyncUtil.blockingLast(Observable.error(new IllegalArgumentException("test")), message -> {});
+      asyncUtil.blockingLast(Observable.error(new IllegalArgumentException("test")));
       Assertions.assertTrue(false);
     } catch (IllegalArgumentException e) {
       Assertions.assertEquals("test",e.getMessage());
@@ -48,10 +65,8 @@ public class AsyncUtilTest {
   @Test
   public void blockingLast_success() throws Exception {
     Integer[] sources = new Integer[]{1,2,3};
-    Set<Integer> received = new LinkedHashSet<>();
-    int result = asyncUtil.blockingLast(Observable.fromArray(sources), message -> received.add(message));
+    int result = asyncUtil.blockingLast(Observable.fromArray(sources));
     Assertions.assertEquals(3, result);
-    Assertions.assertArrayEquals(sources, received.toArray());
   }
 
   @Test

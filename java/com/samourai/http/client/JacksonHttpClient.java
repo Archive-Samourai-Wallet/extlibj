@@ -137,7 +137,7 @@ public abstract class JacksonHttpClient implements IHttpClient {
 
   protected <T> T httpObservableBlockingSingle(final Callable<T> supplier) throws HttpException{
     try {
-      Optional<T> opt = AsyncUtil.getInstance().blockingSingle(
+      Optional<T> opt = AsyncUtil.getInstance().blockingGet(
               httpObservable(supplier)
       );
       return opt.orElse(null);

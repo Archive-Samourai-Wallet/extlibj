@@ -19,53 +19,36 @@ public class AsyncUtil {
         return instance;
     }
 
-    public <T> T blockingSingle(Single<T> o) throws Exception {
+    public <T> T unwrapException(Callable<T> c) throws Exception {
         try {
-            return o.blockingGet();
+            return c.call();
         } catch (RuntimeException e) {
-            // blockingGet wraps errors with RuntimeException, unwrap it
-            if (e.getCause() != null && e instanceof Exception) {
-                throw (Exception)e.getCause();
-            }
-            throw e;
+            throw unwrapException(e);
         }
+    }
+
+    public Exception unwrapException(RuntimeException e) throws Exception {
+        // blockingXXX wraps errors with RuntimeException, unwrap it
+        if (e.getCause() != null && e instanceof Exception) {
+            throw (Exception)e.getCause();
+        }
+        throw e;
+    }
+
+    public <T> T blockingGet(Single<T> o) throws Exception {
+        return unwrapException(() -> o.blockingGet());
     }
 
     public <T> T blockingSingle(Observable<T> o) throws Exception {
-        try {
-            return o.blockingSingle();
-        } catch (RuntimeException e) {
-            // blockingSingle wraps errors with RuntimeException, unwrap it
-            if (e.getCause() != null && e instanceof Exception) {
-                throw (Exception)e.getCause();
-            }
-            throw e;
-        }
+        return unwrapException(() -> o.blockingSingle());
     }
 
-    public <T> T blockingLast(Observable<T> o, Consumer<T> onMessage) throws Exception {
-        try {
-            o.subscribe(onMessage);
-            return o.blockingLast();
-        } catch (RuntimeException e) {
-            // blockingSingle wraps errors with RuntimeException, unwrap it
-            if (e.getCause() != null && e instanceof Exception) {
-                throw (Exception)e.getCause();
-            }
-            throw e;
-        }
+    public <T> T blockingLast(Observable<T> o) throws Exception {
+        return unwrapException(() -> o.blockingLast());
     }
 
     public void blockingAwait(Completable o) throws Exception {
-        try {
-            o.blockingAwait();
-        } catch (RuntimeException e) {
-            // blockingAwait wraps errors with RuntimeException, unwrap it
-            if (e.getCause() != null && e instanceof Exception) {
-                throw (Exception)e.getCause();
-            }
-            throw e;
-        }
+        unwrapException(() -> {o.blockingAwait(); return null;});
     }
 
     public <T> Observable<T> runIOAsync(final Callable<T> callable) {
