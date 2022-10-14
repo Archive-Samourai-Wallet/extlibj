@@ -1,8 +1,11 @@
 package com.samourai.wallet.send;
 
 import com.samourai.wallet.api.backend.beans.UnspentOutput;
+import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 //import org.apache.commons.lang3.tuple.Pair;
 
@@ -112,6 +115,15 @@ public class UTXO {
             ret += utxo.getOutpoints().size();
         }
         return ret;
+    }
+
+    // used by Android
+    public static List<UTXO> filterUtxosWpkh(List<UTXO> utxos) {
+        return utxos.stream().filter(utxo -> {
+            // filter wpkh
+            String script = Hex.toHexString(utxo.getOutpoints().get(0).getScriptBytes());
+            return Bech32UtilGeneric.getInstance().isP2WPKHScript(script);
+        }).collect(Collectors.toList());
     }
 
 }

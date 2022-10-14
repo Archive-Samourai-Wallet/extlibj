@@ -5,6 +5,7 @@ import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsTypeUser;
 import com.samourai.wallet.cahoots.CahootsUtxo;
 import com.samourai.wallet.cahoots.CahootsWallet;
+import com.samourai.wallet.cahoots.multi.MultiCahootsContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +58,23 @@ public abstract class CahootsContext implements SorobanContext {
                 throw new Exception("Unknown Cahoots type");
         }
         return cahootsContext;
+    }
+
+    public static CahootsContext newInitiator(CahootsWallet cahootsWallet, CahootsType cahootsType, int account, long feePerB, long amount, String address, String paynymDestination) throws Exception {
+        switch (cahootsType) {
+            case STONEWALLX2:
+                return Stonewallx2Context.newInitiator(
+                                cahootsWallet, account, feePerB, amount, address, paynymDestination);
+
+            case STOWAWAY:
+                return StowawayContext.newInitiator(cahootsWallet, account, feePerB, amount);
+
+            case MULTI:
+                return MultiCahootsContext.newInitiator(cahootsWallet, account, feePerB, amount, address, paynymDestination);
+
+            default:
+                throw new Exception("Unknown CahootsType");
+        }
     }
 
     public CahootsWallet getCahootsWallet() {
