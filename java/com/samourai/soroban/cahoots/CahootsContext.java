@@ -9,10 +9,7 @@ import com.samourai.wallet.cahoots.multi.MultiCahootsContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public abstract class CahootsContext implements SorobanContext {
     private static final Logger log = LoggerFactory.getLogger(CahootsContext.class);
@@ -24,8 +21,10 @@ public abstract class CahootsContext implements SorobanContext {
     private Long feePerB; // only set for initiator
     private Long amount; // only set for initiator
     private String address; // only set for initiator
-    private Set<String> outputAddresses;
-    private List<CahootsUtxo> inputs;
+    private Set<String> outputAddresses; // keep track of our own change addresses outputs
+    private List<CahootsUtxo> inputs; // keep track of our own inputs
+    private long samouraiFee; // keep track of samourai fee
+    private long minerFeePaid; // keep track of paid minerFee (lower or equals cahoots.fee)
 
     protected CahootsContext(CahootsWallet cahootsWallet, CahootsTypeUser typeUser, CahootsType cahootsType, int account, Long feePerB, Long amount, String address) {
         this.cahootsWallet = cahootsWallet;
@@ -37,6 +36,8 @@ public abstract class CahootsContext implements SorobanContext {
         this.address = address;
         this.outputAddresses = new LinkedHashSet<>();
         this.inputs = new LinkedList<>();
+        this.samouraiFee = 0;
+        this.minerFeePaid = 0;
     }
 
     public static CahootsContext newCounterparty(CahootsWallet cahootsWallet, CahootsType cahootsType, int account) throws Exception {
@@ -123,5 +124,21 @@ public abstract class CahootsContext implements SorobanContext {
 
     public List<CahootsUtxo> getInputs() {
         return inputs;
+    }
+
+    public long getSamouraiFee() {
+        return samouraiFee;
+    }
+
+    public void setSamouraiFee(long samouraiFee) {
+        this.samouraiFee = samouraiFee;
+    }
+
+    public long getMinerFeePaid() {
+        return minerFeePaid;
+    }
+
+    public void setMinerFeePaid(long minerFeePaid) {
+        this.minerFeePaid = minerFeePaid;
     }
 }

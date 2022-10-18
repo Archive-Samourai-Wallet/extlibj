@@ -21,12 +21,6 @@ public class AsyncUtilTest {
   }
 
   @Test
-  public void blockingSingle_success() throws Exception {
-    int result = asyncUtil.blockingSingle(Observable.fromArray(123));
-    Assertions.assertEquals(123, result);
-  }
-
-  @Test
   public void blockingGet_error() throws Exception {
     try {
       asyncUtil.blockingGet(Single.error(new IllegalArgumentException("test")));
@@ -40,16 +34,6 @@ public class AsyncUtilTest {
   public void blockingGet_success() throws Exception {
     int result = asyncUtil.blockingGet(Single.just(123));
     Assertions.assertEquals(123, result);
-  }
-
-  @Test
-  public void blockingSingle_error() throws Exception {
-    try {
-      asyncUtil.blockingSingle(Observable.error(new IllegalArgumentException("test")));
-      Assertions.assertTrue(false);
-    } catch (IllegalArgumentException e) {
-      Assertions.assertEquals("test",e.getMessage());
-    }
   }
 
   @Test
@@ -83,14 +67,14 @@ public class AsyncUtilTest {
 
   @Test
   public void runIOAsync_success() throws Exception {
-      String result = asyncUtil.blockingSingle(asyncUtil.runIOAsync(() -> "ok"));
+      String result = asyncUtil.blockingGet(asyncUtil.runIOAsync(() -> "ok"));
       Assertions.assertEquals("ok", result);
   }
 
   @Test
   public void runIOAsync_error() throws Exception {
     try {
-      asyncUtil.blockingSingle(asyncUtil.runIOAsync(() -> {
+      asyncUtil.blockingGet(asyncUtil.runIOAsync(() -> {
         throw new IllegalArgumentException("test");
       }));
       Assertions.assertTrue(false);
@@ -105,18 +89,18 @@ public class AsyncUtilTest {
     Callable callable = () -> counter++;
 
     // simple run
-    asyncUtil.blockingSingle(asyncUtil.runIOAsync(callable));
+    asyncUtil.blockingGet(asyncUtil.runIOAsync(callable));
     Assertions.assertEquals(1, counter);
 
     // with doOnComplete
-    asyncUtil.blockingSingle(asyncUtil.runIOAsync(callable)
-            .doOnComplete(
-                    () -> {
+    asyncUtil.blockingGet(asyncUtil.runIOAsync(callable)
+            .doOnSuccess(
+                    v -> {
                       Assertions.assertEquals(2, counter);
                       counter++;
                     })
-            .doOnComplete(
-                    () -> {
+            .doOnSuccess(
+                    v -> {
                       Assertions.assertEquals(3, counter);
                       counter++;
                     })

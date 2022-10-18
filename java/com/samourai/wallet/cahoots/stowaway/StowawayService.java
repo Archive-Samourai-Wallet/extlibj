@@ -329,6 +329,9 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         outputsB.add(spendOutput);
         stowaway1.getTransaction().clearOutputs(); // replace spend output by the new one
 
+        // keep track of minerFeePaid
+        cahootsContext.setMinerFeePaid(fee); // sender pays all minerFee
+
         // change output
         BipAddress changeAddress = cahootsWallet.fetchAddressChange(stowaway1.getAccount(), true, BIP_FORMAT.SEGWIT_NATIVE);
         if (log.isDebugEnabled()) {
@@ -343,6 +346,18 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
 
         debug("END doStowaway2", stowaway2, cahootsContext);
         return stowaway2;
+    }
+
+    //
+    // counterparty
+    //
+    @Override
+    public Stowaway doStep3(Stowaway cahoots2, StowawayContext cahootsContext) throws Exception {
+        Stowaway cahoots3 = super.doStep3(cahoots2, cahootsContext);
+
+        // keep track of minerFeePaid
+        cahootsContext.setMinerFeePaid(0); // counterparty pays no minerFee
+        return cahoots3;
     }
 
     private long estimatedFee(int nbTotalSelectedOutPoints, int nbIncomingInputs, long feePerB) {

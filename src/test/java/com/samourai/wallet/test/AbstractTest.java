@@ -152,10 +152,12 @@ public class AbstractTest {
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
-  protected void verifySpendTx(SpendTx spendTx, SpendType spendType, Collection<com.samourai.wallet.send.UTXO> utxos, long fee, long amount, long change, BipFormat changeFormat) throws Exception {
+  protected void verifySpendTx(SpendTx spendTx, SpendType spendType, Collection<com.samourai.wallet.send.UTXO> utxos, long minerFeeTotal, long minerFeePaid, long samouraiFee, long amount, long change, BipFormat changeFormat) throws Exception {
     Assertions.assertEquals(spendType, spendTx.getSpendType());
     assertEquals(utxos, spendTx.getSpendFrom());
-    Assertions.assertEquals(fee, spendTx.getFee());
+    Assertions.assertEquals(minerFeeTotal, spendTx.getMinerFeeTotal());
+    Assertions.assertEquals(minerFeePaid, spendTx.getMinerFeePaid());
+    Assertions.assertEquals(samouraiFee, spendTx.getSamouraiFee());
     Assertions.assertEquals(amount, spendTx.getAmount());
     Assertions.assertEquals(change, spendTx.getChange());
     Assertions.assertEquals(changeFormat, spendTx.getChangeFormat());

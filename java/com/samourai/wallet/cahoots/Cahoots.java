@@ -7,6 +7,7 @@ import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.send.beans.SpendTx;
+import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.util.TxUtil;
 import org.bitcoinj.core.ECKey;
@@ -186,7 +187,7 @@ public abstract class Cahoots {
 
     public abstract PSBT getPSBT();
 
-    public abstract SpendTx getSpendTx(CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider);
+    public abstract SpendTx getSpendTx(CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) throws SpendException;
 
     public void pushTx(IPushTx pushTx) throws Exception {
         String txHex = TxUtil.getInstance().getTxHex(getTransaction());

@@ -401,8 +401,12 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
             throw new Exception("Cannot compose #Cahoots: invalid tx outputs");
         }
 
+        // keep track of minerFeePaid
+        long minerFeePaid = fee / 2L;
+        cahootsContext.setMinerFeePaid(minerFeePaid); // sender & counterparty pay half minerFee
+
         // counterparty pays half of fees
-        Coin _value = Coin.valueOf(counterpartyChangeOutput.getValue().longValue() - (fee / 2L));
+        Coin _value = Coin.valueOf(counterpartyChangeOutput.getValue().longValue() - minerFeePaid);
         if (log.isDebugEnabled()) {
             log.debug("output value post fee:" + _value);
         }
@@ -428,7 +432,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         if (log.isDebugEnabled()) {
             log.debug("+output (Spender change) = " + changeAddress);
         }
-        TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stonewall1.getSpendAmount()) - (fee / 2L), cahootsContext);
+        TransactionOutput output_B0 = computeTxOutput(changeAddress, (totalSelectedAmount - stonewall1.getSpendAmount()) - minerFeePaid, cahootsContext);
         outputsB.add(output_B0);
 
         // destination output
@@ -440,6 +444,19 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
 
         debug("END doSTONEWALLx2_2",stonewall2, cahootsContext);
         return stonewall2;
+    }
+
+    //
+    // counterparty
+    //
+    @Override
+    public STONEWALLx2 doStep3(STONEWALLx2 cahoots2, Stonewallx2Context cahootsContext) throws Exception {
+        STONEWALLx2 cahoots3 = super.doStep3(cahoots2, cahootsContext);
+
+        // keep track of minerFeePaid
+        long minerFeePaid = cahoots3.getFeeAmount() / 2L;
+        cahootsContext.setMinerFeePaid(minerFeePaid); // sender & counterparty pay half minerFee
+        return cahoots3;
     }
 
     private long estimatedFee(int nbTotalSelectedOutPoints, int nbIncomingInputs, String destination, long feePerB) {

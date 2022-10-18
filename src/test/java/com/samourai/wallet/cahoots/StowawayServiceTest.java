@@ -51,7 +51,7 @@ public class StowawayServiceTest extends AbstractCahootsTest {
 
         // verify SpendTx
         SpendTx spendTx = cahoots.getSpendTx(cahootsContextSender, utxoProviderSender);
-        verifySpendTx(spendTx, SpendType.CAHOOTS_STOWAWAY, Arrays.asList(utxoSender1), 216, spendAmount, 0, BIP_FORMAT.SEGWIT_NATIVE);
+        verifySpendTx(spendTx, SpendType.CAHOOTS_STOWAWAY, Arrays.asList(utxoSender1), 216, 216, 0, spendAmount, 4784L, BIP_FORMAT.SEGWIT_NATIVE);
     }
 
     @Test
@@ -59,7 +59,7 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         int account = SamouraiAccountIndex.POSTMIX;
 
         // setup wallets
-        utxoProviderSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        UTXO utxoSender1 = utxoProviderSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
         utxoProviderCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // setup Cahoots
@@ -78,5 +78,9 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         outputs.put(SENDER_CHANGE_POSTMIX_84[0], 4784L);
         verifyTx(cahoots.getTransaction(), txid, raw, outputs);
         pushTx.assertTx(txid, raw);
+
+        // verify SpendTx
+        SpendTx spendTx = cahoots.getSpendTx(cahootsContextSender, utxoProviderSender);
+        verifySpendTx(spendTx, SpendType.CAHOOTS_STOWAWAY, Arrays.asList(utxoSender1), 216, 216, 0, spendAmount, 4784L, BIP_FORMAT.SEGWIT_NATIVE);
     }
 }

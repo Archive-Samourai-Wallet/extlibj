@@ -9,6 +9,7 @@ import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.send.beans.SpendTx;
+import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.util.TxUtil;
 import org.bitcoinj.core.ECKey;
@@ -145,7 +146,7 @@ public class MultiCahoots extends Cahoots {
     }
 
     @Override
-    public SpendTx getSpendTx(CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) {
+    public SpendTx getSpendTx(CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) throws SpendException {
         // forward stonewallx2 SpendTx
         CahootsContext stonewallx2Context = ((MultiCahootsContext)cahootsContext).getStonewallx2Context();
         return stonewallx2.getSpendTx(stonewallx2Context, utxoKeyProvider);

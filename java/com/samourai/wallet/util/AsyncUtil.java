@@ -39,10 +39,6 @@ public class AsyncUtil {
         return unwrapException(() -> o.blockingGet());
     }
 
-    public <T> T blockingSingle(Observable<T> o) throws Exception {
-        return unwrapException(() -> o.blockingSingle());
-    }
-
     public <T> T blockingLast(Observable<T> o) throws Exception {
         return unwrapException(() -> o.blockingLast());
     }
@@ -51,8 +47,8 @@ public class AsyncUtil {
         unwrapException(() -> {o.blockingAwait(); return null;});
     }
 
-    public <T> Observable<T> runIOAsync(final Callable<T> callable) {
-        return Observable.fromCallable(() -> callable.call()).subscribeOn(Schedulers.io());
+    public <T> Single<T> runIOAsync(final Callable<T> callable) {
+        return Single.fromCallable(() -> callable.call()).subscribeOn(Schedulers.io());
     }
 
     public Completable runIOAsyncCompletable(final Action action) {
@@ -60,7 +56,7 @@ public class AsyncUtil {
     }
 
     public <T> T runIO(final Callable<T> callable) throws Exception {
-        return blockingSingle(runIOAsync(callable));
+        return blockingGet(runIOAsync(callable));
     }
 
     public void runIO(final Action action) throws Exception {

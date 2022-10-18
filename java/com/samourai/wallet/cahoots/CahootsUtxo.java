@@ -44,7 +44,7 @@ public class CahootsUtxo extends UTXO {
 
     public static List<CahootsUtxo> toCahootsUtxos(Collection<UTXO> utxos, UtxoKeyProvider keyProvider) {
         return utxos.stream().map(utxo -> {
-            MyTransactionOutPoint outPoint = utxo.getOutpoints().get(0);
+            MyTransactionOutPoint outPoint = utxo.getOutpoints().get(0); // TODO
             try {
                 byte[] key = keyProvider._getPrivKey(outPoint.getHash().toString(), (int) outPoint.getIndex());
                 return new CahootsUtxo(outPoint, utxo.getPath(), key);

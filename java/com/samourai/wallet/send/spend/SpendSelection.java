@@ -8,6 +8,7 @@ import com.samourai.wallet.send.SendFactoryGeneric;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.beans.SpendError;
 import com.samourai.wallet.send.beans.SpendTx;
+import com.samourai.wallet.send.beans.SpendTxSimple;
 import com.samourai.wallet.send.beans.SpendType;
 import com.samourai.wallet.send.exceptions.MakeTxException;
 import com.samourai.wallet.send.exceptions.SignTxException;
@@ -72,7 +73,7 @@ public abstract class SpendSelection {
         return change;
     }
 
-    protected SpendTx computeSpendTx(BipFormat changeFormat, long amount, long fee, long change, Map<String, Long> receivers, boolean rbfOptIn, UtxoKeyProvider keyProvider, NetworkParameters params, long blockHeight) throws SpendException {
+    protected SpendTx computeSpendTx(BipFormat changeFormat, long amount, long minerFee, long change, Map<String, Long> receivers, boolean rbfOptIn, UtxoKeyProvider keyProvider, NetworkParameters params, long blockHeight) throws SpendException {
         // spend tx
         Transaction tx;
         try {
@@ -90,11 +91,11 @@ public abstract class SpendSelection {
         byte[] serialized = tx.bitcoinSerialize();
 
         // check fee
-        if (fee != tx.getFee().value) {
-            log.error("fee check failed: "+fee+" vs "+tx.getFee().value);
+        if (minerFee != tx.getFee().value) {
+            log.error("fee check failed: "+minerFee+" vs "+tx.getFee().value);
             throw new SpendException(SpendError.MAKING);
         }
-        if ((tx.hasWitness() && (fee < tx.getVirtualTransactionSize())) || (!tx.hasWitness() && (fee < serialized.length))) {
+        if ((tx.hasWitness() && (minerFee < tx.getVirtualTransactionSize())) || (!tx.hasWitness() && (minerFee < serialized.length))) {
             throw new SpendException(SpendError.INSUFFICIENT_FEE);
         }
 
@@ -140,14 +141,6 @@ public abstract class SpendSelection {
             }
         }*/
 
-        // consistency check
-        long totalValueSelected = getTotalValueSelected();
-        if((amount+fee+change) > totalValueSelected){
-            // should never happen
-            log.error("inconsistency detected! amount="+amount+", fee="+fee+", change="+change+", totalValueSelected="+totalValueSelected);
-            throw new SpendException(SpendError.INSUFFICIENT_FUNDS);
-        }
-
-        return new SpendTx(spendType, changeFormat, amount, fee, change, getSpendFrom(), receivers, tx);
+        return new SpendTxSimple(spendType, changeFormat, amount, minerFee, 0, change, getSpendFrom(), receivers, tx);
     }
 }

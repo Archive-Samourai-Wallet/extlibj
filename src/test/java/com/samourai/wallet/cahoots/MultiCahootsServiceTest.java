@@ -72,7 +72,7 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
 
         // verify stonewallx2 as SpendTx
         SpendTx spendTx = cahoots.getSpendTx(contextSender, utxoProviderSender);
-        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, spendAmount, 0, BIP_FORMAT.SEGWIT_NATIVE);
+        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, 142, 0, spendAmount, 4858L, BIP_FORMAT.SEGWIT_NATIVE);
     }
 
     @Test
