@@ -59,7 +59,7 @@ public class SpendBuilder {
                 log.debug("spend type:" + spendSelection.getSpendType());
                 log.debug("amount:" + amount);
                 log.debug("total value selected:" + spendSelection.getTotalValueSelected());
-                log.debug("fee:" + spendTx.getFee());
+                log.debug("minerFeeTotal:" + spendTx.getMinerFeeTotal());
                 log.debug("nb inputs:" + spendTx.getSpendFrom().size());
             }
         }

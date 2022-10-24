@@ -7,10 +7,11 @@ import com.samourai.xmanager.protocol.XManagerEnv;
 import com.samourai.xmanager.protocol.XManagerProtocol;
 import com.samourai.xmanager.protocol.XManagerService;
 import com.samourai.xmanager.protocol.rest.*;
-import io.reactivex.Observable;
-import java.util.Optional;
+import io.reactivex.Single;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 public class XManagerClient {
   private static final Logger log = LoggerFactory.getLogger(XManagerClient.class);
@@ -32,7 +33,7 @@ public class XManagerClient {
     this.httpClient = httpClient;
   }
 
-  public Observable<Optional<AddressResponse>> getAddressResponse(XManagerService service) {
+  public Single<Optional<AddressResponse>> getAddressResponse(XManagerService service) {
     String url = protocol.getUrlAddress(serverUrl);
     AddressRequest request = new AddressRequest(service.name());
     return httpClient.postJson(url, AddressResponse.class, null, request);
@@ -41,8 +42,8 @@ public class XManagerClient {
   public String getAddressOrDefault(XManagerService service) {
     String address = null;
     try {
-      Observable<Optional<AddressResponse>> responseObservable = getAddressResponse(service);
-      address = asyncUtil.blockingSingle(responseObservable).get().address;
+      Single<Optional<AddressResponse>> responseObservable = getAddressResponse(service);
+      address = asyncUtil.blockingGet(responseObservable).get().address;
     } catch (Exception e) {
       log.error("getAddressResponse(" + service.name() + ") failed", e);
     }
@@ -69,7 +70,7 @@ public class XManagerClient {
     return receiveAddress;
   }
 
-  public Observable<Optional<AddressIndexResponse>> getAddressIndexResponse(
+  public Single<Optional<AddressIndexResponse>> getAddressIndexResponse(
       XManagerService service) {
     String url = protocol.getUrlAddressIndex(serverUrl);
     AddressIndexRequest request = new AddressIndexRequest(service.name());
@@ -79,9 +80,9 @@ public class XManagerClient {
   public AddressIndexResponse getAddressIndexOrDefault(XManagerService service) {
     AddressIndexResponse response = null;
     try {
-      Observable<Optional<AddressIndexResponse>> responseObservable =
+      Single<Optional<AddressIndexResponse>> responseObservable =
           getAddressIndexResponse(service);
-      response = asyncUtil.blockingSingle(responseObservable).get();
+      response = asyncUtil.blockingGet(responseObservable).get();
     } catch (Exception e) {
       log.error("getAddressIndexResponse(" + service.name() + ") failed", e);
     }
@@ -102,7 +103,7 @@ public class XManagerClient {
     return response;
   }
 
-  public Observable<Optional<VerifyAddressIndexResponse>> verifyAddressIndexResponseAsync(
+  public Single<Optional<VerifyAddressIndexResponse>> verifyAddressIndexResponseAsync(
       XManagerService service, String address, int index) {
     String url = protocol.getUrlVerifyAddressIndex(serverUrl);
     VerifyAddressIndexRequest request =
@@ -113,9 +114,9 @@ public class XManagerClient {
   public boolean verifyAddressIndexResponse(XManagerService service, String address, int index)
       throws Exception {
     try {
-      Observable<Optional<VerifyAddressIndexResponse>> responseObservable =
+      Single<Optional<VerifyAddressIndexResponse>> responseObservable =
           verifyAddressIndexResponseAsync(service, address, index);
-      return asyncUtil.blockingSingle(responseObservable).get().valid;
+      return asyncUtil.blockingGet(responseObservable).get().valid;
     } catch (Exception e) {
       log.error("verifyAddressIndexResponse(" + service.name() + ") failed", e);
       throw e;

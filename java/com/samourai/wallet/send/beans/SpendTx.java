@@ -1,124 +1,62 @@
 package com.samourai.wallet.send.beans;
 
+import com.samourai.wallet.api.backend.IPushTx;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.send.MyTransactionOutPoint;
-import com.samourai.wallet.send.SendFactoryGeneric;
-import com.samourai.wallet.send.exceptions.MakeTxException;
-import com.samourai.wallet.send.exceptions.SignTxException;
 import com.samourai.wallet.send.exceptions.SpendException;
-import com.samourai.wallet.send.provider.UtxoKeyProvider;
-import com.samourai.wallet.send.spend.SpendSelection;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionOutPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
-public class SpendTx {
+public abstract class SpendTx {
     private static final Logger log = LoggerFactory.getLogger(SpendTx.class);
+    private SpendType spendType;
     private BipFormat changeFormat;
     private long amount;
-    private long fee;
+    private long minerFeeTotal;
+    private long minerFeePaid;
+    private long samouraiFee;
     private long change;
-    private SpendSelection spendSelection;
+    private List<MyTransactionOutPoint> spendFrom;
     private Map<String, Long> receivers;
-    private boolean rbfOptIn;
-    private int vSize;
+    private int virtualTransactionSize;
     private int weight;
-    private Transaction tx;
+    private String txid;
 
-    public SpendTx(BipFormat changeFormat, long amount, long fee, long change, SpendSelection spendSelection, Map<String, Long> receivers, boolean rbfOptIn, UtxoKeyProvider keyProvider, NetworkParameters params, long blockHeight) throws SpendException {
-        // consistency check
-        long totalValueSelected = spendSelection.getTotalValueSelected();
-        if((amount+fee+change) > totalValueSelected){
-            // should never happen
-            log.error("inconsistency detected! amount="+amount+", fee="+fee+", change="+change+", totalValueSelected="+totalValueSelected);
-            throw new SpendException(SpendError.INSUFFICIENT_FUNDS);
-        }
-
+    public SpendTx(SpendType spendType, BipFormat changeFormat, long amount, long minerFeeTotal, long minerFeePaid, long samouraiFee, long change, List<MyTransactionOutPoint> spendFrom, Map<String, Long> receivers, int virtualTransactionSize, int weight, String txid) throws SpendException {
+        this.spendType = spendType;
         this.changeFormat = changeFormat;
         this.amount = amount;
-        this.fee = fee;
-        this.spendSelection = spendSelection;
+        this.minerFeeTotal = minerFeeTotal;
+        this.minerFeePaid = minerFeePaid;
+        this.samouraiFee = samouraiFee;
+        this.spendFrom = spendFrom;
         this.receivers = receivers;
         this.change = change;
-        this.rbfOptIn = rbfOptIn;
+        this.virtualTransactionSize = virtualTransactionSize;
+        this.weight = weight;
+        this.txid = txid;
 
-        this.tx = this.computeTx(keyProvider, params, blockHeight);
-        this.vSize = tx.getVirtualTransactionSize();
-        this.weight = tx.getWeight();
+        // consistency check
+        long sumSpendFrom = spendFrom.stream().mapToLong(o -> o.getValue().getValue()).sum();
+        if((amount + samouraiFee + change + minerFeePaid) != sumSpendFrom){
+            // should never happen
+            log.error("inconsistency detected! (amount="+amount+" + samouraiFee="+samouraiFee+" + change="+change+" + minerFeePaid="+minerFeePaid+") != sumSpendFrom="+sumSpendFrom);
+            throw new SpendException(SpendError.MAKING);
+        }
+
+        if(minerFeePaid > minerFeeTotal){
+            // should never happen
+            log.error("inconsistency detected! minerFeePaid="+minerFeePaid+" > minerFeeTotal="+minerFeeTotal);
+            throw new SpendException(SpendError.MAKING);
+        }
     }
 
-    private Transaction computeTx(UtxoKeyProvider keyProvider, NetworkParameters params, long blockHeight) throws SpendException {
-        // spend tx
-        Transaction tx;
-        try {
-            tx = SendFactoryGeneric.getInstance().makeTransaction(receivers, getSpendFrom(), keyProvider.getBipFormatSupplier(), rbfOptIn, params, blockHeight);
-        } catch (MakeTxException e) {
-            log.error("MakeTxException", e);
-            throw new SpendException(SpendError.MAKING);
-        }
-        try {
-            tx = SendFactoryGeneric.getInstance().signTransaction(tx, keyProvider);
-        } catch (SignTxException e) {
-            log.error("spendTx failed", e);
-            throw new SpendException(SpendError.SIGNING);
-        }
-        byte[] serialized = tx.bitcoinSerialize();
-
-        // check fee
-        if (fee != tx.getFee().value) {
-            log.error("fee check failed: "+fee+" vs "+tx.getFee().value);
-            throw new SpendException(SpendError.MAKING);
-        }
-        if ((tx.hasWitness() && (fee < tx.getVirtualTransactionSize())) || (!tx.hasWitness() && (fee < serialized.length))) {
-            throw new SpendException(SpendError.INSUFFICIENT_FEE);
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("size:" + serialized.length);
-            log.debug("vsize:" + tx.getVirtualTransactionSize());
-            log.debug("fee:" + tx.getFee().value);
-        }
-
-        /*final RBFSpend rbf;
-        if (rbfOptIn) {
-            rbf = new RBFSpend();
-            for (TransactionInput input : tx.getInputs()) {
-                String _addr = TxUtil.getInstance().getToAddress(input.getConnectedOutput());
-                AddressType addressType = AddressType.findByAddress(_addr, params);
-                String path = APIFactory.getInstance(TxAnimUIActivity.this).getUnspentPaths().get(_addr);
-                if (path != null) {
-                    if (addressType == AddressType.SEGWIT_NATIVE || addressType == AddressType.SEGWIT_COMPAT) {
-                        path += "/"+addressType.getPurpose();
-                    }
-                    rbf.addKey(input.getOutpoint().toString(), path);
-                } else {
-                    // TODO zeroleak paymentcodes
-                    /*String pcode = BIP47Meta.getInstance().getPCode4Addr(_addr);
-                    int idx = BIP47Meta.getInstance().getIdx4Addr(_addr);
-                    rbf.addKey(input.getOutpoint().toString(), pcode + "/" + idx);*//*
-                }
-            }
-        } else {
-            rbf = null;
-        }
-
-        // TODO zeroleak strict mode
-        /*
-        final List<Integer> strictModeVouts = new ArrayList<Integer>();
-        if (SendParams.getInstance().getDestAddress() != null && SendParams.getInstance().getDestAddress().compareTo("") != 0 &&
-                PrefsUtil.getInstance(TxAnimUIActivity.this).getValue(PrefsUtil.STRICT_OUTPUTS, true) == true) {
-            List<Integer> idxs = SendParams.getInstance().getSpendOutputIndex(tx);
-            for(int i = 0; i < tx.getOutputs().size(); i++)   {
-                if(!idxs.contains(i))   {
-                    strictModeVouts.add(i);
-                }
-            }
-        }*/
-        return tx;
+    public SpendType getSpendType() {
+        return spendType;
     }
 
     public BipFormat getChangeFormat() {
@@ -129,8 +67,16 @@ public class SpendTx {
         return amount;
     }
 
-    public long getFee() {
-        return fee;
+    public long getMinerFeeTotal() {
+        return minerFeeTotal;
+    }
+
+    public long getMinerFeePaid() {
+        return minerFeePaid;
+    }
+
+    public long getSamouraiFee() {
+        return samouraiFee;
     }
 
     public long getChange() {
@@ -141,23 +87,25 @@ public class SpendTx {
         return receivers;
     }
 
-    public List<MyTransactionOutPoint> getSpendFrom() {
-        return spendSelection.getSpendFrom();
+    public List<? extends TransactionOutPoint> getSpendFrom() {
+        return spendFrom;
     }
 
-    public SpendType getSpendType() {
-        return spendSelection.getSpendType();
+    public Map<String, Long> getReceivers() {
+        return receivers;
     }
 
-    public int getvSize() {
-        return vSize;
+    public int getVirtualTransactionSize() {
+        return virtualTransactionSize;
     }
 
     public int getWeight() {
         return weight;
     }
 
-    public Transaction getTx() {
-        return tx;
+    public String getTxid() {
+        return txid;
     }
+
+    public abstract void pushTx(IPushTx pushTx) throws Exception;
 }

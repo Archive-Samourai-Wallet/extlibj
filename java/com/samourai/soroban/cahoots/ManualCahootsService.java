@@ -4,14 +4,16 @@ import com.samourai.soroban.client.SorobanInteraction;
 import com.samourai.soroban.client.SorobanMessageService;
 import com.samourai.soroban.client.SorobanReply;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
-import com.samourai.wallet.cahoots.*;
+import com.samourai.wallet.cahoots.AbstractCahootsService;
+import com.samourai.wallet.cahoots.Cahoots;
+import com.samourai.wallet.cahoots.CahootsType;
+import com.samourai.wallet.cahoots.CahootsTypeUser;
 import com.samourai.wallet.cahoots.multi.MultiCahoots;
 import com.samourai.wallet.cahoots.multi.MultiCahootsService;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
-import com.samourai.xmanager.client.XManagerClient;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,31 +21,25 @@ import org.slf4j.LoggerFactory;
 public class ManualCahootsService extends SorobanMessageService<ManualCahootsMessage, CahootsContext> {
     private static final Logger log = LoggerFactory.getLogger(ManualCahootsService.class);
 
-    private CahootsWallet cahootsWallet;
     private StowawayService stowawayService;
     private Stonewallx2Service stonewallx2Service;
     private MultiCahootsService multiCahootsService;
 
-    public ManualCahootsService(CahootsWallet cahootsWallet, StowawayService stowawayService, Stonewallx2Service stonewallx2Service, MultiCahootsService multiCahootsService) {
-        this.cahootsWallet = cahootsWallet;
+    public ManualCahootsService(StowawayService stowawayService, Stonewallx2Service stonewallx2Service, MultiCahootsService multiCahootsService) {
         this.stowawayService = stowawayService;
         this.stonewallx2Service = stonewallx2Service;
         this.multiCahootsService = multiCahootsService;
     }
 
-    public ManualCahootsService(CahootsWallet cahootsWallet, XManagerClient xManagerClient) {
-        BipFormatSupplier bipFormatSupplier = cahootsWallet.getBipFormatSupplier();
-        NetworkParameters params = cahootsWallet.getParams();
-
-        this.cahootsWallet = cahootsWallet;
+    public ManualCahootsService(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
         this.stowawayService = new StowawayService(bipFormatSupplier, params);
         this.stonewallx2Service = new Stonewallx2Service(bipFormatSupplier, params);
-        this.multiCahootsService = new MultiCahootsService(bipFormatSupplier, params, stonewallx2Service, stowawayService, xManagerClient);
+        this.multiCahootsService = new MultiCahootsService(bipFormatSupplier, params, stonewallx2Service, stowawayService);
     }
 
     public ManualCahootsMessage initiate(CahootsContext cahootsContext) throws Exception {
         AbstractCahootsService cahootsService = getCahootsService(cahootsContext.getCahootsType());
-        Cahoots payload0 = cahootsService.startInitiator(cahootsWallet, cahootsContext);
+        Cahoots payload0 = cahootsService.startInitiator(cahootsContext);
         ManualCahootsMessage response = new ManualCahootsMessage(payload0);
 
         verifyResponse(cahootsContext, response, cahootsService, null);
@@ -64,11 +60,11 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
         SorobanReply response;
         if (payload.getStep() == 0) {
             // new Cahoots as counterparty/receiver
-            Cahoots cahootsResponse = cahootsService.startCollaborator(cahootsWallet, cahootsContext, payload);
+            Cahoots cahootsResponse = cahootsService.startCollaborator(cahootsContext, payload);
             response = new ManualCahootsMessage(cahootsResponse);
         } else {
             // continue existing Cahoots
-            Cahoots cahootsResponse = cahootsService.reply(cahootsWallet, cahootsContext, payload);
+            Cahoots cahootsResponse = cahootsService.reply(cahootsContext, payload);
 
             // check for interaction
             SorobanInteraction interaction = cahootsService.checkInteraction(request, cahootsResponse);

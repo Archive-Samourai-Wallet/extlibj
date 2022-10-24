@@ -8,13 +8,17 @@ import com.samourai.wallet.bip47.BIP47UtilGeneric;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.bip47.rpc.java.Bip47UtilJava;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
+import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
 import com.samourai.wallet.payload.PayloadUtilGeneric;
-import com.samourai.wallet.send.provider.SimpleUtxoProvider;
+import com.samourai.wallet.send.UTXO;
+import com.samourai.wallet.send.beans.SpendTx;
+import com.samourai.wallet.send.beans.SpendType;
+import com.samourai.wallet.send.provider.MockUtxoProvider;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.TxUtil;
 import com.samourai.wallet.util.Z85;
@@ -28,9 +32,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class AbstractTest {
@@ -54,7 +57,7 @@ public class AbstractTest {
   protected HD_Wallet bip44w;
   protected BIP47Wallet bip47Wallet;
   protected BackendApi backendApi;
-  protected SimpleUtxoProvider utxoProvider;
+  protected MockUtxoProvider utxoProvider;
   protected XManagerClient xManagerClient;
   protected BIP47UtilGeneric bip47Util = Bip47UtilJava.getInstance();
   protected MockPushTx pushTx = new MockPushTx(params);
@@ -76,7 +79,7 @@ public class AbstractTest {
     bip44w = hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE, params);
     bip47Wallet = new BIP47Wallet(bip44w);
     walletSupplier = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip44w);
-    utxoProvider = new SimpleUtxoProvider(bip44w.getParams(), walletSupplier);
+    utxoProvider = new MockUtxoProvider(bip44w.getParams(), walletSupplier);
     xManagerClient = new XManagerClient(httpClient, true, false) {
       @Override
       public String getAddressOrDefault(XManagerService service) {
@@ -147,5 +150,26 @@ public class AbstractTest {
   protected Map<String,Long> sortMapOutputs(Map<String,Long> map) {
     return map.entrySet().stream().sorted(Map.Entry.comparingByKey())
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+  }
+
+  protected void verifySpendTx(SpendTx spendTx, SpendType spendType, Collection<com.samourai.wallet.send.UTXO> utxos, long minerFeeTotal, long minerFeePaid, long samouraiFee, long amount, long change, BipFormat changeFormat) throws Exception {
+    Assertions.assertEquals(spendType, spendTx.getSpendType());
+    assertEquals(utxos, spendTx.getSpendFrom());
+    Assertions.assertEquals(minerFeeTotal, spendTx.getMinerFeeTotal());
+    Assertions.assertEquals(minerFeePaid, spendTx.getMinerFeePaid());
+    Assertions.assertEquals(samouraiFee, spendTx.getSamouraiFee());
+    Assertions.assertEquals(amount, spendTx.getAmount());
+    Assertions.assertEquals(change, spendTx.getChange());
+    Assertions.assertEquals(changeFormat, spendTx.getChangeFormat());
+  }
+
+  protected void assertEquals(Collection<UTXO> utxos1, Collection<? extends TransactionOutPoint> utxos2) {
+    Function<UTXO,String> utxoToString = u -> {
+      TransactionOutPoint outPoint = u.getOutpoints().get(0);
+      return outPoint.getHash().toString()+"-"+outPoint.getIndex();
+    };
+    Collection<String> utxos1Str = utxos1.stream().map(utxoToString).collect(Collectors.toList());
+    Collection<String> utxos2Str = utxos1.stream().map(utxoToString).collect(Collectors.toList());
+    Assertions.assertEquals(utxos1Str, utxos2Str);
   }
 }

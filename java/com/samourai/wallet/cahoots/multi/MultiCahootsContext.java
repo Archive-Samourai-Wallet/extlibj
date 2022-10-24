@@ -5,37 +5,41 @@ import com.samourai.soroban.cahoots.Stonewallx2Context;
 import com.samourai.soroban.cahoots.StowawayContext;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsTypeUser;
+import com.samourai.wallet.cahoots.CahootsWallet;
+import com.samourai.xmanager.client.XManagerClient;
 
 public class MultiCahootsContext extends CahootsContext {
     private Stonewallx2Context stonewallx2Context;
     private StowawayContext stowawayContext;
+    private XManagerClient xManagerClient; // only needed for counterparty
 
-    protected MultiCahootsContext(CahootsTypeUser typeUser, int account, Long feePerB, Long amount, String address, String paynymDestination) {
-        super(typeUser, CahootsType.MULTI, account, feePerB, amount, address);
+    protected MultiCahootsContext(CahootsWallet cahootsWallet, CahootsTypeUser typeUser, int account, Long feePerB, Long amount, String address, String paynymDestination, XManagerClient xManagerClient) {
+        super(cahootsWallet, typeUser, CahootsType.MULTI, account, feePerB, amount, address);
         this.stonewallx2Context = computeStonewallContext(paynymDestination);
         this.stowawayContext = computeStowawayContext();
+        this.xManagerClient = xManagerClient;
     }
 
-    public static MultiCahootsContext newInitiator(int account, long feePerB, long amount, String address, String paynymDestination) {
-        return new MultiCahootsContext(CahootsTypeUser.SENDER, account, feePerB, amount, address, paynymDestination);
+    public static MultiCahootsContext newInitiator(CahootsWallet cahootsWallet, int account, long feePerB, long amount, String address, String paynymDestination) {
+        return new MultiCahootsContext(cahootsWallet, CahootsTypeUser.SENDER, account, feePerB, amount, address, paynymDestination, null);
     }
 
-    public static MultiCahootsContext newCounterparty(int account) {
-        return new MultiCahootsContext(CahootsTypeUser.COUNTERPARTY, account, null,null, null, null);
+    public static MultiCahootsContext newCounterparty(CahootsWallet cahootsWallet, int account, XManagerClient xManagerClient) {
+        return new MultiCahootsContext(cahootsWallet, CahootsTypeUser.COUNTERPARTY, account, null,null, null, null, xManagerClient);
     }
 
     private Stonewallx2Context computeStonewallContext(String paynymDestination) {
         if (getTypeUser().equals(CahootsTypeUser.COUNTERPARTY)) {
-            return Stonewallx2Context.newCounterparty(getAccount());
+            return Stonewallx2Context.newCounterparty(getCahootsWallet(), getAccount());
         }
-        return Stonewallx2Context.newInitiator(getAccount(), getFeePerB(), getAmount(), getAddress(), paynymDestination);
+        return Stonewallx2Context.newInitiator(getCahootsWallet(), getAccount(), getFeePerB(), getAmount(), getAddress(), paynymDestination);
     }
 
     private StowawayContext computeStowawayContext() {
         if (getTypeUser().equals(CahootsTypeUser.COUNTERPARTY)) {
-            return StowawayContext.newCounterpartyMulti(getAccount());
+            return StowawayContext.newCounterpartyMulti(getCahootsWallet(), getAccount());
         }
-        return StowawayContext.newInitiator(getAccount(), getFeePerB(), -1L);
+        return StowawayContext.newInitiator(getCahootsWallet(), getAccount(), getFeePerB(), -1L);
     }
 
     public static long computeMultiCahootsFee(long amount) {
@@ -52,5 +56,9 @@ public class MultiCahootsContext extends CahootsContext {
 
     public StowawayContext getStowawayContext() {
         return stowawayContext;
+    }
+
+    public XManagerClient getxManagerClient() {
+        return xManagerClient;
     }
 }

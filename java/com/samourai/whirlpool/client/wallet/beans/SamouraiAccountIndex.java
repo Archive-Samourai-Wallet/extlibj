@@ -16,4 +16,14 @@ public class SamouraiAccountIndex {
       default: return DEPOSIT;
     }
   }
+
+  @Deprecated // TODO accountIndex should not
+  public static WhirlpoolAccount find(int accountIndex) {
+    for (WhirlpoolAccount whirlpoolAccount : WhirlpoolAccount.values()) {
+      if (find(whirlpoolAccount) == accountIndex) {
+        return whirlpoolAccount;
+      }
+    }
+    return null;
+  }
 }

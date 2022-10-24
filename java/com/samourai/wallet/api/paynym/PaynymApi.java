@@ -8,7 +8,7 @@ import com.samourai.wallet.bip47.BIP47UtilGeneric;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.util.JSONUtils;
 import com.samourai.wallet.util.MessageSignUtilGeneric;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ public class PaynymApi {
     }
   }
 
-  public Observable<String> getToken(String paynymCode) throws Exception {
+  public Single<String> getToken(String paynymCode) throws Exception {
     if (log.isDebugEnabled()) {
       log.debug("getToken");
     }
@@ -50,7 +50,7 @@ public class PaynymApi {
     GetTokenRequest request = new GetTokenRequest(paynymCode);
     return httpClient.postJson(url, GetTokenResponse.class, headers, request)
             .onErrorResumeNext(throwable -> {
-              return Observable.error(responseError(throwable));
+              return Single.error(responseError(throwable));
             })
             .map(
             responseOpt -> {
@@ -63,7 +63,7 @@ public class PaynymApi {
     );
   }
 
-  public Observable<CreatePaynymResponse> createPaynym(String paynymCode) throws Exception {
+  public Single<CreatePaynymResponse> createPaynym(String paynymCode) throws Exception {
     if (log.isDebugEnabled()) {
       log.debug("createPaynym");
     }
@@ -72,12 +72,12 @@ public class PaynymApi {
     CreatePaynymRequest request = new CreatePaynymRequest(paynymCode);
     return httpClient.postJson(url, CreatePaynymResponse.class, headers, request)
             .onErrorResumeNext(throwable -> {
-              return Observable.error(responseError(throwable));
+              return Single.error(responseError(throwable));
             })
             .map(responseOpt -> responseOpt.get());
   }
 
-  public Observable<ClaimPaynymResponse> claim(String paynymToken, BIP47Wallet bip47Wallet) throws Exception {
+  public Single<ClaimPaynymResponse> claim(String paynymToken, BIP47Wallet bip47Wallet) throws Exception {
     if (log.isDebugEnabled()) {
       log.debug("claim");
     }
@@ -87,12 +87,12 @@ public class PaynymApi {
     ClaimPaynymRequest request = new ClaimPaynymRequest(signature);
     return httpClient.postJson(url, ClaimPaynymResponse.class, headers, request)
             .onErrorResumeNext(throwable -> {
-              return Observable.error(responseError(throwable));
+              return Single.error(responseError(throwable));
             })
             .map(responseOpt -> responseOpt.get());
   }
 
-  public Observable<AddPaynymResponse> addPaynym(String paynymToken, BIP47Wallet bip47Wallet) throws Exception {
+  public Single<AddPaynymResponse> addPaynym(String paynymToken, BIP47Wallet bip47Wallet) throws Exception {
     if (log.isDebugEnabled()) {
       log.debug("addPaynym");
     }
@@ -104,12 +104,12 @@ public class PaynymApi {
     AddPaynymRequest request = new AddPaynymRequest(nym, code, signature);
     return httpClient.postJson(url, AddPaynymResponse.class, headers, request)
             .onErrorResumeNext(throwable -> {
-              return Observable.error(responseError(throwable));
+              return Single.error(responseError(throwable));
             })
             .map(responseOpt -> responseOpt.get());
   }
 
-  public Observable<GetNymInfoResponse> getNymInfo(String paynymCode) throws Exception {
+  public Single<GetNymInfoResponse> getNymInfo(String paynymCode) throws Exception {
     if (log.isDebugEnabled()) {
       log.debug("getNym");
     }
@@ -118,12 +118,12 @@ public class PaynymApi {
     GetNymInfoRequest request = new GetNymInfoRequest(paynymCode);
     return httpClient.postJson(url, GetNymInfoResponse.class, headers, request)
             .onErrorResumeNext(throwable -> {
-              return Observable.error(responseError(throwable));
+              return Single.error(responseError(throwable));
             })
             .map(responseOpt -> responseOpt.get());
   }
 
-  public Observable follow(String paynymToken, BIP47Wallet bip47Wallet, String paymentCodeTarget) throws Exception {
+  public Single follow(String paynymToken, BIP47Wallet bip47Wallet, String paymentCodeTarget) throws Exception {
     if (log.isDebugEnabled()) {
       log.debug("follow");
     }
@@ -133,12 +133,12 @@ public class PaynymApi {
     FollowPaynymRequest request = new FollowPaynymRequest(paymentCodeTarget, signature);
     return httpClient.postJson(url, Object.class, headers, request)
             .onErrorResumeNext(throwable -> {
-              return Observable.error(responseError(throwable));
+              return Single.error(responseError(throwable));
             })
             .map(responseOpt -> responseOpt.get());
   }
 
-  public Observable unfollow(String paynymToken, BIP47Wallet bip47Wallet, String paymentCodeTarget) throws Exception {
+  public Single unfollow(String paynymToken, BIP47Wallet bip47Wallet, String paymentCodeTarget) throws Exception {
     if (log.isDebugEnabled()) {
       log.debug("unfollow");
     }
@@ -148,7 +148,7 @@ public class PaynymApi {
     UnfollowPaynymRequest request = new UnfollowPaynymRequest(paymentCodeTarget, signature);
     return httpClient.postJson(url, Object.class, headers, request)
             .onErrorResumeNext(throwable -> {
-              return Observable.error(responseError(throwable));
+              return Single.error(responseError(throwable));
             })
             .map(responseOpt -> responseOpt.get());
   }

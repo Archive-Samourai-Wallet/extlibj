@@ -37,7 +37,7 @@ public class PaynymApiTest extends AbstractTest {
 
   @Test
   public void createPaynym() throws Exception {
-    CreatePaynymResponse response = asyncUtil.blockingSingle(paynymApi.createPaynym(paymentCode));
+    CreatePaynymResponse response = asyncUtil.blockingGet(paynymApi.createPaynym(paymentCode));
 
     Assertions.assertEquals("/"+PCODE+"/avatar", response.nymAvatar);
     Assertions.assertEquals("+stillmud69f", response.nymName);
@@ -47,8 +47,8 @@ public class PaynymApiTest extends AbstractTest {
 
   @Test
   public void addPaynym() throws Exception {
-    String token = asyncUtil.blockingSingle(paynymApi.getToken(paymentCode));
-    AddPaynymResponse response = asyncUtil.blockingSingle(paynymApi.addPaynym(token, bip47w));
+    String token = asyncUtil.blockingGet(paynymApi.getToken(paymentCode));
+    AddPaynymResponse response = asyncUtil.blockingGet(paynymApi.addPaynym(token, bip47w));
 
     Assertions.assertEquals("/"+PCODE+"/avatar", response.nymAvatar);
     Assertions.assertEquals("+stillmud69f", response.nymName);
@@ -58,8 +58,8 @@ public class PaynymApiTest extends AbstractTest {
 
   @Test
   public void claim() throws Exception {
-    String token = asyncUtil.blockingSingle(paynymApi.getToken(paymentCode));
-    ClaimPaynymResponse claim = asyncUtil.blockingSingle(paynymApi.claim(token, bip47w));
+    String token = asyncUtil.blockingGet(paynymApi.getToken(paymentCode));
+    ClaimPaynymResponse claim = asyncUtil.blockingGet(paynymApi.claim(token, bip47w));
 
     Assertions.assertEquals(paymentCode, claim.claimed);
   }
@@ -68,27 +68,27 @@ public class PaynymApiTest extends AbstractTest {
   public void followUnfollow() throws Exception {
 
     // follow
-    String token = asyncUtil.blockingSingle(paynymApi.getToken(paymentCode));
-    asyncUtil.blockingSingle(paynymApi.follow(token, bip47w, PCODE2));
+    String token = asyncUtil.blockingGet(paynymApi.getToken(paymentCode));
+    asyncUtil.blockingGet(paynymApi.follow(token, bip47w, PCODE2));
 
     // verify
-    GetNymInfoResponse getNymInfo = asyncUtil.blockingSingle(paynymApi.getNymInfo(paymentCode));
+    GetNymInfoResponse getNymInfo = asyncUtil.blockingGet(paynymApi.getNymInfo(paymentCode));
     PaynymContact paynymContact = getNymInfo.following.iterator().next();
     Assertions.assertEquals(PCODE2, paynymContact.getCode());
     Assertions.assertEquals("nymHc99UYDRYd6EdPYxbLCSLC", paynymContact.getNymId());
     Assertions.assertEquals("+boldboat533", paynymContact.getNymName());
 
     // unfollow
-    asyncUtil.blockingSingle(paynymApi.unfollow(token, bip47w, PCODE2));
+    asyncUtil.blockingGet(paynymApi.unfollow(token, bip47w, PCODE2));
 
     // verify
-    getNymInfo = asyncUtil.blockingSingle(paynymApi.getNymInfo(paymentCode));
+    getNymInfo = asyncUtil.blockingGet(paynymApi.getNymInfo(paymentCode));
     Assertions.assertFalse(getNymInfo.following.contains(PCODE2));
   }
 
   @Test
   public void getNym() throws Exception {
-    GetNymInfoResponse getNymInfo = asyncUtil.blockingSingle(paynymApi.getNymInfo(paymentCode));
+    GetNymInfoResponse getNymInfo = asyncUtil.blockingGet(paynymApi.getNymInfo(paymentCode));
     Assertions.assertEquals("/"+PCODE+"/avatar", getNymInfo.nymAvatar);
     Assertions.assertEquals("+stillmud69f", getNymInfo.nymName);
     Assertions.assertEquals("nymmFABjPvpR2uxmAUKfD53mj", getNymInfo.nymID);
@@ -101,7 +101,7 @@ public class PaynymApiTest extends AbstractTest {
   @Test
   public void getNym_error() throws Exception {
     try {
-      GetNymInfoResponse getNymInfo = asyncUtil.blockingSingle(paynymApi.getNymInfo(paymentCode + "foo"));
+      GetNymInfoResponse getNymInfo = asyncUtil.blockingGet(paynymApi.getNymInfo(paymentCode + "foo"));
       Assertions.assertTrue(false);
     } catch (HttpException e) {
       Assertions.assertEquals("Http query failed: status=500", e.getCause().getMessage());
