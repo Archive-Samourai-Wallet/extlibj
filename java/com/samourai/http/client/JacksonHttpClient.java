@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.samourai.wallet.api.backend.beans.HttpException;
 import com.samourai.wallet.util.AsyncUtil;
 import com.samourai.wallet.util.JSONUtils;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ public abstract class JacksonHttpClient implements IHttpClient {
   }
 
   @Override
-  public <T> Observable<Optional<T>> postJson(
+  public <T> Single<Optional<T>> postJson(
       final String urlStr,
       final Class<T> responseType,
       final Map<String, String> headers,
@@ -131,13 +131,13 @@ public abstract class JacksonHttpClient implements IHttpClient {
     return (HttpException) e;
   }
 
-  protected <T> Observable<Optional<T>> httpObservable(final Callable<T> supplier) {
-    return Observable.fromCallable(() -> Optional.ofNullable(supplier.call())).subscribeOn(Schedulers.io());
+  protected <T> Single<Optional<T>> httpObservable(final Callable<T> supplier) {
+    return Single.fromCallable(() -> Optional.ofNullable(supplier.call())).subscribeOn(Schedulers.io());
   }
 
   protected <T> T httpObservableBlockingSingle(final Callable<T> supplier) throws HttpException{
     try {
-      Optional<T> opt = AsyncUtil.getInstance().blockingSingle(
+      Optional<T> opt = AsyncUtil.getInstance().blockingGet(
               httpObservable(supplier)
       );
       return opt.orElse(null);

@@ -33,11 +33,11 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
         this.typeInteractionBroadcast = typeInteractionBroadcast;
     }
 
-    public abstract T startInitiator(CahootsWallet cahootsWallet, C cahootsContext) throws Exception;
+    public abstract T startInitiator(C cahootsContext) throws Exception;
 
-    public abstract T startCollaborator(CahootsWallet cahootsWallet, C cahootsContext, T payload0) throws Exception;
+    public abstract T startCollaborator(C cahootsContext, T payload0) throws Exception;
 
-    public abstract T reply(CahootsWallet cahootsWallet, C cahootsContext, T payload) throws Exception;
+    public abstract T reply(C cahootsContext, T payload) throws Exception;
 
     public void verifyResponse(C cahootsContext, T response, T request) throws Exception {
         if (!cahootsContext.getCahootsType().equals(cahootsType)) {
@@ -85,7 +85,7 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
             String key = outpoint.getHash().toString() + "-" + outpoint.getIndex();
             if (utxosByHash.containsKey(key)) {
                 CahootsUtxo utxo = utxosByHash.get(key);
-                ECKey eckey = utxo.getKey();
+                ECKey eckey = ECKey.fromPrivate(utxo.getKey());
                 keyBag.put(outpoint.toString(), eckey);
             }
         }
@@ -94,7 +94,7 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
 
     // verify
 
-    protected long computeSpendAmount(HashMap<String,ECKey> keyBag, CahootsWallet cahootsWallet, Cahoots2x cahoots, C cahootsContext) throws Exception {
+    protected long computeSpendAmount(HashMap<String,ECKey> keyBag, Cahoots2x cahoots, C cahootsContext) throws Exception {
         long spendAmount = 0;
 
         String prefix = "["+cahootsContext.getCahootsType()+"/"+cahootsContext.getTypeUser()+"] ";

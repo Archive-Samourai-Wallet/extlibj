@@ -2,6 +2,7 @@ package com.samourai.wallet.cahoots;
 
 import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.soroban.cahoots.ManualCahootsMessage;
+import com.samourai.soroban.cahoots.ManualCahootsService;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipWallet.WalletSupplier;
 import com.samourai.wallet.bipWallet.WalletSupplierImpl;
@@ -12,6 +13,7 @@ import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
 import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.wallet.hd.Chain;
 import com.samourai.wallet.hd.HD_Wallet;
+import com.samourai.wallet.send.provider.MockUtxoProvider;
 import com.samourai.wallet.test.AbstractTest;
 import com.samourai.wallet.util.TestUtil;
 import org.junit.jupiter.api.Assertions;
@@ -28,8 +30,11 @@ public abstract class AbstractCahootsTest extends AbstractTest {
     private static final String SEED_PASSPHRASE_COUNTERPARTY = "counterparty";
     protected static final int FEE_PER_B = 1;
 
-    protected TestCahootsWallet cahootsWalletSender;
-    protected TestCahootsWallet cahootsWalletCounterparty;
+    protected CahootsWallet cahootsWalletSender;
+    protected CahootsWallet cahootsWalletCounterparty;
+
+    protected MockUtxoProvider utxoProviderSender;
+    protected MockUtxoProvider utxoProviderCounterparty;
 
     protected static String[] SENDER_RECEIVE_84;
     protected static String[] COUNTERPARTY_RECEIVE_84;
@@ -61,18 +66,21 @@ public abstract class AbstractCahootsTest extends AbstractTest {
             // no shuffle
         }
     };
-    protected MultiCahootsService multiCahootsService = new MultiCahootsService(bipFormatSupplier, params, stonewallx2Service, stowawayService, xManagerClient);
+    protected MultiCahootsService multiCahootsService = new MultiCahootsService(bipFormatSupplier, params, stonewallx2Service, stowawayService);
+    protected ManualCahootsService manualCahootsService = new ManualCahootsService(stowawayService, stonewallx2Service, multiCahootsService);
 
     public void setUp() throws Exception {
         super.setUp();
 
         final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
         WalletSupplier walletSupplierSender = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletSender);
-        cahootsWalletSender = new TestCahootsWallet(walletSupplierSender, bipFormatSupplier, params);
+        utxoProviderSender = new MockUtxoProvider(params, walletSupplierSender);
+        cahootsWalletSender = new CahootsWallet(walletSupplierSender, bipFormatSupplier, params, utxoProviderSender.getCahootsUtxoProvider());
 
         final HD_Wallet bip84WalletCounterparty = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
         WalletSupplier walletSupplierCounterparty = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletCounterparty);
-        cahootsWalletCounterparty = new TestCahootsWallet(walletSupplierCounterparty, bipFormatSupplier, params);
+        utxoProviderCounterparty = new MockUtxoProvider(params, walletSupplierCounterparty);
+        cahootsWalletCounterparty = new CahootsWallet(walletSupplierCounterparty, bipFormatSupplier, params, utxoProviderCounterparty.getCahootsUtxoProvider());
 
         SENDER_RECEIVE_84 = new String[4];
         for (int i = 0; i < 4; i++) {
@@ -153,11 +161,11 @@ public abstract class AbstractCahootsTest extends AbstractTest {
         Assertions.assertEquals(typeUser, cahootsMessage.getTypeUser());
     }
 
-    protected Cahoots doCahoots(CahootsWallet cahootsWalletSender, CahootsWallet cahootsWalletCounterparty, AbstractCahootsService cahootsService, CahootsContext cahootsContextSender, CahootsContext cahootsContextCp, String[] EXPECTED_PAYLOADS) throws Exception {
+    protected Cahoots doCahoots(AbstractCahootsService cahootsService, CahootsContext cahootsContextSender, CahootsContext cahootsContextCp, String[] EXPECTED_PAYLOADS) throws Exception {
         int nbSteps = EXPECTED_PAYLOADS != null ? EXPECTED_PAYLOADS.length : ManualCahootsMessage.getNbSteps(cahootsContextSender.getCahootsType());
 
         // sender => _0
-        String lastPayload = cahootsService.startInitiator(cahootsWalletSender, cahootsContextSender).toJSONString();
+        String lastPayload = cahootsService.startInitiator(cahootsContextSender).toJSONString();
         if (log.isDebugEnabled()) {
             log.debug("#0 SENDER => "+lastPayload);
         }
@@ -166,7 +174,7 @@ public abstract class AbstractCahootsTest extends AbstractTest {
         }
 
         // counterparty => _1
-        lastPayload = cahootsService.startCollaborator(cahootsWalletCounterparty, cahootsContextCp, Cahoots.parse(lastPayload)).toJSONString();
+        lastPayload = cahootsService.startCollaborator(cahootsContextCp, Cahoots.parse(lastPayload)).toJSONString();
         if (log.isDebugEnabled()) {
             log.debug("#1 COUNTERPARTY => "+lastPayload);
         }
@@ -177,13 +185,13 @@ public abstract class AbstractCahootsTest extends AbstractTest {
         for (int i=2; i<nbSteps; i++) {
             if (i%2 == 0) {
                 // sender
-                lastPayload = cahootsService.reply(cahootsWalletSender, cahootsContextSender, Cahoots.parse(lastPayload)).toJSONString();
+                lastPayload = cahootsService.reply(cahootsContextSender, Cahoots.parse(lastPayload)).toJSONString();
                 if (log.isDebugEnabled()) {
                     log.debug("#"+i+" SENDER => "+lastPayload);
                 }
             } else {
                 // counterparty
-                lastPayload = cahootsService.reply(cahootsWalletCounterparty, cahootsContextCp, Cahoots.parse(lastPayload)).toJSONString();
+                lastPayload = cahootsService.reply(cahootsContextCp, Cahoots.parse(lastPayload)).toJSONString();
                 if (log.isDebugEnabled()) {
                     log.debug("#"+i+" COUNTERPARTY => "+lastPayload);
                 }

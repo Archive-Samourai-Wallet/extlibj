@@ -2,10 +2,7 @@ package com.samourai.dex.config;
 
 import com.samourai.http.client.IHttpClient;
 import com.samourai.http.client.JettyHttpClient;
-import com.samourai.wallet.api.backend.beans.HttpException;
 import com.samourai.wallet.test.AbstractTest;
-import com.samourai.wallet.util.MessageSignUtilGeneric;
-import org.bitcoinj.core.NetworkParameters;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

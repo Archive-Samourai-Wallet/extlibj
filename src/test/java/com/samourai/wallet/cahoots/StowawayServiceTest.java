@@ -1,13 +1,17 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.soroban.cahoots.StowawayContext;
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
+import com.samourai.wallet.send.UTXO;
+import com.samourai.wallet.send.beans.SpendTx;
+import com.samourai.wallet.send.beans.SpendType;
 import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -25,15 +29,15 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         int account = 0;
 
         // setup wallets
-        cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+        UTXO utxoSender1 = utxoProviderSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // setup Cahoots
         long spendAmount = 5000;
-        StowawayContext cahootsContextSender = StowawayContext.newInitiator(account, FEE_PER_B, spendAmount);
-        StowawayContext cahootsContextCp = StowawayContext.newCounterparty(account);
+        StowawayContext cahootsContextSender = StowawayContext.newInitiator(cahootsWalletSender, account, FEE_PER_B, spendAmount);
+        StowawayContext cahootsContextCp = StowawayContext.newCounterparty(cahootsWalletCounterparty, account);
 
-        Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stowawayService, cahootsContextSender, cahootsContextCp, null);
+        Cahoots cahoots = doCahoots(stowawayService, cahootsContextSender, cahootsContextCp, null);
 
         // verify TX
         String txid = "5ee43707672e0fdf27c87e398c6f547f33dadef43fa510c2b7e22ab5fc271b85";
@@ -44,6 +48,10 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         outputs.put(SENDER_CHANGE_84[0], 4784L);
         verifyTx(cahoots.getTransaction(), txid, raw, outputs);
         pushTx.assertTx(txid, raw);
+
+        // verify SpendTx
+        SpendTx spendTx = cahoots.getSpendTx(cahootsContextSender, utxoProviderSender);
+        verifySpendTx(spendTx, SpendType.CAHOOTS_STOWAWAY, Arrays.asList(utxoSender1), 216, 216, 0, spendAmount, 4784L, BIP_FORMAT.SEGWIT_NATIVE);
     }
 
     @Test
@@ -51,15 +59,15 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         int account = SamouraiAccountIndex.POSTMIX;
 
         // setup wallets
-        cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+        UTXO utxoSender1 = utxoProviderSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // setup Cahoots
         long spendAmount = 5000;
-        StowawayContext cahootsContextSender = StowawayContext.newInitiator(account, FEE_PER_B, spendAmount);
-        StowawayContext cahootsContextCp = StowawayContext.newCounterpartyMulti(account);
+        StowawayContext cahootsContextSender = StowawayContext.newInitiator(cahootsWalletSender, account, FEE_PER_B, spendAmount);
+        StowawayContext cahootsContextCp = StowawayContext.newCounterpartyMulti(cahootsWalletCounterparty, account);
 
-        Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stowawayService, cahootsContextSender, cahootsContextCp, null);
+        Cahoots cahoots = doCahoots(stowawayService, cahootsContextSender, cahootsContextCp, null);
 
         // verify TX
         String txid = "fb121061765e4f6179e6be262253427e4c22d7b006207cc84c62d77bf26ee923";
@@ -70,5 +78,9 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         outputs.put(SENDER_CHANGE_POSTMIX_84[0], 4784L);
         verifyTx(cahoots.getTransaction(), txid, raw, outputs);
         pushTx.assertTx(txid, raw);
+
+        // verify SpendTx
+        SpendTx spendTx = cahoots.getSpendTx(cahootsContextSender, utxoProviderSender);
+        verifySpendTx(spendTx, SpendType.CAHOOTS_STOWAWAY, Arrays.asList(utxoSender1), 216, 216, 0, spendAmount, 4784L, BIP_FORMAT.SEGWIT_NATIVE);
     }
 }

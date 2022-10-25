@@ -24,12 +24,12 @@ public class MockPushTx implements IPushTx {
     }
 
     @Override
-    public Pair<Boolean, String> pushTx(String hexTx) throws Exception {
+    public String pushTx(String hexTx) throws Exception {
         Transaction tx = TxUtil.getInstance().fromTxHex(params, hexTx);
         String txid = tx.getHashAsString();
         txids.add(txid);
         txRaws.add(hexTx);
-        return Pair.of(true, tx.getHashAsString());
+        return txid;
     }
 
     public void assertTx(String txid, String raw) {

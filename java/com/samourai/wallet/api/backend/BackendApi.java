@@ -198,6 +198,7 @@ public class BackendApi implements ISweepBackend {
     return new MinerFee(feeResponse);
   }
 
+  @Override
   public String pushTx(String txHex) throws Exception {
     return pushTx(txHex, null);
   }
