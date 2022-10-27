@@ -1,5 +1,6 @@
 package com.samourai.soroban.client;
 
+import com.samourai.dex.config.DexConfigProvider;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.MainNetParams;
@@ -9,12 +10,12 @@ import java.util.Optional;
 
 public enum SorobanServer {
   TESTNET(
-          "https://soroban.samouraiwallet.com/test",
-          "http://sorob4sg7yiopktgz4eom7hl5mcodr6quvhmdpljl5qqhmt6po7oebid.onion/test",
+          DexConfigProvider.getInstance().getSamouraiConfig().getSorobanServerTestnetClear(),
+          DexConfigProvider.getInstance().getSamouraiConfig().getBackendServerTestnetOnion(),
           TestNet3Params.get()),
   MAINNET(
-          "https://soroban.samouraiwallet.com",
-          "http://sorob4sg7yiopktgz4eom7hl5mcodr6quvhmdpljl5qqhmt6po7oebid.onion",
+          DexConfigProvider.getInstance().getSamouraiConfig().getSorobanServerMainnetClear(),
+          DexConfigProvider.getInstance().getSamouraiConfig().getSorobanServerMainnetOnion(),
           MainNetParams.get());
 
   private String serverUrlClear;
