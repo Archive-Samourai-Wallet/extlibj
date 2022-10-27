@@ -3,9 +3,11 @@ package com.samourai.dex.config;
 import com.samourai.wallet.api.backend.IBackendClient;
 import com.samourai.wallet.util.JSONUtils;
 import com.samourai.wallet.util.MessageSignUtilGeneric;
+import com.samourai.whirlpool.client.wallet.beans.WhirlpoolServer;
 import org.bitcoinj.core.NetworkParameters;
 
 public class DexConfigProvider {
+    public static final String ENDPOINT_DEXCONFIG = "/rest/dex-config";
     private static DexConfigProvider instance;
 
     public static DexConfigProvider getInstance() {
@@ -16,22 +18,29 @@ public class DexConfigProvider {
     }
 
     private SamouraiConfig samouraiConfig;
+    private Long lastLoad = null;
 
     protected DexConfigProvider() {
         // initialize default config
         this.samouraiConfig = new SamouraiConfig();
     }
 
-    public void load(IBackendClient httpClient, NetworkParameters networkParameters) throws Exception {
-        String dexURL = "https://pool.whirl.mx:8081/rest/dex-config";
+    public void load(IBackendClient httpClient, NetworkParameters networkParameters, boolean onion) throws Exception {
+        WhirlpoolServer whirlpoolServer = WhirlpoolServer.getByNetworkParameters(networkParameters);
+        String dexURL = whirlpoolServer.getServerUrl(onion) + ENDPOINT_DEXCONFIG;
+        load(httpClient, networkParameters, dexURL, whirlpoolServer.getSigningAddress());
+    }
+
+    public void load(IBackendClient httpClient, NetworkParameters networkParameters, String dexURL, String signingAddress) throws Exception {
         DexConfigResponse dexConfigResponse = httpClient.getJson(dexURL, DexConfigResponse.class, null);
 
         if (MessageSignUtilGeneric.getInstance().verifySignedMessage(
-                DexConfigResponse.SIGNING_ADDRESS,
+                signingAddress,
                 dexConfigResponse.getSamouraiConfig(),
                 dexConfigResponse.getSignature(),
                 networkParameters)) {
             this.samouraiConfig = JSONUtils.getInstance().getObjectMapper().readValue(dexConfigResponse.getSamouraiConfig(), SamouraiConfig.class);
+            this.lastLoad = System.currentTimeMillis();
         } else {
             throw new Exception("Invalid DexConfig signature");
         }
@@ -39,5 +48,9 @@ public class DexConfigProvider {
 
     public SamouraiConfig getSamouraiConfig() {
         return samouraiConfig;
+    }
+
+    public Long getLastLoad() {
+        return lastLoad;
     }
 }

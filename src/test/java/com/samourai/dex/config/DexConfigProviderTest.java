@@ -14,21 +14,24 @@ public class DexConfigProviderTest extends AbstractTest {
   private DexConfigProvider dexConfigProvider = DexConfigProvider.getInstance();
   protected IHttpClient httpClient;
 
-
   @BeforeEach
   public void setUp() throws Exception{
     super.setUp();
   }
 
   @Test
-  public void test() {
+  public void getBackendServerMainnetClear() {
     Assertions.assertEquals("https://api.samouraiwallet.com/v2", dexConfigProvider.getSamouraiConfig().getBackendServerMainnetClear());
   }
 
   @Test
   public void load() throws Exception {
     httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
-    dexConfigProvider.load(httpClient, params);
-    Assertions.assertEquals("https://soroban.samouraiwallet.com/test?whirlpoolServer=true", dexConfigProvider.getSamouraiConfig().getSorobanServerTestnetClear());
+
+    Assertions.assertNull(dexConfigProvider.getLastLoad());
+    dexConfigProvider.load(httpClient, params, false);
+    Assertions.assertNotNull(dexConfigProvider.getLastLoad());
+
+    Assertions.assertEquals("https://soroban.samouraiwallet.com/test", dexConfigProvider.getSamouraiConfig().getSorobanServerTestnetClear());
   }
 }
