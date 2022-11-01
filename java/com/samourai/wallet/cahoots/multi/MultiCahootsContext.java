@@ -10,32 +10,32 @@ public class MultiCahootsContext extends CahootsContext {
     private Stonewallx2Context stonewallx2Context;
     private StowawayContext stowawayContext;
 
-    protected MultiCahootsContext(CahootsTypeUser typeUser, int account, Long feePerB, Long amount, String address, String paynymDestination) {
-        super(typeUser, CahootsType.MULTI, account, feePerB, amount, address);
+    protected MultiCahootsContext(CahootsTypeUser typeUser, int account, Long feePerB, Long amount, String address, String paynymDestination, Boolean rbfOptin) {
+        super(typeUser, CahootsType.MULTI, account, feePerB, amount, address, rbfOptin);
         this.stonewallx2Context = computeStonewallContext(paynymDestination);
         this.stowawayContext = computeStowawayContext();
     }
 
-    public static MultiCahootsContext newInitiator(int account, long feePerB, long amount, String address, String paynymDestination) {
-        return new MultiCahootsContext(CahootsTypeUser.SENDER, account, feePerB, amount, address, paynymDestination);
+    public static MultiCahootsContext newInitiator(int account, long feePerB, long amount, String address, String paynymDestination, Boolean rbfOptin) {
+        return new MultiCahootsContext(CahootsTypeUser.SENDER, account, feePerB, amount, address, paynymDestination, rbfOptin);
     }
 
     public static MultiCahootsContext newCounterparty(int account) {
-        return new MultiCahootsContext(CahootsTypeUser.COUNTERPARTY, account, null,null, null, null);
+        return new MultiCahootsContext(CahootsTypeUser.COUNTERPARTY, account, null,null, null, null, null);
     }
 
     private Stonewallx2Context computeStonewallContext(String paynymDestination) {
         if (getTypeUser().equals(CahootsTypeUser.COUNTERPARTY)) {
             return Stonewallx2Context.newCounterparty(getAccount());
         }
-        return Stonewallx2Context.newInitiator(getAccount(), getFeePerB(), getAmount(), getAddress(), paynymDestination);
+        return Stonewallx2Context.newInitiator(getAccount(), getFeePerB(), getAmount(), getAddress(), paynymDestination, isRbfOptin());
     }
 
     private StowawayContext computeStowawayContext() {
         if (getTypeUser().equals(CahootsTypeUser.COUNTERPARTY)) {
             return StowawayContext.newCounterpartyMulti(getAccount());
         }
-        return StowawayContext.newInitiator(getAccount(), getFeePerB(), -1L);
+        return StowawayContext.newInitiator(getAccount(), getFeePerB(), -1L, isRbfOptin());
     }
 
     public static long computeMultiCahootsFee(long amount) {

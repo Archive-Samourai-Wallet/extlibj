@@ -33,8 +33,9 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         // setup Cahoots
         long feePerB = 1;
         long spendAmount = 5000;
+        boolean rbfOptin = false;
         String address = ADDRESS_BIP84;
-        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address, null);
+        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address, null, rbfOptin);
         MultiCahootsContext contextCp = MultiCahootsContext.newCounterparty(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, multiCahootsService, contextSender, contextCp, null);
@@ -82,8 +83,9 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         // setup Cahoots
         long feePerB = 1;
         long spendAmount = 5000;
+        boolean rbfOptin = false;
         String address = ADDRESS_BIP84;
-        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address, null);
+        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address, null, rbfOptin);
         MultiCahootsContext contextCp = MultiCahootsContext.newCounterparty(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, multiCahootsService, contextSender, contextCp, null);
@@ -129,8 +131,9 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         // setup Cahoots
         long feePerB = 1;
         long spendAmount = 5000;
+        boolean rbfOptin = false;
         String address = ADDRESS_BIP44;
-        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address, null);
+        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address, null, rbfOptin);
         MultiCahootsContext contextCp = MultiCahootsContext.newCounterparty(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, multiCahootsService, contextSender, contextCp, null);
@@ -176,8 +179,9 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         // setup Cahoots
         long feePerB = 1;
         long spendAmount = 5000;
+        boolean rbfOptin = false;
         String address = ADDRESS_P2TR;
-        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address, null);
+        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address, null, rbfOptin);
         MultiCahootsContext contextCp = MultiCahootsContext.newCounterparty(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, multiCahootsService, contextSender, contextCp, null);

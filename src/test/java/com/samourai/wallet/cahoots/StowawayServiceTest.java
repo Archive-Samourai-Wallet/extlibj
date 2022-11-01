@@ -30,7 +30,8 @@ public class StowawayServiceTest extends AbstractCahootsTest {
 
         // setup Cahoots
         long spendAmount = 5000;
-        StowawayContext cahootsContextSender = StowawayContext.newInitiator(account, FEE_PER_B, spendAmount);
+        boolean rbfOptin = false;
+        StowawayContext cahootsContextSender = StowawayContext.newInitiator(account, FEE_PER_B, spendAmount, rbfOptin);
         StowawayContext cahootsContextCp = StowawayContext.newCounterparty(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stowawayService, cahootsContextSender, cahootsContextCp, null);
@@ -56,7 +57,8 @@ public class StowawayServiceTest extends AbstractCahootsTest {
 
         // setup Cahoots
         long spendAmount = 5000;
-        StowawayContext cahootsContextSender = StowawayContext.newInitiator(account, FEE_PER_B, spendAmount);
+        boolean rbfOptin = false;
+        StowawayContext cahootsContextSender = StowawayContext.newInitiator(account, FEE_PER_B, spendAmount, rbfOptin);
         StowawayContext cahootsContextCp = StowawayContext.newCounterpartyMulti(account);
 
         Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, stowawayService, cahootsContextSender, cahootsContextCp, null);

@@ -57,7 +57,8 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
 
         // sender => start Stowaway
         long spendAmount = 5000;
-        StowawayContext contextSender = StowawayContext.newInitiator(account, FEE_PER_B, spendAmount);
+        boolean rbfOptin = false;
+        StowawayContext contextSender = StowawayContext.newInitiator(account, FEE_PER_B, spendAmount, rbfOptin);
         ManualCahootsMessage payload0 = cahootsSender.initiate(contextSender);
         verify(EXPECTED_PAYLOADS[0], payload0, false, CahootsType.STOWAWAY, CahootsTypeUser.SENDER);
 
@@ -118,8 +119,9 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
 
         // sender => start Stonewallx2
         long spendAmount = 5000;
+        boolean rbfOptin = false;
         String address = ADDRESS_BIP84;
-        Stonewallx2Context contextSender = Stonewallx2Context.newInitiator(account, FEE_PER_B, spendAmount, address, null);
+        Stonewallx2Context contextSender = Stonewallx2Context.newInitiator(account, FEE_PER_B, spendAmount, address, null, rbfOptin);
         ManualCahootsMessage payload0 = cahootsSender.initiate(contextSender);
         verify(EXPECTED_PAYLOADS[0], payload0, false, CahootsType.STONEWALLX2, CahootsTypeUser.SENDER);
 
@@ -188,8 +190,9 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
 
         // sender => start multiCahoots
         long spendAmount = 5000;
+        boolean rbfOptin = false;
         String address = ADDRESS_BIP84;
-        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, FEE_PER_B, spendAmount, address, null);
+        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, FEE_PER_B, spendAmount, address, null, rbfOptin);
         ManualCahootsMessage payload0 = cahootsSender.initiate(contextSender);
         verify(EXPECTED_PAYLOADS[0], payload0, false, CahootsType.MULTI, CahootsTypeUser.SENDER);
 

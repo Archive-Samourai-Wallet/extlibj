@@ -267,7 +267,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         stonewall0.setCollabChange(changeAddress.getAddressString());
 
         STONEWALLx2 stonewall1 = stonewall0.copy();
-        stonewall1.doStep1(inputsA, outputsA);
+        stonewall1.doStep1(inputsA, outputsA, cahootsContext.isRbfOptin());
 
         debug("END doSTONEWALLx2_1", stonewall1, cahootsContext);
         return stonewall1;
@@ -429,7 +429,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         transaction.addOutput(destOutput);
 
         STONEWALLx2 stonewall2 = stonewall1.copy();
-        stonewall2.doStep2(inputsB, outputsB);
+        stonewall2.doStep2(inputsB, outputsB, cahootsContext.isRbfOptin());
 
         debug("END doSTONEWALLx2_2",stonewall2, cahootsContext);
         return stonewall2;

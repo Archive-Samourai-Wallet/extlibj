@@ -13,17 +13,17 @@ public class Stonewallx2Context extends CahootsContext {
     // android will check STONEWALLx2.getPaynymDestination() to increment paynym counter after successfull broadcast
     private String paynymDestination;
 
-    protected Stonewallx2Context(CahootsTypeUser typeUser, int account, Long feePerB, Long amount, String address, String paynymDestination) {
-        super(typeUser, CahootsType.STONEWALLX2, account, feePerB, amount, address);
+    protected Stonewallx2Context(CahootsTypeUser typeUser, int account, Long feePerB, Long amount, String address, String paynymDestination, Boolean rbfOptin) {
+        super(typeUser, CahootsType.STONEWALLX2, account, feePerB, amount, address, rbfOptin);
         this.paynymDestination = paynymDestination;
     }
 
-    public static Stonewallx2Context newInitiator(int account, long feePerB, long amount, String address, String paynymDestination) {
-        return new Stonewallx2Context(CahootsTypeUser.SENDER, account, feePerB, amount, address, paynymDestination);
+    public static Stonewallx2Context newInitiator(int account, long feePerB, long amount, String address, String paynymDestination, Boolean rbfOptin) {
+        return new Stonewallx2Context(CahootsTypeUser.SENDER, account, feePerB, amount, address, paynymDestination, rbfOptin);
     }
 
     public static Stonewallx2Context newCounterparty(int account) {
-        return new Stonewallx2Context(CahootsTypeUser.COUNTERPARTY, account, null,null, null, null);
+        return new Stonewallx2Context(CahootsTypeUser.COUNTERPARTY, account, null,null, null, null, null);
     }
 
     public String getPaynymDestination() {

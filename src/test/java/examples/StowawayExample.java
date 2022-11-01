@@ -32,7 +32,8 @@ public class StowawayExample {
         // STEP 0: sender
         long feePerB = 1;
         long spendAmount = 5000;
-        StowawayContext contextSender = StowawayContext.newInitiator(senderAccount, feePerB, spendAmount);
+        boolean rbfOptin = false;
+        StowawayContext contextSender = StowawayContext.newInitiator(senderAccount, feePerB, spendAmount, rbfOptin);
         ManualCahootsMessage message0 = cahootsSender.initiate(contextSender);
 
         // STEP 1: receiver
