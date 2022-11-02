@@ -322,7 +322,7 @@ public abstract class Cahoots2x extends Cahoots {
     //
     // counterparty
     //
-    public void doStep1(List<TransactionInput> inputs, List<TransactionOutput> outputs, Boolean rbfOptin) throws Exception    {
+    public void doStep1(List<TransactionInput> inputs, List<TransactionOutput> outputs) throws Exception    {
         if(this.getStep() != 0 || this.getSpendAmount() == 0L)   {
             throw new Exception("Invalid step/amount");
         }
@@ -332,7 +332,7 @@ public abstract class Cahoots2x extends Cahoots {
 
         Transaction transaction = new Transaction(params);
         transaction.setVersion(2);
-        appendTx(inputs, outputs, transaction, rbfOptin);
+        appendTx(inputs, outputs, transaction);
 
         this.setStep(1);
     }
@@ -340,9 +340,9 @@ public abstract class Cahoots2x extends Cahoots {
     //
     // sender
     //
-    public void doStep2(List<TransactionInput> inputs, List<TransactionOutput> outputs, Boolean rbfOptin) throws Exception    {
+    public void doStep2(List<TransactionInput> inputs, List<TransactionOutput> outputs) throws Exception    {
         Transaction transaction = psbt.getTransaction();
-        appendTx(inputs, outputs, transaction, rbfOptin);
+        appendTx(inputs, outputs, transaction);
 
         this.setStep(2);
     }
@@ -387,11 +387,10 @@ public abstract class Cahoots2x extends Cahoots {
         this.setStep(4);
     }
 
-    protected void appendTx(List<TransactionInput> inputs, List<TransactionOutput> outputs, Transaction transaction, Boolean rbfOptin) {
+    protected void appendTx(List<TransactionInput> inputs, List<TransactionOutput> outputs, Transaction transaction) {
         // append inputs
         for(TransactionInput input : inputs)   {
-            if (rbfOptin)
-                input.setSequenceNumber(SEQUENCE_RBF_ENABLED);
+            input.setSequenceNumber(SEQUENCE_RBF_ENABLED);
             transaction.addInput(input);
             outpoints.put(input.getOutpoint().getHash().toString() + "-" + input.getOutpoint().getIndex(), input.getValue().longValue());
         }

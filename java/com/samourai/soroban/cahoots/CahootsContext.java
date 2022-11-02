@@ -25,9 +25,8 @@ public abstract class CahootsContext implements SorobanContext {
     private String address; // only set for initiator
     private Set<String> outputAddresses;
     private List<CahootsUtxo> inputs;
-    private Boolean rbfOptin;
 
-    protected CahootsContext(CahootsTypeUser typeUser, CahootsType cahootsType, int account, Long feePerB, Long amount, String address, Boolean rbfOptin) {
+    protected CahootsContext(CahootsTypeUser typeUser, CahootsType cahootsType, int account, Long feePerB, Long amount, String address) {
         this.typeUser = typeUser;
         this.cahootsType = cahootsType;
         this.account = account;
@@ -36,7 +35,6 @@ public abstract class CahootsContext implements SorobanContext {
         this.address = address;
         this.outputAddresses = new LinkedHashSet<>();
         this.inputs = new LinkedList<>();
-        this.rbfOptin = rbfOptin;
     }
 
     public static CahootsContext newCounterparty(CahootsType cahootsType, int account) throws Exception {
@@ -102,15 +100,5 @@ public abstract class CahootsContext implements SorobanContext {
 
     public List<CahootsUtxo> getInputs() {
         return inputs;
-    }
-
-    public boolean isRbfOptin() {
-        if (rbfOptin == null)
-            return false;
-        return rbfOptin;
-    }
-
-    public void setRbfOptin(Boolean rbfOptin) {
-        this.rbfOptin = rbfOptin;
     }
 }
