@@ -86,7 +86,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
     //
     // receiver
     //
-    public T doStep3(T cahoots2, CahootsWallet cahootsWallet, C cahootsContext) throws Exception {
+    public T doStep3(T cahoots2, C cahootsContext) throws Exception {
         debug("BEGIN doStep3", cahoots2, cahootsContext);
 
         HashMap<String, ECKey> keyBag_A = computeKeyBag(cahoots2, cahootsContext.getInputs());
@@ -95,7 +95,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
         cahoots3.doStep3(keyBag_A);
 
         // check verifiedSpendAmount
-        long verifiedSpendAmount = computeSpendAmount(keyBag_A, cahootsWallet, cahoots3, cahootsContext);
+        long verifiedSpendAmount = computeSpendAmount(keyBag_A, cahoots3, cahootsContext);
         checkMaxSpendAmount(verifiedSpendAmount, cahoots3.getFeeAmount(), cahootsContext);
 
         debug("END doStep3", cahoots3, cahootsContext);
@@ -105,7 +105,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
     //
     // sender
     //
-    public T doStep4(T cahoots3, CahootsWallet cahootsWallet, C cahootsContext) throws Exception {
+    public T doStep4(T cahoots3, C cahootsContext) throws Exception {
         debug("BEGIN doStep4", cahoots3, cahootsContext);
 
         HashMap<String, ECKey> keyBag_B = computeKeyBag(cahoots3, cahootsContext.getInputs());
@@ -114,7 +114,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
         cahoots4.doStep4(keyBag_B);
 
         // check verifiedSpendAmount
-        long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahootsWallet, cahoots4, cahootsContext);
+        long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahoots4, cahootsContext);
         checkMaxSpendAmount(verifiedSpendAmount, cahoots4.getFeeAmount(), cahootsContext);
 
         // check fee

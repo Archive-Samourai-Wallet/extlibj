@@ -90,11 +90,11 @@ public class JacksonHttpClientTest extends AbstractTest {
   @Test
   public void postJsonSuccess() throws Exception {
     // success
-    PaynymErrorResponse response = AsyncUtil.getInstance().blockingSingle(httpClient.postJson("http://test", PaynymErrorResponse.class, null, null)).get();
+    PaynymErrorResponse response = AsyncUtil.getInstance().blockingGet(httpClient.postJson("http://test", PaynymErrorResponse.class, null, null)).get();
     Assertions.assertEquals("test", response.message);
 
     // success: String - parseJson()
-    String stringResponse = AsyncUtil.getInstance().blockingSingle(httpClient.postJson("http://test", String.class, null, null)).get();
+    String stringResponse = AsyncUtil.getInstance().blockingGet(httpClient.postJson("http://test", String.class, null, null)).get();
     Assertions.assertEquals("{\"message\":\"test\"}", stringResponse);
   }
 
@@ -103,14 +103,14 @@ public class JacksonHttpClientTest extends AbstractTest {
     // exception
     mockException = new IllegalArgumentException("test");
     try {
-      AsyncUtil.getInstance().blockingSingle(httpClient.postJson("http://test", PaynymErrorResponse.class, null, null)).get();
+      AsyncUtil.getInstance().blockingGet(httpClient.postJson("http://test", PaynymErrorResponse.class, null, null)).get();
     } catch (HttpException e) {
       Assertions.assertEquals("test", e.getCause().getMessage());
     }
 
     // exception: String - parseJson()
     try {
-      AsyncUtil.getInstance().blockingSingle(httpClient.postJson("http://test", String.class, null, null)).get();
+      AsyncUtil.getInstance().blockingGet(httpClient.postJson("http://test", String.class, null, null)).get();
     } catch (HttpException e) {
       Assertions.assertEquals("test", e.getCause().getMessage());
     }

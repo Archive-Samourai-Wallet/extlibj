@@ -2,19 +2,26 @@ package com.samourai.wallet.cahoots;
 
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
+import com.samourai.wallet.send.provider.UtxoKeyProvider;
+import com.samourai.wallet.util.TxUtil;
 import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.ECKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CahootsUtxo extends UTXO {
-    private MyTransactionOutPoint outpoint;
-    private ECKey key;
+    private static final Logger log = LoggerFactory.getLogger(CahootsUtxo.class);
 
-    public CahootsUtxo(MyTransactionOutPoint cahootsOutpoint, String path, ECKey key) {
-        super(new LinkedList<MyTransactionOutPoint>(Arrays.asList(new MyTransactionOutPoint[]{cahootsOutpoint})), path);
+    private MyTransactionOutPoint outpoint;
+    private byte[] key;
+
+    public CahootsUtxo(MyTransactionOutPoint cahootsOutpoint, String path, byte[] key) {
+        super(new LinkedList<>(Arrays.asList(new MyTransactionOutPoint[]{cahootsOutpoint})), path);
         this.outpoint = cahootsOutpoint;
         this.key = key;
     }
@@ -23,7 +30,7 @@ public class CahootsUtxo extends UTXO {
         return outpoint;
     }
 
-    public ECKey getKey() {
+    public byte[] getKey() {
         return key;
     }
 
@@ -33,6 +40,19 @@ public class CahootsUtxo extends UTXO {
             balance = balance.add(cahootsUtxo.getOutpoint().getValue());
         }
         return balance;
+    }
+
+    public static List<CahootsUtxo> toCahootsUtxos(Collection<UTXO> utxos, UtxoKeyProvider keyProvider) {
+        return utxos.stream().map(utxo -> {
+            MyTransactionOutPoint outPoint = utxo.getOutpoints().get(0); // TODO
+            try {
+                byte[] key = keyProvider._getPrivKey(outPoint.getHash().toString(), (int) outPoint.getIndex());
+                return new CahootsUtxo(outPoint, utxo.getPath(), key);
+            } catch (Exception e) {
+                log.warn("Skipping CahootsUtxo: "+outPoint+": key not found");
+                return null;
+            }
+        }).filter(utxo -> utxo != null).collect(Collectors.toList());
     }
 
     @Override

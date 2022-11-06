@@ -1,12 +1,14 @@
 package com.samourai.wallet.api.backend;
 
+import com.samourai.dex.config.DexConfigProvider;
+
 public enum BackendServer {
   MAINNET(
-      "https://api.samouraiwallet.com/v2",
-      "http://d2oagweysnavqgcfsfawqwql2rwxend7xxpriq676lzsmtfwbt75qbqd.onion/v2"),
+          DexConfigProvider.getInstance().getSamouraiConfig().getBackendServerMainnetClear(),
+          DexConfigProvider.getInstance().getSamouraiConfig().getBackendServerMainnetOnion()),
   TESTNET(
-      "https://api.samouraiwallet.com/test/v2",
-      "http://d2oagweysnavqgcfsfawqwql2rwxend7xxpriq676lzsmtfwbt75qbqd.onion/test/v2");
+          DexConfigProvider.getInstance().getSamouraiConfig().getBackendServerTestnetClear(),
+          DexConfigProvider.getInstance().getSamouraiConfig().getBackendServerTestnetOnion());
 
   private String backendUrlClear;
   private String backendUrlOnion;

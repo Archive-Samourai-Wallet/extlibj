@@ -1,13 +1,18 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.cahoots.multi.MultiCahoots;
 import com.samourai.wallet.cahoots.multi.MultiCahootsContext;
+import com.samourai.wallet.send.UTXO;
+import com.samourai.wallet.send.beans.SpendTx;
+import com.samourai.wallet.send.beans.SpendType;
 import org.bitcoinj.core.Transaction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -24,20 +29,20 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         int account = 0;
 
         // setup wallets
-        cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
-        cahootsWalletSender.addUtxo(account, "senderTx2", 1, 8000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        UTXO utxoSender1 = utxoProviderSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        utxoProviderSender.addUtxo(account, "senderTx2", 1, 8000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
 
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx2", 1, 9000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx2", 1, 9000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // setup Cahoots
         long feePerB = 1;
         long spendAmount = 5000;
         String address = ADDRESS_BIP84;
-        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address, null);
-        MultiCahootsContext contextCp = MultiCahootsContext.newCounterparty(account);
+        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(cahootsWalletSender, account, feePerB, spendAmount, address, null);
+        MultiCahootsContext contextCp = MultiCahootsContext.newCounterparty(cahootsWalletCounterparty, account, xManagerClient);
 
-        Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, multiCahootsService, contextSender, contextCp, null);
+        Cahoots cahoots = doCahoots(multiCahootsService, contextSender, contextCp, null);
 
         // verify stonewallx2
         {
@@ -64,6 +69,10 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
             verifyTx(tx, txid, raw, outputs);
             pushTx.assertTx(txid, raw);
         }
+
+        // verify stonewallx2 as SpendTx
+        SpendTx spendTx = cahoots.getSpendTx(contextSender, utxoProviderSender);
+        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, 142, 0, spendAmount, 4858L, BIP_FORMAT.SEGWIT_NATIVE);
     }
 
     @Test
@@ -71,22 +80,22 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         int account = 0;
 
         // setup wallets
-        cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
-        cahootsWalletSender.addUtxo(account, "senderTx2", 1, 8000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        utxoProviderSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        utxoProviderSender.addUtxo(account, "senderTx2", 1, 8000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
 
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx2", 1, 9000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx2", 1, 9000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
         // counterparty > THRESHOLD
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx3", 1, 550000000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx3", 1, 550000000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // setup Cahoots
         long feePerB = 1;
         long spendAmount = 5000;
         String address = ADDRESS_BIP84;
-        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address, null);
-        MultiCahootsContext contextCp = MultiCahootsContext.newCounterparty(account);
+        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(cahootsWalletSender, account, feePerB, spendAmount, address, null);
+        MultiCahootsContext contextCp = MultiCahootsContext.newCounterparty(cahootsWalletCounterparty, account, xManagerClient);
 
-        Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, multiCahootsService, contextSender, contextCp, null);
+        Cahoots cahoots = doCahoots(multiCahootsService, contextSender, contextCp, null);
 
         // verify stonewallx2
         {
@@ -120,20 +129,20 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         int account = 0;
 
         // setup wallets
-        cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
-        cahootsWalletSender.addUtxo(account, "senderTx2", 1, 8000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        utxoProviderSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        utxoProviderSender.addUtxo(account, "senderTx2", 1, 8000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
 
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx2", 1, 9000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx2", 1, 9000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // setup Cahoots
         long feePerB = 1;
         long spendAmount = 5000;
         String address = ADDRESS_BIP44;
-        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address, null);
-        MultiCahootsContext contextCp = MultiCahootsContext.newCounterparty(account);
+        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(cahootsWalletSender, account, feePerB, spendAmount, address, null);
+        MultiCahootsContext contextCp = MultiCahootsContext.newCounterparty(cahootsWalletCounterparty, account, xManagerClient);
 
-        Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, multiCahootsService, contextSender, contextCp, null);
+        Cahoots cahoots = doCahoots(multiCahootsService, contextSender, contextCp, null);
 
         // verify stonewallx2
         {
@@ -167,20 +176,20 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
         int account = 0;
 
         // setup wallets
-        cahootsWalletSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
-        cahootsWalletSender.addUtxo(account, "senderTx2", 1, 8000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        utxoProviderSender.addUtxo(account, "senderTx1", 1, 10000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
+        utxoProviderSender.addUtxo(account, "senderTx2", 1, 8000, "tb1qkymumss6zj0rxy9l3v5vqxqwwffy8jjsyhrkrg");
 
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
-        cahootsWalletCounterparty.addUtxo(account, "counterpartyTx2", 1, 9000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx1", 1, 10000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
+        utxoProviderCounterparty.addUtxo(account, "counterpartyTx2", 1, 9000, "tb1qh287jqsh6mkpqmd8euumyfam00fkr78qhrdnde");
 
         // setup Cahoots
         long feePerB = 1;
         long spendAmount = 5000;
         String address = ADDRESS_P2TR;
-        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(account, feePerB, spendAmount, address, null);
-        MultiCahootsContext contextCp = MultiCahootsContext.newCounterparty(account);
+        MultiCahootsContext contextSender = MultiCahootsContext.newInitiator(cahootsWalletSender, account, feePerB, spendAmount, address, null);
+        MultiCahootsContext contextCp = MultiCahootsContext.newCounterparty(cahootsWalletCounterparty, account, xManagerClient);
 
-        Cahoots cahoots = doCahoots(cahootsWalletSender, cahootsWalletCounterparty, multiCahootsService, contextSender, contextCp, null);
+        Cahoots cahoots = doCahoots(multiCahootsService, contextSender, contextCp, null);
 
         // verify stonewallx2
         {

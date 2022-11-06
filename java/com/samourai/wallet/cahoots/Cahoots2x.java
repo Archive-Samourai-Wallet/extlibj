@@ -1,10 +1,16 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bip69.BIP69InputComparator;
 import com.samourai.wallet.bip69.BIP69OutputComparator;
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.segwit.SegwitAddress;
+import com.samourai.wallet.send.beans.SpendTx;
+import com.samourai.wallet.send.beans.SpendTxCahoots;
+import com.samourai.wallet.send.exceptions.SpendException;
+import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.util.RandomUtil;
 import com.samourai.wallet.util.Z85;
 import org.bitcoinj.core.*;
@@ -407,5 +413,10 @@ public abstract class Cahoots2x extends Cahoots {
 
         // update psbt
         this.psbt = new PSBT(transaction);
+    }
+
+    @Override
+    public SpendTx getSpendTx(CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) throws SpendException {
+        return new SpendTxCahoots(BIP_FORMAT.SEGWIT_NATIVE, this, cahootsContext, utxoKeyProvider);
     }
 }

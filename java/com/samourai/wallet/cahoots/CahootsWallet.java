@@ -1,6 +1,8 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.wallet.bip47.rpc.BIP47Account;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
+import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
@@ -9,30 +11,30 @@ import com.samourai.wallet.bipWallet.WalletSupplier;
 import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.HD_Wallet;
-import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
+import com.samourai.wallet.send.provider.CahootsUtxoProvider;
 import com.samourai.wallet.whirlpool.WhirlpoolConst;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.bitcoinj.core.NetworkParameters;
-import org.bouncycastle.util.encoders.Hex;
 
-import java.util.LinkedList;
 import java.util.List;
 
-public abstract class CahootsWallet {
-    private static final Bech32UtilGeneric bech32Util = Bech32UtilGeneric.getInstance();
-
+public class CahootsWallet {
     private WalletSupplier walletSupplier;
-    private HD_Wallet hdWallet;
-    private BIP47Wallet bip47Wallet;
     private BipFormatSupplier bipFormatSupplier;
     private NetworkParameters params;
+    private CahootsUtxoProvider utxoProvider;
 
-    public CahootsWallet(WalletSupplier walletSupplier, BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
+    private HD_Wallet hdWallet;
+    private BIP47Wallet bip47Wallet;
+
+    public CahootsWallet(WalletSupplier walletSupplier, BipFormatSupplier bipFormatSupplier, NetworkParameters params, CahootsUtxoProvider utxoProvider) {
         this.walletSupplier = walletSupplier;
-        this.hdWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84).getHdWallet();
-        this.bip47Wallet = new BIP47Wallet(hdWallet);
         this.bipFormatSupplier = bipFormatSupplier;
         this.params = params;
+        this.utxoProvider = utxoProvider;
+
+        this.hdWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84).getHdWallet();
+        this.bip47Wallet = new BIP47Wallet(hdWallet);
     }
 
     public BipWallet getReceiveWallet(int account, BipFormat bipFormat) throws Exception {
@@ -57,8 +59,6 @@ public abstract class CahootsWallet {
         return getReceiveWallet(account, bipFormat).getNextChangeAddress(increment);
     }
 
-    protected abstract List<CahootsUtxo> fetchUtxos(int account);
-
     public BipFormatSupplier getBipFormatSupplier() {
         return bipFormatSupplier;
     }
@@ -71,8 +71,16 @@ public abstract class CahootsWallet {
         return bip47Wallet;
     }
 
-    public int getBip47Account() {
+    public int getBip47AccountIndex() {
         return 0;
+    }
+
+    public BIP47Account getBip47Account() {
+        return bip47Wallet.getAccount(getBip47AccountIndex());
+    }
+
+    public PaymentCode getPaymentCode() {
+        return new PaymentCode(getBip47Account().getPaymentCode());
     }
 
     public byte[] getFingerprint() {
@@ -80,18 +88,6 @@ public abstract class CahootsWallet {
     }
 
     public List<CahootsUtxo> getUtxosWpkhByAccount(int account) {
-        return filterUtxosWpkh(fetchUtxos(account));
-    }
-
-    protected static List<CahootsUtxo> filterUtxosWpkh(List<CahootsUtxo> utxos) {
-        List<CahootsUtxo> filteredUtxos = new LinkedList<CahootsUtxo>();
-        for(CahootsUtxo utxo : utxos)   {
-            // filter wpkh
-            String script = Hex.toHexString(utxo.getOutpoint().getScriptBytes());
-            if (bech32Util.isP2WPKHScript(script)) {
-                filteredUtxos.add(utxo);
-            }
-        }
-        return filteredUtxos;
+        return utxoProvider.getUtxosWpkhByAccount(account);
     }
 }
