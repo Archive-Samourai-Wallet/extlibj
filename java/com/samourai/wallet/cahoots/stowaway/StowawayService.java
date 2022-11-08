@@ -4,10 +4,7 @@ import com.samourai.soroban.cahoots.StowawayContext;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
-import com.samourai.wallet.cahoots.AbstractCahoots2xService;
-import com.samourai.wallet.cahoots.CahootsType;
-import com.samourai.wallet.cahoots.CahootsUtxo;
-import com.samourai.wallet.cahoots.CahootsWallet;
+import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.util.FeeUtil;
@@ -227,6 +224,15 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         }
 
         List<String> _seenTxs = seenTxs;
+        for(TransactionInput input : transaction.getInputs()) {
+            if(input.getSequenceNumber() != Cahoots2x.SEQUENCE_RBF_DISABLED) { // the default sequence number in bitcoincashj
+                throw new Exception("RBF detected: Please update app"); //additional safety check, it's also duplicated in step3 and step4 in AbstractCahoots2xService
+            }
+            String hash = input.getOutpoint().getHash().toString();
+            if (!_seenTxs.contains(hash)) {
+                _seenTxs.add(hash); // didn't see a check anywhere else for this (only for our own utxos), in case users have collaborated before and happen to choose utxos from the same tx
+            }
+        }
         List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
         int nbTotalSelectedOutPoints = 0;
         long totalSelectedAmount = 0L;

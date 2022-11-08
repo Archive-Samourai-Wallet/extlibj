@@ -36,6 +36,7 @@ public abstract class Cahoots2x extends Cahoots {
     // used by Sparrow
     protected static final String BLOCK_HEIGHT_PROPERTY = "com.sparrowwallet.blockHeight";
     protected static final long SEQUENCE_RBF_ENABLED = 4294967293L;
+    public static final long SEQUENCE_RBF_DISABLED = 4294967295L;
 
     protected long ts = -1L;
     protected String strID = null;
@@ -396,7 +397,6 @@ public abstract class Cahoots2x extends Cahoots {
     protected void appendTx(List<TransactionInput> inputs, List<TransactionOutput> outputs, Transaction transaction) {
         // append inputs
         for(TransactionInput input : inputs)   {
-            input.setSequenceNumber(SEQUENCE_RBF_ENABLED);
             transaction.addInput(input);
             outpoints.put(input.getOutpoint().getHash().toString() + "-" + input.getOutpoint().getIndex(), input.getValue().longValue());
         }
