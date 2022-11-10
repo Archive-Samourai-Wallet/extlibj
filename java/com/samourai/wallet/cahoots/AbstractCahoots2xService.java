@@ -92,7 +92,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
 
         for(TransactionInput input : cahoots2.getTransaction().getInputs()) {
             if(input.getSequenceNumber() != Cahoots2x.SEQUENCE_RBF_DISABLED) { // the default sequence number in bitcoincashj
-                throw new Exception("RBF detected: Please update app");
+                throw new Exception("Please disable RBF");
             }
         }
 
@@ -117,7 +117,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
 
         for(TransactionInput input : cahoots3.getTransaction().getInputs()) {
             if(input.getSequenceNumber() != Cahoots2x.SEQUENCE_RBF_DISABLED) { // the default sequence number in bitcoincashj
-                throw new Exception("RBF detected: Please update app");
+                throw new Exception("Please disable RBF");
             }
         }
 
