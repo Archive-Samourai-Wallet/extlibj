@@ -4,6 +4,7 @@ import com.samourai.http.client.IHttpClient;
 import com.samourai.http.client.JettyHttpClient;
 import com.samourai.wallet.api.backend.BackendApi;
 import com.samourai.wallet.api.backend.BackendServer;
+import com.samourai.wallet.api.backend.beans.WalletResponse;
 import com.samourai.wallet.bip47.BIP47UtilGeneric;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.bip47.rpc.java.Bip47UtilJava;
@@ -11,6 +12,7 @@ import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.WalletSupplierImpl;
+import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
@@ -52,6 +54,12 @@ public class AbstractTest {
   protected HD_WalletFactoryGeneric hdWalletFactory = HD_WalletFactoryGeneric.getInstance();
   protected IHttpClient httpClient;
   protected BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;
+
+  protected ChainSupplier mockChainSupplier = () -> {
+    WalletResponse.InfoBlock infoBlock = new WalletResponse.InfoBlock();
+    infoBlock.height = 1234;
+    return infoBlock;
+  };
   protected PayloadUtilGeneric payloadUtil = PayloadUtilGeneric.getInstance();
   protected WalletSupplierImpl walletSupplier;
   protected HD_Wallet bip44w;

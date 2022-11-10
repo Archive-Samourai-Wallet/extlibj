@@ -9,6 +9,7 @@ import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsUtxo;
 import com.samourai.wallet.cahoots.CahootsWallet;
 import com.samourai.wallet.cahoots.multi.Stonewallx2InputData;
+import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
@@ -29,8 +30,8 @@ import java.util.List;
 public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, Stonewallx2Context> {
     private static final Logger log = LoggerFactory.getLogger(Stonewallx2Service.class);
 
-    public Stonewallx2Service(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
-        super(CahootsType.STONEWALLX2, bipFormatSupplier, params);
+    public Stonewallx2Service(BipFormatSupplier bipFormatSupplier, ChainSupplier chainSupplier, NetworkParameters params) {
+        super(CahootsType.STONEWALLX2, bipFormatSupplier, chainSupplier, params);
     }
 
     @Override
@@ -273,7 +274,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         stonewall0.setCollabChange(changeAddress.getAddressString());
 
         STONEWALLx2 stonewall1 = stonewall0.copy();
-        stonewall1.doStep1(inputsA, outputsA);
+        stonewall1.doStep1(inputsA, outputsA, getChainSupplier(), false);
 
         debug("END doSTONEWALLx2_1", stonewall1, cahootsContext);
         return stonewall1;
@@ -440,7 +441,11 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         transaction.addOutput(destOutput);
 
         STONEWALLx2 stonewall2 = stonewall1.copy();
-        stonewall2.doStep2(inputsB, outputsB);
+        if(stonewall1.getTransaction().getLockTime() == 0) {
+            throw new Exception("Locktime error: Please update."); // safety check
+        } else {
+            stonewall2.doStep2(inputsB, outputsB, null, false); // no need to give chain supplier, psbt should have the lock time
+        }
 
         debug("END doSTONEWALLx2_2",stonewall2, cahootsContext);
         return stonewall2;

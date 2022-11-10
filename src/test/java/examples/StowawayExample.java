@@ -6,9 +6,11 @@ import com.samourai.soroban.cahoots.ManualCahootsMessage;
 import com.samourai.soroban.cahoots.ManualCahootsService;
 import com.samourai.soroban.cahoots.StowawayContext;
 import com.samourai.soroban.client.SorobanInteraction;
+import com.samourai.wallet.api.backend.beans.WalletResponse;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.CahootsWallet;
+import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.xmanager.client.XManagerClient;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.TestNet3Params;
@@ -28,8 +30,13 @@ public class StowawayExample {
 
         // instanciate service
         BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;
+        ChainSupplier mockChainSupplier = () -> {
+            WalletResponse.InfoBlock infoBlock = new WalletResponse.InfoBlock();
+            infoBlock.height = 1234;
+            return infoBlock;
+        };
         NetworkParameters params = TestNet3Params.get();
-        ManualCahootsService cahootsService = new ManualCahootsService(bipFormatSupplier, params);
+        ManualCahootsService cahootsService = new ManualCahootsService(bipFormatSupplier, mockChainSupplier, params);
 
         // STEP 0: sender
         int senderAccount = 0;

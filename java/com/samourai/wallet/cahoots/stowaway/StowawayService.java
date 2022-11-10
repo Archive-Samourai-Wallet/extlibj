@@ -8,6 +8,7 @@ import com.samourai.wallet.cahoots.AbstractCahoots2xService;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsUtxo;
 import com.samourai.wallet.cahoots.CahootsWallet;
+import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.util.FeeUtil;
@@ -24,8 +25,8 @@ import java.util.List;
 public class StowawayService extends AbstractCahoots2xService<Stowaway, StowawayContext> {
     private static final Logger log = LoggerFactory.getLogger(StowawayService.class);
 
-    public StowawayService(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
-        super(CahootsType.STOWAWAY, bipFormatSupplier, params);
+    public StowawayService(BipFormatSupplier bipFormatSupplier, ChainSupplier chainSupplier, NetworkParameters params) {
+        super(CahootsType.STOWAWAY, bipFormatSupplier, chainSupplier, params);
     }
 
     @Override
@@ -194,7 +195,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         stowaway0.setCounterpartyAccount(cahootsContext.getAccount());
 
         Stowaway stowaway1 = stowaway0.copy();
-        stowaway1.doStep1(inputsA, outputsA);
+        stowaway1.doStep1(inputsA, outputsA, getChainSupplier(), true); //will always need to give chainsupplier here, locktime is always 0 because of new tx.
 
         debug("END doStowaway1", stowaway1, cahootsContext);
         return stowaway1;
@@ -341,8 +342,12 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         outputsB.add(output_B0);
 
         Stowaway stowaway2 = stowaway1.copy();
-        stowaway2.doStep2(inputsB, outputsB);
-        stowaway2.setFeeAmount(fee);
+        if(stowaway1.getTransaction().getLockTime() != 0) {
+            throw new Exception("Locktime error: Please update."); // safety check
+        } else {
+            stowaway2.doStep2(inputsB, outputsB, null, true);
+            stowaway2.setFeeAmount(fee);
+        }
 
         debug("END doStowaway2", stowaway2, cahootsContext);
         return stowaway2;

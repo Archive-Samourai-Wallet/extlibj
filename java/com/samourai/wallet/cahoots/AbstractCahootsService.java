@@ -6,6 +6,7 @@ import com.samourai.soroban.cahoots.TxBroadcastInteraction;
 import com.samourai.soroban.cahoots.TypeInteraction;
 import com.samourai.soroban.client.SorobanInteraction;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.RandomUtil;
@@ -23,14 +24,16 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
 
     private CahootsType cahootsType;
     private BipFormatSupplier bipFormatSupplier;
+    private ChainSupplier chainSupplier;
     protected NetworkParameters params;
     private TypeInteraction typeInteractionBroadcast;
 
-    public AbstractCahootsService(CahootsType cahootsType, BipFormatSupplier bipFormatSupplier, NetworkParameters params, TypeInteraction typeInteractionBroadcast) {
+    public AbstractCahootsService(CahootsType cahootsType, BipFormatSupplier bipFormatSupplier, ChainSupplier chainSupplier, NetworkParameters params, TypeInteraction typeInteractionBroadcast) {
         this.cahootsType = cahootsType;
         this.bipFormatSupplier = bipFormatSupplier;
         this.params = params;
         this.typeInteractionBroadcast = typeInteractionBroadcast;
+        this.chainSupplier = chainSupplier;
     }
 
     public abstract T startInitiator(C cahootsContext) throws Exception;
@@ -169,6 +172,10 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
 
     public BipFormatSupplier getBipFormatSupplier() {
         return bipFormatSupplier;
+    }
+
+    public ChainSupplier getChainSupplier() {
+        return chainSupplier;
     }
 
     // overridable for tests
