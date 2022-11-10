@@ -396,6 +396,7 @@ public abstract class Cahoots2x extends Cahoots {
     protected void appendTx(List<TransactionInput> inputs, List<TransactionOutput> outputs, Transaction transaction) {
         // append inputs
         for(TransactionInput input : inputs)   {
+            input.setSequenceNumber(SEQUENCE_RBF_ENABLED);
             transaction.addInput(input);
             outpoints.put(input.getOutpoint().getHash().toString() + "-" + input.getOutpoint().getIndex(), input.getValue().longValue());
         }
