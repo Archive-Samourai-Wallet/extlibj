@@ -36,7 +36,6 @@ public abstract class Cahoots2x extends Cahoots {
     // used by Sparrow
     protected static final String BLOCK_HEIGHT_PROPERTY = "com.sparrowwallet.blockHeight";
     protected static final long SEQUENCE_RBF_ENABLED = 4294967293L;
-    public static final long SEQUENCE_RBF_DISABLED = 4294967295L;
 
     protected long ts = -1L;
     protected String strID = null;

@@ -6,7 +6,6 @@ import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.TransactionInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,12 +89,6 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
     public T doStep3(T cahoots2, C cahootsContext) throws Exception {
         debug("BEGIN doStep3", cahoots2, cahootsContext);
 
-        for(TransactionInput input : cahoots2.getTransaction().getInputs()) {
-            if(input.getSequenceNumber() != Cahoots2x.SEQUENCE_RBF_DISABLED) { // the default sequence number in bitcoincashj
-                throw new Exception("Please disable RBF");
-            }
-        }
-
         HashMap<String, ECKey> keyBag_A = computeKeyBag(cahoots2, cahootsContext.getInputs());
 
         T cahoots3 = (T)cahoots2.copy();
@@ -114,12 +107,6 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
     //
     public T doStep4(T cahoots3, C cahootsContext) throws Exception {
         debug("BEGIN doStep4", cahoots3, cahootsContext);
-
-        for(TransactionInput input : cahoots3.getTransaction().getInputs()) {
-            if(input.getSequenceNumber() != Cahoots2x.SEQUENCE_RBF_DISABLED) { // the default sequence number in bitcoincashj
-                throw new Exception("Please disable RBF");
-            }
-        }
 
         HashMap<String, ECKey> keyBag_B = computeKeyBag(cahoots3, cahootsContext.getInputs());
 
