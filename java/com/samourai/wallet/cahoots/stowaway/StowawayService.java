@@ -226,7 +226,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         List<String> _seenTxs = seenTxs;
         for(TransactionInput input : transaction.getInputs()) {
             if(input.getSequenceNumber() != Cahoots2x.SEQUENCE_RBF_DISABLED) { // the default sequence number in bitcoincashj
-                throw new Exception("RBF detected: Please update app"); //additional safety check, it's also duplicated in step3 and step4 in AbstractCahoots2xService
+                throw new Exception("Please disable RBF"); //additional safety check, it's also duplicated in step3 and step4 in AbstractCahoots2xService
             }
             String hash = input.getOutpoint().getHash().toString();
             if (!_seenTxs.contains(hash)) {
