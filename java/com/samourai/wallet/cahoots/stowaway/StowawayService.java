@@ -25,8 +25,8 @@ import java.util.List;
 public class StowawayService extends AbstractCahoots2xService<Stowaway, StowawayContext> {
     private static final Logger log = LoggerFactory.getLogger(StowawayService.class);
 
-    public StowawayService(BipFormatSupplier bipFormatSupplier, ChainSupplier chainSupplier, NetworkParameters params) {
-        super(CahootsType.STOWAWAY, bipFormatSupplier, chainSupplier, params);
+    public StowawayService(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
+        super(CahootsType.STOWAWAY, bipFormatSupplier, params);
     }
 
     @Override
@@ -195,7 +195,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         stowaway0.setCounterpartyAccount(cahootsContext.getAccount());
 
         Stowaway stowaway1 = stowaway0.copy();
-        stowaway1.doStep1(inputsA, outputsA, getChainSupplier(), true); //will always need to give chainsupplier here, locktime is always 0 because of new tx.
+        stowaway1.doStep1(inputsA, outputsA, cahootsWallet.getChainSupplier(), true); //will always need to give chainsupplier here, locktime is always 0 because of new tx.
 
         debug("END doStowaway1", stowaway1, cahootsContext);
         return stowaway1;

@@ -49,13 +49,13 @@ public abstract class AbstractCahootsTest extends AbstractTest {
     protected static String[] COUNTERPARTY_CHANGE_POSTMIX_44;
     protected static String[] COUNTERPARTY_CHANGE_POSTMIX_84;
 
-    protected Stonewallx2Service stonewallx2Service = new Stonewallx2Service(bipFormatSupplier, mockChainSupplier, params) {
+    protected Stonewallx2Service stonewallx2Service = new Stonewallx2Service(bipFormatSupplier, params) {
         @Override
         protected void shuffleUtxos(List<CahootsUtxo> utxos) {
             // no shuffle
         }
     };
-    protected StowawayService stowawayService = new StowawayService(bipFormatSupplier, mockChainSupplier, params) {
+    protected StowawayService stowawayService = new StowawayService(bipFormatSupplier, params) {
         @Override
         protected int getRandNextInt(int bound) {
             return 0; // make test reproductible
@@ -66,7 +66,7 @@ public abstract class AbstractCahootsTest extends AbstractTest {
             // no shuffle
         }
     };
-    protected MultiCahootsService multiCahootsService = new MultiCahootsService(bipFormatSupplier, mockChainSupplier, params, stonewallx2Service, stowawayService);
+    protected MultiCahootsService multiCahootsService = new MultiCahootsService(bipFormatSupplier, params, stonewallx2Service, stowawayService);
     protected ManualCahootsService manualCahootsService = new ManualCahootsService(stowawayService, stonewallx2Service, multiCahootsService);
 
     public void setUp() throws Exception {
@@ -75,12 +75,12 @@ public abstract class AbstractCahootsTest extends AbstractTest {
         final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
         WalletSupplier walletSupplierSender = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletSender);
         utxoProviderSender = new MockUtxoProvider(params, walletSupplierSender);
-        cahootsWalletSender = new CahootsWallet(walletSupplierSender, bipFormatSupplier, params, utxoProviderSender.getCahootsUtxoProvider());
+        cahootsWalletSender = new CahootsWallet(walletSupplierSender, mockChainSupplier, bipFormatSupplier, params, utxoProviderSender.getCahootsUtxoProvider());
 
         final HD_Wallet bip84WalletCounterparty = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
         WalletSupplier walletSupplierCounterparty = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletCounterparty);
         utxoProviderCounterparty = new MockUtxoProvider(params, walletSupplierCounterparty);
-        cahootsWalletCounterparty = new CahootsWallet(walletSupplierCounterparty, bipFormatSupplier, params, utxoProviderCounterparty.getCahootsUtxoProvider());
+        cahootsWalletCounterparty = new CahootsWallet(walletSupplierCounterparty, mockChainSupplier, bipFormatSupplier, params, utxoProviderCounterparty.getCahootsUtxoProvider());
 
         SENDER_RECEIVE_84 = new String[4];
         for (int i = 0; i < 4; i++) {

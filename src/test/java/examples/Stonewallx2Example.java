@@ -3,11 +3,9 @@ package examples;
 import com.samourai.http.client.IHttpClient;
 import com.samourai.http.client.JettyHttpClient;
 import com.samourai.soroban.cahoots.*;
-import com.samourai.wallet.api.backend.beans.WalletResponse;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.CahootsWallet;
-import com.samourai.wallet.chain.ChainSupplier;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.TestNet3Params;
 
@@ -24,13 +22,8 @@ public class Stonewallx2Example {
 
         // instanciate service
         BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;
-        ChainSupplier mockChainSupplier = () -> {
-            WalletResponse.InfoBlock infoBlock = new WalletResponse.InfoBlock();
-            infoBlock.height = 1234;
-            return infoBlock;
-        };
         NetworkParameters params = TestNet3Params.get();
-        ManualCahootsService cahootsService = new ManualCahootsService(bipFormatSupplier, mockChainSupplier, params);
+        ManualCahootsService cahootsService = new ManualCahootsService(bipFormatSupplier, params);
 
         // instanciate sender
         int senderAccount = 0;

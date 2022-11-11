@@ -4,7 +4,6 @@ import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.soroban.cahoots.TypeInteraction;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
-import com.samourai.wallet.chain.ChainSupplier;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
@@ -12,14 +11,13 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 
 public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends CahootsContext> extends AbstractCahootsService<T,C> {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahoots2xService.class);
     private static final long LOCK_TIME_LENIENCE = 2; // 2 blocks
-    public AbstractCahoots2xService(CahootsType cahootsType, BipFormatSupplier bipFormatSupplier, ChainSupplier chainSupplier, NetworkParameters params) {
-        super(cahootsType, bipFormatSupplier, chainSupplier, params, TypeInteraction.TX_BROADCAST);
+    public AbstractCahoots2xService(CahootsType cahootsType, BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
+        super(cahootsType, bipFormatSupplier, params, TypeInteraction.TX_BROADCAST);
     }
 
     @Override
@@ -94,7 +92,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
 
         T cahoots3 = (T)cahoots2.copy();
         long txLockTime = cahoots3.getTransaction().getLockTime();
-        long currentBlockHeight = getChainSupplier().getLatestBlock().height;
+        long currentBlockHeight = cahootsContext.getCahootsWallet().getChainSupplier().getLatestBlock().height;
         if(cahootsContext.getCahootsType() != CahootsType.STOWAWAY) {
             if (txLockTime == 0 || (txLockTime - currentBlockHeight) > LOCK_TIME_LENIENCE) { // maybe a block is found fast and users dont have exact same block heights, or the user is running custom code and is malicious
                 throw new Exception("Locktime error: txLockTime " + txLockTime + ", vs currentBlockHeight " + currentBlockHeight);
@@ -124,7 +122,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
 
         T cahoots4 = (T)cahoots3.copy();
         long txLockTime = cahoots4.getTransaction().getLockTime();
-        long currentBlockHeight = getChainSupplier().getLatestBlock().height;
+        long currentBlockHeight = cahootsContext.getCahootsWallet().getChainSupplier().getLatestBlock().height;
         if(cahootsContext.getCahootsType() != CahootsType.STOWAWAY) {
             if (txLockTime == 0 || (txLockTime - currentBlockHeight) > LOCK_TIME_LENIENCE) { // maybe a block is found fast and users dont have exact same block heights, or the user is running custom code and is malicious
                 throw new Exception("Locktime error: txLockTime " + txLockTime + ", vs currentBlockHeight " + currentBlockHeight);

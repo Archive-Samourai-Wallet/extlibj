@@ -40,8 +40,8 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
 
     private long threshold = -1;
 
-    public MultiCahootsService(BipFormatSupplier bipFormatSupplier, ChainSupplier chainSupplier, NetworkParameters params, Stonewallx2Service stonewallx2Service, StowawayService stowawayService) {
-        super(CahootsType.MULTI, bipFormatSupplier, chainSupplier, params, TypeInteraction.TX_BROADCAST_MULTI);
+    public MultiCahootsService(BipFormatSupplier bipFormatSupplier, NetworkParameters params, Stonewallx2Service stonewallx2Service, StowawayService stowawayService) {
+        super(CahootsType.MULTI, bipFormatSupplier, params, TypeInteraction.TX_BROADCAST_MULTI);
         this.stonewallx2Service = stonewallx2Service;
         this.stowawayService = stowawayService;
     }

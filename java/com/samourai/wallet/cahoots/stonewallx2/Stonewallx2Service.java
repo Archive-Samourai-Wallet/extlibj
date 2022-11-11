@@ -30,8 +30,8 @@ import java.util.List;
 public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, Stonewallx2Context> {
     private static final Logger log = LoggerFactory.getLogger(Stonewallx2Service.class);
 
-    public Stonewallx2Service(BipFormatSupplier bipFormatSupplier, ChainSupplier chainSupplier, NetworkParameters params) {
-        super(CahootsType.STONEWALLX2, bipFormatSupplier, chainSupplier, params);
+    public Stonewallx2Service(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
+        super(CahootsType.STONEWALLX2, bipFormatSupplier, params);
     }
 
     @Override
@@ -274,7 +274,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         stonewall0.setCollabChange(changeAddress.getAddressString());
 
         STONEWALLx2 stonewall1 = stonewall0.copy();
-        stonewall1.doStep1(inputsA, outputsA, getChainSupplier(), false);
+        stonewall1.doStep1(inputsA, outputsA, cahootsWallet.getChainSupplier(), false);
 
         debug("END doSTONEWALLx2_1", stonewall1, cahootsContext);
         return stonewall1;
