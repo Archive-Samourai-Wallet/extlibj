@@ -8,6 +8,7 @@ import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.BipWallet;
 import com.samourai.wallet.bipWallet.WalletSupplier;
+import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.HD_Wallet;
@@ -21,14 +22,16 @@ import java.util.List;
 public class CahootsWallet {
     private WalletSupplier walletSupplier;
     private BipFormatSupplier bipFormatSupplier;
+    private ChainSupplier chainSupplier;
     private NetworkParameters params;
     private CahootsUtxoProvider utxoProvider;
 
     private HD_Wallet hdWallet;
     private BIP47Wallet bip47Wallet;
 
-    public CahootsWallet(WalletSupplier walletSupplier, BipFormatSupplier bipFormatSupplier, NetworkParameters params, CahootsUtxoProvider utxoProvider) {
+    public CahootsWallet(WalletSupplier walletSupplier, ChainSupplier chainSupplier, BipFormatSupplier bipFormatSupplier, NetworkParameters params, CahootsUtxoProvider utxoProvider) {
         this.walletSupplier = walletSupplier;
+        this.chainSupplier = chainSupplier;
         this.bipFormatSupplier = bipFormatSupplier;
         this.params = params;
         this.utxoProvider = utxoProvider;
@@ -61,6 +64,10 @@ public class CahootsWallet {
 
     public BipFormatSupplier getBipFormatSupplier() {
         return bipFormatSupplier;
+    }
+
+    public ChainSupplier getChainSupplier() {
+        return chainSupplier;
     }
 
     public NetworkParameters getParams() {

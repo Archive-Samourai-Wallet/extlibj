@@ -6,6 +6,7 @@ import com.samourai.wallet.bip69.BIP69InputComparator;
 import com.samourai.wallet.bip69.BIP69OutputComparator;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.cahoots.psbt.PSBT;
+import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendTxCahoots;
@@ -36,7 +37,6 @@ public abstract class Cahoots2x extends Cahoots {
     // used by Sparrow
     protected static final String BLOCK_HEIGHT_PROPERTY = "com.sparrowwallet.blockHeight";
     protected static final long SEQUENCE_RBF_ENABLED = 4294967293L;
-    public static final long SEQUENCE_RBF_DISABLED = 4294967295L;
 
     protected long ts = -1L;
     protected String strID = null;
@@ -329,7 +329,7 @@ public abstract class Cahoots2x extends Cahoots {
     //
     // counterparty
     //
-    public void doStep1(List<TransactionInput> inputs, List<TransactionOutput> outputs) throws Exception    {
+    public void doStep1(List<TransactionInput> inputs, List<TransactionOutput> outputs, ChainSupplier chainSupplier, boolean isStowaway) throws Exception    {
         if(this.getStep() != 0 || this.getSpendAmount() == 0L)   {
             throw new Exception("Invalid step/amount");
         }
@@ -339,7 +339,7 @@ public abstract class Cahoots2x extends Cahoots {
 
         Transaction transaction = new Transaction(params);
         transaction.setVersion(2);
-        appendTx(inputs, outputs, transaction);
+        appendTx(inputs, outputs, transaction, chainSupplier, isStowaway);
 
         this.setStep(1);
     }
@@ -347,9 +347,9 @@ public abstract class Cahoots2x extends Cahoots {
     //
     // sender
     //
-    public void doStep2(List<TransactionInput> inputs, List<TransactionOutput> outputs) throws Exception    {
+    public void doStep2(List<TransactionInput> inputs, List<TransactionOutput> outputs, ChainSupplier chainSupplier, boolean isStowaway) throws Exception    {
         Transaction transaction = psbt.getTransaction();
-        appendTx(inputs, outputs, transaction);
+        appendTx(inputs, outputs, transaction, chainSupplier, isStowaway);
 
         this.setStep(2);
     }
@@ -394,9 +394,10 @@ public abstract class Cahoots2x extends Cahoots {
         this.setStep(4);
     }
 
-    protected void appendTx(List<TransactionInput> inputs, List<TransactionOutput> outputs, Transaction transaction) {
+    protected void appendTx(List<TransactionInput> inputs, List<TransactionOutput> outputs, Transaction transaction, ChainSupplier chainSupplier, boolean isStowaway) {
         // append inputs
         for(TransactionInput input : inputs)   {
+            input.setSequenceNumber(SEQUENCE_RBF_ENABLED);
             transaction.addInput(input);
             outpoints.put(input.getOutpoint().getHash().toString() + "-" + input.getOutpoint().getIndex(), input.getValue().longValue());
         }
@@ -410,6 +411,11 @@ public abstract class Cahoots2x extends Cahoots {
         String strBlockHeight = System.getProperty(BLOCK_HEIGHT_PROPERTY);
         if(strBlockHeight != null) {
             transaction.setLockTime(Long.parseLong(strBlockHeight));
+        } else if(this.psbt == null && !isStowaway) {
+            if(chainSupplier != null) {
+                long height = chainSupplier.getLatestBlock().height;
+                transaction.setLockTime(height);
+            }
         }
 
         // update psbt

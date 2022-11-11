@@ -12,6 +12,7 @@ import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
+import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.util.TxUtil;
 import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import com.samourai.xmanager.client.XManagerClient;

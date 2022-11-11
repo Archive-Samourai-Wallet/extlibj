@@ -6,18 +6,16 @@ import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.TransactionInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 
 public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends CahootsContext> extends AbstractCahootsService<T,C> {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahoots2xService.class);
-
+    private static final long LOCK_TIME_LENIENCE = 2; // 2 blocks
     public AbstractCahoots2xService(CahootsType cahootsType, BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
         super(cahootsType, bipFormatSupplier, params, TypeInteraction.TX_BROADCAST);
     }
@@ -90,15 +88,20 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
     public T doStep3(T cahoots2, C cahootsContext) throws Exception {
         debug("BEGIN doStep3", cahoots2, cahootsContext);
 
-        for(TransactionInput input : cahoots2.getTransaction().getInputs()) {
-            if(input.getSequenceNumber() != Cahoots2x.SEQUENCE_RBF_DISABLED) { // the default sequence number in bitcoincashj
-                throw new Exception("RBF detected: Please update app");
-            }
-        }
-
         HashMap<String, ECKey> keyBag_A = computeKeyBag(cahoots2, cahootsContext.getInputs());
 
         T cahoots3 = (T)cahoots2.copy();
+        long txLockTime = cahoots3.getTransaction().getLockTime();
+        long currentBlockHeight = cahootsContext.getCahootsWallet().getChainSupplier().getLatestBlock().height;
+        if(cahootsContext.getCahootsType() != CahootsType.STOWAWAY) {
+            if (txLockTime == 0 || (txLockTime - currentBlockHeight) > LOCK_TIME_LENIENCE) { // maybe a block is found fast and users dont have exact same block heights, or the user is running custom code and is malicious
+                throw new Exception("Locktime error: txLockTime " + txLockTime + ", vs currentBlockHeight " + currentBlockHeight);
+            }
+        } else {
+            if(txLockTime != 0) {
+                throw new Exception("Locktime error: txLockTime " + txLockTime + ", vs expected 0");
+            }
+        }
         cahoots3.doStep3(keyBag_A);
 
         // check verifiedSpendAmount
@@ -115,15 +118,20 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
     public T doStep4(T cahoots3, C cahootsContext) throws Exception {
         debug("BEGIN doStep4", cahoots3, cahootsContext);
 
-        for(TransactionInput input : cahoots3.getTransaction().getInputs()) {
-            if(input.getSequenceNumber() != Cahoots2x.SEQUENCE_RBF_DISABLED) { // the default sequence number in bitcoincashj
-                throw new Exception("RBF detected: Please update app");
-            }
-        }
-
         HashMap<String, ECKey> keyBag_B = computeKeyBag(cahoots3, cahootsContext.getInputs());
 
         T cahoots4 = (T)cahoots3.copy();
+        long txLockTime = cahoots4.getTransaction().getLockTime();
+        long currentBlockHeight = cahootsContext.getCahootsWallet().getChainSupplier().getLatestBlock().height;
+        if(cahootsContext.getCahootsType() != CahootsType.STOWAWAY) {
+            if (txLockTime == 0 || (txLockTime - currentBlockHeight) > LOCK_TIME_LENIENCE) { // maybe a block is found fast and users dont have exact same block heights, or the user is running custom code and is malicious
+                throw new Exception("Locktime error: txLockTime " + txLockTime + ", vs currentBlockHeight " + currentBlockHeight);
+            }
+        } else {
+            if(txLockTime != 0) {
+                throw new Exception("Locktime error: txLockTime " + txLockTime + ", vs expected 0");
+            }
+        }
         cahoots4.doStep4(keyBag_B);
 
         // check verifiedSpendAmount
