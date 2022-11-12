@@ -11,7 +11,7 @@ import java.util.Optional;
 public enum SorobanServer {
   TESTNET(
           DexConfigProvider.getInstance().getSamouraiConfig().getSorobanServerTestnetClear(),
-          DexConfigProvider.getInstance().getSamouraiConfig().getBackendServerTestnetOnion(),
+          DexConfigProvider.getInstance().getSamouraiConfig().getSorobanServerTestnetOnion(),
           TestNet3Params.get()),
   MAINNET(
           DexConfigProvider.getInstance().getSamouraiConfig().getSorobanServerMainnetClear(),
