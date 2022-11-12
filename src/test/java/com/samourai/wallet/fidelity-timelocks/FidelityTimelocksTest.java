@@ -3,13 +3,25 @@ package com.samourai.wallet.hd;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.bitcoinj.core.Coin;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.DumpedPrivateKey;
 import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionOutPoint;
+import org.bitcoinj.core.TransactionInput;
+import org.bitcoinj.core.TransactionOutput;
+import org.bitcoinj.core.TransactionWitness;
 import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
+import org.bitcoinj.crypto.TransactionSignature;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.segwit.FidelityTimelockAddress;
 import com.samourai.wallet.util.Util;
 
@@ -18,6 +30,8 @@ public class FidelityTimelocksTest {
 
     @Test
     public void testVectors()  {
+
+      // vectors by Belcher at: https://gist.github.com/chris-belcher/7257763cedcc014de2cd4239857cd36e
 
       NetworkParameters params = MainNetParams.get();
 
@@ -80,6 +94,96 @@ public class FidelityTimelocksTest {
             Assertions.assertEquals(privkeys.get(i), hdw84.getAddressAt(0, 2, indexes.get(i)).getECKey().getPrivateKeyAsWiF(params));
           }
 
+        }
+        catch(Exception e)  {
+          e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    public void testTransaction()  {
+
+      NetworkParameters params = TestNet3Params.get();
+
+        try  {
+
+          DumpedPrivateKey dpk = DumpedPrivateKey.fromBase58(params, "cSdzxBCNGiy87xh533V6fnpGkZ5GBMAYqTm5umGi381oMvV5QjAh");
+          ECKey eckey = dpk.getKey();
+          FidelityTimelockAddress faddress = new FidelityTimelockAddress(eckey, params, 2);
+          Script redeemScript = faddress.fidelityBondTimelockRedeemScript();
+
+          String prevHash = "3cc94a320a2a9c94458a68eaa28b89ffa89d29c74735196a3a7f3f7827805982";
+          long prevIdx = 1;
+          long prevAmount = 100000000L;
+          long spendAmount = 99999400L;
+
+          String toAddress = "tb1pns3ykx8xew6a7vgas2v5v6c9ezc4aa42eagf9cjm37fqvmgaugnsnd02xw";
+
+          Transaction tx = new Transaction(params);
+          tx.setVersion(2);
+          tx.setLockTime(faddress.getTimelock());   // nLocktime <= present time && >= CLTV timelock
+
+          TransactionOutPoint outpoint = new TransactionOutPoint(params, prevIdx, Sha256Hash.wrap(prevHash));
+          TransactionInput input = new TransactionInput(params, null, new byte[0], outpoint);
+          input.setSequenceNumber(0xfffffffe);
+          TransactionOutput output = Bech32UtilGeneric.getInstance().getTransactionOutput(toAddress, spendAmount, params);
+          tx.addInput(input);
+          tx.addOutput(output);
+
+          TransactionSignature sig = tx.calculateWitnessSignature(0, eckey, redeemScript.getProgram(), Coin.valueOf(prevAmount), Transaction.SigHash.ALL, false);
+          TransactionWitness witness = new TransactionWitness(2);
+          witness.setPush(0, sig.encodeToBitcoin());
+          witness.setPush(1, redeemScript.getProgram());
+          tx.setWitness(0, witness);
+
+          byte[] serialized = tx.bitcoinSerialize();
+          Assertions.assertEquals(Util.bytesToHex(serialized).toUpperCase(), "0200000000010182598027783F7F3A6A193547C7299DA8FF898BA2EA688A45949C2A0A324AC93C0100000000FEFFFFFF01A8DEF505000000002251209C224B18E6CBB5DF311D8299466B05C8B15EF6AACF5092E25B8F92066D1DE22702473044022049873DB0370ECAF030E26FCA2EE9437BD5351DE0AE0A3154BC18EDFE897A0A2A02205CC98A20A1B463870D62547D56196F28C82C3F165BE16ABEDE4AFBF706CF07B4012A0400FB5A5EB1752103D665BB0F8CB7053C2A4DA40E1A1CCB83C62BB71BEB27E21EF70E5B22312329F7AC00FB5A5E");
+        }
+        catch(Exception e)  {
+          e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    public void testTransactionFuture()  {
+
+      NetworkParameters params = TestNet3Params.get();
+
+        try  {
+
+          DumpedPrivateKey dpk = DumpedPrivateKey.fromBase58(params, "cSCbi8sSbZXaMN5PgvCx9agw3garQL8XT1BoqHRturr5K4tndXUi");
+          ECKey eckey = dpk.getKey();
+          FidelityTimelockAddress faddress = new FidelityTimelockAddress(eckey, params, 959);
+          Script redeemScript = faddress.fidelityBondTimelockRedeemScript();
+
+          String prevHash = "249ad1298554be84dcf4d02cef39a18449c5af3390d2f44f4e765361f87e392b";
+          long prevIdx = 1;
+          long prevAmount = 100000L;
+          long spendAmount = 99430L;
+
+          String toAddress = "tb1pns3ykx8xew6a7vgas2v5v6c9ezc4aa42eagf9cjm37fqvmgaugnsnd02xw";
+
+          Transaction tx = new Transaction(params);
+          tx.setVersion(2);
+          tx.setLockTime(faddress.getTimelock());   // nLocktime <= present time && >= CLTV timelock
+
+          TransactionOutPoint outpoint = new TransactionOutPoint(params, prevIdx, Sha256Hash.wrap(prevHash));
+          TransactionInput input = new TransactionInput(params, null, new byte[0], outpoint);
+          input.setSequenceNumber(0xfffffffe);
+          TransactionOutput output = Bech32UtilGeneric.getInstance().getTransactionOutput(toAddress, spendAmount, params);
+          tx.addInput(input);
+          tx.addOutput(output);
+
+          TransactionSignature sig = tx.calculateWitnessSignature(0, eckey, redeemScript.getProgram(), Coin.valueOf(prevAmount), Transaction.SigHash.ALL, false);
+          TransactionWitness witness = new TransactionWitness(2);
+          witness.setPush(0, sig.encodeToBitcoin());
+          witness.setPush(1, redeemScript.getProgram());
+          tx.setWitness(0, witness);
+
+          byte[] serialized = tx.bitcoinSerialize();
+          Assertions.assertEquals(Util.bytesToHex(serialized).toUpperCase(), "020000000001012B397EF86153764E4FF4D29033AFC54984A139EF2CD0F4DC84BE548529D19A240100000000FEFFFFFF0166840100000000002251209C224B18E6CBB5DF311D8299466B05C8B15EF6AACF5092E25B8F92066D1DE22702473044022076F1CC512D984C6118732682C508836B9C377DE5DBBEC20AE2EF3277C0A8BBB602206F8950521A2BF09CFE5865F19E601BACE5A3726CF753AB178C7D4623C3C74283012B0580785DF400B1752103A64668F579E1A7126191B2536572426569624E8ED7910CDCFBA1B2179A7CB26FAC80785DF4");
         }
         catch(Exception e)  {
           e.printStackTrace();
