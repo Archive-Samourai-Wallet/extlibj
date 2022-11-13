@@ -80,12 +80,12 @@ public class FidelityTimelocksTest {
 
             FidelityTimelockAddress faddress = new FidelityTimelockAddress(Util.hexToBytes(pubkeys.get(i)), params, indexes.get(i));
 
-            String redeemScript = Util.bytesToHex(faddress.fidelityBondTimelockRedeemScript().getProgram());
-            byte[] scriptpubkey = faddress.fidelityBondTimelockOutputScript().getProgram();
-            String saddress = faddress.getFidelityBondTimelockAddressAsString();
+            String redeemScript = Util.bytesToHex(faddress.timelockRedeemScript().getProgram());
+            byte[] scriptpubkey = faddress.timelockOutputScript().getProgram();
+            String saddress = faddress.getTimelockAddressAsString();
 
             // test vectors
-            Assertions.assertEquals(redeemScripts.get(i), Util.bytesToHex(faddress.fidelityBondTimelockRedeemScript().getProgram()).toLowerCase());
+            Assertions.assertEquals(redeemScripts.get(i), Util.bytesToHex(faddress.timelockRedeemScript().getProgram()).toLowerCase());
             Assertions.assertEquals(scriptPubkeys.get(i), Util.bytesToHex(scriptpubkey).toLowerCase());
             Assertions.assertEquals(addresses.get(i), saddress);
 
@@ -111,7 +111,7 @@ public class FidelityTimelocksTest {
           DumpedPrivateKey dpk = DumpedPrivateKey.fromBase58(params, "cSdzxBCNGiy87xh533V6fnpGkZ5GBMAYqTm5umGi381oMvV5QjAh");
           ECKey eckey = dpk.getKey();
           FidelityTimelockAddress faddress = new FidelityTimelockAddress(eckey, params, 2);
-          Script redeemScript = faddress.fidelityBondTimelockRedeemScript();
+          Script redeemScript = faddress.timelockRedeemScript();
 
           String prevHash = "3cc94a320a2a9c94458a68eaa28b89ffa89d29c74735196a3a7f3f7827805982";
           long prevIdx = 1;
@@ -156,7 +156,7 @@ public class FidelityTimelocksTest {
           DumpedPrivateKey dpk = DumpedPrivateKey.fromBase58(params, "cSCbi8sSbZXaMN5PgvCx9agw3garQL8XT1BoqHRturr5K4tndXUi");
           ECKey eckey = dpk.getKey();
           FidelityTimelockAddress faddress = new FidelityTimelockAddress(eckey, params, 959);
-          Script redeemScript = faddress.fidelityBondTimelockRedeemScript();
+          Script redeemScript = faddress.timelockRedeemScript();
 
           String prevHash = "249ad1298554be84dcf4d02cef39a18449c5af3390d2f44f4e765361f87e392b";
           long prevIdx = 1;
