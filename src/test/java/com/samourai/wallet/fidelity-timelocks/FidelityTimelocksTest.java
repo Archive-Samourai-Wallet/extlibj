@@ -2,6 +2,7 @@ package com.samourai.wallet.hd;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.security.SignatureException;
 
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ECKey;
@@ -93,6 +94,39 @@ public class FidelityTimelocksTest {
             Assertions.assertEquals(pubkeys.get(i), Util.bytesToHex(hdw84.getAddressAt(0, 2, indexes.get(i)).getECKey().getPubKey()).toLowerCase());
             Assertions.assertEquals(privkeys.get(i), hdw84.getAddressAt(0, 2, indexes.get(i)).getECKey().getPrivateKeyAsWiF(params));
           }
+
+          DumpedPrivateKey dpk = DumpedPrivateKey.fromBase58(params, privkeys.get(0));
+          ECKey eckey = dpk.getKey();
+          Assertions.assertEquals("16vmiGpY1rEaYnpGgtG7FZgr2uFCpeDgV6", eckey.toAddress(params).toString());
+          // From test vectors:
+          // Note that as signatures contains a random nonce, it might not be exactly the same when your code generates it
+          // p2pkh address is the p2pkh address corresponding to the derived public key, it can be used to verify the message
+          // signature in any wallet that supports Verify Message.
+          //
+          // This code asserts OK in our tests:
+          //
+          // String sig = eckey.signMessage("fidelity-bond-cert|020000000000000000000000000000000000000000000000000000000000000001|375");
+          // Assertions.assertEquals("H2b/90XcKnIU/D1nSCPhk8OcxrHebMCr4Ok2d2yDnbKDTSThNsNKA64CT4v2kt+xA1JmGRG/dMnUUH1kKqCVSHo=", sign);
+          boolean res = false;
+          try {
+            eckey.verifyMessage("fidelity-bond-cert|020000000000000000000000000000000000000000000000000000000000000001|375", "H2b/90XcKnIU/D1nSCPhk8OcxrHebMCr4Ok2d2yDnbKDTSThNsNKA64CT4v2kt+xA1JmGRG/dMnUUH1kKqCVSHo=");
+            res = true;
+          }
+          catch(SignatureException se) {
+            ;
+          }
+          Assertions.assertEquals(true, res);
+
+          res = false;
+          try {
+            String sig = eckey.signMessage("fidelity-bond-cert|020000000000000000000000000000000000000000000000000000000000000001|375");
+            eckey.verifyMessage("fidelity-bond-cert|020000000000000000000000000000000000000000000000000000000000000001|375", sig);
+            res = true;
+          }
+          catch(SignatureException se) {
+            ;
+          }
+          Assertions.assertEquals(true, res);
 
         }
         catch(Exception e)  {
