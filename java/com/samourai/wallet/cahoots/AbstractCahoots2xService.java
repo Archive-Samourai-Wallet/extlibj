@@ -97,10 +97,6 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
             if (txLockTime == 0 || (txLockTime - currentBlockHeight) > LOCK_TIME_LENIENCE) { // maybe a block is found fast and users dont have exact same block heights, or the user is running custom code and is malicious
                 throw new Exception("Locktime error: txLockTime " + txLockTime + ", vs currentBlockHeight " + currentBlockHeight);
             }
-        } else {
-            if(txLockTime != 0) {
-                throw new Exception("Locktime error: txLockTime " + txLockTime + ", vs expected 0");
-            }
         }
         cahoots3.doStep3(keyBag_A);
 
@@ -126,10 +122,6 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
         if(cahootsContext.getCahootsType() != CahootsType.STOWAWAY) {
             if (txLockTime == 0 || (txLockTime - currentBlockHeight) > LOCK_TIME_LENIENCE) { // maybe a block is found fast and users dont have exact same block heights, or the user is running custom code and is malicious
                 throw new Exception("Locktime error: txLockTime " + txLockTime + ", vs currentBlockHeight " + currentBlockHeight);
-            }
-        } else {
-            if(txLockTime != 0) {
-                throw new Exception("Locktime error: txLockTime " + txLockTime + ", vs expected 0");
             }
         }
         cahoots4.doStep4(keyBag_B);

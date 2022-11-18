@@ -342,13 +342,8 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         outputsB.add(output_B0);
 
         Stowaway stowaway2 = stowaway1.copy();
-        if(stowaway1.getTransaction().getLockTime() != 0) {
-            throw new Exception("Locktime error: Please update."); // safety check
-        } else {
-            stowaway2.doStep2(inputsB, outputsB, null, true);
-            stowaway2.setFeeAmount(fee);
-        }
-
+        stowaway2.doStep2(inputsB, outputsB, null, true);
+        stowaway2.setFeeAmount(fee);
         debug("END doStowaway2", stowaway2, cahootsContext);
         return stowaway2;
     }
