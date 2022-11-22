@@ -195,7 +195,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         stowaway0.setCounterpartyAccount(cahootsContext.getAccount());
 
         Stowaway stowaway1 = stowaway0.copy();
-        stowaway1.doStep1(inputsA, outputsA, cahootsWallet.getChainSupplier(), true); //will always need to give chainsupplier here, locktime is always 0 because of new tx.
+        stowaway1.doStep1(inputsA, outputsA, null, true);
 
         debug("END doStowaway1", stowaway1, cahootsContext);
         return stowaway1;
