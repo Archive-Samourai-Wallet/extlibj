@@ -18,13 +18,10 @@ public class StowawayContext extends CahootsContext {
     }
 
     public static StowawayContext newCounterparty(CahootsWallet cahootsWallet, int account) {
-        // force account #0 for Stowaway counterparty (MULTI uses newCounterpartyMulti() to bypass it)
-        account = 0;
         return new StowawayContext(cahootsWallet, CahootsTypeUser.COUNTERPARTY, account, null,null);
     }
 
     public static StowawayContext newCounterpartyMulti(CahootsWallet cahootsWallet, int account) {
-        // allow non-zero account for Stowaway MULTI
-        return new StowawayContext(cahootsWallet, CahootsTypeUser.COUNTERPARTY, account, null,null);
+        return newCounterparty(cahootsWallet, account);
     }
 }

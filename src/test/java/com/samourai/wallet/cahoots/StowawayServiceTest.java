@@ -55,7 +55,7 @@ public class StowawayServiceTest extends AbstractCahootsTest {
     }
 
     @Test
-    public void Stowaway_MULTI_POSTMIX() throws Exception {
+    public void Stowaway_POSTMIX() throws Exception {
         int account = SamouraiAccountIndex.POSTMIX;
 
         // setup wallets
@@ -65,16 +65,16 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         // setup Cahoots
         long spendAmount = 5000;
         StowawayContext cahootsContextSender = StowawayContext.newInitiator(cahootsWalletSender, account, FEE_PER_B, spendAmount);
-        StowawayContext cahootsContextCp = StowawayContext.newCounterpartyMulti(cahootsWalletCounterparty, account);
+        StowawayContext cahootsContextCp = StowawayContext.newCounterparty(cahootsWalletCounterparty, account);
 
         Cahoots cahoots = doCahoots(stowawayService, cahootsContextSender, cahootsContextCp, null);
 
         // verify TX
-        String txid = "fb121061765e4f6179e6be262253427e4c22d7b006207cc84c62d77bf26ee923";
-        String raw = "02000000000102d54f4c6e366d8fc11b8630d4dd1536765ec8022bd3ab8a62fefc2ee96b9ccf140100000000fdffffffad05bb9c893f5cb9762ea57729efaf4a4b8eb1e377533fddc49d15d01fb307940100000000fdffffff02b012000000000000160014c92e53e44ae5d9d392aecf1ce7a980b073b01cd6983a0000000000001600143bdff7532977f4f8094cfa8ccff2574cc71eebe702483045022100af62a5e82e112f82f2fcfcae0461de195902e2bd378d26f9f236834d7fac2d0d0220481aeb526c294b8718347be5195c147f334a6b4863f8508ca8ea30fcd5b0ff30012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f202483045022100cc9caebc56646e70b4983291d6315f0ebbbd21953a8c1801dc1f14cebd7ead630220567e18db1380ac1c4e7153ffce5b38f3684decccbb00a6c2a64b455fb6766595012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f200000000";
+        String txid = "2cd56ca8314c049270cf389a8aefcef0ffd741baf00e94b9b50d509135c6c2d1";
+        String raw = "02000000000102d54f4c6e366d8fc11b8630d4dd1536765ec8022bd3ab8a62fefc2ee96b9ccf140100000000fdffffffad05bb9c893f5cb9762ea57729efaf4a4b8eb1e377533fddc49d15d01fb307940100000000fdffffff02b012000000000000160014c92e53e44ae5d9d392aecf1ce7a980b073b01cd6983a00000000000016001428a90fa3f4f285fc689f389115326dbf96917d6202483045022100c611140c3a74977157725a4da7580d19476eb35e5cf21f6950fb7c6cd0ed8f95022045b3319b51214c431fc76d3dd74f3908fba98b63ef6377ec0b187c3cb38a8ae9012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f202483045022100a7d438bdea83d240151d2ec2df818786bc7f94411e5f43f8eec78b984939de51022024635264353161c41523cef01230a499aaac50993285625f95aa7528cfc4d117012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f200000000";
 
         Map<String,Long> outputs = new LinkedHashMap<>();
-        outputs.put(COUNTERPARTY_RECEIVE_POSTMIX_84[0], 15000L);
+        outputs.put(COUNTERPARTY_RECEIVE_84[0], 15000L);
         outputs.put(SENDER_CHANGE_POSTMIX_84[0], 4784L);
         verifyTx(cahoots.getTransaction(), txid, raw, outputs);
         pushTx.assertTx(txid, raw);

@@ -8,10 +8,10 @@ import com.samourai.wallet.cahoots.AbstractCahoots2xService;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsUtxo;
 import com.samourai.wallet.cahoots.CahootsWallet;
-import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.util.FeeUtil;
+import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import org.bitcoinj.core.*;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
@@ -109,7 +109,8 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         CahootsWallet cahootsWallet = cahootsContext.getCahootsWallet();
         int account = cahootsContext.getAccount();
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
-        return doStowaway1(stowaway0, cahootsContext, utxos, account, seenTxs);
+        int receiveAccount = SamouraiAccountIndex.DEPOSIT; //counterparty should always receive Stowaway to DEPOSIT
+        return doStowaway1(stowaway0, cahootsContext, utxos, receiveAccount, seenTxs);
     }
 
     public Stowaway doStowaway1(Stowaway stowaway0, StowawayContext cahootsContext, List<CahootsUtxo> utxos, int receiveAccount, List<String> seenTxs) throws Exception {
