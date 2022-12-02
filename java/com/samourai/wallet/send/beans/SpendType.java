@@ -6,5 +6,6 @@ public enum SpendType {
     RICOCHET,
     CAHOOTS_STONEWALL2X,
     CAHOOTS_STOWAWAY,
-    CAHOOTS_MULTI;
+    CAHOOTS_MULTI,
+    TX0X2;
 }

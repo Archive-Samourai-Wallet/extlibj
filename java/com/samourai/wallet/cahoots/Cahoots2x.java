@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-// shared payload for 2x Cahoots: Stonewallx2 or Stowaway
+// shared payload for 2x Cahoots: Stonewallx2, Stowaway, Tx0x2
 public abstract class Cahoots2x extends Cahoots {
     private static final Logger log = LoggerFactory.getLogger(Cahoots2x.class);
 
