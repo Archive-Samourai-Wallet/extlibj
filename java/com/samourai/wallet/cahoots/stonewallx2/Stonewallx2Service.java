@@ -9,7 +9,6 @@ import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsUtxo;
 import com.samourai.wallet.cahoots.CahootsWallet;
 import com.samourai.wallet.cahoots.multi.Stonewallx2InputData;
-import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
@@ -274,7 +273,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         stonewall0.setCollabChange(changeAddress.getAddressString());
 
         STONEWALLx2 stonewall1 = stonewall0.copy();
-        stonewall1.doStep1(inputsA, outputsA, cahootsWallet.getChainSupplier(), false);
+        stonewall1.doStep1(inputsA, outputsA, cahootsWallet.getChainSupplier());
 
         debug("END doSTONEWALLx2_1", stonewall1, cahootsContext);
         return stonewall1;
@@ -444,7 +443,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         if(stonewall1.getTransaction().getLockTime() == 0) {
             throw new Exception("Locktime error: Please update."); // safety check
         } else {
-            stonewall2.doStep2(inputsB, outputsB, null, false); // no need to give chain supplier, psbt should have the lock time
+            stonewall2.doStep2(inputsB, outputsB);
         }
 
         debug("END doSTONEWALLx2_2",stonewall2, cahootsContext);

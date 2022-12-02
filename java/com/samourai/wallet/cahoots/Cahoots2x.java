@@ -329,7 +329,7 @@ public abstract class Cahoots2x extends Cahoots {
     //
     // counterparty
     //
-    public void doStep1(List<TransactionInput> inputs, List<TransactionOutput> outputs, ChainSupplier chainSupplier, boolean isStowaway) throws Exception    {
+    public void doStep1(List<TransactionInput> inputs, List<TransactionOutput> outputs, ChainSupplier chainSupplier) throws Exception    {
         if(this.getStep() != 0 || this.getSpendAmount() == 0L)   {
             throw new Exception("Invalid step/amount");
         }
@@ -337,9 +337,14 @@ public abstract class Cahoots2x extends Cahoots {
             throw new Exception("Invalid outputs");
         }
 
-        Transaction transaction = new Transaction(params);
-        transaction.setVersion(2);
-        appendTx(inputs, outputs, transaction, chainSupplier, isStowaway);
+        Transaction transaction = getTransaction();
+        if (transaction == null) {
+            // for STONEWALLX2/STOWAWAY, tx is created by counterparty at step1
+            // for TX0X2, tx is created by sender before step1
+            transaction = new Transaction(params);
+            transaction.setVersion(2);
+        }
+        appendTx(inputs, outputs, transaction, chainSupplier);
 
         this.setStep(1);
     }
@@ -347,9 +352,9 @@ public abstract class Cahoots2x extends Cahoots {
     //
     // sender
     //
-    public void doStep2(List<TransactionInput> inputs, List<TransactionOutput> outputs, ChainSupplier chainSupplier, boolean isStowaway) throws Exception    {
+    public void doStep2(List<TransactionInput> inputs, List<TransactionOutput> outputs) throws Exception    {
         Transaction transaction = psbt.getTransaction();
-        appendTx(inputs, outputs, transaction, chainSupplier, isStowaway);
+        appendTx(inputs, outputs, transaction, null); // no need to give chain supplier, psbt should have the lock time
 
         this.setStep(2);
     }
@@ -394,7 +399,7 @@ public abstract class Cahoots2x extends Cahoots {
         this.setStep(4);
     }
 
-    protected void appendTx(List<TransactionInput> inputs, List<TransactionOutput> outputs, Transaction transaction, ChainSupplier chainSupplier, boolean isStowaway) {
+    protected void appendTx(List<TransactionInput> inputs, List<TransactionOutput> outputs, Transaction transaction, ChainSupplier chainSupplier) {
         // append inputs
         for(TransactionInput input : inputs)   {
             input.setSequenceNumber(SEQUENCE_RBF_ENABLED);
@@ -411,7 +416,7 @@ public abstract class Cahoots2x extends Cahoots {
         String strBlockHeight = System.getProperty(BLOCK_HEIGHT_PROPERTY);
         if(strBlockHeight != null) {
             transaction.setLockTime(Long.parseLong(strBlockHeight));
-        } else if(this.psbt == null && !isStowaway) {
+        } else if(this.psbt == null && getType() != CahootsType.STOWAWAY.getValue()) {
             if(chainSupplier != null) {
                 long height = chainSupplier.getLatestBlock().height;
                 transaction.setLockTime(height);

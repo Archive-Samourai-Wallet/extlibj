@@ -196,7 +196,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         stowaway0.setCounterpartyAccount(cahootsContext.getAccount());
 
         Stowaway stowaway1 = stowaway0.copy();
-        stowaway1.doStep1(inputsA, outputsA, null, true);
+        stowaway1.doStep1(inputsA, outputsA, null);
 
         debug("END doStowaway1", stowaway1, cahootsContext);
         return stowaway1;
@@ -343,7 +343,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         outputsB.add(output_B0);
 
         Stowaway stowaway2 = stowaway1.copy();
-        stowaway2.doStep2(inputsB, outputsB, null, true);
+        stowaway2.doStep2(inputsB, outputsB);
         stowaway2.setFeeAmount(fee);
         debug("END doStowaway2", stowaway2, cahootsContext);
         return stowaway2;
