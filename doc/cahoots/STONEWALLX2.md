@@ -11,7 +11,7 @@ See [Stonewallx2Example.java](https://code.samourai.io/wallet/ExtLibJ/-/blob/dev
 
 ## II. Cahoots dialog
 See [Stonewallx2Service.java](https://code.samourai.io/wallet/ExtLibJ/-/blob/develop/java/com/samourai/wallet/cahoots/stonewallx2/Stonewallx2Service.java)
-
+![](charts/STONEWALLX2.chart.png)
 
 #### Step #0: SENDER
 Initialize:
@@ -72,7 +72,7 @@ Set:
 - outpoints: append inputs
 - feeAmount: total miner fee (as pair number)
 - psbt: 
-    * append spend output
+    * append spendOutput + changeOutput
     * update counterparty change output: deduce feeAmount/2
 
 #### Step #3: COUNTERPARTY
