@@ -53,9 +53,6 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
             if (!Arrays.equals(cahoots.fingerprintCollab, request.fingerprintCollab)) {
                 throw new Exception("Invalid altered Cahoots fingerprintCollab");
             }
-            if (!Objects.equals(cahoots.strCollabChange, request.strCollabChange)) {
-                throw new Exception("Invalid altered Cahoots strCollabChange");
-            }
         }
 
         if (cahoots.getStep() >= 3) {

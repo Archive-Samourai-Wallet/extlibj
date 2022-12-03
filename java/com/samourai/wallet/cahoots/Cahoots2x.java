@@ -51,7 +51,6 @@ public abstract class Cahoots2x extends Cahoots {
     protected int cptyAccount = 0;
     protected byte[] fingerprint = null;
     protected byte[] fingerprintCollab = null;
-    protected String strCollabChange = null;
 
     public Cahoots2x()    {
         super();
@@ -73,7 +72,6 @@ public abstract class Cahoots2x extends Cahoots {
         this.cptyAccount = c.getCounterpartyAccount();
         this.fingerprint = c.getFingerprint();
         this.fingerprintCollab = c.getFingerprintCollab();
-        this.strCollabChange = c.getCollabChange();
     }
 
     public Cahoots2x(int type, NetworkParameters params, long spendAmount, String strDestination, int account, byte[] fingerprint) {
@@ -179,14 +177,6 @@ public abstract class Cahoots2x extends Cahoots {
         this.fingerprintCollab = fingerprint;
     }
 
-    public String getCollabChange() {
-        return strCollabChange;
-    }
-
-    public void setCollabChange(String strCollabChange) {
-        this.strCollabChange = strCollabChange;
-    }
-
     @Override
     protected JSONObject toJSONObjectCahoots() throws Exception {
         JSONObject obj = super.toJSONObjectCahoots();
@@ -212,7 +202,6 @@ public abstract class Cahoots2x extends Cahoots {
             obj.put("fingerprint_collab", Hex.toHexString(fingerprintCollab));
         }
         obj.put("psbt", psbt == null ? "" : Z85.getInstance().encode(psbt.toGZIP()));
-        obj.put("collabChange", strCollabChange == null ? "" : strCollabChange);
         return obj;
     }
 
@@ -231,12 +220,6 @@ public abstract class Cahoots2x extends Cahoots {
                 outpoints.put(entry.getString("outpoint"), entry.getLong("value"));
             }
             this.strDestination = obj.getString("dest");
-            if(obj.has("collabChange")) {
-                this.strCollabChange = obj.getString("collabChange");
-            }
-            else    {
-                this.strCollabChange = "";
-            }
             if(obj.has("account"))    {
                 this.account = obj.getInt("account");
             }
