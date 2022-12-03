@@ -126,7 +126,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         List<CahootsUtxo> selectedUTXO = selectUtxos1(stowaway0, utxos, seenTxs);
         List<TransactionInput> inputsA = cahootsContext.addInputs(selectedUTXO);
 
-        // destination output
+        // receive output
         BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(receiveAccount, true, BIP_FORMAT.SEGWIT_NATIVE);
         if (log.isDebugEnabled()) {
             log.debug("+output (CounterParty receive) = "+receiveAddress);
@@ -312,16 +312,16 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
 
         List<TransactionOutput> outputsB = new LinkedList<>();
 
-        // tx: modify spend output
-        long contributedAmount = 0L;
+        // tx: modify receive output: spendAmount + sum(counterparty inputs)
+        long counterpartyContributedAmount = 0L;
         for(Long value : stowaway1.getOutpoints().values())   {
-            contributedAmount += value;
+            counterpartyContributedAmount += value;
         }
-        long outputAmount = transaction.getOutput(0).getValue().longValue();
+        long spendAmount = transaction.getOutput(0).getValue().longValue();
         TransactionOutput spendOutput = transaction.getOutput(0);
-        spendOutput.setValue(Coin.valueOf(outputAmount + contributedAmount));
+        spendOutput.setValue(Coin.valueOf(spendAmount + counterpartyContributedAmount));
         outputsB.add(spendOutput);
-        stowaway1.getTransaction().clearOutputs(); // replace spend output by the new one
+        stowaway1.getTransaction().clearOutputs(); // replace receive output by the new one
 
         // keep track of minerFeePaid
         cahootsContext.setMinerFeePaid(fee); // sender pays all minerFee

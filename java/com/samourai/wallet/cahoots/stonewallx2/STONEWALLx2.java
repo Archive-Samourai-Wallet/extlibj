@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 public class STONEWALLx2 extends Cahoots2x {
     private static final Logger log = LoggerFactory.getLogger(STONEWALLx2.class);
 
+    protected String strCollabChange = null;
+
     // set by initiator when spending to a paynym
     // we need this to increment paynym counter on android after broadcast
     protected String paynymDestination = null;
@@ -18,6 +20,7 @@ public class STONEWALLx2 extends Cahoots2x {
 
     private STONEWALLx2(STONEWALLx2 c)    {
         super(c);
+        this.strCollabChange = c.getCollabChange();
         this.paynymDestination = c.paynymDestination;
     }
 
@@ -38,6 +41,7 @@ public class STONEWALLx2 extends Cahoots2x {
     @Override
     protected JSONObject toJSONObjectCahoots() throws Exception {
         JSONObject obj = super.toJSONObjectCahoots();
+        obj.put("collabChange", strCollabChange == null ? "" : strCollabChange);
         obj.put("destPaynym", paynymDestination == null ? "" : paynymDestination);
         return obj;
     }
@@ -45,7 +49,21 @@ public class STONEWALLx2 extends Cahoots2x {
     @Override
     protected void fromJSONObjectCahoots(JSONObject obj) throws Exception {
         super.fromJSONObjectCahoots(obj);
+        if(obj.has("collabChange")) {
+            this.strCollabChange = obj.getString("collabChange");
+        }
+        else    {
+            this.strCollabChange = "";
+        }
         this.paynymDestination = obj.getString("destPaynym");
+    }
+
+    public String getCollabChange() {
+        return strCollabChange;
+    }
+
+    public void setCollabChange(String strCollabChange) {
+        this.strCollabChange = strCollabChange;
     }
 
     @Override

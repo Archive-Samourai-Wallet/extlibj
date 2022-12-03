@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, Stonewallx2Context> {
     private static final Logger log = LoggerFactory.getLogger(Stonewallx2Service.class);
@@ -35,6 +36,9 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
 
         if (request != null) {
             // properties should never change once set
+            if (!Objects.equals(cahoots.strCollabChange, request.strCollabChange)) {
+                throw new Exception("Invalid altered Cahoots strCollabChange");
+            }
             if (!StringUtils.equals(cahoots.paynymDestination, request.paynymDestination)) {
                 throw new Exception("Invalid altered Cahoots strPayNymDestination");
             }
