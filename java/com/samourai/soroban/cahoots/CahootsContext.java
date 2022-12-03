@@ -6,6 +6,7 @@ import com.samourai.wallet.cahoots.CahootsTypeUser;
 import com.samourai.wallet.cahoots.CahootsUtxo;
 import com.samourai.wallet.cahoots.CahootsWallet;
 import com.samourai.wallet.cahoots.multi.MultiCahootsContext;
+import org.bitcoinj.core.TransactionInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,6 +121,17 @@ public abstract class CahootsContext implements SorobanContext {
 
     public void addInput(CahootsUtxo cahootsUtxo) {
         inputs.add(cahootsUtxo);
+    }
+
+    public List<TransactionInput> addInputs(List<CahootsUtxo> inputs) {
+        List<TransactionInput> inputsA = new LinkedList<>();
+
+        for (CahootsUtxo utxo : inputs) {
+            TransactionInput input = utxo.getOutpoint().computeSpendInput();
+            inputsA.add(input);
+            addInput(utxo);
+        }
+        return inputsA;
     }
 
     public List<CahootsUtxo> getInputs() {

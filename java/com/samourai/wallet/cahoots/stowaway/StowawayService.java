@@ -4,10 +4,7 @@ import com.samourai.soroban.cahoots.StowawayContext;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
-import com.samourai.wallet.cahoots.AbstractCahoots2xService;
-import com.samourai.wallet.cahoots.CahootsType;
-import com.samourai.wallet.cahoots.CahootsUtxo;
-import com.samourai.wallet.cahoots.CahootsWallet;
+import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.util.FeeUtil;
@@ -120,6 +117,35 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         byte[] fingerprint = cahootsWallet.getFingerprint();
         stowaway0.setFingerprintCollab(fingerprint);
 
+        //
+        //
+        // step1: A utxos -> B (take largest that cover amount)
+        //
+        //
+
+        List<CahootsUtxo> selectedUTXO = selectUtxos1(stowaway0, utxos, seenTxs);
+        List<TransactionInput> inputsA = cahootsContext.addInputs(selectedUTXO);
+
+        // destination output
+        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(receiveAccount, true, BIP_FORMAT.SEGWIT_NATIVE);
+        if (log.isDebugEnabled()) {
+            log.debug("+output (CounterParty receive) = "+receiveAddress);
+        }
+        List<TransactionOutput> outputsA = new LinkedList<>();
+        TransactionOutput output_A0 = computeTxOutput(receiveAddress, stowaway0.getSpendAmount(), cahootsContext);
+        outputsA.add(output_A0);
+
+        stowaway0.setDestination(receiveAddress.getAddressString());
+        stowaway0.setCounterpartyAccount(cahootsContext.getAccount());
+
+        Stowaway stowaway1 = stowaway0.copy();
+        stowaway1.doStep1(inputsA, outputsA, null);
+
+        debug("END doStowaway1", stowaway1, cahootsContext);
+        return stowaway1;
+    }
+
+    protected List<CahootsUtxo> selectUtxos1(Cahoots2x stowaway0, List<CahootsUtxo> utxos, List<String> seenTxs) throws Exception {
         // sort in ascending order by value
         Collections.sort(utxos, new UTXO.UTXOComparator());
         if (log.isDebugEnabled()) {
@@ -139,6 +165,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
             }
         }
         if(highUTXO.size() > 0)    {
+            // select a single high utxo randomly
             CahootsUtxo utxo = highUTXO.get(getRandNextInt(highUTXO.size()));
             if (log.isDebugEnabled()) {
                 log.debug("BIP84 selected random utxo: " + utxo);
@@ -147,6 +174,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
             totalContributedAmount = utxo.getValue();
         }
         if (selectedUTXO.size() == 0) {
+            // select multiple utxos
             for (CahootsUtxo utxo : utxos) {
                 if (!_seenTxs.contains(utxo.getOutpoint().getHash().toString())) {
                     _seenTxs.add(utxo.getOutpoint().getHash().toString());
@@ -168,38 +196,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         if (!stowaway0.isContributedAmountSufficient(totalContributedAmount)) {
             throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
         }
-
-        //
-        //
-        // step1: A utxos -> B (take largest that cover amount)
-        //
-        //
-
-        List<TransactionInput> inputsA = new LinkedList<>();
-
-        for (CahootsUtxo utxo : selectedUTXO) {
-            TransactionInput input = utxo.getOutpoint().computeSpendInput();
-            inputsA.add(input);
-            cahootsContext.addInput(utxo);
-        }
-
-        // destination output
-        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(receiveAccount, true, BIP_FORMAT.SEGWIT_NATIVE);
-        if (log.isDebugEnabled()) {
-            log.debug("+output (CounterParty receive) = "+receiveAddress);
-        }
-        List<TransactionOutput> outputsA = new LinkedList<>();
-        TransactionOutput output_A0 = computeTxOutput(receiveAddress, stowaway0.getSpendAmount(), cahootsContext);
-        outputsA.add(output_A0);
-
-        stowaway0.setDestination(receiveAddress.getAddressString());
-        stowaway0.setCounterpartyAccount(cahootsContext.getAccount());
-
-        Stowaway stowaway1 = stowaway0.copy();
-        stowaway1.doStep1(inputsA, outputsA, null);
-
-        debug("END doStowaway1", stowaway1, cahootsContext);
-        return stowaway1;
+        return selectedUTXO;
     }
 
     //
@@ -311,12 +308,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         //
         //
 
-        List<TransactionInput> inputsB = new LinkedList<>();
-        for (CahootsUtxo utxo : selectedUTXO) {
-            TransactionInput input = utxo.getOutpoint().computeSpendInput();
-            inputsB.add(input);
-            cahootsContext.addInput(utxo);
-        }
+        List<TransactionInput> inputsB = cahootsContext.addInputs(selectedUTXO);
 
         List<TransactionOutput> outputsB = new LinkedList<>();
 
