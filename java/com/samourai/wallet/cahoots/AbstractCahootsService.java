@@ -116,13 +116,15 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
         }
 
         for(TransactionOutput output : transaction.getOutputs()) {
-            String outputAddress = bipFormatSupplier.getToAddress(output);
-            if (outputAddress != null && cahootsContext.getOutputAddresses().contains(outputAddress)) {
-                if (output.getValue() != null) {
-                    if (log.isDebugEnabled()) {
-                        log.debug(prefix+"computeSpendAmount: -output " + output.getValue().longValue()+" "+outputAddress);
+            if (!output.getScriptPubKey().isOpReturn()) {
+                String outputAddress = bipFormatSupplier.getToAddress(output);
+                if (outputAddress != null && cahootsContext.getOutputAddresses().contains(outputAddress)) {
+                    if (output.getValue() != null) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(prefix + "computeSpendAmount: -output " + output.getValue().longValue() + " " + outputAddress);
+                        }
+                        spendAmount -= output.getValue().longValue();
                     }
-                    spendAmount -= output.getValue().longValue();
                 }
             }
         }

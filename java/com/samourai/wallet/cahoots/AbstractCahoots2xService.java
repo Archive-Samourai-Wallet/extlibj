@@ -53,9 +53,6 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
             if (!Arrays.equals(cahoots.fingerprintCollab, request.fingerprintCollab)) {
                 throw new Exception("Invalid altered Cahoots fingerprintCollab");
             }
-            if (!Objects.equals(cahoots.strCollabChange, request.strCollabChange)) {
-                throw new Exception("Invalid altered Cahoots strCollabChange");
-            }
         }
 
         if (cahoots.getStep() >= 3) {
@@ -91,13 +88,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
         HashMap<String, ECKey> keyBag_A = computeKeyBag(cahoots2, cahootsContext.getInputs());
 
         T cahoots3 = (T)cahoots2.copy();
-        long txLockTime = cahoots3.getTransaction().getLockTime();
-        long currentBlockHeight = cahootsContext.getCahootsWallet().getChainSupplier().getLatestBlock().height;
-        if(cahootsContext.getCahootsType() != CahootsType.STOWAWAY) {
-            if (txLockTime == 0 || (txLockTime - currentBlockHeight) > LOCK_TIME_LENIENCE) { // maybe a block is found fast and users dont have exact same block heights, or the user is running custom code and is malicious
-                throw new Exception("Locktime error: txLockTime " + txLockTime + ", vs currentBlockHeight " + currentBlockHeight);
-            }
-        }
+        checkLockTime(cahoots3, cahootsContext);
         cahoots3.doStep3(keyBag_A);
 
         // check verifiedSpendAmount
@@ -117,13 +108,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
         HashMap<String, ECKey> keyBag_B = computeKeyBag(cahoots3, cahootsContext.getInputs());
 
         T cahoots4 = (T)cahoots3.copy();
-        long txLockTime = cahoots4.getTransaction().getLockTime();
-        long currentBlockHeight = cahootsContext.getCahootsWallet().getChainSupplier().getLatestBlock().height;
-        if(cahootsContext.getCahootsType() != CahootsType.STOWAWAY) {
-            if (txLockTime == 0 || (txLockTime - currentBlockHeight) > LOCK_TIME_LENIENCE) { // maybe a block is found fast and users dont have exact same block heights, or the user is running custom code and is malicious
-                throw new Exception("Locktime error: txLockTime " + txLockTime + ", vs currentBlockHeight " + currentBlockHeight);
-            }
-        }
+        checkLockTime(cahoots4, cahootsContext);
         cahoots4.doStep4(keyBag_B);
 
         // check verifiedSpendAmount
@@ -135,6 +120,16 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
 
         debug("END doStep4", cahoots4, cahootsContext);
         return cahoots4;
+    }
+
+    protected void checkLockTime(T cahoots, CahootsContext cahootsContext) throws Exception {
+        long txLockTime = cahoots.getTransaction().getLockTime();
+        long currentBlockHeight = cahootsContext.getCahootsWallet().getChainSupplier().getLatestBlock().height;
+        if(cahootsContext.getCahootsType() != CahootsType.STOWAWAY) {
+            if (txLockTime == 0 || Math.abs(txLockTime - currentBlockHeight) > LOCK_TIME_LENIENCE) { // maybe a block is found fast and users dont have exact same block heights, or the user is running custom code and is malicious
+                throw new Exception("Locktime error: txLockTime " + txLockTime + ", vs currentBlockHeight " + currentBlockHeight);
+            }
+        }
     }
 
     public void debug(String info, T cahoots, C cahootsContext) {

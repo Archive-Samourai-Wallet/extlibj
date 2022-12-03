@@ -4,12 +4,7 @@ import com.samourai.soroban.cahoots.Stonewallx2Context;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
-import com.samourai.wallet.cahoots.AbstractCahoots2xService;
-import com.samourai.wallet.cahoots.CahootsType;
-import com.samourai.wallet.cahoots.CahootsUtxo;
-import com.samourai.wallet.cahoots.CahootsWallet;
-import com.samourai.wallet.cahoots.multi.Stonewallx2InputData;
-import com.samourai.wallet.chain.ChainSupplier;
+import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
@@ -26,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, Stonewallx2Context> {
     private static final Logger log = LoggerFactory.getLogger(Stonewallx2Service.class);
@@ -40,6 +36,9 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
 
         if (request != null) {
             // properties should never change once set
+            if (!Objects.equals(cahoots.strCollabChange, request.strCollabChange)) {
+                throw new Exception("Invalid altered Cahoots strCollabChange");
+            }
             if (!StringUtils.equals(cahoots.paynymDestination, request.paynymDestination)) {
                 throw new Exception("Invalid altered Cahoots strPayNymDestination");
             }
@@ -119,14 +118,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         return stonewall0;
     }
 
-
-
-    //
-    // counterparty
-    //
-    private Stonewallx2InputData getInputData(Stonewallx2Context cahootsContext, STONEWALLx2 stonewall0, int account, List<String> seenTxs) throws Exception {
-        CahootsWallet cahootsWallet = cahootsContext.getCahootsWallet();
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
+    protected List<CahootsUtxo> selectUtxos1(Cahoots2x stonewall0, List<CahootsUtxo> utxos, List<String> seenTxs) throws Exception {
         shuffleUtxos(utxos);
 
         if (log.isDebugEnabled()) {
@@ -186,23 +178,9 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         if (!stonewall0.isContributedAmountSufficient(totalContributedAmount)) {
             throw new Exception("Cannot compose #Cahoots: insufficient wallet balance");
         }
-
-        //
-        //
-        // step1: A utxos -> B (take largest that cover amount)
-        //
-        //
-
-        List<TransactionInput> inputsA = new LinkedList<>();
-
-        for (CahootsUtxo utxo : selectedUTXO) {
-            TransactionInput input = utxo.getOutpoint().computeSpendInput();
-            inputsA.add(input);
-            cahootsContext.addInput(utxo);
-        }
-
-        return new Stonewallx2InputData(totalContributedAmount, utxos, inputsA);
+        return selectedUTXO;
     }
+
     private BipAddress getContributorMixAddress(CahootsWallet cahootsWallet, STONEWALLx2 stonewall0, boolean increment, BipFormat bipFormat) throws Exception {
         BipAddress receiveAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), increment, bipFormat);
         if (receiveAddress.getAddressString().equalsIgnoreCase(stonewall0.getDestination())) {
@@ -256,25 +234,33 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         debug("BEGIN doSTONEWALLx2_1", stonewall0, cahootsContext);
 
         int account = cahootsContext.getAccount();
-        Stonewallx2InputData inputData = getInputData(cahootsContext, stonewall0, account, seenTxs);
+        CahootsWallet cahootsWallet = cahootsContext.getCahootsWallet();
 
-        List<TransactionInput> inputsA = inputData.getInputs();
+        //
+        //
+        // step1: A utxos -> B (take largest that cover amount)
+        //
+        //
+
+        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
+        List<CahootsUtxo> selectedUTXO = selectUtxos1(stonewall0, utxos, seenTxs);
+        List<TransactionInput> inputsA = cahootsContext.addInputs(selectedUTXO);
+        long contributedAmount = CahootsUtxo.sumValue(selectedUTXO).getValue();
 
         List<TransactionOutput> outputsA = new LinkedList<>();
         outputsA.add(mixOutput);
 
         // contributor change output
-        CahootsWallet cahootsWallet = cahootsContext.getCahootsWallet();
         BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), true, BIP_FORMAT.SEGWIT_NATIVE);
         if (log.isDebugEnabled()) {
             log.debug("+output (CounterParty change) = " + changeAddress);
         }
-        TransactionOutput output_A1 = computeTxOutput(changeAddress, inputData.getContributedAmount() - stonewall0.getSpendAmount(), cahootsContext);
+        TransactionOutput output_A1 = computeTxOutput(changeAddress, contributedAmount - stonewall0.getSpendAmount(), cahootsContext);
         outputsA.add(output_A1);
         stonewall0.setCollabChange(changeAddress.getAddressString());
 
         STONEWALLx2 stonewall1 = stonewall0.copy();
-        stonewall1.doStep1(inputsA, outputsA, cahootsWallet.getChainSupplier(), false);
+        stonewall1.doStep1(inputsA, outputsA, cahootsWallet.getChainSupplier());
 
         debug("END doSTONEWALLx2_1", stonewall1, cahootsContext);
         return stonewall1;
@@ -420,12 +406,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         //
         //
 
-        List<TransactionInput> inputsB = new LinkedList<>();
-        for (CahootsUtxo utxo : selectedUTXO) {
-            TransactionInput input = utxo.getOutpoint().computeSpendInput();
-            inputsB.add(input);
-            cahootsContext.addInput(utxo);
-        }
+        List<TransactionInput> inputsB = cahootsContext.addInputs(selectedUTXO);
 
         // spender change output
         List<TransactionOutput> outputsB = new LinkedList<>();
@@ -444,7 +425,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         if(stonewall1.getTransaction().getLockTime() == 0) {
             throw new Exception("Locktime error: Please update."); // safety check
         } else {
-            stonewall2.doStep2(inputsB, outputsB, null, false); // no need to give chain supplier, psbt should have the lock time
+            stonewall2.doStep2(inputsB, outputsB);
         }
 
         debug("END doSTONEWALLx2_2",stonewall2, cahootsContext);
