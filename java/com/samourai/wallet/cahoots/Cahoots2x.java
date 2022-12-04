@@ -320,13 +320,8 @@ public abstract class Cahoots2x extends Cahoots {
             throw new Exception("Invalid outputs");
         }
 
-        Transaction transaction = getTransaction();
-        if (transaction == null) {
-            // for STONEWALLX2/STOWAWAY, tx is created by counterparty at step1
-            // for TX0X2, tx is created by sender before step1
-            transaction = new Transaction(params);
-            transaction.setVersion(2);
-        }
+        Transaction transaction = new Transaction(params);
+        transaction.setVersion(2);
         appendTx(inputs, outputs, transaction, chainSupplier);
 
         this.setStep(1);
