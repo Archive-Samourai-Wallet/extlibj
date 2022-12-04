@@ -140,8 +140,10 @@ public class AbstractTest {
 
     Map<String,Long> outputsActuals = new LinkedHashMap<>();
     for (TransactionOutput txOutput : tx.getOutputs()) {
-      String address = bipFormatSupplier.getToAddress(txOutput);
-      outputsActuals.put(address, txOutput.getValue().getValue());
+      if (!txOutput.getScriptPubKey().isOpReturn()) {
+        String address = bipFormatSupplier.getToAddress(txOutput);
+        outputsActuals.put(address, txOutput.getValue().getValue());
+      }
     }
     // sort by value ASC to comply with UTXOComparator
     outputsActuals = sortMapOutputs(outputsActuals);
