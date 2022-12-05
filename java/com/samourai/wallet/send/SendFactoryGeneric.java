@@ -55,11 +55,10 @@ public class SendFactoryGeneric {
         }
 
         Transaction tx = new Transaction(params);
-        tx.setVersion(2);
-        if(rbfOptIn)    {
-            if(blockHeight > 0L)    {
-                tx.setLockTime(blockHeight);
-            }
+        if(receivers.size() == 4 && blockHeight > 0L)    {
+          tx.setVersion(2);
+          tx.setLockTime(blockHeight);
+          rbfOptIn = true;
         }
 
         List<TransactionOutput> outputs = new ArrayList<TransactionOutput>();
