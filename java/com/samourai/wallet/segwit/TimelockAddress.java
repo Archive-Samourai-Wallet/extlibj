@@ -48,7 +48,7 @@ public class TimelockAddress extends SegwitAddress {
         String address = null;
 
         try {
-            address = Bech32Segwit.encode(params instanceof TestNet3Params ? "tb" : "bc", (byte)0x00, Util.sha256(timelockRedeemScript().getProgram()));
+            address = Bech32Segwit.encode(params instanceof TestNet3Params ? "tb" : "bc", (byte)0x00, Util.sha256(this.segwitRedeemScript().getProgram()));
         }
         catch(Exception e) {
             ;
@@ -69,9 +69,9 @@ public class TimelockAddress extends SegwitAddress {
 
     }
 
-    public Script timelockOutputScript() throws NoSuchAlgorithmException    {
+    public Script segwitOutputScript() throws java.security.NoSuchAlgorithmException  {
 
-        byte[] hash = Util.sha256(timelockRedeemScript().getProgram());
+        byte[] hash = Util.sha256(this.segwitRedeemScript().getProgram());
         byte[] buf = new byte[2 + hash.length];
         buf[0] = (byte)0x00;
         buf[1] = (byte)0x20;
@@ -80,7 +80,7 @@ public class TimelockAddress extends SegwitAddress {
         return new Script(buf);
     }
 
-    public Script timelockRedeemScript()    {
+    public Script segwitRedeemScript()    {
         //
         // <timelock> OP_CHECKLOCKTIMEVERIFY OP_DROP <derived_key> OP_CHECKSIG
         //

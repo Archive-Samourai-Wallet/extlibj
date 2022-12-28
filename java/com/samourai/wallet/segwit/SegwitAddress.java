@@ -1,7 +1,5 @@
 package com.samourai.wallet.segwit;
 
-import com.samourai.wallet.bip340.BIP340Util;
-import com.samourai.wallet.bip340.Point;
 import com.samourai.wallet.segwit.bech32.Bech32Segwit;
 
 import org.bitcoinj.core.Address;
@@ -73,13 +71,18 @@ public class SegwitAddress {
 
     public Address getAddress()    {
 
-        return Address.fromP2SHScript(params, segWitOutputScript());
+        try {
+          return Address.fromP2SHScript(params, segwitOutputScript());
+        }
+        catch(java.security.NoSuchAlgorithmException nsae) {
+            return null;
+        }
 
     }
 
     public String getAddressAsString()    {
 
-        return getAddress().toString();
+      return getAddress().toString();
 
     }
 
@@ -108,12 +111,12 @@ public class SegwitAddress {
 
     }
 
-    public Script segWitOutputScript()    {
+    public Script segwitOutputScript() throws java.security.NoSuchAlgorithmException  {
 
         //
         // OP_HASH160 hash160(redeemScript) OP_EQUAL
         //
-        byte[] hash = Utils.sha256hash160(segWitRedeemScript().getProgram());
+        byte[] hash = Utils.sha256hash160(this.segwitRedeemScript().getProgram());
         byte[] buf = new byte[3 + hash.length];
         buf[0] = (byte)0xa9;    // HASH160
         buf[1] = (byte)0x14;    // push 20 bytes
@@ -123,7 +126,7 @@ public class SegwitAddress {
         return new Script(buf);
     }
 
-    public Script segWitRedeemScript()    {
+    public Script segwitRedeemScript()    {
 
         //
         // The P2SH segwit redeemScript is always 22 bytes. It starts with a OP_0, followed by a canonical push of the keyhash (i.e. 0x0014{20-byte keyhash})
@@ -137,26 +140,8 @@ public class SegwitAddress {
         return new Script(buf);
     }
 
-    public Script taprootRedeemScript()    {
-
-        //
-        // The P2TR redeemScript is always 34 bytes. It starts with a OP_1, followed by a canonical push of the tweaked pub key (i.e. 0x0120{32-byte tweaked key})
-        //
-        Point internalPubKeyPoint = BIP340Util.getInternalPubkey(ecKey);
-
-        if(internalPubKeyPoint == null) return null;
-
-        byte[] tweakedPubKey = internalPubKeyPoint.toBytes();
-        byte[] buf = new byte[2 + tweakedPubKey.length];
-        buf[0] = (byte)0x51;  // OP_1
-        buf[1] = (byte)0x20;  // push 32 bytes
-        System.arraycopy(tweakedPubKey, 0, buf, 2, tweakedPubKey.length); // tweaked key
-
-        return new Script(buf);
-    }
-
-    public String segWitRedeemScriptToString() {
-        return Hex.toHexString(segWitRedeemScript().getProgram());
+    public String segwitRedeemScriptToString() {
+        return Hex.toHexString(segwitRedeemScript().getProgram());
     }
 
 }

@@ -277,7 +277,7 @@ public abstract class Cahoots2x extends Cahoots {
                     log.debug("signTx bech32:" + segwitAddress.getBech32AsString());
                 }
 
-                final Script redeemScript = segwitAddress.segWitRedeemScript();
+                final Script redeemScript = segwitAddress.segwitRedeemScript();
                 final Script scriptCode = redeemScript.scriptCode();
 
                 long value = outpoints.get(outpoint.getHash().toString() + "-" + outpoint.getIndex());
