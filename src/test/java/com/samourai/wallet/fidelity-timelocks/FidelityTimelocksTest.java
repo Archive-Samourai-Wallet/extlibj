@@ -105,26 +105,10 @@ public class FidelityTimelocksTest {
       //
       // String sig = eckey.signMessage("fidelity-bond-cert|020000000000000000000000000000000000000000000000000000000000000001|375");
       // Assertions.assertEquals("H2b/90XcKnIU/D1nSCPhk8OcxrHebMCr4Ok2d2yDnbKDTSThNsNKA64CT4v2kt+xA1JmGRG/dMnUUH1kKqCVSHo=", sign);
-      boolean res = false;
-      try {
-        eckey.verifyMessage("fidelity-bond-cert|020000000000000000000000000000000000000000000000000000000000000001|375", "H2b/90XcKnIU/D1nSCPhk8OcxrHebMCr4Ok2d2yDnbKDTSThNsNKA64CT4v2kt+xA1JmGRG/dMnUUH1kKqCVSHo=");
-        res = true;
-      }
-      catch(SignatureException se) {
-        ;
-      }
-      Assertions.assertEquals(true, res);
+      eckey.verifyMessage("fidelity-bond-cert|020000000000000000000000000000000000000000000000000000000000000001|375", "H2b/90XcKnIU/D1nSCPhk8OcxrHebMCr4Ok2d2yDnbKDTSThNsNKA64CT4v2kt+xA1JmGRG/dMnUUH1kKqCVSHo=");
 
-      res = false;
-      try {
-        String sig = eckey.signMessage("fidelity-bond-cert|020000000000000000000000000000000000000000000000000000000000000001|375");
-        eckey.verifyMessage("fidelity-bond-cert|020000000000000000000000000000000000000000000000000000000000000001|375", sig);
-        res = true;
-      }
-      catch(SignatureException se) {
-        ;
-      }
-      Assertions.assertEquals(true, res);
+      String sig = eckey.signMessage("fidelity-bond-cert|020000000000000000000000000000000000000000000000000000000000000001|375");
+      eckey.verifyMessage("fidelity-bond-cert|020000000000000000000000000000000000000000000000000000000000000001|375", sig);
 
     }
 
