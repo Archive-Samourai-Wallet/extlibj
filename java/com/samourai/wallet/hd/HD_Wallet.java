@@ -137,7 +137,12 @@ public class HD_Wallet {
     }
 
     public HD_Address getAddressAt(int account, int chain, int idx) {
-        return getAccount(account).getChain(chain).getAddressAt(idx);
+        if(chain > 1)   {
+          return getAccount(account).getChainAt(chain).getAddressAt(idx);
+        }
+        else   {
+          return getAccount(account).getChain(chain).getAddressAt(idx);
+        }
     }
 
     public SegwitAddress getSegwitAddressAt(int account, int chain, int idx) {
