@@ -7,26 +7,17 @@ import com.samourai.wallet.util.Util;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.BigIntegers;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.math.BigInteger;
-import java.security.NoSuchAlgorithmException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import javax.annotation.Nullable;
 
-import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Utils;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.UnsafeByteArrayOutputStream;
-
-import org.bouncycastle.util.encoders.Hex;
-
-import org.apache.commons.lang3.ArrayUtils;
 
 public class P2TRAddress extends SegwitAddress {
 

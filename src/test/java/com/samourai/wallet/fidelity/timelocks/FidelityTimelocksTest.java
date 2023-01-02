@@ -1,9 +1,10 @@
-package com.samourai.wallet.hd;
+package com.samourai.wallet.fidelity.timelocks;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.security.SignatureException;
 
+import com.samourai.wallet.hd.HD_Wallet;
+import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.DumpedPrivateKey;

@@ -3,9 +3,6 @@ package com.samourai.wallet.segwit;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.math.BigInteger;
 
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;

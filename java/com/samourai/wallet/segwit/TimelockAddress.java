@@ -1,21 +1,14 @@
 package com.samourai.wallet.segwit;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.security.NoSuchAlgorithmException;
 import java.math.BigInteger;
 
 import com.samourai.wallet.segwit.bech32.Bech32Segwit;
 import com.samourai.wallet.util.Util;
 
-import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Utils;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
-
-import org.bouncycastle.util.encoders.Hex;
 
 import org.apache.commons.lang3.ArrayUtils;
 

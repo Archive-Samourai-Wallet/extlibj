@@ -1,7 +1,4 @@
-package com.samourai.wallet.hd;
-
-import java.util.List;
-import java.util.ArrayList;
+package com.samourai.wallet.timelocks;
 
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ECKey;
@@ -13,7 +10,6 @@ import org.bitcoinj.core.TransactionOutPoint;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.core.TransactionWitness;
-import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.crypto.TransactionSignature;

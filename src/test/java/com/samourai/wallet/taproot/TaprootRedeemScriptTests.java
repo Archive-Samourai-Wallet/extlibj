@@ -1,9 +1,7 @@
 package com.samourai.wallet.taproot;
 
 import com.samourai.wallet.bip340.BIP340Util;
-import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.segwit.P2TRAddress;
-import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.MainNetParams;
@@ -11,9 +9,6 @@ import org.bitcoinj.script.Script;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-
 
 public class TaprootRedeemScriptTests  {
     private static final String PRIVATE_KEY = "0cbb6e8bc0271939a1ea977ef52b6a3d9bb7e918d4bfb97c7bd2951052898c08";
