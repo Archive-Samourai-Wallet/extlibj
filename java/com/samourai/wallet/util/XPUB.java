@@ -2,11 +2,6 @@ package com.samourai.wallet.util;
 
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.crypto.ChildNumber;
-import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.crypto.HDKeyDerivation;
-import org.bouncycastle.util.encoders.Hex;
 
 import java.nio.ByteBuffer;
 
