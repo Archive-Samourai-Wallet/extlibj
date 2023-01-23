@@ -5,6 +5,8 @@ import org.bitcoinj.params.TestNet3Params;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.samourai.wallet.util.XPUB;
+
 public class XPubUtilTest {
   private static final XPubUtil xPubUtil = XPubUtil.getInstance();
   private static final NetworkParameters params = TestNet3Params.get();
@@ -26,4 +28,20 @@ public class XPubUtilTest {
     Assertions.assertEquals("tb1qtyj9wey8mf3t79ltzpmsjcm5qkj2svmg5tznj5", xPubUtil.getAddressBech32(XPUB, 0, 1, params));
     Assertions.assertEquals("tb1qdcewkxujau042zva8xf3tgf5k6z6069838d8st", xPubUtil.getAddressBech32(XPUB, 1, 1, params));
   }
+
+  @Test
+  public void xpub() throws Exception {
+  	// acount 0
+  	XPUB xpub = new XPUB("zpub6rszzdAK6RuafeRwyN8z1cgWcXCuKbLmjjfnrW4fWKtcoXQ8787214pNJjnBG5UATyghuNzjn6Lfp5k5xymrLFJnCy46bMYJPyZsbpFGagT");
+  	xpub.decode();
+  	int child = xpub.getChild();
+  	Assertions.assertEquals(child, -2147483648);
+
+  	// acount 2147483646
+  	xpub = new XPUB("zpub6rszzdATS6SYmnDsZFa7fx3sdFPYYKjyqoCETE1KuMK6fVdjcse9xobKhm5fUAYpcuk4U8RVMRsaPtA1UQKGFQExaojoqvdpTfeNoDiLpcg");
+  	xpub.decode();
+  	child = xpub.getChild();
+  	Assertions.assertEquals(child, -2);
+  }
+
 }
