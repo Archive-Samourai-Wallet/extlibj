@@ -69,7 +69,7 @@ public class BIP_FORMAT {
             Coin value = txInput.getValue();
 
             SegwitAddress segwitAddress = new SegwitAddress(key.getPubKey(), tx.getParams());
-            final Script redeemScript = segwitAddress.segWitRedeemScript();
+            final Script redeemScript = segwitAddress.segwitRedeemScript();
 
             TransactionSignature sig =
                     tx.calculateWitnessSignature(
@@ -109,7 +109,7 @@ public class BIP_FORMAT {
             Coin value = txInput.getValue();
 
             SegwitAddress segwitAddress = new SegwitAddress(key.getPubKey(), tx.getParams());
-            final Script redeemScript = segwitAddress.segWitRedeemScript();
+            final Script redeemScript = segwitAddress.segwitRedeemScript();
 
             TransactionSignature sig =
                     tx.calculateWitnessSignature(

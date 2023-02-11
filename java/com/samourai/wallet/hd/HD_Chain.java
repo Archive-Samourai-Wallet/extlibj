@@ -17,7 +17,7 @@ public class HD_Chain {
     private int addrIdx = 0;
 
     private NetworkParameters mParams = null;
-    
+
     private HD_Chain() { ; }
 
     public HD_Chain(NetworkParameters params, DeterministicKey aKey, int accountIndex, boolean isReceive) {
@@ -31,12 +31,27 @@ public class HD_Chain {
         strPath = cKey.getPath().toString();
     }
 
+    public HD_Chain(NetworkParameters params, DeterministicKey aKey, int accountIndex, int idx) {
+
+        mParams = params;
+        this.accountIndex = accountIndex;
+        this.isReceive = (idx == 0) ? true : false;
+        this.chainIndex = idx;
+        cKey = HDKeyDerivation.deriveChildKey(aKey, chainIndex);
+
+        strPath = cKey.getPath().toString();
+    }
+
     public int getAccountIndex() {
         return accountIndex;
     }
 
     public boolean isReceive() {
         return isReceive;
+    }
+
+    public boolean isFidelityTimelock() {
+        return (chainIndex == 2);
     }
 
     public int getChainIndex() {

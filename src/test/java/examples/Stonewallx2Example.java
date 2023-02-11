@@ -40,7 +40,7 @@ public class Stonewallx2Example {
         ManualCahootsMessage message0 = cahootsService.initiate(contextSender);
 
         // STEP 1: counterparty
-        StowawayContext contextReceiver = StowawayContext.newCounterparty(cahootsWalletCounterparty, receiverAccount);
+        Stonewallx2Context contextReceiver = Stonewallx2Context.newCounterparty(cahootsWalletCounterparty, receiverAccount);
         ManualCahootsMessage message1 = (ManualCahootsMessage)cahootsService.reply(contextReceiver, message0);
 
         // STEP 2: sender
