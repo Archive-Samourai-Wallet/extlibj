@@ -1,5 +1,6 @@
 package com.samourai.wallet.bipWallet;
 
+import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
 import com.samourai.wallet.hd.BIP_WALLET;
@@ -94,6 +95,11 @@ public class WalletSupplierImpl implements WalletSupplier {
   @Override
   public BipWallet getWallet(WhirlpoolAccount account, BipFormat bipFormat) {
     return walletsByAccountByAddressType.get(account).get(bipFormat);
+  }
+
+  @Override
+  public BipWallet getWallet(UnspentOutput unspentOutput) {
+    return getWalletByPub(unspentOutput.xpub.m);
   }
 
   @Override
