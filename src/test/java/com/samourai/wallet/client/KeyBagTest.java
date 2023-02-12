@@ -32,8 +32,8 @@ public class KeyBagTest extends AbstractTest {
     UnspentOutput utxo3 = utxoProvider.addUtxo(bipWallet, 3333).toUnspentOutputs(bipWallet.getPub()).iterator().next();
     byte[] key1 = bipWallet.getAddressAt(utxo1).getHdAddress().getECKey().getPrivKeyBytes();
     byte[] key2 = bipWallet.getAddressAt(utxo2).getHdAddress().getECKey().getPrivKeyBytes();
-    keyBag.add(utxo1, key1);
-    keyBag.add(utxo2, key2);
+    keyBag.add(utxo1, walletSupplier);
+    keyBag.add(utxo2, walletSupplier);
 
     // verify
     Assertions.assertArrayEquals(key1, keyBag.getPrivKeyBytes(utxo1));

@@ -2,6 +2,7 @@ package com.samourai.wallet.bipWallet;
 
 import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.hd.BipAddress;
+import com.samourai.wallet.hd.HD_Address;
 import org.bitcoinj.core.ECKey;
 
 import java.util.Collection;
@@ -18,6 +19,15 @@ public class KeyBag {
     public void add(UnspentOutput unspentOutput, byte[] privKeyBytes) {
         String hashKey = hashKey(unspentOutput);
         this.privKeys.put(hashKey, privKeyBytes);
+    }
+
+    public void add(UnspentOutput unspentOutput, WalletSupplier walletSupplier) throws Exception {
+        BipAddress bipAddress = walletSupplier.getAddress(unspentOutput);
+        if (bipAddress == null) {
+            throw new Exception("BipAddress not found for utxo: "+unspentOutput);
+        }
+        byte[] privKeyBytes = bipAddress.getHdAddress().getECKey().getPrivKeyBytes();
+        add(unspentOutput, privKeyBytes);
     }
 
     public void addAll(Collection<UnspentOutput> unspentOutputs, WalletSupplier walletSupplier) throws Exception {
