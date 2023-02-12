@@ -1,8 +1,10 @@
 package com.samourai.wallet.bipWallet;
 
 import com.samourai.wallet.api.backend.beans.UnspentOutput;
+import com.samourai.wallet.hd.BipAddress;
 import org.bitcoinj.core.ECKey;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -13,9 +15,20 @@ public class KeyBag {
         this.privKeys = new LinkedHashMap<>();
     }
 
-    public void add(byte[] privKeyBytes, UnspentOutput unspentOutput) {
+    public void add(UnspentOutput unspentOutput, byte[] privKeyBytes) {
         String hashKey = hashKey(unspentOutput);
         this.privKeys.put(hashKey, privKeyBytes);
+    }
+
+    public void addAll(Collection<UnspentOutput> unspentOutputs, WalletSupplier walletSupplier) throws Exception {
+        for (UnspentOutput unspentOutput : unspentOutputs) {
+            BipAddress bipAddress = walletSupplier.getAddress(unspentOutput);
+            if (bipAddress == null) {
+                throw new Exception("BipAddress not found for utxo: "+unspentOutput);
+            }
+            byte[] privKeyBytes = bipAddress.getHdAddress().getECKey().getPrivKeyBytes();
+            add(unspentOutput, privKeyBytes);
+        }
     }
 
     public byte[] getPrivKeyBytes(UnspentOutput unspentOutput) {
@@ -29,6 +42,10 @@ public class KeyBag {
             kb.put(e.getKey(), ECKey.fromPrivate(e.getValue()));
         }
         return kb;
+    }
+
+    public int size() {
+        return privKeys.size();
     }
 
     private static String hashKey(UnspentOutput unspentOutput) {

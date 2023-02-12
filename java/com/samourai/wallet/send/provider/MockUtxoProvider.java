@@ -1,5 +1,6 @@
 package com.samourai.wallet.send.provider;
 
+import com.google.common.collect.Lists;
 import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
@@ -63,37 +64,42 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
   public UTXO addUtxo(int account, String txid, int n, long value, String address) throws Exception {
     WhirlpoolAccount whirlpoolAccount = SamouraiAccountIndex.find(account);
     BipWallet bipWallet = walletSupplier.getWallet(whirlpoolAccount, BIP_FORMAT.SEGWIT_NATIVE);
-    return addUtxo(bipWallet, Sha256Hash.of(txid.getBytes()).toString(), n, value, address, ECKey.fromPrivate(BigInteger.valueOf(1234)));
+    return addUtxo(bipWallet, Sha256Hash.of(txid.getBytes()).toString(), n, value, address, ECKey.fromPrivate(BigInteger.valueOf(1234)), null);
   }
 
   public UTXO addUtxo(BipWallet bipWallet, long value) throws Exception {
     int n = nbUtxos+1; // keep backward-compatibility with existing tests
     BipAddress bipAddress = bipWallet.getAddressAt(0, n);
     String address = bipAddress.getAddressString();
+    String path = UnspentOutput.computePath(bipAddress.getHdAddress());
     ECKey ecKey = bipAddress.getHdAddress().getECKey();
     String txid = generateTxHash(n, params);
-    return addUtxo(bipWallet, txid, n, value, address, ecKey);
+    return addUtxo(bipWallet, txid, n, value, address, ecKey, path);
   }
 
   public UTXO addUtxo(BipWallet bipWallet, String txid, int n, long value, String address, ECKey ecKey) throws Exception {
-    UTXO utxo = new UTXO();
+    return addUtxo(bipWallet, txid, n, value, address, ecKey, null);
+  }
 
-    nbUtxos++;
+  public UTXO addUtxo(BipWallet bipWallet, String txid, int n, long value, String address, ECKey ecKey, String path) throws Exception {
     String pub = bipWallet.getPub();
-    UnspentOutput unspentOutput = computeUtxo(txid, n, pub, address, value, 999, getBipFormatSupplier(), params);
+    UnspentOutput unspentOutput = computeUtxo(txid, n, path, pub, address, value, 999, getBipFormatSupplier(), params);
     MyTransactionOutPoint outPoint = unspentOutput.computeOutpoint(params);
-    utxo.getOutpoints().add(outPoint);
+    UTXO utxo = new UTXO(Lists.newArrayList(outPoint), path);
+    nbUtxos++;
+
     WhirlpoolAccount account = bipWallet.getAccount();
     utxosByAccount.get(account).add(utxo);
     setKey(outPoint, ecKey);
     return utxo;
   }
 
-  private static UnspentOutput computeUtxo(String hash, int n, String xpub, String address, long value, int confirms, BipFormatSupplier bipFormatSupplier, NetworkParameters params) throws Exception {
+  private static UnspentOutput computeUtxo(String hash, int n, String path, String xpub, String address, long value, int confirms, BipFormatSupplier bipFormatSupplier, NetworkParameters params) throws Exception {
     UnspentOutput utxo = new UnspentOutput();
     utxo.tx_hash = hash;
     utxo.tx_output_n = n;
     utxo.xpub = new UnspentOutput.Xpub();
+    utxo.xpub.path = path;
     utxo.xpub.m = xpub;
     utxo.confirmations = confirms;
     utxo.addr = address;

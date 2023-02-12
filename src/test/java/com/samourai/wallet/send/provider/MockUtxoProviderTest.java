@@ -18,14 +18,14 @@ public class MockUtxoProviderTest extends AbstractTest {
         BipWallet bipWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84);
 
         UTXO utxo1 = utxoProvider.addUtxo(bipWallet, 100000);
-        assertUtxo(utxo1, 100000, "befa44c5a7c219c507d316c452af2202626986a17f8400e32b47927c4d0c3f3e", 1, 999, "tb1q4crk5fzlr7qcz0nsun67luk982mn4wtlyydvlh", "02hNvy9WddFQ{17<N@0j-x7E?XQK");
+        assertUtxo(utxo1, 100000, "befa44c5a7c219c507d316c452af2202626986a17f8400e32b47927c4d0c3f3e", 1, 999, "tb1q4crk5fzlr7qcz0nsun67luk982mn4wtlyydvlh", "02hNvy9WddFQ{17<N@0j-x7E?XQK", "m/0/1");
 
         UTXO utxo2 = utxoProvider.addUtxo(bipWallet, 100000);
-        assertUtxo(utxo2, 100000, "8a9181c630effdbe46a09a3f26ede268e579baf2addd3986614631decb019979", 2, 999, "tb1qfqd55aeuuhj6jl2v0v6ckudd7wecdv6ss9ands", "02d%yn{rzV</9V4DO{.3T[e(NVRQ");
+        assertUtxo(utxo2, 100000, "8a9181c630effdbe46a09a3f26ede268e579baf2addd3986614631decb019979", 2, 999, "tb1qfqd55aeuuhj6jl2v0v6ckudd7wecdv6ss9ands", "02d%yn{rzV</9V4DO{.3T[e(NVRQ", "m/0/2");
     }
 
-    private void assertUtxo(UTXO utxo, long value, String txid, int n, int confirmations, String address, String scriptBytesZ85) {
-        Assertions.assertEquals(null, utxo.getPath());
+    private void assertUtxo(UTXO utxo, long value, String txid, int n, int confirmations, String address, String scriptBytesZ85, String path) {
+        Assertions.assertEquals(path, utxo.getPath());
         Assertions.assertEquals(value, utxo.getValue());
 
         Assertions.assertEquals(1, utxo.getOutpoints().size());

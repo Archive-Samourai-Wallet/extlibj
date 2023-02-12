@@ -94,6 +94,10 @@ public class UnspentOutput {
         return HD_Address.getPathAddress(purpose, coinType, accountIndex, computePathChainIndex(), computePathAddressIndex());
     }
 
+    public static String computePath(HD_Address hdAddress) {
+        return computePath(hdAddress.getChainIndex(), hdAddress.getAddressIndex());
+    }
+
     public static String computePath(int chainIndex, int addressIndex) {
         return "m"+PATH_SEPARATOR+chainIndex+PATH_SEPARATOR+addressIndex;
     }
@@ -140,8 +144,9 @@ public class UnspentOutput {
           + value
           + " sats, "
           + confirmations
-          + " confirmations, path="
-          + (xpub != null && xpub.path != null ? xpub.path : "null")
+          + " confirmations"
+          + ", path=" + (xpub != null && xpub.path != null ? xpub.path : "null")
+          + ", xpub=" + (xpub != null && xpub.m != null ? xpub.m : "null")
           + ", address="
           + addr
           + ")";
