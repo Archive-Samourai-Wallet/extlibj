@@ -1,6 +1,7 @@
 package com.samourai.wallet.send.provider;
 
 import com.google.common.collect.Lists;
+import com.google.common.hash.HashCode;
 import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
@@ -30,6 +31,7 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
   private WalletSupplier walletSupplier;
   private CahootsUtxoProvider cahootsUtxoProvider;
   private int nbUtxos = 0;
+  private Integer forcedWalletUniqueId = null;
 
   public MockUtxoProvider(NetworkParameters params, WalletSupplier walletSupplier) {
     this.params = params;
@@ -41,6 +43,11 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
     for (WhirlpoolAccount account : WhirlpoolAccount.values()) {
       utxosByAccount.put(account, new LinkedList<>());
     }
+  }
+
+  public void setRetroCompatibilityMode() {
+    // for retro-compatible tests
+    this.forcedWalletUniqueId = 1000;
   }
 
   public void clear() {
@@ -73,7 +80,10 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
     String address = bipAddress.getAddressString();
     String path = UnspentOutput.computePath(bipAddress.getHdAddress());
     ECKey ecKey = bipAddress.getHdAddress().getECKey();
-    String txid = generateTxHash(n, params);
+    // use a namespace specific to BipWallet for generating txid
+    int walletUniqueId = new BigInteger(bipWallet.getHdAccount().xpubstr().getBytes()).intValue();
+    int uniqueId = forcedWalletUniqueId != null ? forcedWalletUniqueId : walletUniqueId;
+    String txid = generateTxHash(Math.abs(n*uniqueId), params);
     return addUtxo(bipWallet, txid, n, value, address, ecKey, path);
   }
 
@@ -108,9 +118,8 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
     return utxo;
   }
 
-  private static String generateTxHash(int i, NetworkParameters params) {
+  private static String generateTxHash(int uniqueId, NetworkParameters params) {
     Transaction tx = new Transaction(params);
-    long uniqueId = i*1000;
     tx.addOutput(Coin.valueOf(uniqueId), ECKey.fromPrivate(BigInteger.valueOf(uniqueId))); // mock key)
     return tx.getHashAsString();
   }
