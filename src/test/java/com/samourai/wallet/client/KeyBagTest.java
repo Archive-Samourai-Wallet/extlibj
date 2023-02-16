@@ -1,6 +1,5 @@
 package com.samourai.wallet.client;
 
-import com.google.common.collect.Lists;
 import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.bipWallet.BipWallet;
 import com.samourai.wallet.bipWallet.KeyBag;
@@ -9,6 +8,8 @@ import com.samourai.wallet.test.AbstractTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
 
 public class KeyBagTest extends AbstractTest {
   private KeyBag keyBag;
@@ -49,7 +50,7 @@ public class KeyBagTest extends AbstractTest {
     UnspentOutput utxo3 = utxoProvider.addUtxo(bipWallet, 3333).toUnspentOutputs(bipWallet.getPub()).iterator().next();
     byte[] key1 = bipWallet.getAddressAt(utxo1).getHdAddress().getECKey().getPrivKeyBytes();
     byte[] key2 = bipWallet.getAddressAt(utxo2).getHdAddress().getECKey().getPrivKeyBytes();
-    keyBag.addAll(Lists.newArrayList(utxo1, utxo2), walletSupplier);
+    keyBag.addAll(Arrays.asList(utxo1, utxo2), walletSupplier);
 
     // verify
     Assertions.assertArrayEquals(key1, keyBag.getPrivKeyBytes(utxo1));

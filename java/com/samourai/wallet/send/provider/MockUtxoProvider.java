@@ -1,7 +1,5 @@
 package com.samourai.wallet.send.provider;
 
-import com.google.common.collect.Lists;
-import com.google.common.hash.HashCode;
 import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
@@ -95,7 +93,7 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
     String pub = bipWallet.getPub();
     UnspentOutput unspentOutput = computeUtxo(txid, n, path, pub, address, value, 999, getBipFormatSupplier(), params);
     MyTransactionOutPoint outPoint = unspentOutput.computeOutpoint(params);
-    UTXO utxo = new UTXO(Lists.newArrayList(outPoint), path);
+    UTXO utxo = new UTXO(Arrays.asList(outPoint), path);
     nbUtxos++;
 
     WhirlpoolAccount account = bipWallet.getAccount();
