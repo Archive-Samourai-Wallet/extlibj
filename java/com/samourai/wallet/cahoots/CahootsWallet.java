@@ -1,6 +1,7 @@
 package com.samourai.wallet.cahoots;
 
-import com.samourai.wallet.bip47.rpc.BIP47Account;
+import com.samourai.soroban.client.RpcWallet;
+import com.samourai.soroban.client.RpcWalletImpl;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
@@ -15,7 +16,6 @@ import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.send.provider.CahootsUtxoProvider;
 import com.samourai.wallet.whirlpool.WhirlpoolConst;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
-import org.bitcoinj.core.NetworkParameters;
 
 import java.util.List;
 
@@ -23,21 +23,21 @@ public class CahootsWallet {
     private WalletSupplier walletSupplier;
     private BipFormatSupplier bipFormatSupplier;
     private ChainSupplier chainSupplier;
-    private NetworkParameters params;
     private CahootsUtxoProvider utxoProvider;
 
     private HD_Wallet hdWallet;
     private BIP47Wallet bip47Wallet;
+    private RpcWallet rpcWallet;
 
-    public CahootsWallet(WalletSupplier walletSupplier, ChainSupplier chainSupplier, BipFormatSupplier bipFormatSupplier, NetworkParameters params, CahootsUtxoProvider utxoProvider) {
+    public CahootsWallet(WalletSupplier walletSupplier, ChainSupplier chainSupplier, BipFormatSupplier bipFormatSupplier, CahootsUtxoProvider utxoProvider) {
         this.walletSupplier = walletSupplier;
         this.chainSupplier = chainSupplier;
         this.bipFormatSupplier = bipFormatSupplier;
-        this.params = params;
         this.utxoProvider = utxoProvider;
 
         this.hdWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84).getHdWallet();
         this.bip47Wallet = new BIP47Wallet(hdWallet);
+        this.rpcWallet = new RpcWalletImpl(bip47Wallet);
     }
 
     public BipWallet getReceiveWallet(int account, BipFormat bipFormat) throws Exception {
@@ -70,24 +70,12 @@ public class CahootsWallet {
         return chainSupplier;
     }
 
-    public NetworkParameters getParams() {
-        return params;
-    }
-
-    public BIP47Wallet getBip47Wallet() {
-        return bip47Wallet;
-    }
-
-    public int getBip47AccountIndex() {
-        return 0;
-    }
-
-    public BIP47Account getBip47Account() {
-        return bip47Wallet.getAccount(getBip47AccountIndex());
+    public RpcWallet getRpcWallet() {
+        return rpcWallet;
     }
 
     public PaymentCode getPaymentCode() {
-        return new PaymentCode(getBip47Account().getPaymentCode());
+        return rpcWallet.getPaymentCode();
     }
 
     public byte[] getFingerprint() {

@@ -33,6 +33,11 @@ public class CryptoUtil {
     private final RandomUtil randomUtil = RandomUtil.getInstance();
     private String provider;
 
+    // do not use for Android
+    public static CryptoUtil getInstanceJava() {
+        return CryptoUtil.getInstance(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+    }
+
     public static CryptoUtil getInstance(Provider provider) {
         if (instance == null) {
             try {

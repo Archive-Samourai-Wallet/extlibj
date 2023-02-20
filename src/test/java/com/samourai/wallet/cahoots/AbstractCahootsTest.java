@@ -75,12 +75,12 @@ public abstract class AbstractCahootsTest extends AbstractTest {
         final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
         WalletSupplier walletSupplierSender = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletSender);
         utxoProviderSender = new MockUtxoProvider(params, walletSupplierSender);
-        cahootsWalletSender = new CahootsWallet(walletSupplierSender, mockChainSupplier, bipFormatSupplier, params, utxoProviderSender.getCahootsUtxoProvider());
+        cahootsWalletSender = new CahootsWallet(walletSupplierSender, mockChainSupplier, bipFormatSupplier, utxoProviderSender.getCahootsUtxoProvider());
 
         final HD_Wallet bip84WalletCounterparty = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
         WalletSupplier walletSupplierCounterparty = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletCounterparty);
         utxoProviderCounterparty = new MockUtxoProvider(params, walletSupplierCounterparty);
-        cahootsWalletCounterparty = new CahootsWallet(walletSupplierCounterparty, mockChainSupplier, bipFormatSupplier, params, utxoProviderCounterparty.getCahootsUtxoProvider());
+        cahootsWalletCounterparty = new CahootsWallet(walletSupplierCounterparty, mockChainSupplier, bipFormatSupplier, utxoProviderCounterparty.getCahootsUtxoProvider());
 
         SENDER_RECEIVE_84 = new String[4];
         for (int i = 0; i < 4; i++) {
