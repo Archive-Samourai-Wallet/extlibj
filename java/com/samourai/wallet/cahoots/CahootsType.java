@@ -11,7 +11,8 @@ public enum CahootsType {
     STONEWALLX2(0, "StonewallX2", true, SpendType.CAHOOTS_STONEWALL2X, STONEWALLx2.class.getName()),
     STOWAWAY(1, "Stowaway", false, SpendType.CAHOOTS_STOWAWAY, Stowaway.class.getName()),
     MULTI(2, "MultiCahoots", false, SpendType.CAHOOTS_MULTI, MultiCahoots.class.getName()),
-    TX0X2(3, "Tx0X2", true, SpendType.TX0X2, "com.samourai.wallet.cahoots.tx0x2.Tx0x2"); // implemented in whirlpool-client
+    TX0X2(3, "Tx0x2", true, SpendType.TX0X2, "com.samourai.wallet.cahoots.tx0x2.Tx0x2"), // implemented in whirlpool-client
+    TX0X2_MULTI(4, "MultiTx0x2", true, SpendType.TX0X2_MULTI, "com.samourai.wallet.cahoots.tx0x2.MultiTx0x2"); // implemented in whirlpool-client
 
     private int value;
     private String label;
