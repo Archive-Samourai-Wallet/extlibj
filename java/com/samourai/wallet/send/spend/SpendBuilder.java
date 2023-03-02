@@ -34,7 +34,7 @@ public class SpendBuilder {
     }
 
     // forcedChangeType may be null
-    public SpendTx preview(BipWallet spendWallet, BipWallet changeWallet, String address, long amount, boolean boltzmann, boolean rbfOptIn, BigInteger feePerKb, BipFormat forcedChangeFormat, List<MyTransactionOutPoint> preselectedInputs, long blockHeight) throws Exception {
+    public SpendTx preview(BipWallet spendWallet, BipWallet changeWallet, String address, long amount, boolean stonewall, boolean rbfOptIn, BigInteger feePerKb, BipFormat forcedChangeFormat, List<MyTransactionOutPoint> preselectedInputs, long blockHeight) throws Exception {
         WhirlpoolAccount account = spendWallet.getAccount();
         NetworkParameters params = spendWallet.getParams();
         BipFormat addressFormat = computeAddressFormat(forcedChangeFormat, address, utxoProvider.getBipFormatSupplier(), params);
@@ -50,7 +50,7 @@ public class SpendBuilder {
         else {
             // get all UTXO
             Collection<UTXO> utxos = findUtxos(neededAmount, account, addressFormat);
-            spendSelection = computeUtxoSelection(spendWallet, changeWallet, address, boltzmann, amount, neededAmount, utxos, addressFormat, feePerKb, forcedChangeFormat);
+            spendSelection = computeUtxoSelection(spendWallet, changeWallet, address, stonewall, amount, neededAmount, utxos, addressFormat, feePerKb, forcedChangeFormat);
         }
 
         SpendTx spendTx = spendSelection.spendTx(amount, address, addressFormat, account, rbfOptIn, params, feePerKb, utxoProvider, blockHeight);
@@ -121,7 +121,7 @@ public class SpendBuilder {
         return new SpendSelectionSimple(utxoProvider.getBipFormatSupplier(), utxos);
     }
 
-    private SpendSelection computeUtxoSelection(BipWallet spendWallet, BipWallet changeWallet, String address, boolean boltzmann, long amount, long neededAmount, Collection<UTXO> utxos, BipFormat addressFormat,  BigInteger feePerKb, BipFormat forcedChangeFormat) throws SpendException {
+    private SpendSelection computeUtxoSelection(BipWallet spendWallet, BipWallet changeWallet, String address, boolean stonewall, long amount, long neededAmount, Collection<UTXO> utxos, BipFormat addressFormat,  BigInteger feePerKb, BipFormat forcedChangeFormat) throws SpendException {
         WhirlpoolAccount account = spendWallet.getAccount();
         NetworkParameters params = spendWallet.getParams();
         long balance = UTXO.sumValue(utxos);
@@ -141,10 +141,10 @@ public class SpendBuilder {
             return new SpendSelectionSimple(utxoProvider.getBipFormatSupplier(), utxos);
         }
 
-        // boltzmann spend
-        if (boltzmann) {
+        // stonewall spend
+        if (stonewall) {
             IIndexHandler changeIndexHandler = changeWallet.getIndexHandlerChange();
-            SpendSelection spendSelection = SpendSelectionBoltzmann.compute(neededAmount, utxoProvider, addressFormat, amount, address, account, forcedChangeFormat, params, feePerKb, changeIndexHandler);
+            SpendSelection spendSelection = SpendSelectionStonewall.compute(neededAmount, utxoProvider, addressFormat, amount, address, account, forcedChangeFormat, params, feePerKb, changeIndexHandler);
             if (spendSelection != null) {
                 return spendSelection;
             }

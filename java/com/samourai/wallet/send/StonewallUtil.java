@@ -18,26 +18,26 @@ import org.slf4j.LoggerFactory;
 import java.math.BigInteger;
 import java.util.*;
 
-public class BoltzmannUtil {
-    private static final Logger log = LoggerFactory.getLogger(BoltzmannUtil.class);
+public class StonewallUtil {
+    private static final Logger log = LoggerFactory.getLogger(StonewallUtil.class);
 
-    private static BoltzmannUtil instance = null;
+    private static StonewallUtil instance = null;
 
-    private BoltzmannUtil() {
+    private StonewallUtil() {
         super();
     }
 
-    public static BoltzmannUtil getInstance() {
+    public static StonewallUtil getInstance() {
         if (instance == null) {
-            instance = new BoltzmannUtil();
+            instance = new StonewallUtil();
         }
         return instance;
     }
 
     // this will increment change index
-    public Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> boltzmann(List<UTXO> utxos, List<UTXO> utxosBis, BigInteger spendAmount, String address, WhirlpoolAccount account, UtxoProvider utxoProvider, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb) {
+    public Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> stonewall(List<UTXO> utxos, List<UTXO> utxosBis, BigInteger spendAmount, String address, WhirlpoolAccount account, UtxoProvider utxoProvider, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb) {
 
-        Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> set0 = boltzmannSet(utxos, spendAmount, address, null, account, null, utxoProvider, forcedChangeFormat, params, feePerKb);
+        Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> set0 = stonewallSet(utxos, spendAmount, address, null, account, null, utxoProvider, forcedChangeFormat, params, feePerKb);
         if(set0 == null)    {
             return null;
         }
@@ -78,7 +78,7 @@ public class BoltzmannUtil {
         else    {
             return null;
         }
-        Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> set1 = boltzmannSet(_utxo, spendAmount, address, set0.getLeft(), account, set0.getMiddle(), utxoProvider, forcedChangeFormat, params, feePerKb);
+        Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> set1 = stonewallSet(_utxo, spendAmount, address, set0.getLeft(), account, set0.getMiddle(), utxoProvider, forcedChangeFormat, params, feePerKb);
         if(set1 == null)    {
             return null;
         }
@@ -94,7 +94,7 @@ public class BoltzmannUtil {
     }
 
     // this will increment change index
-    public Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> boltzmannSet(List<UTXO> utxos, BigInteger spendAmount, String address, List<MyTransactionOutPoint> firstPassOutpoints, WhirlpoolAccount account, List<TransactionOutput> outputs0, UtxoProvider utxoProvider, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb) {
+    private Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> stonewallSet(List<UTXO> utxos, BigInteger spendAmount, String address, List<MyTransactionOutPoint> firstPassOutpoints, WhirlpoolAccount account, List<TransactionOutput> outputs0, UtxoProvider utxoProvider, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb) {
 
         if(utxos == null || utxos.size() == 0)    {
             return null;

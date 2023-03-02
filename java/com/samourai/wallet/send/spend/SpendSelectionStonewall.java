@@ -4,7 +4,7 @@ import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.client.indexHandler.IIndexHandler;
-import com.samourai.wallet.send.BoltzmannUtil;
+import com.samourai.wallet.send.StonewallUtil;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.beans.SpendError;
@@ -22,17 +22,17 @@ import org.slf4j.LoggerFactory;
 import java.math.BigInteger;
 import java.util.*;
 
-public class SpendSelectionBoltzmann extends SpendSelection {
-    private static final Logger log = LoggerFactory.getLogger(SpendSelectionBoltzmann.class);
+public class SpendSelectionStonewall extends SpendSelection {
+    private static final Logger log = LoggerFactory.getLogger(SpendSelectionStonewall.class);
     private static boolean TEST_MODE = false;
     private Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair;
 
-    public SpendSelectionBoltzmann(BipFormatSupplier bipFormatSupplier, Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair) {
+    public SpendSelectionStonewall(BipFormatSupplier bipFormatSupplier, Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair) {
         super(bipFormatSupplier, SpendType.STONEWALL);
         this.pair = pair;
     }
 
-    public static SpendSelectionBoltzmann compute(long neededAmount, UtxoProvider utxoProvider, BipFormat changeFormat, long amount, String address, WhirlpoolAccount account, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb, IIndexHandler changeIndexHandler) {
+    public static SpendSelectionStonewall compute(long neededAmount, UtxoProvider utxoProvider, BipFormat changeFormat, long amount, String address, WhirlpoolAccount account, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb, IIndexHandler changeIndexHandler) {
         int initialChangeIndex = changeIndexHandler.get();
 
         if (log.isDebugEnabled()) {
@@ -151,13 +151,13 @@ public class SpendSelectionBoltzmann extends SpendSelection {
         }
 
         if ((_utxos1 == null || _utxos1.size() == 0) && (_utxos2 == null || _utxos2.size() == 0)) {
-            // can't do boltzmann => revert change index
+            // can't do stonewall => revert change index
             changeIndexHandler.set(initialChangeIndex, true);
             return null;
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("boltzmann spend");
+            log.debug("stonewall spend");
         }
 
         List<UTXO> _utxos1Shuffled = new ArrayList<>(_utxos1);
@@ -172,21 +172,21 @@ public class SpendSelectionBoltzmann extends SpendSelection {
             }
         }
 
-        // boltzmann spend (STONEWALL)
-        Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair = BoltzmannUtil.getInstance().boltzmann(_utxos1Shuffled, _utxos2Shuffled, BigInteger.valueOf(amount), address, account, utxoProvider, forcedChangeFormat, params, feePerKb);
+        // STONEWALL spend
+        Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair = StonewallUtil.getInstance().stonewall(_utxos1Shuffled, _utxos2Shuffled, BigInteger.valueOf(amount), address, account, utxoProvider, forcedChangeFormat, params, feePerKb);
 
         if (pair == null) {
-            // can't do boltzmann => revert change index
+            // can't do stonewall => revert change index
             changeIndexHandler.set(initialChangeIndex, true);
             return null;
         }
 
-        return new SpendSelectionBoltzmann(utxoProvider.getBipFormatSupplier(), pair);
+        return new SpendSelectionStonewall(utxoProvider.getBipFormatSupplier(), pair);
     }
 
     @Override
     public SpendTx spendTx(long amount, String address, BipFormat changeFormat, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, UtxoProvider utxoProvider, long blockHeight) throws SpendException {
-        // select utxos for boltzmann
+        // select utxos for stonewall
         long inputAmount = 0L;
         long outputAmount = 0L;
 

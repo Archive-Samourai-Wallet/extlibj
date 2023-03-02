@@ -58,7 +58,7 @@ public class SpendBuilderTest extends AbstractTest {
             ADDRESS_CHANGE_84[i] = depositWallet84.getAddressAt(Chain.CHANGE.getIndex(), i).getAddressString();
         }
 
-        SpendSelectionBoltzmann._setTestMode(true);
+        SpendSelectionStonewall._setTestMode(true);
     }
 
     private SpendTx spend(String address, long amount, boolean stonewall) throws Exception {
@@ -202,7 +202,7 @@ public class SpendBuilderTest extends AbstractTest {
         UTXO utxo7 = utxoProvider.addUtxo(depositWallet84, 40000);
         UTXO utxo8 = utxoProvider.addUtxo(depositWallet84, 40000);
 
-        // should select Boltzmann
+        // should select STONEWALL
         SpendTx spendTx = spend(ADDRESS_BIP84, amount, true);
 
         Map<String,Long> outputs = new LinkedHashMap<>();
@@ -230,7 +230,7 @@ public class SpendBuilderTest extends AbstractTest {
         UTXO utxo7 = utxoProvider.addUtxo(depositWallet84, 40000);
         UTXO utxo8 = utxoProvider.addUtxo(depositWallet84, 40000);
 
-        // should select Boltzmann
+        // should select STONEWALL
         SpendTx spendTx = spend(ADDRESS_BIP49, amount, true);
 
         Map<String,Long> outputs = new LinkedHashMap<>();
@@ -258,7 +258,7 @@ public class SpendBuilderTest extends AbstractTest {
         UTXO utxo7 = utxoProvider.addUtxo(depositWallet84, 40000);
         UTXO utxo8 = utxoProvider.addUtxo(depositWallet84, 40000);
 
-        // should select Boltzmann
+        // should select STONEWALL
         SpendTx spendTx = spend(ADDRESS_BIP44, amount, true);
 
         Map<String,Long> outputs = new LinkedHashMap<>();
