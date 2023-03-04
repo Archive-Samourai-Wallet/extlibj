@@ -56,7 +56,7 @@ public class XmrBtcSwapsTest {
 
       TransactionOutPoint outpoint = new TransactionOutPoint(params, prevIdx, Sha256Hash.wrap(prevHash));
       TransactionInput input = new TransactionInput(params, null, new byte[0], outpoint);
-      input.setSequenceNumber(0x0c);
+      input.setSequenceNumber(SwapSupportAddress.SEQUENCE_CANCEL);
       TransactionOutput output = Bech32UtilGeneric.getInstance().getTransactionOutput(toAddress, spendAmount, params);
       tx.addInput(input);
       tx.addOutput(output);
@@ -102,7 +102,7 @@ public class XmrBtcSwapsTest {
 
         TransactionOutPoint outpoint = new TransactionOutPoint(params, prevIdx, Sha256Hash.wrap(prevHash));
         TransactionInput input = new TransactionInput(params, null, new byte[0], outpoint);
-        input.setSequenceNumber(0xffffffff);
+        input.setSequenceNumber(SwapSupportAddress.SEQUENCE_REFUND);
         TransactionOutput output = Bech32UtilGeneric.getInstance().getTransactionOutput(toAddress, spendAmount, params);
         tx.addInput(input);
         tx.addOutput(output);
@@ -148,7 +148,7 @@ public class XmrBtcSwapsTest {
 
         TransactionOutPoint outpoint = new TransactionOutPoint(params, prevIdx, Sha256Hash.wrap(prevHash));
         TransactionInput input = new TransactionInput(params, null, new byte[0], outpoint);
-        input.setSequenceNumber(0x0c);
+        input.setSequenceNumber(SwapSupportAddress.SEQUENCE_CANCEL);
         TransactionOutput output = Bech32UtilGeneric.getInstance().getTransactionOutput(toAddress, spendAmount, params);
         tx.addInput(input);
         tx.addOutput(output);
@@ -194,7 +194,7 @@ public class XmrBtcSwapsTest {
 
         TransactionOutPoint outpoint = new TransactionOutPoint(params, prevIdx, Sha256Hash.wrap(prevHash));
         TransactionInput input = new TransactionInput(params, null, new byte[0], outpoint);
-        input.setSequenceNumber(0xffffffff);
+        input.setSequenceNumber(SwapSupportAddress.SEQUENCE_REFUND);
         TransactionOutput output = Bech32UtilGeneric.getInstance().getTransactionOutput(toAddress, spendAmount, params);
         tx.addInput(input);
         tx.addOutput(output);
@@ -239,7 +239,7 @@ public class XmrBtcSwapsTest {
 
         TransactionOutPoint outpoint = new TransactionOutPoint(params, prevIdx, Sha256Hash.wrap(prevHash));
         TransactionInput input = new TransactionInput(params, null, new byte[0], outpoint);
-        input.setSequenceNumber(0x0c);
+        input.setSequenceNumber(SwapSupportAddress.SEQUENCE_CANCEL);
         TransactionOutput output = Bech32UtilGeneric.getInstance().getTransactionOutput(toAddress, spendAmount, params);
         tx.addInput(input);
         tx.addOutput(output);
@@ -283,7 +283,7 @@ public class XmrBtcSwapsTest {
 
         TransactionOutPoint outpoint = new TransactionOutPoint(params, prevIdx, Sha256Hash.wrap(prevHash));
         TransactionInput input = new TransactionInput(params, null, new byte[0], outpoint);
-        input.setSequenceNumber(0xffffffff);
+        input.setSequenceNumber(SwapSupportAddress.SEQUENCE_REFUND);
         TransactionOutput output = Bech32UtilGeneric.getInstance().getTransactionOutput(toAddress, spendAmount, params);
         tx.addInput(input);
         tx.addOutput(output);
@@ -297,6 +297,94 @@ public class XmrBtcSwapsTest {
         tx.setWitness(0, witness);
 
         Assertions.assertEquals("daa50de6d9cf97c30e1562a57ddb1f289d090a508e0847d39c5fe22569c37c46", tx.getHash().toString());
+
+      }
+
+      @Test
+      public void punishTransactionFromPrivkey() throws Exception  {
+
+        NetworkParameters params = TestNet3Params.get();
+
+        DumpedPrivateKey dpk0 = DumpedPrivateKey.fromBase58(params, "cSGKUpKemaq8ArtrevDjweVzNf1TBn2Q46H4wh4FG4PtMc8aA2y3");
+        ECKey eckey0 = dpk0.getKey();
+        DumpedPrivateKey dpk1 = DumpedPrivateKey.fromBase58(params, "cRjMKXzDLgzsGPDBzjUvmTmfmXj1BMD61CFgEmQ563Hx4CxQG8E1");
+        ECKey eckey1 = dpk1.getKey();
+
+        SwapSupportAddress saddress = new SwapSupportAddress(eckey0, eckey1, params);
+        Script redeemScript = saddress.redeemScript();
+        Assertions.assertEquals("tb1qw277svm5dmj7nlw3z4vgz0edqke2cxupe65hfy5050tc2vlnt7xsq6qene", saddress.getDefaultToAddressAsString());
+
+        String prevHash = "0497ff119d1d20ddc7484ad55699e9ba49fbd9750a41189782af1d158fa20971";
+        long prevIdx = 2;
+        long prevAmount = 250000L;
+        long spendAmount = 249400;
+
+        String toAddress = "tb1pkqnmm3hvp46yuz6sj9qurqfa76fcr6mfh0cnj42cwrzkpapaay2qlesywh";
+
+        Transaction tx = new Transaction(params);
+        tx.setVersion(2);
+        tx.setLockTime(0L);
+
+        TransactionOutPoint outpoint = new TransactionOutPoint(params, prevIdx, Sha256Hash.wrap(prevHash));
+        TransactionInput input = new TransactionInput(params, null, new byte[0], outpoint);
+        input.setSequenceNumber(SwapSupportAddress.SEQUENCE_PUNISH);
+        TransactionOutput output = Bech32UtilGeneric.getInstance().getTransactionOutput(toAddress, spendAmount, params);
+        tx.addInput(input);
+        tx.addOutput(output);
+
+        TransactionWitness witness = new TransactionWitness(3);
+        TransactionSignature sig0 = tx.calculateWitnessSignature(0, eckey1, redeemScript.getProgram(), Coin.valueOf(prevAmount), Transaction.SigHash.ALL, false);
+        TransactionSignature sig1 = tx.calculateWitnessSignature(0, eckey0, redeemScript.getProgram(), Coin.valueOf(prevAmount), Transaction.SigHash.ALL, false);
+        witness.setPush(0, sig0.encodeToBitcoin());
+        witness.setPush(1, sig1.encodeToBitcoin());
+        witness.setPush(2, saddress.redeemScript().getProgram());
+        tx.setWitness(0, witness);
+
+        Assertions.assertEquals("91add4af7fa8cbdf3ab63a21fcea68ad9df8274dc36ec08508cdfdb8d703711a", tx.getHash().toString());
+
+      }
+
+      @Test
+      public void punishTransactionFromPrivkey2() throws Exception  {
+
+        NetworkParameters params = TestNet3Params.get();
+
+        DumpedPrivateKey dpk0 = DumpedPrivateKey.fromBase58(params, "cRr5GksBCGPnQmSd7c1s1Zahm8G7SNN9xnaPVJB51EveAK6utr9Q");
+        ECKey eckey0 = dpk0.getKey();
+        DumpedPrivateKey dpk1 = DumpedPrivateKey.fromBase58(params, "cSzVcJUtB13nAezBvfQNYdFnvK1kJYUeVsrFtD8vMazRdFVtpmvv");
+        ECKey eckey1 = dpk1.getKey();
+
+        SwapSupportAddress saddress = new SwapSupportAddress(eckey0, eckey1, params);
+        Script redeemScript = saddress.redeemScript();
+        Assertions.assertEquals("tb1q2y8dwg0ueuj94dsuwytrjh35f0ag3jma3ma5qwgjlfvzpyt7mjjsuwuxnu", saddress.getDefaultToAddressAsString());
+
+        String prevHash = "3ab73d2e11b5a9f55fb7fb56e767775eea074f12f7677fd2414b2d5480e0a28d";
+        long prevIdx = 1;
+        long prevAmount = 125000L;
+        long spendAmount = 124400;
+
+        String toAddress = "tb1pkqnmm3hvp46yuz6sj9qurqfa76fcr6mfh0cnj42cwrzkpapaay2qlesywh";
+
+        Transaction tx = new Transaction(params);
+        tx.setVersion(2);
+        tx.setLockTime(0L);
+
+        TransactionOutPoint outpoint = new TransactionOutPoint(params, prevIdx, Sha256Hash.wrap(prevHash));
+        TransactionInput input = new TransactionInput(params, null, new byte[0], outpoint);
+        input.setSequenceNumber(SwapSupportAddress.SEQUENCE_PUNISH);
+        TransactionOutput output = Bech32UtilGeneric.getInstance().getTransactionOutput(toAddress, spendAmount, params);
+        tx.addInput(input);
+        tx.addOutput(output);
+
+        TransactionWitness witness = new TransactionWitness(3);
+        TransactionSignature sig0 = tx.calculateWitnessSignature(0, eckey1, redeemScript.getProgram(), Coin.valueOf(prevAmount), Transaction.SigHash.ALL, false);
+        TransactionSignature sig1 = tx.calculateWitnessSignature(0, eckey0, redeemScript.getProgram(), Coin.valueOf(prevAmount), Transaction.SigHash.ALL, false);
+        witness.setPush(0, sig0.encodeToBitcoin());
+        witness.setPush(1, sig1.encodeToBitcoin());
+        witness.setPush(2, saddress.redeemScript().getProgram());
+        tx.setWitness(0, witness);
+
+        Assertions.assertEquals("857f48f6c35c71a3c47adf3059be838de494f73b8cf54052a3e7a273c51e6d30", tx.getHash().toString());
 
       }
 
