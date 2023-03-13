@@ -1,5 +1,6 @@
 package com.samourai.wallet.util;
 
+import com.samourai.wallet.send.MyTransactionOutPoint;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.NetworkParameters;
@@ -7,11 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
-import java.util.Vector;
-
-import com.samourai.wallet.segwit.bech32.Bech32;
-import com.samourai.wallet.segwit.bech32.Bech32Segwit;
-import com.samourai.wallet.send.MyTransactionOutPoint;
+import java.util.Collection;
 
 public class FeeUtil {
   private static final Logger log = LoggerFactory.getLogger(FeeUtil.class);
@@ -87,6 +84,11 @@ public class FeeUtil {
     return txSize;
   }
 
+  public BigInteger estimatedFeeSegwit(Collection<MyTransactionOutPoint> inputs, int outputsNonOpReturn, int outputsOpReturn, BigInteger feePerKb, NetworkParameters params)   {
+    Triple<Integer,Integer,Integer> outpointTypes = getOutpointCount(inputs, params);
+    return estimatedFeeSegwit(outpointTypes.getLeft(), outpointTypes.getMiddle(), outpointTypes.getRight(), outputsNonOpReturn, outputsOpReturn, feePerKb);
+  }
+
   public BigInteger estimatedFeeSegwit(int inputsP2PKH, int inputsP2SHP2WPKH, int inputsP2WPKH, int outputsNonOpReturn, int outputsOpReturn, BigInteger feePerKb)   {
     int size = estimatedSizeSegwit(inputsP2PKH, inputsP2SHP2WPKH, inputsP2WPKH, outputsNonOpReturn, outputsOpReturn);
     return calculateFee(size, feePerKb);
@@ -153,7 +155,7 @@ public class FeeUtil {
     return BigInteger.valueOf(feePerB * 1000L);
   }
 
-  public Triple<Integer,Integer,Integer> getOutpointCount(Vector<MyTransactionOutPoint> outpoints, NetworkParameters params) {
+  public Triple<Integer,Integer,Integer> getOutpointCount(Collection<MyTransactionOutPoint> outpoints, NetworkParameters params) {
 
     int p2wpkh_p2tr = 0;
     int p2sh_p2wpkh = 0;
@@ -174,7 +176,7 @@ public class FeeUtil {
     return Triple.of(p2pkh, p2sh_p2wpkh, p2wpkh_p2tr);
   }
 
-  public int getOutpointCountP2TR(Vector<MyTransactionOutPoint> outpoints) {
+  public int getOutpointCountP2TR(Collection<MyTransactionOutPoint> outpoints) {
 
     int count = 0;
 
@@ -187,7 +189,7 @@ public class FeeUtil {
     return count;
   }
 
-  public int getOutpointCountP2WSH(Vector<MyTransactionOutPoint> outpoints) {
+  public int getOutpointCountP2WSH(Collection<MyTransactionOutPoint> outpoints) {
 
     int count = 0;
 
@@ -200,7 +202,7 @@ public class FeeUtil {
     return count;
   }
 
-  public int getOutpointCountP2TR_P2WSH(Vector<MyTransactionOutPoint> outpoints) {
+  public int getOutpointCountP2TR_P2WSH(Collection<MyTransactionOutPoint> outpoints) {
 
     return getOutpointCountP2TR(outpoints) + getOutpointCountP2WSH(outpoints);
 

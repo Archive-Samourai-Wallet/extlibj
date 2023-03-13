@@ -1,7 +1,6 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.soroban.cahoots.StowawayContext;
-import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
@@ -51,7 +50,7 @@ public class StowawayServiceTest extends AbstractCahootsTest {
 
         // verify SpendTx
         SpendTx spendTx = cahoots.getSpendTx(cahootsContextSender, utxoProviderSender);
-        verifySpendTx(spendTx, SpendType.CAHOOTS_STOWAWAY, Arrays.asList(utxoSender1), 216, 216, 0, spendAmount, 4784L, BIP_FORMAT.SEGWIT_NATIVE);
+        verifySpendTx(spendTx, SpendType.CAHOOTS_STOWAWAY, Arrays.asList(utxoSender1), 216, 216, 0, spendAmount, false, 4784L);
     }
 
     @Test
@@ -81,6 +80,6 @@ public class StowawayServiceTest extends AbstractCahootsTest {
 
         // verify SpendTx
         SpendTx spendTx = cahoots.getSpendTx(cahootsContextSender, utxoProviderSender);
-        verifySpendTx(spendTx, SpendType.CAHOOTS_STOWAWAY, Arrays.asList(utxoSender1), 216, 216, 0, spendAmount, 4784L, BIP_FORMAT.SEGWIT_NATIVE);
+        verifySpendTx(spendTx, SpendType.CAHOOTS_STOWAWAY, Arrays.asList(utxoSender1), 216, 216, 0, spendAmount, false, 4784L);
     }
 }

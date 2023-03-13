@@ -77,7 +77,7 @@ public class WalletSupplierImpl implements WalletSupplier {
   public BipWallet getWalletByPub(String pub) {
     BipWallet bipWallet = walletsByPub.get(pub);
     if (bipWallet == null) {
-      log.error("No wallet found for: " + pub);
+      log.error("BipWallet not found for: " + pub);
       return null;
     }
     return bipWallet;
@@ -105,7 +105,8 @@ public class WalletSupplierImpl implements WalletSupplier {
 
   @Override
   public BipAddress getAddress(UnspentOutput unspentOutput) {
-    return getWallet(unspentOutput).getAddressAt(unspentOutput);
+    BipWallet bipWallet = getWallet(unspentOutput);
+    return bipWallet != null ? bipWallet.getAddressAt(unspentOutput) : null;
   }
 
   @Override

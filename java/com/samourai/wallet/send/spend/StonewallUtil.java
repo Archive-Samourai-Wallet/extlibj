@@ -1,10 +1,12 @@
-package com.samourai.wallet.send;
+package com.samourai.wallet.send.spend;
 
 import com.samourai.wallet.SamouraiWalletConst;
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.send.MyTransactionOutPoint;
+import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.provider.UtxoProvider;
-import com.samourai.wallet.send.spend.SpendBuilder;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.apache.commons.lang3.tuple.Pair;
@@ -22,6 +24,7 @@ public class StonewallUtil {
     private static final Logger log = LoggerFactory.getLogger(StonewallUtil.class);
 
     private static StonewallUtil instance = null;
+    private boolean TEST_MODE;
 
     private StonewallUtil() {
         super();
@@ -34,8 +37,97 @@ public class StonewallUtil {
         return instance;
     }
 
+    public static List<Collection<UTXO>> utxoSets(UtxoProvider utxoProvider, BipFormat changeFormat, WhirlpoolAccount account) {
+        // input formats sorted by preference
+        List<BipFormat> bipFormats = new LinkedList<>();
+        bipFormats.add(changeFormat);
+        for (BipFormat bipFormat : Arrays.asList(BIP_FORMAT.SEGWIT_NATIVE, BIP_FORMAT.SEGWIT_COMPAT, BIP_FORMAT.LEGACY)) {
+            if (bipFormat != changeFormat) {
+                bipFormats.add(bipFormat);
+            }
+        }
+
+        // utxo sets sorted by preference
+        List<Collection<UTXO>> utxoSets = new LinkedList<>();
+        for (BipFormat bipFormat : bipFormats) {
+            Collection<UTXO> utxos = utxoProvider.getUtxos(account, bipFormat);
+            utxoSets.add(utxos);
+
+            long value = UTXO.sumValue(utxos);
+            if (log.isDebugEnabled()) {
+                log.debug("utxoSets[" + bipFormat + "]: " + value+" ("+utxos.size()+" inputs)");
+            }
+        }
+        return utxoSets;
+    }
+
+    public Pair<List<UTXO>,List<UTXO>> stonewallInputs(List<Collection<UTXO>> utxoSets, BipFormat changeFormat, long amount, NetworkParameters params, BigInteger feePerKb) {
+        Collection<UTXO> _utxos1 = null;
+        Collection<UTXO> _utxos2 = null;
+
+        // try funding the whole STONEWALL with one utxoSet (multipler=2)
+        for (Collection<UTXO> utxos : utxoSets) {
+            if (hasEnoughBalance(utxos, amount, 2, feePerKb, params)) {
+                log.debug("set 1 " + changeFormat + " 2x");
+                _utxos1 = utxos;
+                break;
+            }
+        }
+
+        if (_utxos1 == null) {
+            // try partially funding the STONEWALL with one utxoSet (multipler=1)
+            for (Collection<UTXO> utxos : utxoSets) {
+                if (hasEnoughBalance(utxos, amount, 1, feePerKb, params)) {
+                    log.debug("set 1 " + changeFormat);
+                    _utxos1 = utxos;
+                    break;
+                }
+            }
+        }
+
+        if (_utxos1 != null) {
+            // complete the STONEWALL with another bipFormat (multipler=1)
+            for (Collection<UTXO> utxos : utxoSets) {
+                if (utxos != _utxos1) {
+                    if (hasEnoughBalance(utxos, amount, 1, feePerKb, params)) {
+                        log.debug("set 2 " + changeFormat);
+                        _utxos2 = utxos;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ((_utxos1 == null || _utxos1.size() == 0) && (_utxos2 == null || _utxos2.size() == 0)) {
+            // can't do stonewall
+            return null;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("stonewall spend");
+        }
+
+        List<UTXO> _utxos1Shuffled = new ArrayList<>(_utxos1);
+        if (!TEST_MODE) {
+            Collections.shuffle(_utxos1Shuffled);
+        }
+        List<UTXO> _utxos2Shuffled = null;
+        if (_utxos2 != null && _utxos2.size() > 0) {
+            _utxos2Shuffled = new ArrayList<>(_utxos2);
+            if (!TEST_MODE) {
+                Collections.shuffle(_utxos2Shuffled);
+            }
+        }
+        return Pair.of(_utxos1Shuffled, _utxos2Shuffled);
+    }
+
+    private boolean hasEnoughBalance(Collection<UTXO> utxos, long amount, int multiplier, BigInteger feePerKb, NetworkParameters params) {
+        long neededAmount = SpendBuilder.computeNeededAmount(UTXO.listOutpoints(utxos), amount, feePerKb, params);
+        return UTXO.sumValue(utxos) >= (neededAmount * multiplier);
+    }
+
     // this will increment change index
-    public Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> stonewall(List<UTXO> utxos, List<UTXO> utxosBis, BigInteger spendAmount, String address, WhirlpoolAccount account, UtxoProvider utxoProvider, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb) {
+    public SpendSelectionStonewall stonewall(List<UTXO> utxos, List<UTXO> utxosBis, BigInteger spendAmount, String address, WhirlpoolAccount account, UtxoProvider utxoProvider, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb) {
 
         Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> set0 = stonewallSet(utxos, spendAmount, address, null, account, null, utxoProvider, forcedChangeFormat, params, feePerKb);
         if(set0 == null)    {
@@ -90,7 +182,7 @@ public class StonewallUtil {
 //        ret.getRight().addAll(set0.getMiddle());
         ret.getRight().addAll(set1.getMiddle());
 
-        return ret;
+        return new SpendSelectionStonewall(utxoProvider.getBipFormatSupplier(), ret.getLeft(), ret.getRight());
     }
 
     // this will increment change index
@@ -347,5 +439,9 @@ public class StonewallUtil {
 
         return ret;
 
+    }
+
+    public void _setTestMode() {
+        TEST_MODE = true;
     }
 }

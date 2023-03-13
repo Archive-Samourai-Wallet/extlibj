@@ -9,7 +9,6 @@ import com.samourai.wallet.bip47.BIP47UtilGeneric;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.bip47.rpc.java.Bip47UtilJava;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
-import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.chain.ChainSupplier;
@@ -34,7 +33,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -162,24 +164,23 @@ public class AbstractTest {
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
   }
 
-  protected void verifySpendTx(SpendTx spendTx, SpendType spendType, Collection<com.samourai.wallet.send.UTXO> utxos, long minerFeeTotal, long minerFeePaid, long samouraiFee, long amount, long change, BipFormat changeFormat) throws Exception {
+  protected void verifySpendTx(SpendTx spendTx, SpendType spendType, Collection<com.samourai.wallet.send.UTXO> utxos, long minerFeeTotal, long minerFeePaid, long samouraiFee, long amount, boolean entireBalanceExpected, long change) throws Exception {
     Assertions.assertEquals(spendType, spendTx.getSpendType());
     assertEquals(utxos, spendTx.getSpendFrom());
     Assertions.assertEquals(minerFeeTotal, spendTx.getMinerFeeTotal());
     Assertions.assertEquals(minerFeePaid, spendTx.getMinerFeePaid());
     Assertions.assertEquals(samouraiFee, spendTx.getSamouraiFee());
     Assertions.assertEquals(amount, spendTx.getAmount());
+    Assertions.assertEquals(entireBalanceExpected, spendTx.isEntireBalance());
     Assertions.assertEquals(change, spendTx.getChange());
-    Assertions.assertEquals(changeFormat, spendTx.getChangeFormat());
   }
 
   protected void assertEquals(Collection<UTXO> utxos1, Collection<? extends TransactionOutPoint> utxos2) {
-    Function<UTXO,String> utxoToString = u -> {
-      TransactionOutPoint outPoint = u.getOutpoints().get(0);
+    Function<TransactionOutPoint,String> outPointToString = outPoint -> {
       return outPoint.getHash().toString()+"-"+outPoint.getIndex();
     };
-    Collection<String> utxos1Str = utxos1.stream().map(utxoToString).collect(Collectors.toList());
-    Collection<String> utxos2Str = utxos1.stream().map(utxoToString).collect(Collectors.toList());
+    Collection<String> utxos1Str = UTXO.listOutpoints(utxos1).stream().map(outPointToString).collect(Collectors.toList());
+    Collection<String> utxos2Str = utxos2.stream().map(outPointToString).collect(Collectors.toList());
     Assertions.assertEquals(utxos1Str, utxos2Str);
   }
 }

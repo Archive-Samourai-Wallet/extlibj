@@ -1,10 +1,8 @@
 package com.samourai.wallet.send.spend;
 
-import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.client.indexHandler.IIndexHandler;
-import com.samourai.wallet.send.StonewallUtil;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.beans.SpendError;
@@ -24,173 +22,39 @@ import java.util.*;
 
 public class SpendSelectionStonewall extends SpendSelection {
     private static final Logger log = LoggerFactory.getLogger(SpendSelectionStonewall.class);
-    private static boolean TEST_MODE = false;
-    private Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair;
+    private static final StonewallUtil stonewallUtil = StonewallUtil.getInstance();
+    private List<MyTransactionOutPoint> inputs;
+    private List<TransactionOutput> outputs;
 
-    public SpendSelectionStonewall(BipFormatSupplier bipFormatSupplier, Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair) {
+    protected SpendSelectionStonewall(BipFormatSupplier bipFormatSupplier, List<MyTransactionOutPoint> inputs, List<TransactionOutput> outputs) {
         super(bipFormatSupplier, SpendType.STONEWALL);
-        this.pair = pair;
+        this.inputs = inputs;
+        this.outputs = outputs;
     }
 
-    public static SpendSelectionStonewall compute(long neededAmount, UtxoProvider utxoProvider, BipFormat changeFormat, long amount, String address, WhirlpoolAccount account, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb, IIndexHandler changeIndexHandler) {
-        int initialChangeIndex = changeIndexHandler.get();
-
-        if (log.isDebugEnabled()) {
-            log.debug("needed amount:" + neededAmount);
-        }
-
-        Collection<UTXO> _utxos1 = null;
-        Collection<UTXO> _utxos2 = null;
-
-        Collection<UTXO> utxosP2WPKH = utxoProvider.getUtxos(account, BIP_FORMAT.SEGWIT_NATIVE);
-        Collection<UTXO> utxosP2SH_P2WPKH = utxoProvider.getUtxos(account, BIP_FORMAT.SEGWIT_COMPAT);
-        Collection<UTXO> utxosP2PKH = utxoProvider.getUtxos(account, BIP_FORMAT.LEGACY);
-
-        long valueP2WPKH = UTXO.sumValue(utxosP2WPKH);
-        long valueP2SH_P2WPKH = UTXO.sumValue(utxosP2SH_P2WPKH);
-        long valueP2PKH = UTXO.sumValue(utxosP2PKH);
-
-        if (log.isDebugEnabled()) {
-            log.debug("value P2WPKH:" + valueP2WPKH);
-            log.debug("value P2SH_P2WPKH:" + valueP2SH_P2WPKH);
-            log.debug("value P2PKH:" + valueP2PKH);
-        }
-
-        boolean selectedP2WPKH = false;
-        boolean selectedP2SH_P2WPKH = false;
-        boolean selectedP2PKH = false;
-
-        if ((valueP2WPKH > (neededAmount * 2)) && changeFormat == BIP_FORMAT.SEGWIT_NATIVE) {
-            if (log.isDebugEnabled()) {
-                log.debug("set 1 P2WPKH 2x");
-            }
-            _utxos1 = utxosP2WPKH;
-            selectedP2WPKH = true;
-        } else if (changeFormat == BIP_FORMAT.SEGWIT_COMPAT && (valueP2SH_P2WPKH > (neededAmount * 2))) {
-            if (log.isDebugEnabled()) {
-                log.debug("set 1 P2SH_P2WPKH 2x");
-            }
-            _utxos1 = utxosP2SH_P2WPKH;
-            selectedP2SH_P2WPKH = true;
-        } else if (changeFormat == BIP_FORMAT.LEGACY && (valueP2PKH > (neededAmount * 2))) {
-            if (log.isDebugEnabled()) {
-                log.debug("set 1 P2PKH 2x");
-            }
-            _utxos1 = utxosP2PKH;
-            selectedP2PKH = true;
-        } else if (valueP2WPKH > (neededAmount * 2)) {
-            if (log.isDebugEnabled()) {
-                log.debug("set 1 P2WPKH 2x");
-            }
-            _utxos1 = utxosP2WPKH;
-            selectedP2WPKH = true;
-        } else if (valueP2SH_P2WPKH > (neededAmount * 2)) {
-            if (log.isDebugEnabled()) {
-                log.debug("set 1 P2SH_P2WPKH 2x");
-            }
-            _utxos1 = utxosP2SH_P2WPKH;
-            selectedP2SH_P2WPKH = true;
-        } else if (valueP2PKH > (neededAmount * 2)) {
-            if (log.isDebugEnabled()) {
-                log.debug("set 1 P2PKH 2x");
-            }
-            _utxos1 = utxosP2PKH;
-            selectedP2PKH = true;
-        } else {
-            ;
-        }
-
-        if (_utxos1 == null || _utxos1.size() == 0) {
-            if (valueP2SH_P2WPKH > neededAmount) {
-                if (log.isDebugEnabled()) {
-                    log.debug("set 1 P2SH_P2WPKH");
-                }
-                _utxos1 = utxosP2SH_P2WPKH;
-                selectedP2SH_P2WPKH = true;
-            } else if (valueP2WPKH > neededAmount) {
-                if (log.isDebugEnabled()) {
-                    log.debug("set 1 P2WPKH");
-                }
-                _utxos1 = utxosP2WPKH;
-                selectedP2WPKH = true;
-            } else if (valueP2PKH > neededAmount) {
-                if (log.isDebugEnabled()) {
-                    log.debug("set 1 P2PKH");
-                }
-                _utxos1 = utxosP2PKH;
-                selectedP2PKH = true;
-            } else {
-                ;
-            }
-        }
-
-        if (_utxos1 != null && _utxos1.size() > 0) {
-            if (!selectedP2SH_P2WPKH && valueP2SH_P2WPKH > neededAmount) {
-                if (log.isDebugEnabled()) {
-                    log.debug("set 2 P2SH_P2WPKH");
-                }
-                _utxos2 = utxosP2SH_P2WPKH;
-                selectedP2SH_P2WPKH = true;
-            }
-            if (!selectedP2SH_P2WPKH && !selectedP2WPKH && valueP2WPKH > neededAmount) {
-                if (log.isDebugEnabled()) {
-                    log.debug("set 2 P2WPKH");
-                }
-                _utxos2 = utxosP2WPKH;
-                selectedP2WPKH = true;
-            }
-            if (!selectedP2SH_P2WPKH && !selectedP2WPKH && !selectedP2PKH && valueP2PKH > neededAmount) {
-                if (log.isDebugEnabled()) {
-                    log.debug("set 2 P2PKH");
-                }
-                _utxos2 = utxosP2PKH;
-                selectedP2PKH = true;
-            } else {
-                ;
-            }
-        }
-
-        if ((_utxos1 == null || _utxos1.size() == 0) && (_utxos2 == null || _utxos2.size() == 0)) {
-            // can't do stonewall => revert change index
-            changeIndexHandler.set(initialChangeIndex, true);
-            return null;
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("stonewall spend");
-        }
-
-        List<UTXO> _utxos1Shuffled = new ArrayList<>(_utxos1);
-        if (!TEST_MODE) {
-            Collections.shuffle(_utxos1Shuffled);
-        }
-        List<UTXO> _utxos2Shuffled = null;
-        if (_utxos2 != null && _utxos2.size() > 0) {
-            _utxos2Shuffled = new ArrayList<>(_utxos2);
-            if (!TEST_MODE) {
-                Collections.shuffle(_utxos2Shuffled);
-            }
-        }
+    public static SpendSelectionStonewall compute(UtxoProvider utxoProvider, BipFormat changeFormat, long amount, String address, WhirlpoolAccount account, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb, IIndexHandler changeIndexHandler) {
+        // find inputs
+        List<Collection<UTXO>> utxoSets = stonewallUtil.utxoSets(utxoProvider, changeFormat, account);
+        Pair<List<UTXO>,List<UTXO>> utxosPair = stonewallUtil.stonewallInputs(utxoSets, changeFormat, amount, params, feePerKb);
 
         // STONEWALL spend
-        Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair = StonewallUtil.getInstance().stonewall(_utxos1Shuffled, _utxos2Shuffled, BigInteger.valueOf(amount), address, account, utxoProvider, forcedChangeFormat, params, feePerKb);
-
-        if (pair == null) {
+        int initialChangeIndex = changeIndexHandler.get();
+        SpendSelectionStonewall spendSelection = stonewallUtil.stonewall(utxosPair.getLeft(), utxosPair.getRight(), BigInteger.valueOf(amount), address, account, utxoProvider, forcedChangeFormat, params, feePerKb);
+        if (spendSelection == null) {
             // can't do stonewall => revert change index
             changeIndexHandler.set(initialChangeIndex, true);
             return null;
         }
-
-        return new SpendSelectionStonewall(utxoProvider.getBipFormatSupplier(), pair);
+        return spendSelection;
     }
 
     @Override
-    public SpendTx spendTx(long amount, String address, BipFormat changeFormat, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, UtxoProvider utxoProvider, long blockHeight) throws SpendException {
+    public SpendTx spendTx(long amount, String address, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, UtxoProvider utxoProvider, long blockHeight) throws SpendException {
         // select utxos for stonewall
         long inputAmount = 0L;
         long outputAmount = 0L;
 
-        for (MyTransactionOutPoint outpoint : pair.getLeft()) {
+        for (MyTransactionOutPoint outpoint : inputs) {
             UTXO u = new UTXO();
             List<MyTransactionOutPoint> outs = new ArrayList<MyTransactionOutPoint>();
             outs.add(outpoint);
@@ -200,7 +64,7 @@ public class SpendSelectionStonewall extends SpendSelection {
         }
 
         Map<String, Long> receivers = new HashMap<>();
-        for (TransactionOutput output : pair.getRight()) {
+        for (TransactionOutput output : outputs) {
             try {
                 String outputAddress = getBipFormatSupplier().getToAddress(output);
                 if (receivers.containsKey(outputAddress)) {
@@ -217,11 +81,7 @@ public class SpendSelectionStonewall extends SpendSelection {
 
         BigInteger fee = BigInteger.valueOf(inputAmount - outputAmount);
         long change = computeChange(amount, fee);
-        SpendTx spendTx = computeSpendTx(changeFormat, amount, fee.longValue(), change, receivers, rbfOptIn, utxoProvider, params, blockHeight);
+        SpendTx spendTx = computeSpendTx(amount, false, fee.longValue(), change, receivers, rbfOptIn, utxoProvider, params, blockHeight);
         return spendTx;
-    }
-
-    public static void _setTestMode(boolean testMode) {
-        TEST_MODE = testMode;
     }
 }

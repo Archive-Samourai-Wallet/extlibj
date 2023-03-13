@@ -4,7 +4,6 @@ import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bip69.BIP69InputComparator;
 import com.samourai.wallet.bip69.BIP69OutputComparator;
-import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.segwit.SegwitAddress;
@@ -407,6 +406,6 @@ public abstract class Cahoots2x extends Cahoots {
 
     @Override
     public SpendTx getSpendTx(CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) throws SpendException {
-        return new SpendTxCahoots(BIP_FORMAT.SEGWIT_NATIVE, this, cahootsContext, utxoKeyProvider);
+        return new SpendTxCahoots(this, cahootsContext, utxoKeyProvider);
     }
 }
