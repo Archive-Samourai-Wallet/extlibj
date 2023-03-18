@@ -8,13 +8,10 @@ import com.samourai.soroban.client.SorobanInteraction;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.MyTransactionOutPoint;
-import com.samourai.wallet.util.RandomUtil;
 import org.bitcoinj.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.security.SecureRandom;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -171,16 +168,5 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
 
     public BipFormatSupplier getBipFormatSupplier() {
         return bipFormatSupplier;
-    }
-
-    // overridable for tests
-    protected int getRandNextInt(int bound) {
-        SecureRandom random = RandomUtil.getSecureRandom();
-        return random.nextInt(bound);
-    }
-
-    // overridable for tests
-    protected void shuffleUtxos(List<CahootsUtxo> utxos) {
-        Collections.shuffle(utxos);
     }
 }
