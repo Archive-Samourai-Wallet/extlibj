@@ -76,8 +76,8 @@ public abstract class Cahoots2x extends Cahoots {
     public Cahoots2x(int type, NetworkParameters params, long spendAmount, String strDestination, int account, byte[] fingerprint) {
         super(type, params);
         this.ts = System.currentTimeMillis() / 1000L;
-        SecureRandom random = RandomUtil.getSecureRandom();
-        this.strID = Hex.toHexString(Sha256Hash.hash(BigInteger.valueOf(random.nextLong()).toByteArray()));
+        long randomLong = RandomUtil.getInstance().nextLong();
+        this.strID = Hex.toHexString(Sha256Hash.hash(BigInteger.valueOf(randomLong).toByteArray()));
         this.spendAmount = spendAmount;
         this.outpoints = new HashMap<String, Long>();
         this.strDestination = strDestination;

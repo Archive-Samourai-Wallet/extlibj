@@ -8,6 +8,7 @@ import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.util.FeeUtil;
+import com.samourai.wallet.util.RandomUtil;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -24,7 +25,6 @@ public class StonewallUtil {
     private static final Logger log = LoggerFactory.getLogger(StonewallUtil.class);
 
     private static StonewallUtil instance = null;
-    private boolean TEST_MODE;
 
     private StonewallUtil() {
         super();
@@ -108,15 +108,12 @@ public class StonewallUtil {
         }
 
         List<UTXO> _utxos1Shuffled = new ArrayList<>(_utxos1);
-        if (!TEST_MODE) {
-            Collections.shuffle(_utxos1Shuffled);
-        }
+        RandomUtil.getInstance().shuffle(_utxos1Shuffled);
+
         List<UTXO> _utxos2Shuffled = null;
         if (_utxos2 != null && _utxos2.size() > 0) {
             _utxos2Shuffled = new ArrayList<>(_utxos2);
-            if (!TEST_MODE) {
-                Collections.shuffle(_utxos2Shuffled);
-            }
+            RandomUtil.getInstance().shuffle(_utxos2Shuffled);
         }
         return Pair.of(_utxos1Shuffled, _utxos2Shuffled);
     }
@@ -439,9 +436,5 @@ public class StonewallUtil {
 
         return ret;
 
-    }
-
-    public void _setTestMode() {
-        TEST_MODE = true;
     }
 }

@@ -40,7 +40,5 @@ public abstract class AbstractSpendTest extends AbstractTest {
         for (int i = 0; i < 4; i++) {
             ADDRESS_CHANGE_84[i] = depositWallet84.getAddressAt(Chain.CHANGE.getIndex(), i).getAddressString();
         }
-
-        StonewallUtil.getInstance()._setTestMode();
     }
 }
