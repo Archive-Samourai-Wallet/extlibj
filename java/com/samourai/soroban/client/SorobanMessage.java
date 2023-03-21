@@ -1,7 +1,5 @@
 package com.samourai.soroban.client;
 
-public interface SorobanMessage extends SorobanReply {
-    String toPayload();
-
+public interface SorobanMessage extends SorobanMessageSimple {
     boolean isDone();
 }

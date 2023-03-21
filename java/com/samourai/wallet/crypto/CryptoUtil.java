@@ -1,5 +1,8 @@
 package com.samourai.wallet.crypto;
 
+import com.samourai.soroban.client.RpcWallet;
+import com.samourai.soroban.client.dialog.Encrypter;
+import com.samourai.soroban.client.dialog.PaynymEncrypter;
 import com.samourai.wallet.crypto.impl.ECDHKeySet;
 import com.samourai.wallet.crypto.impl.EncryptedMessage;
 import com.samourai.wallet.util.RandomUtil;
@@ -114,6 +117,10 @@ public class CryptoUtil {
             log.error("", e);
             return false;
         }
+    }
+
+    public Encrypter getEncrypter(RpcWallet rpcWallet) {
+        return new PaynymEncrypter(rpcWallet, this);
     }
 
     //
