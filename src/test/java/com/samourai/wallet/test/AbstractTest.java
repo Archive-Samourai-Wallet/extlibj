@@ -22,6 +22,7 @@ import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
 import com.samourai.wallet.send.provider.MockUtxoProvider;
 import com.samourai.wallet.util.FormatsUtilGeneric;
+import com.samourai.wallet.util.RandomUtil;
 import com.samourai.wallet.util.TxUtil;
 import com.samourai.wallet.util.Z85;
 import com.samourai.xmanager.client.XManagerClient;
@@ -81,6 +82,7 @@ public class AbstractTest {
 
   @BeforeEach
   public void setUp() throws Exception {
+    RandomUtil._setTestMode();
     httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
 
     byte[] seed = hdWalletFactory.computeSeedFromWords(SEED_WORDS);

@@ -49,23 +49,8 @@ public abstract class AbstractCahootsTest extends AbstractTest {
     protected static String[] COUNTERPARTY_CHANGE_POSTMIX_44;
     protected static String[] COUNTERPARTY_CHANGE_POSTMIX_84;
 
-    protected Stonewallx2Service stonewallx2Service = new Stonewallx2Service(bipFormatSupplier, params) {
-        @Override
-        protected void shuffleUtxos(List<CahootsUtxo> utxos) {
-            // no shuffle
-        }
-    };
-    protected StowawayService stowawayService = new StowawayService(bipFormatSupplier, params) {
-        @Override
-        protected int getRandNextInt(int bound) {
-            return 0; // make test reproductible
-        }
-
-        @Override
-        protected void shuffleUtxos(List<CahootsUtxo> utxos) {
-            // no shuffle
-        }
-    };
+    protected Stonewallx2Service stonewallx2Service = new Stonewallx2Service(bipFormatSupplier, params);
+    protected StowawayService stowawayService = new StowawayService(bipFormatSupplier, params);
     protected MultiCahootsService multiCahootsService = new MultiCahootsService(bipFormatSupplier, params, stonewallx2Service, stowawayService);
     protected ManualCahootsService manualCahootsService = new ManualCahootsService(stowawayService, stonewallx2Service, multiCahootsService);
 

@@ -12,6 +12,7 @@ import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
 import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoProvider;
+import com.samourai.wallet.util.RandomUtil;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.NetworkParameters;
@@ -24,7 +25,6 @@ import java.util.*;
 
 public class SpendSelectionBoltzmann extends SpendSelection {
     private static final Logger log = LoggerFactory.getLogger(SpendSelectionBoltzmann.class);
-    private static boolean TEST_MODE = false;
     private Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair;
 
     public SpendSelectionBoltzmann(BipFormatSupplier bipFormatSupplier, Pair<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>> pair) {
@@ -161,15 +161,12 @@ public class SpendSelectionBoltzmann extends SpendSelection {
         }
 
         List<UTXO> _utxos1Shuffled = new ArrayList<>(_utxos1);
-        if (!TEST_MODE) {
-            Collections.shuffle(_utxos1Shuffled);
-        }
+        RandomUtil.getInstance().shuffle(_utxos1Shuffled);
+
         List<UTXO> _utxos2Shuffled = null;
         if (_utxos2 != null && _utxos2.size() > 0) {
             _utxos2Shuffled = new ArrayList<>(_utxos2);
-            if (!TEST_MODE) {
-                Collections.shuffle(_utxos2Shuffled);
-            }
+            RandomUtil.getInstance().shuffle(_utxos2Shuffled);
         }
 
         // boltzmann spend (STONEWALL)
@@ -219,9 +216,5 @@ public class SpendSelectionBoltzmann extends SpendSelection {
         long change = computeChange(amount, fee);
         SpendTx spendTx = computeSpendTx(changeFormat, amount, fee.longValue(), change, receivers, rbfOptIn, utxoProvider, params, blockHeight);
         return spendTx;
-    }
-
-    public static void _setTestMode(boolean testMode) {
-        TEST_MODE = testMode;
     }
 }

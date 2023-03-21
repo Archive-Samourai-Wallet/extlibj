@@ -9,6 +9,7 @@ import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.FormatsUtilGeneric;
+import com.samourai.wallet.util.RandomUtil;
 import com.samourai.xmanager.client.XManagerClient;
 import com.samourai.xmanager.protocol.XManagerService;
 import org.apache.commons.lang3.StringUtils;
@@ -119,7 +120,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
     }
 
     protected List<CahootsUtxo> selectUtxos1(Cahoots2x stonewall0, List<CahootsUtxo> utxos, List<String> seenTxs) throws Exception {
-        shuffleUtxos(utxos);
+        RandomUtil.getInstance().shuffle(utxos);
 
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
@@ -284,7 +285,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
 
         CahootsWallet cahootsWallet = cahootsContext.getCahootsWallet();
         List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stonewall1.getAccount());
-        shuffleUtxos(utxos);
+        RandomUtil.getInstance().shuffle(utxos);
 
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
