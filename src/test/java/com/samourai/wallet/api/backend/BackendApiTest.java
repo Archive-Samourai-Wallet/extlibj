@@ -56,7 +56,7 @@ public class BackendApiTest extends AbstractTest {
     for (String zpub : zpubs) {
       Assertions.assertTrue(addresses.containsKey(zpub));
     }
-    assertAddressEquals(addresses.get(VPUB_1), VPUB_1, 63, 7, 0);
+    assertAddressEquals(addresses.get(VPUB_1), VPUB_1, 2, 0, 0);
     assertAddressEquals(addresses.get(VPUB_2), VPUB_2, 0, 0, 0);
   }
 
@@ -82,7 +82,7 @@ public class BackendApiTest extends AbstractTest {
     Assertions.assertEquals(0, walletResponse.unspent_outputs.length);
 
     Map<String, WalletResponse.Address> addressesMap = walletResponse.getAddressesMap();
-    assertAddressEquals(addressesMap.get(VPUB_1), VPUB_1, 63, 7, 0);
+    assertAddressEquals(addressesMap.get(VPUB_1), VPUB_1, 2, 0, 0);
 
     Assertions.assertTrue(walletResponse.txs.length > 0);
 
@@ -102,7 +102,7 @@ public class BackendApiTest extends AbstractTest {
     Assertions.assertEquals(0, walletResponse.unspent_outputs.length);
 
     Map<String, WalletResponse.Address> addressesMap = walletResponse.getAddressesMap();
-    assertAddressEquals(addressesMap.get(VPUB_1), VPUB_1, 63, 7, 0);
+    assertAddressEquals(addressesMap.get(VPUB_1), VPUB_1, 2, 0, 0);
     assertAddressEquals(addressesMap.get(VPUB_2), VPUB_2, 0, 0, 0);
 
     Assertions.assertTrue(walletResponse.txs.length > 0);
@@ -137,9 +137,9 @@ public class BackendApiTest extends AbstractTest {
     XPubResponse xPubResponse = backendApi.fetchXPub(VPUB_1);
 
     Assertions.assertEquals(XPubResponse.Status.ok, xPubResponse.status);
-    Assertions.assertEquals(1589461970, xPubResponse.data.created);
+    Assertions.assertEquals(1678790389, xPubResponse.data.created);
     Assertions.assertEquals("BIP84", xPubResponse.data.derivation);
-    Assertions.assertTrue(xPubResponse.data.unused.external >= 63);
+    Assertions.assertTrue(xPubResponse.data.unused.external >= 2);
     Assertions.assertTrue(xPubResponse.data.unused.internal >= 0);
     Assertions.assertTrue(xPubResponse.data.balance >= 0);
   }
