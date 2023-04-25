@@ -2,9 +2,7 @@ package com.samourai.wallet.api.backend;
 
 import com.samourai.wallet.api.backend.beans.*;
 import com.samourai.wallet.segwit.SegwitAddress;
-import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.SendFactoryGeneric;
-import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.test.AbstractTest;
 import com.samourai.wallet.util.TxUtil;
 import org.bitcoinj.core.Coin;
@@ -137,7 +135,7 @@ public class BackendApiTest extends AbstractTest {
     XPubResponse xPubResponse = backendApi.fetchXPub(VPUB_1);
 
     Assertions.assertEquals(XPubResponse.Status.ok, xPubResponse.status);
-    Assertions.assertEquals(1678790389, xPubResponse.data.created);
+    Assertions.assertEquals(1682434654, xPubResponse.data.created);
     Assertions.assertEquals("BIP84", xPubResponse.data.derivation);
     Assertions.assertTrue(xPubResponse.data.unused.external >= 2);
     Assertions.assertTrue(xPubResponse.data.unused.internal >= 0);
