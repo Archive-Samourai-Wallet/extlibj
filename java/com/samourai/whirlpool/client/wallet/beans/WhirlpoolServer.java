@@ -11,7 +11,7 @@ import java.util.Optional;
 public enum WhirlpoolServer {
   TESTNET(
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerTestnetClear(),
-          DexConfigProvider.getInstance().getSamouraiConfig().getBackendServerTestnetOnion(),
+          DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerTestnetOnion(),
           TestNet3Params.get(),
           "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4"),
   INTEGRATION(
@@ -20,10 +20,10 @@ public enum WhirlpoolServer {
           TestNet3Params.get(),
           "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4"),
   MAINNET(
-          DexConfigProvider.getInstance().getSamouraiConfig().getSorobanServerMainnetClear(),
-          DexConfigProvider.getInstance().getSamouraiConfig().getSorobanServerMainnetOnion(),
+          DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerMainnetClear(),
+          DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerMainnetOnion(),
           MainNetParams.get(),
-          "1LYKqgLMJagcQ69Y9iLj4TNs4uH9surJ3w"),
+          "1NwVafYT1s6SF5Atusv7A8MASzCvGruGXq"),
   LOCAL_TESTNET("http://127.0.0.1:8080", "http://127.0.0.1:8080", TestNet3Params.get(),
           "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4");
 
