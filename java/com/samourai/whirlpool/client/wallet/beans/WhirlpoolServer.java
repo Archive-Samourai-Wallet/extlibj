@@ -23,7 +23,7 @@ public enum WhirlpoolServer {
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerMainnetClear(),
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerMainnetOnion(),
           MainNetParams.get(),
-          "1LYKqgLMJagcQ69Y9iLj4TNs4uH9surJ3w"),
+          "1NwVafYT1s6SF5Atusv7A8MASzCvGruGXq"),
   LOCAL_TESTNET("http://127.0.0.1:8080", "http://127.0.0.1:8080", TestNet3Params.get(),
           "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4");
 
