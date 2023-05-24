@@ -29,6 +29,7 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
   private WalletSupplier walletSupplier;
   private CahootsUtxoProvider cahootsUtxoProvider;
   private int nbUtxos = 0;
+  private Integer forcedWalletUniqueId = null;
 
   public MockUtxoProvider(NetworkParameters params, WalletSupplier walletSupplier) {
     this.params = params;
@@ -40,6 +41,11 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
     for (WhirlpoolAccount account : WhirlpoolAccount.values()) {
       utxosByAccount.put(account, new LinkedList<>());
     }
+  }
+
+  public void setRetroCompatibilityMode() {
+    // for retro-compatible tests
+    this.forcedWalletUniqueId = 1000;
   }
 
   public void clear() {
@@ -63,37 +69,45 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
   public UTXO addUtxo(int account, String txid, int n, long value, String address) throws Exception {
     WhirlpoolAccount whirlpoolAccount = SamouraiAccountIndex.find(account);
     BipWallet bipWallet = walletSupplier.getWallet(whirlpoolAccount, BIP_FORMAT.SEGWIT_NATIVE);
-    return addUtxo(bipWallet, Sha256Hash.of(txid.getBytes()).toString(), n, value, address, ECKey.fromPrivate(BigInteger.valueOf(1234)));
+    return addUtxo(bipWallet, Sha256Hash.of(txid.getBytes()).toString(), n, value, address, ECKey.fromPrivate(BigInteger.valueOf(1234)), null);
   }
 
   public UTXO addUtxo(BipWallet bipWallet, long value) throws Exception {
     int n = nbUtxos+1; // keep backward-compatibility with existing tests
     BipAddress bipAddress = bipWallet.getAddressAt(0, n);
     String address = bipAddress.getAddressString();
+    String path = UnspentOutput.computePath(bipAddress.getHdAddress());
     ECKey ecKey = bipAddress.getHdAddress().getECKey();
-    String txid = generateTxHash(n, params);
-    return addUtxo(bipWallet, txid, n, value, address, ecKey);
+    // use a namespace specific to BipWallet for generating txid
+    int walletUniqueId = new BigInteger(bipWallet.getHdAccount().xpubstr().getBytes()).intValue();
+    int uniqueId = forcedWalletUniqueId != null ? forcedWalletUniqueId : walletUniqueId;
+    String txid = generateTxHash(Math.abs(n*uniqueId), params);
+    return addUtxo(bipWallet, txid, n, value, address, ecKey, path);
   }
 
   public UTXO addUtxo(BipWallet bipWallet, String txid, int n, long value, String address, ECKey ecKey) throws Exception {
-    UTXO utxo = new UTXO();
+    return addUtxo(bipWallet, txid, n, value, address, ecKey, null);
+  }
 
-    nbUtxos++;
+  public UTXO addUtxo(BipWallet bipWallet, String txid, int n, long value, String address, ECKey ecKey, String path) throws Exception {
     String pub = bipWallet.getPub();
-    UnspentOutput unspentOutput = computeUtxo(txid, n, pub, address, value, 999, getBipFormatSupplier(), params);
+    UnspentOutput unspentOutput = computeUtxo(txid, n, path, pub, address, value, 999, getBipFormatSupplier(), params);
     MyTransactionOutPoint outPoint = unspentOutput.computeOutpoint(params);
-    utxo.getOutpoints().add(outPoint);
+    UTXO utxo = new UTXO(Arrays.asList(outPoint), path);
+    nbUtxos++;
+
     WhirlpoolAccount account = bipWallet.getAccount();
     utxosByAccount.get(account).add(utxo);
     setKey(outPoint, ecKey);
     return utxo;
   }
 
-  private static UnspentOutput computeUtxo(String hash, int n, String xpub, String address, long value, int confirms, BipFormatSupplier bipFormatSupplier, NetworkParameters params) throws Exception {
+  private static UnspentOutput computeUtxo(String hash, int n, String path, String xpub, String address, long value, int confirms, BipFormatSupplier bipFormatSupplier, NetworkParameters params) throws Exception {
     UnspentOutput utxo = new UnspentOutput();
     utxo.tx_hash = hash;
     utxo.tx_output_n = n;
     utxo.xpub = new UnspentOutput.Xpub();
+    utxo.xpub.path = path;
     utxo.xpub.m = xpub;
     utxo.confirmations = confirms;
     utxo.addr = address;
@@ -102,9 +116,8 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
     return utxo;
   }
 
-  private static String generateTxHash(int i, NetworkParameters params) {
+  private static String generateTxHash(int uniqueId, NetworkParameters params) {
     Transaction tx = new Transaction(params);
-    long uniqueId = i*1000;
     tx.addOutput(Coin.valueOf(uniqueId), ECKey.fromPrivate(BigInteger.valueOf(uniqueId))); // mock key)
     return tx.getHashAsString();
   }

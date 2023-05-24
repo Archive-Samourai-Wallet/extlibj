@@ -9,6 +9,7 @@ import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.FormatsUtilGeneric;
+import com.samourai.wallet.util.TxUtil;
 import com.samourai.wallet.util.RandomUtil;
 import com.samourai.xmanager.client.XManagerClient;
 import com.samourai.xmanager.protocol.XManagerService;
@@ -376,24 +377,15 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
             throw new Exception("Cannot compose #Cahoots: invalid tx outputs count");
         }
 
-        // find counterparty change output index
-        TransactionOutput counterpartyChangeOutput = null;
-        for (TransactionOutput transactionOutput : transaction.getOutputs()) {
-            String toAddress = getBipFormatSupplier().getToAddress(transactionOutput);
-            if(toAddress.equalsIgnoreCase(stonewall1.getCollabChange())) {
-                counterpartyChangeOutput = transactionOutput;
-                break;
-            }
-        }
-        if (counterpartyChangeOutput == null) {
-            throw new Exception("Cannot compose #Cahoots: invalid tx outputs");
-        }
-
         // keep track of minerFeePaid
         long minerFeePaid = fee / 2L;
         cahootsContext.setMinerFeePaid(minerFeePaid); // sender & counterparty pay half minerFee
 
-        // counterparty pays half of fees
+        // update counterparty change output to pay half of fees
+        TransactionOutput counterpartyChangeOutput = TxUtil.getInstance().findOutputByAddress(transaction, stonewall1.getCollabChange(), getBipFormatSupplier());
+        if (counterpartyChangeOutput == null) {
+            throw new Exception("Cannot compose #Cahoots: counterpartyChangeOutput not found");
+        }
         Coin _value = Coin.valueOf(counterpartyChangeOutput.getValue().longValue() - minerFeePaid);
         if (log.isDebugEnabled()) {
             log.debug("output value post fee:" + _value);

@@ -20,6 +20,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 
 // shared payload for any Cahoots: Stonewallx2, Stowaway, MultiCahoots
@@ -151,15 +152,11 @@ public abstract class Cahoots {
         int type = obj.getJSONObject("cahoots").getInt("type");
         CahootsType cahootsType = CahootsType.find(type).get();
 
-        switch(cahootsType) {
-            case STOWAWAY:
-                return new Stowaway(obj);
-            case STONEWALLX2:
-                return new STONEWALLx2(obj);
-            case MULTI:
-                return new MultiCahoots(obj);
-        }
-        throw new Exception("Unrecognized #Cahoots");
+        // instanciate
+        Class<?> clazz = Class.forName(cahootsType.getCahootsClassName());
+        Constructor<?> constructor = clazz.getConstructor(JSONObject.class);
+        Cahoots cahoots = (Cahoots)constructor.newInstance(obj);
+        return cahoots;
     }
 
     public String toJSONString() {

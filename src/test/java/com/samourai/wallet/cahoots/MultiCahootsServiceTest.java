@@ -1,6 +1,5 @@
 package com.samourai.wallet.cahoots;
 
-import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.cahoots.multi.MultiCahoots;
 import com.samourai.wallet.cahoots.multi.MultiCahootsContext;
 import com.samourai.wallet.send.UTXO;
@@ -72,7 +71,7 @@ public class MultiCahootsServiceTest extends AbstractCahootsTest {
 
         // verify stonewallx2 as SpendTx
         SpendTx spendTx = cahoots.getSpendTx(contextSender, utxoProviderSender);
-        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, 142, 0, spendAmount, 4858L, BIP_FORMAT.SEGWIT_NATIVE);
+        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, 142, 0, spendAmount, false, 4858L);
     }
 
     @Test

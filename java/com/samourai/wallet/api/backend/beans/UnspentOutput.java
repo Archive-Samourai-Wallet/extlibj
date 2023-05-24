@@ -63,11 +63,19 @@ public class UnspentOutput {
     }
 
     public int computePathChainIndex() {
-        return Integer.parseInt(xpub.path.split(PATH_SEPARATOR)[1]);
+        try {
+            return Integer.parseInt(xpub.path.split(PATH_SEPARATOR)[1]);
+        } catch (Exception e) {
+            throw new RuntimeException("computePathChainIndex failed for utxo path: "+xpub.path);
+        }
     }
 
     public int computePathAddressIndex() {
-        return Integer.parseInt(xpub.path.split(PATH_SEPARATOR)[2]);
+        try {
+            return Integer.parseInt(xpub.path.split(PATH_SEPARATOR)[2]);
+        } catch (Exception e) {
+            throw new RuntimeException("computePathAddressIndex failed for utxo path: "+xpub.path);
+        }
     }
 
     public String getPath() {
@@ -84,6 +92,14 @@ public class UnspentOutput {
             return HD_Address.getPathAddressBip47(purpose, coinType, accountIndex);
         }
         return HD_Address.getPathAddress(purpose, coinType, accountIndex, computePathChainIndex(), computePathAddressIndex());
+    }
+
+    public static String computePath(HD_Address hdAddress) {
+        return computePath(hdAddress.getChainIndex(), hdAddress.getAddressIndex());
+    }
+
+    public static String computePath(int chainIndex, int addressIndex) {
+        return "m"+PATH_SEPARATOR+chainIndex+PATH_SEPARATOR+addressIndex;
     }
 
     public MyTransactionOutPoint computeOutpoint(NetworkParameters params) {
@@ -128,8 +144,9 @@ public class UnspentOutput {
           + value
           + " sats, "
           + confirmations
-          + " confirmations, path="
-          + (xpub != null && xpub.path != null ? xpub.path : "null")
+          + " confirmations"
+          + ", path=" + (xpub != null && xpub.path != null ? xpub.path : "null")
+          + ", xpub=" + (xpub != null && xpub.m != null ? xpub.m : "null")
           + ", address="
           + addr
           + ")";

@@ -54,7 +54,7 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
 
         // verify SpendTx
         SpendTx spendTx = cahoots.getSpendTx(cahootsContextSender, utxoProviderSender);
-        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, 142, 0, spendAmount, 4858, BIP_FORMAT.SEGWIT_NATIVE);
+        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, 142, 0, spendAmount, false, 4858);
     }
 
     @Test
@@ -87,7 +87,7 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
 
         // verify SpendTx
         SpendTx spendTx = cahoots.getSpendTx(cahootsContextSender, utxoProviderSender);
-        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 294, 147, 0, spendAmount, 4853, BIP_FORMAT.SEGWIT_NATIVE);
+        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 294, 147, 0, spendAmount, false, 4853);
     }
 
     @Test
@@ -120,7 +120,7 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
 
         // verify SpendTx
         SpendTx spendTx = cahoots.getSpendTx(cahootsContextSender, utxoProviderSender);
-        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, 142, 0, spendAmount, 4858, BIP_FORMAT.SEGWIT_NATIVE);
+        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, 142, 0, spendAmount, false, 4858);
     }
 
     @Test
@@ -153,7 +153,7 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
 
         // verify SpendTx
         SpendTx spendTx = cahoots.getSpendTx(cahootsContextSender, utxoProviderSender);
-        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, 142, 0, spendAmount, 4858, BIP_FORMAT.SEGWIT_NATIVE);
+        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, 142, 0, spendAmount, false, 4858);
     }
 
     @Test
@@ -186,7 +186,7 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
 
         // verify SpendTx
         SpendTx spendTx = cahoots.getSpendTx(cahootsContextSender, utxoProviderSender);
-        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, 142, 0, spendAmount, 4858, BIP_FORMAT.SEGWIT_NATIVE);
+        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, 142, 0, spendAmount, false, 4858);
     }
 
     @Test
@@ -219,7 +219,7 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
 
         // verify SpendTx
         SpendTx spendTx = cahoots.getSpendTx(cahootsContextSender, utxoProviderSender);
-        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, 142, 0, spendAmount, 4858, BIP_FORMAT.SEGWIT_NATIVE);
+        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, 142, 0, spendAmount, false, 4858);
     }
 
     @Test
@@ -256,7 +256,7 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
 
         // verify SpendTx
         SpendTx spendTx = cahoots.getSpendTx(cahootsContextSender, utxoProviderSender);
-        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, 142, 0, spendAmount, 4858, BIP_FORMAT.SEGWIT_NATIVE);
+        verifySpendTx(spendTx, SpendType.CAHOOTS_STONEWALL2X, Arrays.asList(utxoSender1), 284, 142, 0, spendAmount, false, 4858);
     }
 
     @Test

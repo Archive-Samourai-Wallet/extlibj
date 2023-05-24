@@ -12,6 +12,7 @@ See [StowawayExample.java](https://code.samourai.io/wallet/ExtLibJ/-/blob/develo
 
 ## II. Cahoots dialog
 See [StowawayService.java](https://code.samourai.io/wallet/ExtLibJ/-/blob/develop/java/com/samourai/wallet/cahoots/stowaway/StowawayService.java)
+![](charts/STOWAWAY.chart.png)
 
 
 #### Step #0: SENDER

@@ -48,6 +48,10 @@ public class CahootsWallet {
         switch(account) {
             case WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT:
                 return walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, bipFormat);
+            case WhirlpoolConst.WHIRLPOOL_PREMIX_ACCOUNT:
+                return walletSupplier.getWallet(WhirlpoolAccount.PREMIX, bipFormat);
+            case WhirlpoolConst.WHIRLPOOL_BADBANK_ACCOUNT:
+                return walletSupplier.getWallet(WhirlpoolAccount.BADBANK, bipFormat);
             case 0:
                 return walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, bipFormat);
         }

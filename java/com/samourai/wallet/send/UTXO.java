@@ -109,6 +109,14 @@ public class UTXO {
 
     }
 
+    public static List<MyTransactionOutPoint> listOutpoints(Collection<UTXO> utxos) {
+        List<MyTransactionOutPoint> outPoints = new LinkedList<>();
+        for (UTXO utxo : utxos) {
+            outPoints.addAll(utxo.getOutpoints());
+        }
+        return outPoints;
+    }
+
     public static int countOutpoints(Collection<UTXO> utxos) {
         int ret = 0;
         for (UTXO utxo : utxos) {

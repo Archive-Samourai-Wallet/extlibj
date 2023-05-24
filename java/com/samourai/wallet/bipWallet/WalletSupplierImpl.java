@@ -1,8 +1,10 @@
 package com.samourai.wallet.bipWallet;
 
+import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
 import com.samourai.wallet.hd.BIP_WALLET;
+import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.apache.commons.lang3.ArrayUtils;
@@ -75,7 +77,7 @@ public class WalletSupplierImpl implements WalletSupplier {
   public BipWallet getWalletByPub(String pub) {
     BipWallet bipWallet = walletsByPub.get(pub);
     if (bipWallet == null) {
-      log.error("No wallet found for: " + pub);
+      log.error("BipWallet not found for: " + pub);
       return null;
     }
     return bipWallet;
@@ -94,6 +96,17 @@ public class WalletSupplierImpl implements WalletSupplier {
   @Override
   public BipWallet getWallet(WhirlpoolAccount account, BipFormat bipFormat) {
     return walletsByAccountByAddressType.get(account).get(bipFormat);
+  }
+
+  @Override
+  public BipWallet getWallet(UnspentOutput unspentOutput) {
+    return getWalletByPub(unspentOutput.xpub.m);
+  }
+
+  @Override
+  public BipAddress getAddress(UnspentOutput unspentOutput) {
+    BipWallet bipWallet = getWallet(unspentOutput);
+    return bipWallet != null ? bipWallet.getAddressAt(unspentOutput) : null;
   }
 
   @Override

@@ -4,7 +4,6 @@ import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bip69.BIP69InputComparator;
 import com.samourai.wallet.bip69.BIP69OutputComparator;
-import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.segwit.SegwitAddress;
@@ -30,7 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-// shared payload for 2x Cahoots: Stonewallx2 or Stowaway
+// shared payload for 2x Cahoots: Stonewallx2, Stowaway, Tx0x2
 public abstract class Cahoots2x extends Cahoots {
     private static final Logger log = LoggerFactory.getLogger(Cahoots2x.class);
 
@@ -320,13 +319,8 @@ public abstract class Cahoots2x extends Cahoots {
             throw new Exception("Invalid outputs");
         }
 
-        Transaction transaction = getTransaction();
-        if (transaction == null) {
-            // for STONEWALLX2/STOWAWAY, tx is created by counterparty at step1
-            // for TX0X2, tx is created by sender before step1
-            transaction = new Transaction(params);
-            transaction.setVersion(2);
-        }
+        Transaction transaction = new Transaction(params);
+        transaction.setVersion(2);
         appendTx(inputs, outputs, transaction, chainSupplier);
 
         this.setStep(1);
@@ -412,6 +406,6 @@ public abstract class Cahoots2x extends Cahoots {
 
     @Override
     public SpendTx getSpendTx(CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) throws SpendException {
-        return new SpendTxCahoots(BIP_FORMAT.SEGWIT_NATIVE, this, cahootsContext, utxoKeyProvider);
+        return new SpendTxCahoots(this, cahootsContext, utxoKeyProvider);
     }
 }
