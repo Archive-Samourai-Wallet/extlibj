@@ -205,7 +205,7 @@ public class Point  {
     }
 
     public boolean equals(Point P) {
-        return getPair().equals(P.getPair());
+        return getPair().getLeft().compareTo(P.getX()) == 0 && getPair().getRight().compareTo(P.getY()) == 0;
     }
 
     public static boolean isSecp256k1(byte[] b) {
