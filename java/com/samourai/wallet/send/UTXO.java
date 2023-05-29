@@ -17,7 +17,11 @@ public class UTXO {
     private List<MyTransactionOutPoint> outpoints = null;
 
     public UTXO() {
-        this(new ArrayList<MyTransactionOutPoint>(), null, null);
+        this(new ArrayList<>(), null, null);
+    }
+
+    public UTXO(String path, String xpub) {
+        this(new ArrayList<>(), path, xpub);
     }
 
     public UTXO(List<MyTransactionOutPoint> outpoints, String path, String xpub) {
