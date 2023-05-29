@@ -93,7 +93,7 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
     String pub = bipWallet.getPub();
     UnspentOutput unspentOutput = computeUtxo(txid, n, path, pub, address, value, 999, getBipFormatSupplier(), params);
     MyTransactionOutPoint outPoint = unspentOutput.computeOutpoint(params);
-    UTXO utxo = new UTXO(Arrays.asList(outPoint), path);
+    UTXO utxo = new UTXO(Arrays.asList(outPoint), path, pub);
     nbUtxos++;
 
     WhirlpoolAccount account = bipWallet.getAccount();

@@ -20,8 +20,8 @@ public class CahootsUtxo extends UTXO {
     private MyTransactionOutPoint outpoint;
     private byte[] key;
 
-    public CahootsUtxo(MyTransactionOutPoint cahootsOutpoint, String path, byte[] key) {
-        super(new LinkedList<>(Arrays.asList(new MyTransactionOutPoint[]{cahootsOutpoint})), path);
+    public CahootsUtxo(MyTransactionOutPoint cahootsOutpoint, String path, String xpub, byte[] key) {
+        super(new LinkedList<>(Arrays.asList(new MyTransactionOutPoint[]{cahootsOutpoint})), path, xpub);
         this.outpoint = cahootsOutpoint;
         this.key = key;
     }
@@ -47,7 +47,7 @@ public class CahootsUtxo extends UTXO {
             MyTransactionOutPoint outPoint = utxo.getOutpoints().get(0); // TODO
             try {
                 byte[] key = keyProvider._getPrivKey(outPoint.getHash().toString(), (int) outPoint.getIndex());
-                return new CahootsUtxo(outPoint, utxo.getPath(), key);
+                return new CahootsUtxo(outPoint, utxo.getPath(), utxo.getXpub(), key);
             } catch (Exception e) {
                 log.warn("Skipping CahootsUtxo: "+outPoint+": key not found");
                 return null;
@@ -62,6 +62,7 @@ public class CahootsUtxo extends UTXO {
                 ", value=" + outpoint.getValue() +
                 ", address="+outpoint.getAddress() +
                 ", path="+getPath()+
+                ", xpub="+getXpub()+
                 '}';
     }
 }

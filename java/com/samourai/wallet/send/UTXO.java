@@ -12,19 +12,21 @@ import java.util.stream.Collectors;
 public class UTXO {
 
     private String path = null;
+    private String xpub = null;
 
     private List<MyTransactionOutPoint> outpoints = null;
 
     public UTXO() {
-        this(new ArrayList<MyTransactionOutPoint>(), null);
+        this(new ArrayList<MyTransactionOutPoint>(), null, null);
     }
 
-    public UTXO(List<MyTransactionOutPoint> outpoints, String path) {
+    public UTXO(List<MyTransactionOutPoint> outpoints, String path, String xpub) {
         this.outpoints = outpoints;
         this.path = path;
+        this.xpub = xpub;
     }
 
-    public Collection<UnspentOutput> toUnspentOutputs(String xpub) {
+    public Collection<UnspentOutput> toUnspentOutputs() {
         List<UnspentOutput> unspentOutputs = new LinkedList<>();
         for (MyTransactionOutPoint outPoint : outpoints) {
             unspentOutputs.add(new UnspentOutput(outPoint, null, path, xpub));
@@ -46,6 +48,14 @@ public class UTXO {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public String getXpub() {
+        return xpub;
+    }
+
+    public void setXpub(String xpub) {
+        this.xpub = xpub;
     }
 
     public long getValue() {
