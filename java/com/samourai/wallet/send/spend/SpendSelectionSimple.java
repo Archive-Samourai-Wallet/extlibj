@@ -161,7 +161,7 @@ public class SpendSelectionSimple extends SpendSelection {
             receivers.put(address, amount);
 
             // add change output
-            String changeAddress = utxoProvider.getNextChangeAddress(account, changeFormat, true);
+            String changeAddress = utxoProvider.getNextAddressChange(account, changeFormat, true);
             if (changeAddress.equals(address)) {
                 // prevent erasing existing receiver
                 log.error("address and changeAddress are identical");

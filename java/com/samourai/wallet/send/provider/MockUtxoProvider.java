@@ -124,7 +124,7 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
   }
 
   @Override
-  public String getNextChangeAddress(WhirlpoolAccount account, BipFormat bipFormat, boolean increment) {
+  public String getNextAddressChange(WhirlpoolAccount account, BipFormat bipFormat, boolean increment) {
     BipWallet bipWallet = walletSupplier.getWallet(account, bipFormat);
     return bipWallet.getNextAddressChange(increment).getAddressString();
   }
