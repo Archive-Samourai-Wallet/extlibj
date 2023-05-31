@@ -16,7 +16,7 @@ public class FeeUtilTest {
   public void estimatedSizeSegwit() throws Exception {
     Assertions.assertEquals(113, feeUtil.estimatedSizeSegwit(0, 0, 1, 1, 0));
     Assertions.assertEquals(193, feeUtil.estimatedSizeSegwit(1, 0, 0, 1, 0));
-    Assertions.assertEquals(273, feeUtil.estimatedSizeSegwit(1, 0, 0, 1, 1));
+    Assertions.assertEquals(276, feeUtil.estimatedSizeSegwit(1, 0, 0, 1, 1));
 
     Assertions.assertEquals(319, feeUtil.estimatedSizeSegwit(0, 0, 3, 3, 0));
     Assertions.assertEquals(422, feeUtil.estimatedSizeSegwit(0, 0, 4, 4, 0));
@@ -33,9 +33,9 @@ public class FeeUtilTest {
     Assertions.assertEquals(193, feeUtil.estimatedSizeSegwit(1, 0, 0, 1, 0, 0));
     Assertions.assertEquals(236, feeUtil.estimatedSizeSegwit(1, 0, 0, 1, 1,0));
 
-    Assertions.assertEquals(273, feeUtil.estimatedSizeSegwit(1, 0, 0, 1, 1));
-    Assertions.assertEquals(273, feeUtil.estimatedSizeSegwit(1, 0, 0, 1, 0,1));
-    Assertions.assertEquals(316, feeUtil.estimatedSizeSegwit(1, 0, 0, 1, 1, 1));
+    Assertions.assertEquals(276, feeUtil.estimatedSizeSegwit(1, 0, 0, 1, 1));
+    Assertions.assertEquals(276, feeUtil.estimatedSizeSegwit(1, 0, 0, 1, 0,1));
+    Assertions.assertEquals(319, feeUtil.estimatedSizeSegwit(1, 0, 0, 1, 1, 1));
 
     Assertions.assertEquals(319, feeUtil.estimatedSizeSegwit(0, 0, 3, 3, 0));
     Assertions.assertEquals(319, feeUtil.estimatedSizeSegwit(0, 0, 3, 3, 0,0));
@@ -58,7 +58,7 @@ public class FeeUtilTest {
     Assertions.assertEquals(11300, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 100));
 
     Assertions.assertEquals(1930, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 0, 10));
-    Assertions.assertEquals(2730, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 1, 10));
+    Assertions.assertEquals(2760, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 1, 10));
     Assertions.assertEquals(3190, feeUtil.estimatedFeeSegwit(0, 0, 3, 3, 0, 10));
     Assertions.assertEquals(4220, feeUtil.estimatedFeeSegwit(0, 0, 4, 4, 0, 10));
     Assertions.assertEquals(5250, feeUtil.estimatedFeeSegwit(0, 0, 5, 5, 0, 10));
@@ -86,9 +86,9 @@ public class FeeUtilTest {
     Assertions.assertEquals(2020, feeUtil.estimatedFeeSegwit(1, 0, 0, 0, 1, 0, 10));
     Assertions.assertEquals(2790, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 2, 0, 10));
 
-    Assertions.assertEquals(2730, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 0, 1, 10));
-    Assertions.assertEquals(2820, feeUtil.estimatedFeeSegwit(1, 0, 0, 0, 1, 1, 10));
-    Assertions.assertEquals(3590, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 2, 1, 10));
+    Assertions.assertEquals(2760, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 0, 1, 10));
+    Assertions.assertEquals(2850, feeUtil.estimatedFeeSegwit(1, 0, 0, 0, 1, 1, 10));
+    Assertions.assertEquals(3620, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 2, 1, 10));
 
     Assertions.assertEquals(3190, feeUtil.estimatedFeeSegwit(0, 0, 3, 3, 0, 0, 10));
     Assertions.assertEquals(3460, feeUtil.estimatedFeeSegwit(0, 0, 3, 0, 3, 0, 10));

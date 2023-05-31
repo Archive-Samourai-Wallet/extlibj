@@ -74,7 +74,8 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
 
   public UTXO addUtxo(BipWallet bipWallet, long value) throws Exception {
     int n = nbUtxos+1; // keep backward-compatibility with existing tests
-    BipAddress bipAddress = bipWallet.getAddressAt(0, n);
+    BipFormat bipFormat = bipWallet.getBipFormatDefault();
+    BipAddress bipAddress = bipWallet.getAddressAt(0, n, bipFormat);
     String address = bipAddress.getAddressString();
     String path = UnspentOutput.computePath(bipAddress.getHdAddress());
     ECKey ecKey = bipAddress.getHdAddress().getECKey();
@@ -90,10 +91,10 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
   }
 
   public UTXO addUtxo(BipWallet bipWallet, String txid, int n, long value, String address, ECKey ecKey, String path) throws Exception {
-    String pub = bipWallet.getPub();
-    UnspentOutput unspentOutput = computeUtxo(txid, n, path, pub, address, value, 999, getBipFormatSupplier(), params);
+    String xpub = bipWallet.getXPub();
+    UnspentOutput unspentOutput = computeUtxo(txid, n, path, xpub, address, value, 999, getBipFormatSupplier(), params);
     MyTransactionOutPoint outPoint = unspentOutput.computeOutpoint(params);
-    UTXO utxo = new UTXO(Arrays.asList(outPoint), path, pub);
+    UTXO utxo = new UTXO(Arrays.asList(outPoint), path, xpub);
     nbUtxos++;
 
     WhirlpoolAccount account = bipWallet.getAccount();
@@ -125,7 +126,7 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
   @Override
   public String getNextChangeAddress(WhirlpoolAccount account, BipFormat bipFormat, boolean increment) {
     BipWallet bipWallet = walletSupplier.getWallet(account, bipFormat);
-    return bipWallet.getNextChangeAddress(increment).getAddressString();
+    return bipWallet.getNextAddressChange(increment).getAddressString();
   }
 
   @Override

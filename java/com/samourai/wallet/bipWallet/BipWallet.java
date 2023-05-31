@@ -2,6 +2,7 @@ package com.samourai.wallet.bipWallet;
 
 import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.bipFormat.BipFormat;
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.client.indexHandler.IIndexHandler;
 import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
 import com.samourai.wallet.hd.*;
@@ -10,64 +11,93 @@ import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+
 public class BipWallet {
   private static final Logger log = LoggerFactory.getLogger(BipWallet.class);
 
+  private BipFormatSupplier bipFormatSupplier;
   private String id;
   private HD_Wallet hdWallet;
   private HD_Account hdAccount;
   private IndexHandlerSupplier indexHandlerSupplier;
   private WhirlpoolAccount whirlpoolAccount;
   private BipDerivation derivation;
-  private BipFormat bipFormat;
-  private String pub;
+  private Collection<BipFormat> bipFormats;
+  private BipFormat bipFormatDefault;
+  private String pub; // xpub, ypub, zpub...
+  private String xPub; // pub forced as xpub
 
-  public BipWallet(HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, BIP_WALLET bip) {
-    this(bip.name(), bip44w, indexHandlerSupplier, bip.getAccount(), bip.getBipDerivation(), bip.getBipFormat());
+  public BipWallet(BipFormatSupplier bipFormatSupplier, HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, BIP_WALLET bip) {
+    this(bipFormatSupplier, bip.name(), bip44w, indexHandlerSupplier, bip.getAccount(), bip.getBipDerivation(), bip.getBipFormats(), bip.getBipFormatDefault());
   }
 
-  public BipWallet(String id, HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, WhirlpoolAccount whirlpoolAccount, BipDerivation derivation, BipFormat bipFormat) {
+  public BipWallet(BipFormatSupplier bipFormatSupplier, String id, HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, WhirlpoolAccount whirlpoolAccount, BipDerivation derivation, Collection<BipFormat> bipFormats, BipFormat bipFormatDefault) {
+    this.bipFormatSupplier = bipFormatSupplier;
     this.id = id;
     this.hdWallet = new HD_Wallet(derivation.getPurpose(), bip44w);
     this.hdAccount = this.hdWallet.getAccount(derivation.getAccountIndex());
     this.indexHandlerSupplier = indexHandlerSupplier;
     this.whirlpoolAccount = whirlpoolAccount;
     this.derivation = derivation;
-    this.bipFormat = bipFormat;
-    this.pub = bipFormat.getPub(hdAccount);
+    this.bipFormats = bipFormats;
+    this.bipFormatDefault = bipFormatDefault;
+    this.pub = getBipFormatDefault().getPub(hdAccount);
+    this.xPub = hdAccount.xpubstr();
   }
 
   // address
 
-  public BipAddress getNextAddress(){
-    return getNextAddress(true);
+  public BipAddress getNextAddressReceive(){
+    return getNextAddressReceive(bipFormatDefault, true);
   }
 
-  public BipAddress getNextAddress(boolean increment) {
+  public BipAddress getNextAddressReceive(boolean increment){
+    return getNextAddressReceive(bipFormatDefault, increment);
+  }
+
+  public BipAddress getNextAddressReceive(BipFormat bipFormat){
+    return getNextAddressReceive(bipFormat, true);
+  }
+
+  public BipAddress getNextAddressReceive(BipFormat bipFormat, boolean increment) {
     int nextAddressIndex = increment ? getIndexHandlerReceive().getAndIncrement() : getIndexHandlerReceive().get();
-    return getAddressAt(Chain.RECEIVE.getIndex(), nextAddressIndex);
+    return getAddressAt(Chain.RECEIVE.getIndex(), nextAddressIndex, bipFormat);
   }
 
-  public BipAddress getNextChangeAddress() {
-    return getNextChangeAddress(true);
+  public BipAddress getNextAddressChange() {
+    return getNextAddressChange(bipFormatDefault, true);
   }
 
-  public BipAddress getNextChangeAddress(boolean increment) {
+  public BipAddress getNextAddressChange(boolean increment) {
+    return getNextAddressChange(bipFormatDefault, increment);
+  }
+
+  public BipAddress getNextAddressChange(BipFormat bipFormat) {
+    return getNextAddressChange(bipFormat, true);
+  }
+
+  public BipAddress getNextAddressChange(BipFormat bipFormat, boolean increment) {
     int nextAddressIndex =
             increment ? getIndexHandlerChange().getAndIncrement() : getIndexHandlerChange().get();
-    return getAddressAt(Chain.CHANGE.getIndex(), nextAddressIndex);
+    return getAddressAt(Chain.CHANGE.getIndex(), nextAddressIndex, bipFormat);
   }
 
   public BipAddress getAddressAt(int chainIndex, int addressIndex) {
+    return getAddressAt(chainIndex, addressIndex, bipFormatDefault);
+  }
+
+  public BipAddress getAddressAt(int chainIndex, int addressIndex, BipFormat bipFormat) {
     HD_Address hdAddress = hdWallet.getAddressAt(derivation.getAccountIndex(), chainIndex, addressIndex);
-    return new BipAddress(hdAddress, this);
+    return new BipAddress(hdAddress, derivation, bipFormat);
   }
 
   public BipAddress getAddressAt(UnspentOutput utxo) {
     if (!utxo.hasPath()) {
       return null; // bip47
     }
-    return getAddressAt(utxo.computePathChainIndex(), utxo.computePathAddressIndex());
+    BipFormat bipFormat = bipFormatSupplier.findByAddress(utxo.addr, getParams());
+    return getAddressAt(utxo.computePathChainIndex(), utxo.computePathAddressIndex(), bipFormat);
   }
 
   //
@@ -96,12 +126,20 @@ public class BipWallet {
     return derivation;
   }
 
-  public BipFormat getBipFormat() {
-    return bipFormat;
+  public Collection<BipFormat> getBipFormats() {
+    return bipFormats;
+  }
+
+  public BipFormat getBipFormatDefault() {
+    return bipFormatDefault;
   }
 
   public String getPub() {
     return pub;
+  }
+
+  public String getXPub() {
+    return xPub;
   }
 
   public NetworkParameters getParams() {

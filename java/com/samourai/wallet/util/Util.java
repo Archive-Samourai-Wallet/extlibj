@@ -11,6 +11,8 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class Util  {
 
@@ -102,4 +104,10 @@ public class Util  {
         return mac_data;
     }
 
+    public static <O> Collection<O> intersection(Collection<O> collection, Collection<O> otherCollection) {
+        return collection.stream()
+                .distinct()
+                .filter(otherCollection::contains)
+                .collect(Collectors.toSet());
+    }
 }

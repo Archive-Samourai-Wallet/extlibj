@@ -13,7 +13,7 @@ import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.send.provider.CahootsUtxoProvider;
-import com.samourai.wallet.whirlpool.WhirlpoolConst;
+import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.bitcoinj.core.NetworkParameters;
 
@@ -40,30 +40,28 @@ public class CahootsWallet {
         this.bip47Wallet = new BIP47Wallet(hdWallet);
     }
 
-    public BipWallet getReceiveWallet(int account, BipFormat bipFormat) throws Exception {
+    private BipFormat likeTypedBipFormat(BipFormat bipFormat) {
         if (bipFormat == BIP_FORMAT.TAPROOT) {
             // like-typed output is not implemented for TAPROOT => handle TAPROOT mix output as SEGWIT_NATIVE
-            bipFormat = BIP_FORMAT.SEGWIT_NATIVE;
+            return BIP_FORMAT.SEGWIT_NATIVE;
         }
-        switch(account) {
-            case WhirlpoolConst.WHIRLPOOL_POSTMIX_ACCOUNT:
-                return walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, bipFormat);
-            case WhirlpoolConst.WHIRLPOOL_PREMIX_ACCOUNT:
-                return walletSupplier.getWallet(WhirlpoolAccount.PREMIX, bipFormat);
-            case WhirlpoolConst.WHIRLPOOL_BADBANK_ACCOUNT:
-                return walletSupplier.getWallet(WhirlpoolAccount.BADBANK, bipFormat);
-            case 0:
-                return walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, bipFormat);
-        }
-        throw new Exception("Invalid account: "+account);
+        return bipFormat;
+    }
+
+    public BipWallet getReceiveWallet(int account, BipFormat bipFormat) throws Exception {
+        bipFormat = likeTypedBipFormat(bipFormat);
+        WhirlpoolAccount whirlpoolAccount = SamouraiAccountIndex.find(account);
+        return walletSupplier.getWallet(whirlpoolAccount, bipFormat);
     }
 
     public BipAddress fetchAddressReceive(int account, boolean increment, BipFormat bipFormat) throws Exception {
-        return getReceiveWallet(account, bipFormat).getNextAddress(increment);
+        bipFormat = likeTypedBipFormat(bipFormat);
+        return getReceiveWallet(account, bipFormat).getNextAddressReceive(bipFormat, increment);
     }
 
     public BipAddress fetchAddressChange(int account, boolean increment, BipFormat bipFormat) throws Exception {
-        return getReceiveWallet(account, bipFormat).getNextChangeAddress(increment);
+        bipFormat = likeTypedBipFormat(bipFormat);
+        return getReceiveWallet(account, bipFormat).getNextAddressChange(bipFormat, increment);
     }
 
     public BipFormatSupplier getBipFormatSupplier() {

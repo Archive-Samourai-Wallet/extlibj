@@ -13,8 +13,6 @@ public class BipAddressTest extends AbstractTest {
   private BipWallet bipWalletDeposit;
   private BipWallet bipWalletPremix;
   private BipWallet bipWalletPostmix;
-  private BipWallet bipWalletPostmixAsBip44;
-  private BipWallet bipWalletPostmixAsBip49;
 
   public BipAddressTest() throws Exception {
     super();
@@ -27,8 +25,6 @@ public class BipAddressTest extends AbstractTest {
     bipWalletDeposit = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP44);
     bipWalletPremix = walletSupplier.getWallet(BIP_WALLET.PREMIX_BIP84);
     bipWalletPostmix = walletSupplier.getWallet(BIP_WALLET.POSTMIX_BIP84);
-    bipWalletPostmixAsBip44 = walletSupplier.getWallet(BIP_WALLET.POSTMIX_BIP84_AS_BIP44);
-    bipWalletPostmixAsBip49 = walletSupplier.getWallet(BIP_WALLET.POSTMIX_BIP84_AS_BIP49);
   }
 
   @Test
@@ -53,23 +49,6 @@ public class BipAddressTest extends AbstractTest {
             "tb1q6jfh0zp0mjfem9g655drczkkm49p2t3xlqyd69", bipWalletPostmix.getAddressAt(1, 0).getAddressString());
     Assertions.assertEquals(
             "tb1qv7n3qjsn449nrm4q5hvlrpj6p2d077mmukjd3e", bipWalletPostmix.getAddressAt(1, 1).getAddressString());
-
-    Assertions.assertEquals(
-            "myxnF72uWYFan5RR4fLKVKeiAbrQ8qQ3F9", bipWalletPostmixAsBip44.getAddressAt(0, 0).getAddressString());
-    Assertions.assertEquals(
-            "mztxCuMNZ2ZwTmMTiZgjp2aiyKZUnXwyMv", bipWalletPostmixAsBip44.getAddressAt(1, 0).getAddressString());
-    Assertions.assertEquals(
-            "mpy22barYekLsVEEeZMLP2vaEKCtDJsdB7", bipWalletPostmixAsBip44.getAddressAt(1, 1).getAddressString());
-
-    Assertions.assertEquals(
-            "2N48pFXu5Emo5XRkyNhCzx7pghCcnRJR9Mh", bipWalletPostmixAsBip49.getAddressAt(0, 0).getAddressString());
-
-    Assertions.assertEquals(
-            "2N4Y7AQ1bWADjquT831zg9Eg65AygAYi9Mq", bipWalletPostmixAsBip49.getAddressAt(1, 0).getAddressString());
-
-    Assertions.assertEquals(
-            "2NAhUx9Xyhgbaba864Dzg16fVhUUkr4ueST", bipWalletPostmixAsBip49.getAddressAt(1, 1).getAddressString());
-
   }
 
   @Test
@@ -94,19 +73,5 @@ public class BipAddressTest extends AbstractTest {
             "m/84'/1'/2147483646'/1/0", bipWalletPostmix.getAddressAt(1, 0).getPathAddress());
     Assertions.assertEquals(
             "m/84'/1'/2147483646'/1/1", bipWalletPostmix.getAddressAt(1, 1).getPathAddress());
-
-    Assertions.assertEquals(
-            "m/84'/1'/2147483646'/0/0", bipWalletPostmixAsBip44.getAddressAt(0, 0).getPathAddress());
-    Assertions.assertEquals(
-            "m/84'/1'/2147483646'/1/0", bipWalletPostmixAsBip44.getAddressAt(1, 0).getPathAddress());
-    Assertions.assertEquals(
-            "m/84'/1'/2147483646'/1/1", bipWalletPostmixAsBip44.getAddressAt(1, 1).getPathAddress());
-
-    Assertions.assertEquals(
-            "m/84'/1'/2147483646'/0/0", bipWalletPostmixAsBip49.getAddressAt(0, 0).getPathAddress());
-    Assertions.assertEquals(
-            "m/84'/1'/2147483646'/1/0", bipWalletPostmixAsBip49.getAddressAt(1, 0).getPathAddress());
-    Assertions.assertEquals(
-            "m/84'/1'/2147483646'/1/1", bipWalletPostmixAsBip49.getAddressAt(1, 1).getPathAddress());
   }
 }

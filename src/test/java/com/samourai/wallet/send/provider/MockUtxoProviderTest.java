@@ -46,7 +46,7 @@ public class MockUtxoProviderTest extends AbstractTest {
         // instanciate another MockUtxoProvider
         byte[] seed = hdWalletFactory.computeSeedFromWords(SEED_WORDS);
         HD_Wallet bip44w2 = hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE+"FOO", params);
-        WalletSupplier walletSupplier2 = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip44w2);
+        WalletSupplier walletSupplier2 = new WalletSupplierImpl(bipFormatSupplier, new MemoryIndexHandlerSupplier(), bip44w2);
         MockUtxoProvider utxoProvider2 = new MockUtxoProvider(params, walletSupplier2);
 
         BipWallet bipWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84);

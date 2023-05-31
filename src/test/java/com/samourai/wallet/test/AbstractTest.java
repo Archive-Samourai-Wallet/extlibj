@@ -90,7 +90,7 @@ public class AbstractTest {
     byte[] seed = hdWalletFactory.computeSeedFromWords(SEED_WORDS);
     bip44w = hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE, params);
     bip47Wallet = new BIP47Wallet(bip44w);
-    walletSupplier = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip44w);
+    walletSupplier = new WalletSupplierImpl(bipFormatSupplier, new MemoryIndexHandlerSupplier(), bip44w);
     utxoProvider = new MockUtxoProvider(bip44w.getParams(), walletSupplier);
     xManagerClient = new XManagerClient(httpClient, true, false) {
       @Override
