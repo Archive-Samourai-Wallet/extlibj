@@ -51,9 +51,6 @@ public class WalletSupplierImpl implements WalletSupplier {
     for (BIP_WALLET bip : BIP_WALLET.values()) {
       BipWallet bipWallet = new BipWallet(bipFormatSupplier, bip44w, indexHandlerSupplier, bip);
       register(bipWallet);
-      for (BipFormat bipFormat : bip.getBipFormats()) {
-        walletsByAccountByAddressType.get(bip.getAccount()).put(bipFormat, bipWallet);
-      }
     }
   }
 
@@ -61,6 +58,12 @@ public class WalletSupplierImpl implements WalletSupplier {
     walletsByAccount.get(bipWallet.getAccount()).add(bipWallet);
     walletsByXPub.put(bipWallet.getXPub(), bipWallet);
     walletsById.put(bipWallet.getId(), bipWallet);
+    for (BipFormat bipFormat : bipWallet.getBipFormats()) {
+      walletsByAccountByAddressType.get(bipWallet.getAccount()).put(bipFormat, bipWallet);
+    }
+    if (log.isDebugEnabled()) {
+      log.debug("+BipWallet["+bipWallet.getId()+"]: "+bipWallet.toString());
+    }
     // no walletsByAccountByAddressType here
   }
 

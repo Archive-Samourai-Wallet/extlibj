@@ -110,4 +110,20 @@ public class Util  {
                 .filter(otherCollection::contains)
                 .collect(Collectors.toSet());
     }
+
+    public static String maskString(String value) {
+        return maskString(value, 3);
+    }
+
+    private static String maskString(String value, int startEnd) {
+        if (value == null) {
+            return "null";
+        }
+        if (value.length() <= startEnd) {
+            return value;
+        }
+        return value.substring(0, Math.min(startEnd, value.length()))
+                + "..."
+                + value.substring(Math.max(0, value.length() - startEnd), value.length());
+    }
 }

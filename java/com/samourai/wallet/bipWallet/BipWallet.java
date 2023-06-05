@@ -6,6 +6,7 @@ import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.client.indexHandler.IIndexHandler;
 import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
 import com.samourai.wallet.hd.*;
+import com.samourai.wallet.util.Util;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
@@ -152,5 +153,18 @@ public class BipWallet {
 
   public HD_Account getHdAccount() {
     return hdAccount;
+  }
+
+  @Override
+  public String toString() {
+    return "BipWallet{" +
+            "id='" + id + '\'' +
+            ", whirlpoolAccount=" + whirlpoolAccount +
+            ", derivation=" + derivation +
+            ", bipFormatDefault=" + bipFormatDefault +
+            ", bipFormats=" + bipFormats +
+            ", pub='" + Util.maskString(pub) + '\'' +
+            ", xPub='" + Util.maskString(xPub) + '\'' +
+            '}';
   }
 }

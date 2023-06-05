@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.samourai.code.wallet</groupId>
 	<artifactId>extlibj</artifactId>
-	<version>0.0.43-tx0x2-SNAPSHOT</version>
+	<version>0.0.43-bipWalletRefactoring-SNAPSHOT</version>
 	<name>extlibj</name>
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
