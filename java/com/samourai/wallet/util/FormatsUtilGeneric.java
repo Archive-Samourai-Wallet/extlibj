@@ -304,9 +304,14 @@ public class FormatsUtilGeneric {
 	}
 
 	public boolean isValidP2SH(final String address, NetworkParameters params) {
-
-		if(isValidBitcoinAddress(address, params))    {
-			return Address.fromBase58(params, address).isP2SHAddress();
+		
+		try  {
+			if(isValidBitcoinAddress(address, params))    {
+				return Address.fromBase58(params, address).isP2SHAddress();
+			}
+		}
+		catch(Exception e)  {
+			;
 		}
 
 		return false;
