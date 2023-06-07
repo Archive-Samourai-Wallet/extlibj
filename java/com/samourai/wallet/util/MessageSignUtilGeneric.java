@@ -35,6 +35,7 @@ public class MessageSignUtilGeneric {
 				try {
 					P2TRAddress _address = new P2TRAddress(ecKey, params);
 					toAddress = _address.getP2TRAddressAsString();
+		            return toAddress.equalsIgnoreCase(address);
 	            }
 				catch(Exception e) {
 					return false;
@@ -42,19 +43,20 @@ public class MessageSignUtilGeneric {
             }
             else if(FormatsUtilGeneric.getInstance().isValidBech32(address)) {
                 toAddress = Bech32UtilGeneric.getInstance().toBech32(ecKey.getPubKey(), params);
+	            return toAddress.equalsIgnoreCase(address);
             }
             else if(FormatsUtilGeneric.getInstance().isValidP2SH(address, params)) {
 				SegwitAddress _address = new SegwitAddress(ecKey, params, SegwitAddress.TYPE_P2SH_P2WPKH);
 				toAddress = _address.getDefaultToAddressAsString();
+	            return toAddress.equals(address);
             }
 			else {
                 toAddress = ecKey.toAddress(params).toString();
+	            return toAddress.equals(address);
             }
-            return toAddress.equals(address);
         }
-        else    {
-            return false;
-        }
+		
+		return false;
     }
 
     public String signMessage(ECKey key, String strMessage) {
