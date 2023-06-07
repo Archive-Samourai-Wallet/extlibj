@@ -1,5 +1,7 @@
 package com.samourai.wallet.util;
 
+import java.nio.ByteBuffer;
+
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.TestNet3Params;
 import org.junit.jupiter.api.Assertions;
@@ -38,10 +40,32 @@ public class XPubUtilTest {
   	Assertions.assertEquals(child, -2147483648);
 
   	// acount 2147483646
-  	xpub = new XPUB("zpub6rszzdATS6SYmnDsZFa7fx3sdFPYYKjyqoCETE1KuMK6fVdjcse9xobKhm5fUAYpcuk4U8RVMRsaPtA1UQKGFQExaojoqvdpTfeNoDiLpcg");
+	String strXPUB = "zpub6rszzdATS6SYmnDsZFa7fx3sdFPYYKjyqoCETE1KuMK6fVdjcse9xobKhm5fUAYpcuk4U8RVMRsaPtA1UQKGFQExaojoqvdpTfeNoDiLpcg";
+  	xpub = new XPUB(strXPUB);
   	xpub.decode();
   	child = xpub.getChild();
   	Assertions.assertEquals(child, -2);
+  }
+
+  @Test
+  public void makeXPUB() throws Exception {
+
+	String strXPUB = "zpub6rszzdATS6SYmnDsZFa7fx3sdFPYYKjyqoCETE1KuMK6fVdjcse9xobKhm5fUAYpcuk4U8RVMRsaPtA1UQKGFQExaojoqvdpTfeNoDiLpcg";
+  	XPUB xpub = new XPUB(strXPUB);
+  	xpub.decode();
+	
+    byte[] chain = xpub.getChain();
+    byte[] pub = xpub.getPubkey();
+    byte depth = xpub.getDepth();
+    int version = xpub.getVersion();
+    int fingerprint = xpub.getFingerprint();
+  	int child = xpub.getChild();
+
+  	Assertions.assertEquals(version, com.samourai.wallet.util.XPUB.MAGIC_ZPUB);
+
+	String _strXPUB = com.samourai.wallet.util.XPUB.makeXPUB(ByteBuffer.allocate(4).putInt(version).array(), new byte[] { depth }, ByteBuffer.allocate(4).putInt(fingerprint).array(), ByteBuffer.allocate(4).putInt(child).array(), chain,  pub);
+  	Assertions.assertEquals(strXPUB, _strXPUB);
+	
   }
 
 }
