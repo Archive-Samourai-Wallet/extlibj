@@ -83,10 +83,17 @@ public class BipWalletTest extends AbstractTest {
   }
 
   @Test
-  public void getZpub() throws Exception {
+  public void getBipPub() throws Exception {
     Assertions.assertEquals(
         "vpub5YEQpEDPAZWVTkmWASSHyaUMsae7uV9FnRrhZ3cqV6RFbBQx7wjVsUfLqSE3hgNY8WQixurkbWNkfV2sRE7LPfNKQh2t3s5une4QZthwdCu",
-        bipWalletDeposit84.getPub());
+        bipWalletDeposit84.getBipPub());
+  }
+
+  @Test
+  public void getXPub() throws Exception {
+    Assertions.assertEquals(
+            "tpubDCGZwoNuBCYuS9LbHLzdbfzjYe2fn7dKAHVSUPTkb1vuSfi7hUuiG3eT7tE1DzdcjhBF5SZk3vuu8EkcFUnbsaBpCyB2uDP7v3n774RGre9",
+            bipWalletDeposit84.getXPub());
   }
 
   @Test

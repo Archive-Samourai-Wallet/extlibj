@@ -9,7 +9,7 @@ import org.bitcoinj.core.Transaction;
 public interface BipFormat {
   String getId();
   String getLabel();
-  String getPub(HD_Account hdAccount);
+  String getBipPub(HD_Account hdAccount);
   String getAddressString(HD_Address hdAddress);
   String getToAddress(ECKey ecKey, NetworkParameters params);
   void sign(Transaction tx, int inputIndex, ECKey key) throws Exception;

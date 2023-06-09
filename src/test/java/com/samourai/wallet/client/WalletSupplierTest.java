@@ -107,7 +107,7 @@ public class WalletSupplierTest extends AbstractTest {
     BipFormat bipFormat = new BipFormatImpl(bipFormatId, "label") {
 
       @Override
-      public String getPub(HD_Account hdAccount) {
+      public String getBipPub(HD_Account hdAccount) {
         return "testpub-"+hdAccount.getId();
       }
 
@@ -129,7 +129,7 @@ public class WalletSupplierTest extends AbstractTest {
     BipWallet bipWallet = walletSupplier.getWalletById("custom");
     Assertions.assertNotNull(bipFormat);
     Assertions.assertEquals("m/123'/1'/4", bipWallet.getDerivation().getPathAccount(params));
-    Assertions.assertEquals("testpub-4", bipWallet.getPub());
+    Assertions.assertEquals("testpub-4", bipWallet.getBipPub());
     Assertions.assertEquals("testaddress", bipWallet.getNextAddressReceive().getAddressString());
   }
 }

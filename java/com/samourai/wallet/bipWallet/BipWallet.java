@@ -26,7 +26,7 @@ public class BipWallet {
   private BipDerivation derivation;
   private Collection<BipFormat> bipFormats;
   private BipFormat bipFormatDefault;
-  private String pub; // xpub, ypub, zpub...
+  private String bipPub; // xpub, ypub, zpub...
   private String xPub; // pub forced as xpub
 
   public BipWallet(BipFormatSupplier bipFormatSupplier, HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, BIP_WALLET bip) {
@@ -43,7 +43,7 @@ public class BipWallet {
     this.derivation = derivation;
     this.bipFormats = bipFormats;
     this.bipFormatDefault = bipFormatDefault;
-    this.pub = getBipFormatDefault().getPub(hdAccount);
+    this.bipPub = getBipFormatDefault().getBipPub(hdAccount);
     this.xPub = hdAccount.xpubstr();
   }
 
@@ -135,8 +135,8 @@ public class BipWallet {
     return bipFormatDefault;
   }
 
-  public String getPub() {
-    return pub;
+  public String getBipPub() {
+    return bipPub;
   }
 
   public String getXPub() {
@@ -163,8 +163,8 @@ public class BipWallet {
             ", derivation=" + derivation +
             ", bipFormatDefault=" + bipFormatDefault +
             ", bipFormats=" + bipFormats +
-            ", pub='" + Util.maskString(pub) + '\'' +
             ", xPub='" + Util.maskString(xPub) + '\'' +
+            ", bipPub='" + Util.maskString(bipPub) + '\'' +
             '}';
   }
 }
