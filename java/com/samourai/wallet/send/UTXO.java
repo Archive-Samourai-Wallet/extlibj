@@ -33,7 +33,7 @@ public class UTXO {
     public Collection<UnspentOutput> toUnspentOutputs() {
         List<UnspentOutput> unspentOutputs = new LinkedList<>();
         for (MyTransactionOutPoint outPoint : outpoints) {
-            unspentOutputs.add(new UnspentOutput(outPoint, null, path, xpub));
+            unspentOutputs.add(new UnspentOutput(outPoint, path, xpub));
         }
         return unspentOutputs;
     }

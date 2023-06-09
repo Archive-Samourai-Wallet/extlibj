@@ -23,7 +23,6 @@ public class UnspentOutput {
     public long value;
     public String script;
     public String addr;
-    public String pubkey;
     public int confirmations;
     public Xpub xpub;
 
@@ -38,12 +37,11 @@ public class UnspentOutput {
         this.value = copy.value;
         this.script = copy.script;
         this.addr = copy.addr;
-        this.pubkey = copy.pubkey;
         this.confirmations = copy.confirmations;
         this.xpub = copy.xpub;
     }
 
-    public UnspentOutput(MyTransactionOutPoint outPoint, String pubkey, String path, String xpub) {
+    public UnspentOutput(MyTransactionOutPoint outPoint, String path, String xpub) {
         this.tx_hash = outPoint.getTxHash().toString();
         this.tx_output_n = outPoint.getTxOutputN();
         this.tx_version = -1; // ignored
@@ -51,7 +49,6 @@ public class UnspentOutput {
         this.value = outPoint.getValue().getValue();
         this.script = outPoint.getScriptBytes() != null ? Hex.toHexString(outPoint.getScriptBytes()) : null;
         this.addr = outPoint.getAddress();
-        this.pubkey = pubkey;
         this.confirmations = outPoint.getConfirmations();
         this.xpub = new Xpub();
         this.xpub.path = path;
