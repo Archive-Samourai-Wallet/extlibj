@@ -44,4 +44,12 @@ public class BipDerivation {
   public int getAccountIndex() {
     return accountIndex;
   }
+
+  @Override
+  public String toString() {
+    return "BipDerivation{" +
+            "purpose=" + purpose +
+            ", accountIndex=" + accountIndex +
+            '}';
+  }
 }

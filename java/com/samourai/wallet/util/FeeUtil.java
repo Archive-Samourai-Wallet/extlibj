@@ -22,7 +22,7 @@ public class FeeUtil {
 
   private static final int ESTIMATED_OUTPUT_LEN = 34;
   private static final int ESTIMATED_OUTPUT_P2TR_P2WSH_LEN = 43;
-  private static final int ESTIMATED_OPRETURN_LEN = 80;
+  private static final int ESTIMATED_OPRETURN_LEN = 83;
 
   private static FeeUtil instance = null;
 

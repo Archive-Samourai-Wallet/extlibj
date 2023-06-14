@@ -52,12 +52,17 @@ public class BipFormatSupplierImpl implements BipFormatSupplier {
         } catch(NullPointerException ignored) {
         }
 
-        if (Address.fromBase58(params, address).isP2SHAddress()) {
-            // P2SH
-            return BIP_FORMAT.SEGWIT_COMPAT;
-        } else {
-            // P2PKH
-            return BIP_FORMAT.LEGACY;
+        try {
+            if (Address.fromBase58(params, address).isP2SHAddress()) {
+                // P2SH
+                return BIP_FORMAT.SEGWIT_COMPAT;
+            } else {
+                // P2PKH
+                return BIP_FORMAT.LEGACY;
+            }
+        } catch (Exception e) {
+            log.error("Unknown address type: "+(address!=null?address:"null"));
+            return null;
         }
     }
 

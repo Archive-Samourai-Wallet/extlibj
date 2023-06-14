@@ -28,9 +28,9 @@ public class KeyBagTest extends AbstractTest {
   @Test
   public void add() throws Exception {
     BipWallet bipWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84);
-    UnspentOutput utxo1 = utxoProvider.addUtxo(bipWallet, 1111).toUnspentOutputs(bipWallet.getPub()).iterator().next();
-    UnspentOutput utxo2 = utxoProvider.addUtxo(bipWallet, 2222).toUnspentOutputs(bipWallet.getPub()).iterator().next();
-    UnspentOutput utxo3 = utxoProvider.addUtxo(bipWallet, 3333).toUnspentOutputs(bipWallet.getPub()).iterator().next();
+    UnspentOutput utxo1 = utxoProvider.addUtxo(bipWallet, 1111).toUnspentOutputs().iterator().next();
+    UnspentOutput utxo2 = utxoProvider.addUtxo(bipWallet, 2222).toUnspentOutputs().iterator().next();
+    UnspentOutput utxo3 = utxoProvider.addUtxo(bipWallet, 3333).toUnspentOutputs().iterator().next();
     byte[] key1 = bipWallet.getAddressAt(utxo1).getHdAddress().getECKey().getPrivKeyBytes();
     byte[] key2 = bipWallet.getAddressAt(utxo2).getHdAddress().getECKey().getPrivKeyBytes();
     keyBag.add(utxo1, walletSupplier);
@@ -45,9 +45,9 @@ public class KeyBagTest extends AbstractTest {
   @Test
   public void addAll() throws Exception {
     BipWallet bipWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84);
-    UnspentOutput utxo1 = utxoProvider.addUtxo(bipWallet, 1111).toUnspentOutputs(bipWallet.getPub()).iterator().next();
-    UnspentOutput utxo2 = utxoProvider.addUtxo(bipWallet, 2222).toUnspentOutputs(bipWallet.getPub()).iterator().next();
-    UnspentOutput utxo3 = utxoProvider.addUtxo(bipWallet, 3333).toUnspentOutputs(bipWallet.getPub()).iterator().next();
+    UnspentOutput utxo1 = utxoProvider.addUtxo(bipWallet, 1111).toUnspentOutputs().iterator().next();
+    UnspentOutput utxo2 = utxoProvider.addUtxo(bipWallet, 2222).toUnspentOutputs().iterator().next();
+    UnspentOutput utxo3 = utxoProvider.addUtxo(bipWallet, 3333).toUnspentOutputs().iterator().next();
     byte[] key1 = bipWallet.getAddressAt(utxo1).getHdAddress().getECKey().getPrivKeyBytes();
     byte[] key2 = bipWallet.getAddressAt(utxo2).getHdAddress().getECKey().getPrivKeyBytes();
     keyBag.addAll(Arrays.asList(utxo1, utxo2), walletSupplier);

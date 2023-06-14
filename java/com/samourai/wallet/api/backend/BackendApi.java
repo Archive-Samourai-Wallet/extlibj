@@ -175,14 +175,14 @@ public class BackendApi implements ISweepBackend {
     return response;
   }
 
-  public void initBip84(String zpub) throws Exception {
+  public void initBip84(String xpub) throws Exception {
     String url = computeAuthUrl(urlBackend + URL_INIT_BIP84);
     if (log.isDebugEnabled()) {
       log.debug("initBip84");
     }
     Map<String,String> headers = computeHeaders();
     Map<String, String> postBody = new HashMap<String, String>();
-    postBody.put("xpub", zpub);
+    postBody.put("xpub", xpub);
     postBody.put("type", "new");
     postBody.put("segwit", "bip84");
     httpClient.postUrlEncoded(url, Void.class, headers, postBody);

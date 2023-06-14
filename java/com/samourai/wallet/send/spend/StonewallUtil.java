@@ -385,7 +385,7 @@ public class StonewallUtil {
                 // type of address for 'mixed' amount must match type of address for destination
                 //
                 BipFormat mixedFormat = SpendBuilder.computeAddressFormat(forcedChangeFormat, address, bipFormatSupplier, params);
-                _address = utxoProvider.getNextChangeAddress(account, mixedFormat, true);
+                _address = utxoProvider.getNextAddressChange(account, mixedFormat, true);
             }
             txSpendOutput = bipFormatSupplier.getTransactionOutput(_address, spendAmount.longValue(), params);
             txOutputs.add(txSpendOutput);
@@ -396,7 +396,7 @@ public class StonewallUtil {
             //
             String utxoAddress = utxos.get(0).getOutpoints().get(0).getAddress();
             BipFormat changeFormat = SpendBuilder.computeAddressFormat(forcedChangeFormat, utxoAddress, bipFormatSupplier, params);
-            String changeAddress = utxoProvider.getNextChangeAddress(account, changeFormat, true);
+            String changeAddress = utxoProvider.getNextAddressChange(account, changeFormat, true);
             txChangeOutput = bipFormatSupplier.getTransactionOutput(changeAddress, changeDue.longValue(), params);
             txOutputs.add(txChangeOutput);
         }

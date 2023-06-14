@@ -21,9 +21,9 @@ public interface WalletSupplier {
 
   BipAddress getAddress(UnspentOutput unspentOutput);
 
-  BipWallet getWalletByPub(String pub);
+  BipWallet getWalletByXPub(String pub);
 
   BipWallet getWalletById(String id);
 
-  String[] getPubs(boolean withIgnoredAccounts, BipFormat... bipFormats);
+  String[] getXPubs(boolean withIgnoredAccounts, BipFormat... bipFormats);
 }
