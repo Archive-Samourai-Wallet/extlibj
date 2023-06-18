@@ -4,8 +4,8 @@ import com.samourai.wallet.util.JSONUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractSorobanMessageSimple implements SorobanMessageSimple {
-    private static final Logger log = LoggerFactory.getLogger(AbstractSorobanMessageSimple.class);
+public abstract class AbstractSorobanPayload implements SorobanPayload {
+    private static final Logger log = LoggerFactory.getLogger(AbstractSorobanPayload.class);
 
     @Override
     public String toPayload() {
