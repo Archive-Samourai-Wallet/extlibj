@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -64,6 +65,11 @@ public class RandomUtil {
             return 0;
         }
         return getSecureRandom().nextLong();
+    }
+
+    public <E> E nextFromCollection(Collection<E> collection) {
+        int i = nextInt(collection.size());
+        return (E)collection.toArray()[i];
     }
 
     public void shuffle(List list) {

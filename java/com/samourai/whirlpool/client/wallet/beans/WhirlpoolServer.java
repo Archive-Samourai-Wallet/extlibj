@@ -15,22 +15,22 @@ public enum WhirlpoolServer {
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerTestnetOnion(),
           TestNet3Params.get(),
           "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4",
-          "PM8TJPTDuJei5ML1FinhAKuwHHfdBYq66zTdcqM2RMqAywefDeH6h5YAFP2hZDAdSkx2kK1s2XFnixQBPYw2YWDMdz4vbcePFGfNNVGLkyKFAYKcrqvZ"), // TODO
+          "PM8TJSs3yAbowqwTXs3YmkJZ6JARF87uf35MztevhXtAsvv2hRHhSt4phK3PLJ6HmDiyzvdbYBNawkncG6fnH5mGqMmY6rB6DcMUfgcZME6g7soodeHR"), // TODO
   INTEGRATION(
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerIntegrationClear(),
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerIntegrationOnion(),
           TestNet3Params.get(),
           "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4",
-          "PM8TJPTDuJei5ML1FinhAKuwHHfdBYq66zTdcqM2RMqAywefDeH6h5YAFP2hZDAdSkx2kK1s2XFnixQBPYw2YWDMdz4vbcePFGfNNVGLkyKFAYKcrqvZ"), // TODO
+          "PM8TJSs3yAbowqwTXs3YmkJZ6JARF87uf35MztevhXtAsvv2hRHhSt4phK3PLJ6HmDiyzvdbYBNawkncG6fnH5mGqMmY6rB6DcMUfgcZME6g7soodeHR"), // TODO
   MAINNET(
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerMainnetClear(),
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerMainnetOnion(),
           MainNetParams.get(),
           "1NwVafYT1s6SF5Atusv7A8MASzCvGruGXq",
-          "PM8TJPTDuJei5ML1FinhAKuwHHfdBYq66zTdcqM2RMqAywefDeH6h5YAFP2hZDAdSkx2kK1s2XFnixQBPYw2YWDMdz4vbcePFGfNNVGLkyKFAYKcrqvZ"), // TODO
+          "PM8TJSs3yAbowqwTXs3YmkJZ6JARF87uf35MztevhXtAsvv2hRHhSt4phK3PLJ6HmDiyzvdbYBNawkncG6fnH5mGqMmY6rB6DcMUfgcZME6g7soodeHR"), // TODO
   LOCAL_TESTNET("http://127.0.0.1:8080", "http://127.0.0.1:8080", TestNet3Params.get(),
           "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4",
-          "PM8TJPTDuJei5ML1FinhAKuwHHfdBYq66zTdcqM2RMqAywefDeH6h5YAFP2hZDAdSkx2kK1s2XFnixQBPYw2YWDMdz4vbcePFGfNNVGLkyKFAYKcrqvZ"); // TODO
+          "PM8TJSs3yAbowqwTXs3YmkJZ6JARF87uf35MztevhXtAsvv2hRHhSt4phK3PLJ6HmDiyzvdbYBNawkncG6fnH5mGqMmY6rB6DcMUfgcZME6g7soodeHR"); // TODO
 
   private String serverUrlClear;
   private String serverUrlOnion;

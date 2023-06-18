@@ -1,5 +1,8 @@
 package com.samourai.dex.config;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 public class SamouraiConfig {
     // extlibj: BackendServer
     private String backendServerMainnetClear = "https://api.samouraiwallet.com/v2";
@@ -12,6 +15,52 @@ public class SamouraiConfig {
     private String sorobanServerTestnetOnion = "http://sorob4sg7yiopktgz4eom7hl5mcodr6quvhmdpljl5qqhmt6po7oebid.onion/test";
     private String sorobanServerMainnetClear = "https://soroban.samouraiwallet.com";
     private String sorobanServerMainnetOnion = "http://sorob4sg7yiopktgz4eom7hl5mcodr6quvhmdpljl5qqhmt6po7oebid.onion";
+
+    // extlibj: SorobanServerDex
+    private Collection<String> sorobanServerDexTestnetClear = Arrays.asList( // TODO test cluster
+            "http://163.172.128.201:4242",
+            "http://163.172.130.151:4242",
+            "http://163.172.159.127:4242",
+            "http://163.172.174.29:4242",
+            "http://163.172.159.227:4242",
+            "http://51.15.192.136:4242",
+            "http://51.158.116.168:4242",
+            "http://51.15.226.163:4242",
+            "http://212.47.230.157:4242"
+    );
+    private Collection<String> sorobanServerDexTestnetOnion = Arrays.asList(
+            "http://sorin6xws7lfvz2ikma3ceqzlbmmp4huyfwla3d5mzkcjnta2djgggid.onion/test",
+            "http://sor2aduqon52pngz56b3pp2niq5vp4l7xstco654gfa37fcaoblle5yd.onion/test",
+            "http://sor3xcg6i4tyt4uawt2t3i3ml4dzubh46wyloptl3g5jyshkgekuumyd.onion/test",
+            "http://sor4ky4w6iywr3terpofu3xlnwrnawbb4aq2okobixojatswelfpsuad.onion/test",
+            "http://sor5qv4q3uvg3cyfaay5dazkvuytukepexlqehgirxbq7ynszpqo4uad.onion/test",
+            "http://sor6jatlc2pim7mg4paxy6kgzuw7qidajlxk7xy6ic6ytcpcy47lucyd.onion/test",
+            "http://sor7qfbf24l3gdba5ed625pfwfebwctiao5po3zux3c6udlboowkucid.onion/test",
+            "http://sorark2anb6q6oz6egxo4zo67cmlnfvjxz2h34v74ta6jozceqclw5yd.onion/test",
+            "http://sorbutari3lpxmqhpzu3jojflteluekxnfyu2jgs4vqkgtsxrjyv4byd.onion/test"
+    );
+    private Collection<String> sorobanServerDexMainnetClear = Arrays.asList(
+            "http://163.172.128.201:4242",
+            "http://163.172.130.151:4242",
+            "http://163.172.159.127:4242",
+            "http://163.172.174.29:4242",
+            "http://163.172.159.227:4242",
+            "http://51.15.192.136:4242",
+            "http://51.158.116.168:4242",
+            "http://51.15.226.163:4242",
+            "http://212.47.230.157:4242"
+    );
+    private Collection<String> sorobanServerDexMainnetOnion = Arrays.asList(
+            "http://sorin6xws7lfvz2ikma3ceqzlbmmp4huyfwla3d5mzkcjnta2djgggid.onion",
+            "http://sor2aduqon52pngz56b3pp2niq5vp4l7xstco654gfa37fcaoblle5yd.onion",
+            "http://sor3xcg6i4tyt4uawt2t3i3ml4dzubh46wyloptl3g5jyshkgekuumyd.onion",
+            "http://sor4ky4w6iywr3terpofu3xlnwrnawbb4aq2okobixojatswelfpsuad.onion",
+            "http://sor5qv4q3uvg3cyfaay5dazkvuytukepexlqehgirxbq7ynszpqo4uad.onion",
+            "http://sor6jatlc2pim7mg4paxy6kgzuw7qidajlxk7xy6ic6ytcpcy47lucyd.onion",
+            "http://sor7qfbf24l3gdba5ed625pfwfebwctiao5po3zux3c6udlboowkucid.onion",
+            "http://sorark2anb6q6oz6egxo4zo67cmlnfvjxz2h34v74ta6jozceqclw5yd.onion",
+            "http://sorbutari3lpxmqhpzu3jojflteluekxnfyu2jgs4vqkgtsxrjyv4byd.onion"
+    );
 
     // whrilpool-client: WhrilpoolServer
     private String whirlpoolServerTestnetClear = "https://pool.whirl.mx:8081";
@@ -102,6 +151,9 @@ public class SamouraiConfig {
     public void setBackendServerTestnetOnion(String backendServerTestnetOnion) {
         this.backendServerTestnetOnion = backendServerTestnetOnion;
     }
+
+    //
+
     public String getSorobanServerTestnetClear() {
         return sorobanServerTestnetClear;
     }
@@ -132,5 +184,40 @@ public class SamouraiConfig {
 
     public void setSorobanServerMainnetOnion(String sorobanServerMainnetOnion) {
         this.sorobanServerMainnetOnion = sorobanServerMainnetOnion;
+    }
+
+    //
+
+
+    public Collection<String> getSorobanServerDexTestnetClear() {
+        return sorobanServerDexTestnetClear;
+    }
+
+    public void setSorobanServerDexTestnetClear(Collection<String> sorobanServerDexTestnetClear) {
+        this.sorobanServerDexTestnetClear = sorobanServerDexTestnetClear;
+    }
+
+    public Collection<String> getSorobanServerDexTestnetOnion() {
+        return sorobanServerDexTestnetOnion;
+    }
+
+    public void setSorobanServerDexTestnetOnion(Collection<String> sorobanServerDexTestnetOnion) {
+        this.sorobanServerDexTestnetOnion = sorobanServerDexTestnetOnion;
+    }
+
+    public Collection<String> getSorobanServerDexMainnetClear() {
+        return sorobanServerDexMainnetClear;
+    }
+
+    public void setSorobanServerDexMainnetClear(Collection<String> sorobanServerDexMainnetClear) {
+        this.sorobanServerDexMainnetClear = sorobanServerDexMainnetClear;
+    }
+
+    public Collection<String> getSorobanServerDexMainnetOnion() {
+        return sorobanServerDexMainnetOnion;
+    }
+
+    public void setSorobanServerDexMainnetOnion(Collection<String> sorobanServerDexMainnetOnion) {
+        this.sorobanServerDexMainnetOnion = sorobanServerDexMainnetOnion;
     }
 }
