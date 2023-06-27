@@ -7,6 +7,7 @@ import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomUtil {
@@ -67,9 +68,26 @@ public class RandomUtil {
         return getSecureRandom().nextLong();
     }
 
-    public <E> E nextFromCollection(Collection<E> collection) {
-        int i = nextInt(collection.size());
-        return (E)collection.toArray()[i];
+    public <E> E next(Collection<E> collection) {
+        return (E)next(collection.toArray());
+    }
+
+    public <K, V> Map.Entry<K, V> next(Map<K, V> map) {
+        if (map.isEmpty()) {
+            log.warn("next(): map is empty");
+            return null;
+        }
+        Object entries[] = map.entrySet().toArray();
+        return (Map.Entry<K, V>) next(entries);
+    }
+
+    public <T> T next(T[] array) {
+        if (array.length == 0) {
+            log.warn("next(): array is empty");
+            return null;
+        }
+        int i = nextInt(array.length);
+        return array[i];
     }
 
     public void shuffle(List list) {
@@ -79,7 +97,7 @@ public class RandomUtil {
         Collections.shuffle(list);
     }
 
-    public static void _setTestMode() {
-        testMode = true;
+    public static void _setTestMode(boolean testMode) {
+        testMode = testMode;
     }
 }

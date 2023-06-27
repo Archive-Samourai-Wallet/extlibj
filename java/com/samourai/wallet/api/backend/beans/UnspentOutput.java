@@ -134,9 +134,7 @@ public class UnspentOutput {
 
     @Override
     public String toString() {
-      return tx_hash
-          + ":"
-          + tx_output_n
+      return getUtxoName()
           + " ("
           + value
           + " sats, "
@@ -147,5 +145,9 @@ public class UnspentOutput {
           + ", address="
           + addr
           + ")";
+    }
+
+    public String getUtxoName() {
+        return tx_hash+":"+tx_output_n;
     }
   }

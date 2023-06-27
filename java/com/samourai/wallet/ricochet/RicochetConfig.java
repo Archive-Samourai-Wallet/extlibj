@@ -3,10 +3,9 @@ package com.samourai.wallet.ricochet;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bip47.BIP47UtilGeneric;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
-import com.samourai.wallet.bip47.rpc.PaymentAddress;
 import com.samourai.wallet.bip47.rpc.PaymentCode;
-import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipWallet.BipWallet;
+import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.bitcoinj.core.NetworkParameters;
@@ -57,9 +56,9 @@ public class RicochetConfig {
         NetworkParameters params = bip47Wallet.getParams();
         try {
             PaymentCode pcode = new PaymentCode(SamouraiWalletConst.samouraiDonationPCode);
-            PaymentAddress paymentAddress = bip47Util.getSendAddress(bip47Wallet, pcode, bip47WalletOutgoingIdx, params);
+            SegwitAddress segwitAddress = bip47Util.getSendAddress(bip47Wallet, pcode, bip47WalletOutgoingIdx, params);
             // derive as bech32
-            strAddress = BIP_FORMAT.SEGWIT_NATIVE.getToAddress(paymentAddress.getSendECKey(), params);
+            strAddress = segwitAddress.getBech32AsString();
             bip47WalletOutgoingIdx++;
         } catch (Exception e) {
             // fallback to defaultFeeAddress

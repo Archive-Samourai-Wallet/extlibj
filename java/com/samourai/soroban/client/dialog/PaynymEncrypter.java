@@ -28,14 +28,6 @@ public class PaynymEncrypter implements Encrypter {
     this.cryptoUtil = cryptoUtil;
   }
 
-  public PaynymEncrypter(RpcWallet rpcWallet, CryptoUtil cryptoUtil) {
-    this(
-        rpcWallet.getPaymentCode(),
-        rpcWallet.getPaymentCodeKey(),
-        rpcWallet.getBip47Wallet().getParams(),
-        cryptoUtil);
-  }
-
   @Override
   public String decrypt(byte[] encrypted, PaymentCode paymentCodePartner) throws Exception {
     ECKey partnerKey = getPartnerKey(paymentCodePartner);

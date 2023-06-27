@@ -1,7 +1,7 @@
 package com.samourai.http.client;
 
 public interface IHttpClientService {
-  IHttpClient getHttpClient();
+  IHttpClient getHttpClient(HttpUsage httpUsage);
 
   void stop();
 }

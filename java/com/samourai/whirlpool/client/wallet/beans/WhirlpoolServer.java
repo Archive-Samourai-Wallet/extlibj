@@ -9,46 +9,33 @@ import org.bitcoinj.params.TestNet3Params;
 
 import java.util.Optional;
 
+@Deprecated // use WhirlpoolNetwork instead
 public enum WhirlpoolServer {
   TESTNET(
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerTestnetClear(),
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerTestnetOnion(),
-          TestNet3Params.get(),
-          "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4",
-          "PM8TJSs3yAbowqwTXs3YmkJZ6JARF87uf35MztevhXtAsvv2hRHhSt4phK3PLJ6HmDiyzvdbYBNawkncG6fnH5mGqMmY6rB6DcMUfgcZME6g7soodeHR"), // TODO
+          WhirlpoolNetwork.TESTNET),
   INTEGRATION(
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerIntegrationClear(),
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerIntegrationOnion(),
-          TestNet3Params.get(),
-          "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4",
-          "PM8TJSs3yAbowqwTXs3YmkJZ6JARF87uf35MztevhXtAsvv2hRHhSt4phK3PLJ6HmDiyzvdbYBNawkncG6fnH5mGqMmY6rB6DcMUfgcZME6g7soodeHR"), // TODO
+          WhirlpoolNetwork.INTEGRATION),
   MAINNET(
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerMainnetClear(),
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerMainnetOnion(),
-          MainNetParams.get(),
-          "1NwVafYT1s6SF5Atusv7A8MASzCvGruGXq",
-          "PM8TJSs3yAbowqwTXs3YmkJZ6JARF87uf35MztevhXtAsvv2hRHhSt4phK3PLJ6HmDiyzvdbYBNawkncG6fnH5mGqMmY6rB6DcMUfgcZME6g7soodeHR"), // TODO
-  LOCAL_TESTNET("http://127.0.0.1:8080", "http://127.0.0.1:8080", TestNet3Params.get(),
-          "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4",
-          "PM8TJSs3yAbowqwTXs3YmkJZ6JARF87uf35MztevhXtAsvv2hRHhSt4phK3PLJ6HmDiyzvdbYBNawkncG6fnH5mGqMmY6rB6DcMUfgcZME6g7soodeHR"); // TODO
+          WhirlpoolNetwork.MAINNET),
+  LOCAL_TESTNET("http://127.0.0.1:8080", "http://127.0.0.1:8080", WhirlpoolNetwork.LOCAL_TESTNET); // TODO
 
   private String serverUrlClear;
   private String serverUrlOnion;
-  private NetworkParameters params;
-  private String signingAddress;
-  private PaymentCode signingPaymentCode;
+  private WhirlpoolNetwork whirlpoolNetwork;
 
   WhirlpoolServer(
           String serverUrlClear,
           String serverUrlOnion,
-          NetworkParameters params,
-          String signingAddress,
-          String signingPaymentCode) {
+          WhirlpoolNetwork whirlpoolNetwork) {
     this.serverUrlClear = serverUrlClear;
     this.serverUrlOnion = serverUrlOnion;
-    this.params = params;
-    this.signingAddress = signingAddress;
-    this.signingPaymentCode = new PaymentCode(signingPaymentCode);
+    this.whirlpoolNetwork = whirlpoolNetwork;
   }
 
   public String getServerUrlClear() {
@@ -64,16 +51,8 @@ public enum WhirlpoolServer {
     return serverUrl;
   }
 
-  public NetworkParameters getParams() {
-    return params;
-  }
-
-  public String getSigningAddress() {
-    return signingAddress;
-  }
-
-  public PaymentCode getSigningPaymentCode() {
-    return signingPaymentCode;
+  public WhirlpoolNetwork getWhirlpoolNetwork() {
+    return whirlpoolNetwork;
   }
 
   public static Optional<WhirlpoolServer> find(String value) {

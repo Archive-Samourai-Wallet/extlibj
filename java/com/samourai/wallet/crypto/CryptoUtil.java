@@ -119,10 +119,6 @@ public class CryptoUtil {
         }
     }
 
-    public Encrypter getEncrypter(RpcWallet rpcWallet) {
-        return new PaynymEncrypter(rpcWallet, this);
-    }
-
     //
 
     private byte[] decryptAES_CTR (byte[] data, byte[] keyBytes, byte[] ivBytes) throws Exception {

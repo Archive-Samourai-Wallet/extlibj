@@ -13,6 +13,14 @@ public class HttpException extends Exception {
     this.responseBody = responseBody;
   }
 
+  public HttpException(Exception cause) {
+    this(cause, null);
+  }
+
+  public HttpException(String message) {
+    this(message, null);
+  }
+
   public String getResponseBody() {
     return responseBody;
   }

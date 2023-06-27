@@ -28,7 +28,7 @@ public class DexConfigProvider {
     public void load(IBackendClient httpClient, NetworkParameters networkParameters, boolean onion) throws Exception {
         WhirlpoolServer whirlpoolServer = WhirlpoolServer.getByNetworkParameters(networkParameters);
         String dexURL = whirlpoolServer.getServerUrl(onion) + ENDPOINT_DEXCONFIG;
-        load(httpClient, networkParameters, dexURL, whirlpoolServer.getSigningAddress());
+        load(httpClient, networkParameters, dexURL, whirlpoolServer.getWhirlpoolNetwork().getSigningAddress());
     }
 
     public void load(IBackendClient httpClient, NetworkParameters networkParameters, String dexURL, String signingAddress) throws Exception {

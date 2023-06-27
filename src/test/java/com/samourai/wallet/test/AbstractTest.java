@@ -7,12 +7,14 @@ import com.samourai.wallet.api.backend.BackendServer;
 import com.samourai.wallet.api.backend.beans.WalletResponse;
 import com.samourai.wallet.bip47.BIP47UtilGeneric;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
+import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.bip47.rpc.java.Bip47UtilJava;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
+import com.samourai.wallet.crypto.CryptoUtil;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
 import com.samourai.wallet.payload.PayloadUtilGeneric;
@@ -57,6 +59,7 @@ public class AbstractTest {
   protected HD_WalletFactoryGeneric hdWalletFactory = HD_WalletFactoryGeneric.getInstance();
   protected IHttpClient httpClient;
   protected BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;
+  protected CryptoUtil cryptoUtil = CryptoUtil.getInstanceJava();
 
   protected ChainSupplier mockChainSupplier = () -> {
     WalletResponse.InfoBlock infoBlock = new WalletResponse.InfoBlock();
@@ -67,6 +70,12 @@ public class AbstractTest {
   protected WalletSupplierImpl walletSupplier;
   protected HD_Wallet bip44w;
   protected BIP47Wallet bip47Wallet;
+
+  protected BIP47Wallet bip47WalletInitiator;
+  protected BIP47Wallet bip47WalletCounterparty;
+  protected PaymentCode paymentCodeInitiator;
+  protected PaymentCode paymentCodeCounterparty;
+
   protected BackendApi backendApi;
   protected MockUtxoProvider utxoProvider;
   protected XManagerClient xManagerClient;
@@ -84,12 +93,18 @@ public class AbstractTest {
 
   @BeforeEach
   public void setUp() throws Exception {
-    RandomUtil._setTestMode();
+    RandomUtil._setTestMode(true);
     httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
 
     byte[] seed = hdWalletFactory.computeSeedFromWords(SEED_WORDS);
     bip44w = hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE, params);
     bip47Wallet = new BIP47Wallet(bip44w);
+
+    bip47WalletInitiator = bip47Wallet;
+    bip47WalletCounterparty = new BIP47Wallet(hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE+"counterparty", params));
+    paymentCodeInitiator = bip47Util.getPaymentCode(bip47WalletInitiator);
+    paymentCodeCounterparty = bip47Util.getPaymentCode(bip47WalletCounterparty);
+
     walletSupplier = new WalletSupplierImpl(bipFormatSupplier, new MemoryIndexHandlerSupplier(), bip44w);
     utxoProvider = new MockUtxoProvider(bip44w.getParams(), walletSupplier);
     xManagerClient = new XManagerClient(httpClient, true, false) {

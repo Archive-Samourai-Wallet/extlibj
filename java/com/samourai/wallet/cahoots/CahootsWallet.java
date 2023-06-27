@@ -10,6 +10,7 @@ import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.BipWallet;
 import com.samourai.wallet.bipWallet.WalletSupplier;
 import com.samourai.wallet.chain.ChainSupplier;
+import com.samourai.wallet.crypto.CryptoUtil;
 import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.HD_Wallet;
@@ -29,7 +30,7 @@ public class CahootsWallet {
     private BIP47Wallet bip47Wallet;
     private RpcWallet rpcWallet;
 
-    public CahootsWallet(WalletSupplier walletSupplier, ChainSupplier chainSupplier, BipFormatSupplier bipFormatSupplier, CahootsUtxoProvider utxoProvider) {
+    public CahootsWallet(WalletSupplier walletSupplier, ChainSupplier chainSupplier, BipFormatSupplier bipFormatSupplier, CahootsUtxoProvider utxoProvider, CryptoUtil cryptoUtil) {
         this.walletSupplier = walletSupplier;
         this.chainSupplier = chainSupplier;
         this.bipFormatSupplier = bipFormatSupplier;
@@ -37,7 +38,7 @@ public class CahootsWallet {
 
         this.hdWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84).getHdWallet();
         this.bip47Wallet = new BIP47Wallet(hdWallet);
-        this.rpcWallet = new RpcWalletImpl(bip47Wallet);
+        this.rpcWallet = new RpcWalletImpl(bip47Wallet, cryptoUtil);
     }
 
     private BipFormat likeTypedBipFormat(BipFormat bipFormat) {

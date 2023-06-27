@@ -106,10 +106,7 @@ public abstract class JacksonHttpClient implements IHttpClient {
   private <T> T parseJson(String responseContent, Class<T> responseType) throws Exception {
     T result;
     if (log.isTraceEnabled()) {
-      String responseStr =
-          (responseContent != null
-              ? responseContent.substring(0, Math.min(responseContent.length(), 50))
-              : "null");
+      String responseStr = (responseContent != null ? responseContent : "null");
       log.trace(
           "response["
               + (responseType != null ? responseType.getCanonicalName() : "null")

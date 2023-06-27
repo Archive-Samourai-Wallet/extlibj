@@ -153,8 +153,6 @@ public class Point  {
 
     public static byte[] taggedHash(String tag, byte[] msg) throws NoSuchAlgorithmException {
 
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-
         byte[] tagHash = Util.sha256(tag.getBytes());
         int len = (tagHash.length * 2) + msg.length;
         byte[] buf = new byte[len];

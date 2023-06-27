@@ -1,5 +1,6 @@
 package com.samourai.soroban.client;
 
+import com.samourai.soroban.client.dialog.Encrypter;
 import com.samourai.wallet.bip47.rpc.BIP47Account;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.bip47.rpc.PaymentCode;
@@ -10,4 +11,5 @@ public interface RpcWallet {
     BIP47Account getBip47Account();
     PaymentCode getPaymentCode();
     ECKey getPaymentCodeKey();
+    Encrypter getEncrypter();
 }

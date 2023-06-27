@@ -1,22 +1,27 @@
 package com.samourai.wallet.util;
 
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import com.samourai.wallet.api.backend.beans.HttpException;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.bitcoinj.core.Sha256Hash;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 public class Util  {
-
-  private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+    private static final Logger log = LoggerFactory.getLogger(Util.class);
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
   public static String bytesToHex(byte[] b) {
       char[] hexChars = new char[b.length * 2];
@@ -83,6 +88,19 @@ public class Util  {
         return digest.digest(b);
     }
 
+    public static String sha256Hex(String str) throws NoSuchAlgorithmException {
+        return new String(Hex.encodeHex(sha256(str.getBytes())));
+    }
+
+    public static byte[] sha512(String str) {
+        return DigestUtils.sha512(str);
+    }
+
+    public static String sha512Hex(String str) {
+        // don't use DigestUtils.sha512Hex() for Android compatibility
+        return new String(Hex.encodeHex(sha512(str)));
+    }
+
     public static byte[] getHMAC(byte[] b0, byte[] b1)  {
 
         Mac sha512_HMAC = null;
@@ -115,15 +133,33 @@ public class Util  {
         return maskString(value, 3);
     }
 
-    private static String maskString(String value, int startEnd) {
+    public static String maskString(String value, int startEnd) {
         if (value == null) {
             return "null";
         }
-        if (value.length() <= startEnd) {
+        if (value.length() <= (2*startEnd)) {
             return value;
         }
         return value.substring(0, Math.min(startEnd, value.length()))
                 + "..."
-                + value.substring(Math.max(0, value.length() - startEnd), value.length());
+                + value.substring(Math.max(0, value.length() - startEnd));
+    }
+
+    public static <T,R> R retryOnHttpException(Callback<T> generator, CallbackWithArg<T, R> callable, int attemptsLimit) throws Exception {
+        int attempts = 0;
+        while (true) {
+            try {
+                T generated = generator.execute();
+                return callable.apply(generated);
+            } catch (HttpException e) {
+                attempts++;
+                log.warn("attempt failed (attempt " + attempts + "/" + attemptsLimit + ")");
+                if (attempts >= attemptsLimit) {
+                    throw e;
+                }
+            } catch (Exception e) {
+                throw e;
+            }
+        }
     }
 }

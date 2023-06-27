@@ -42,7 +42,7 @@ public enum SorobanServerDex {
   }
 
   public String getServerUrlRandom(boolean onion) {
-    String url = RandomUtil.getInstance().nextFromCollection(getServerUrls(onion));
+    String url = RandomUtil.getInstance().next(getServerUrls(onion));
     if (log.isDebugEnabled()) {
       log.debug("using SorobanServer: "+url);
     }
