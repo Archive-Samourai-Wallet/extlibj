@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public enum SorobanServerDex {
@@ -23,6 +25,7 @@ public enum SorobanServerDex {
           MainNetParams.get());
 
   private static final Logger log = LoggerFactory.getLogger(SorobanServerDex.class);
+
   private Collection<String> serverUrlsClear;
   private Collection<String> serverUrlsOnion;
   private NetworkParameters params;

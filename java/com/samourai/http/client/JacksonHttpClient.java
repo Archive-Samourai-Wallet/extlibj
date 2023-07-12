@@ -44,11 +44,7 @@ public abstract class JacksonHttpClient implements IHttpClient {
         return result;
       } catch (Exception e) {
         if (log.isDebugEnabled()) {
-          if (e instanceof HttpException) {
-            log.error("getJson failed: " + urlStr + ": " + e.toString());
-          } else {
-            log.error("getJson failed: " + urlStr, e);
-          }
+          log.error("getJson failed: " + urlStr + ": " + e.toString());
         }
         throw httpException(e);
       }
@@ -70,11 +66,7 @@ public abstract class JacksonHttpClient implements IHttpClient {
                 return result;
               } catch (Exception e) {
                 if (log.isDebugEnabled()) {
-                  if (e instanceof HttpException) {
-                    log.error("postJson failed: " + urlStr + ": " + e.toString());
-                  } else {
-                    log.error("postJson failed: " + urlStr, e);
-                  }
+                  log.error("postJson failed: " + urlStr + ": " + e.toString());
                 }
                 throw httpException(e);
               }
@@ -92,11 +84,7 @@ public abstract class JacksonHttpClient implements IHttpClient {
         return result;
       } catch (Exception e) {
         if (log.isDebugEnabled()) {
-          if (e instanceof HttpException) {
-            log.error("postUrlEncoded failed: " + urlStr + ": " + e.toString());
-          } else {
-            log.error("postUrlEncoded failed: " + urlStr, e);
-          }
+          log.error("postUrlEncoded failed: " + urlStr + ": " + e.toString());
         }
         throw httpException(e);
       }
@@ -107,6 +95,9 @@ public abstract class JacksonHttpClient implements IHttpClient {
     T result;
     if (log.isTraceEnabled()) {
       String responseStr = (responseContent != null ? responseContent : "null");
+      if (responseStr.length()>500) {
+        responseStr = responseStr.substring(0, 500);
+      }
       log.trace(
           "response["
               + (responseType != null ? responseType.getCanonicalName() : "null")
