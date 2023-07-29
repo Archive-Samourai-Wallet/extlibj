@@ -21,10 +21,7 @@ import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
 import com.samourai.wallet.send.provider.MockUtxoProvider;
-import com.samourai.wallet.util.FormatsUtilGeneric;
-import com.samourai.wallet.util.RandomUtil;
-import com.samourai.wallet.util.TxUtil;
-import com.samourai.wallet.util.Z85;
+import com.samourai.wallet.util.*;
 import com.samourai.xmanager.client.XManagerClient;
 import com.samourai.xmanager.protocol.XManagerService;
 import org.bitcoinj.core.*;
@@ -55,6 +52,7 @@ public class AbstractTest {
   protected HD_WalletFactoryGeneric hdWalletFactory = HD_WalletFactoryGeneric.getInstance();
   protected IHttpClient httpClient;
   protected BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;
+  protected CryptoTestUtil cryptoTestUtil = CryptoTestUtil.getInstance();
 
   protected ChainSupplier mockChainSupplier = () -> {
     WalletResponse.InfoBlock infoBlock = new WalletResponse.InfoBlock();

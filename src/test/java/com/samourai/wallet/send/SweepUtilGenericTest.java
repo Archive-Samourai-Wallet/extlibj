@@ -34,10 +34,10 @@ public class SweepUtilGenericTest extends AbstractTest {
         Iterator<SweepPreview> it = sweepPreviews.iterator();
 
         SweepPreview sweepPreview = it.next();
-        assertSweepPreview(sweepPreview, "2Mu3RYBxGdkz8rwCaYZWhi24A4aR1cSWJFb", BIP_FORMAT.SEGWIT_COMPAT,136, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
+        assertSweepPreview(sweepPreview, "2Mu3RYBxGdkz8rwCaYZWhi24A4aR1cSWJFb", BIP_FORMAT.SEGWIT_COMPAT,133, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
 
         sweepPreview = it.next();
-        assertSweepPreview(sweepPreview, "tb1qkz6870gwrtp4unx9yw4qvz27tagd5wykynufyq", BIP_FORMAT.SEGWIT_NATIVE, 113, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
+        assertSweepPreview(sweepPreview, "tb1qkz6870gwrtp4unx9yw4qvz27tagd5wykynufyq", BIP_FORMAT.SEGWIT_NATIVE, 110, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
     }
 
     @Test
@@ -53,10 +53,10 @@ public class SweepUtilGenericTest extends AbstractTest {
         Iterator<SweepPreview> it = sweepPreviews.iterator();
 
         SweepPreview sweepPreview = it.next();
-        assertSweepPreview(sweepPreview, "2Mu3RYBxGdkz8rwCaYZWhi24A4aR1cSWJFb", BIP_FORMAT.SEGWIT_COMPAT,136, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
+        assertSweepPreview(sweepPreview, "2Mu3RYBxGdkz8rwCaYZWhi24A4aR1cSWJFb", BIP_FORMAT.SEGWIT_COMPAT,133, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
 
         sweepPreview = it.next();
-        assertSweepPreview(sweepPreview, "tb1qkz6870gwrtp4unx9yw4qvz27tagd5wykynufyq", BIP_FORMAT.SEGWIT_NATIVE, 113, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
+        assertSweepPreview(sweepPreview, "tb1qkz6870gwrtp4unx9yw4qvz27tagd5wykynufyq", BIP_FORMAT.SEGWIT_NATIVE, 110, 1, new BigInteger("2854445280755403823944422649848886010716442579975080723501674454330739189892"));
     }
 
     @Test
