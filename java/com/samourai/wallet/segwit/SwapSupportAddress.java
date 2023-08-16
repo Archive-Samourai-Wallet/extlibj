@@ -21,6 +21,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 public class SwapSupportAddress extends SegwitAddress {
 	
+	public static final long SEQUENCE_LOCK   = 0xffffffff;
 	public static final long SEQUENCE_CANCEL = 0x0c;
 	public static final long SEQUENCE_REFUND = 0xffffffff;
 	public static final long SEQUENCE_PUNISH = 0x06;

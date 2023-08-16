@@ -388,4 +388,92 @@ public class XmrBtcSwapsTest {
 
       }
 
+      @Test
+      public void lockTransactionFromPrivkey() throws Exception  {
+
+        NetworkParameters params = TestNet3Params.get();
+
+        DumpedPrivateKey dpk0 = DumpedPrivateKey.fromBase58(params, "cV8UgmEouzBZp8B3EhCpNF2ryPnhqeppaznuQXDcUANPauG3PHUr");
+        ECKey eckey0 = dpk0.getKey();
+        DumpedPrivateKey dpk1 = DumpedPrivateKey.fromBase58(params, "cVFrRwSsyfivixKJpcSFzWa8mKYPzx6FrueEXMQ3x4ripVoQkmZS");
+        ECKey eckey1 = dpk1.getKey();
+
+        SwapSupportAddress saddress = new SwapSupportAddress(eckey0, eckey1, params);
+        Script redeemScript = saddress.redeemScript();
+        Assertions.assertEquals("tb1qhn4xq9zlref52tqk5007z09s2afdh7ljr7pthk6d48r8w0qezknszffjq3", saddress.getDefaultToAddressAsString());
+
+        String prevHash = "9120315df6ddadb4a2430d2a46d9c5bdc047bcd6af4274d4a42ffcb974af6118";
+        long prevIdx = 1;
+        long prevAmount = 125000L;
+        long spendAmount = 124400;
+
+        String toAddress = "tb1pkqnmm3hvp46yuz6sj9qurqfa76fcr6mfh0cnj42cwrzkpapaay2qlesywh";
+
+        Transaction tx = new Transaction(params);
+        tx.setVersion(2);
+        tx.setLockTime(0L);
+
+        TransactionOutPoint outpoint = new TransactionOutPoint(params, prevIdx, Sha256Hash.wrap(prevHash));
+        TransactionInput input = new TransactionInput(params, null, new byte[0], outpoint);
+        input.setSequenceNumber(SwapSupportAddress.SEQUENCE_LOCK);
+        TransactionOutput output = Bech32UtilGeneric.getInstance().getTransactionOutput(toAddress, spendAmount, params);
+        tx.addInput(input);
+        tx.addOutput(output);
+
+        TransactionWitness witness = new TransactionWitness(3);
+        TransactionSignature sig0 = tx.calculateWitnessSignature(0, eckey1, redeemScript.getProgram(), Coin.valueOf(prevAmount), Transaction.SigHash.ALL, false);
+        TransactionSignature sig1 = tx.calculateWitnessSignature(0, eckey0, redeemScript.getProgram(), Coin.valueOf(prevAmount), Transaction.SigHash.ALL, false);
+        witness.setPush(0, sig0.encodeToBitcoin());
+        witness.setPush(1, sig1.encodeToBitcoin());
+        witness.setPush(2, saddress.redeemScript().getProgram());
+        tx.setWitness(0, witness);
+
+        Assertions.assertEquals("5b9acfdc16b2399e6d44fee9bd1aa49ae629e4a0d26e953654619ca6e1800637", tx.getHash().toString());
+
+      }
+
+      @Test
+      public void lockTransactionFromPrivkey2() throws Exception  {
+
+        NetworkParameters params = TestNet3Params.get();
+
+        DumpedPrivateKey dpk0 = DumpedPrivateKey.fromBase58(params, "cUGhdUiAqPUFyvcF2HJNCy42rUQdV4cUZAFxERB26GBQ36qF2CRp");
+        ECKey eckey0 = dpk0.getKey();
+        DumpedPrivateKey dpk1 = DumpedPrivateKey.fromBase58(params, "cNy8SJRSq8ieea8fS1G12d7qgTvBqow4rYsqKc3CyFoKX1eHzUD6");
+        ECKey eckey1 = dpk1.getKey();
+
+        SwapSupportAddress saddress = new SwapSupportAddress(eckey0, eckey1, params);
+        Script redeemScript = saddress.redeemScript();
+        Assertions.assertEquals("tb1qarp7fhzhcasapl8wuc6msn4c5dmjhrdlk9ljfdy9700wrtgf2fmq98xy9q", saddress.getDefaultToAddressAsString());
+
+        String prevHash = "5c8e567a0d500c4a04ca2ce3f891903d1bbe003052d05d52c0d0d3a2bd2f2390";
+        long prevIdx = 1;
+        long prevAmount = 125000L;
+        long spendAmount = 124400;
+
+        String toAddress = "tb1pkqnmm3hvp46yuz6sj9qurqfa76fcr6mfh0cnj42cwrzkpapaay2qlesywh";
+
+        Transaction tx = new Transaction(params);
+        tx.setVersion(2);
+        tx.setLockTime(0L);
+
+        TransactionOutPoint outpoint = new TransactionOutPoint(params, prevIdx, Sha256Hash.wrap(prevHash));
+        TransactionInput input = new TransactionInput(params, null, new byte[0], outpoint);
+        input.setSequenceNumber(SwapSupportAddress.SEQUENCE_LOCK);
+        TransactionOutput output = Bech32UtilGeneric.getInstance().getTransactionOutput(toAddress, spendAmount, params);
+        tx.addInput(input);
+        tx.addOutput(output);
+
+        TransactionWitness witness = new TransactionWitness(3);
+        TransactionSignature sig0 = tx.calculateWitnessSignature(0, eckey1, redeemScript.getProgram(), Coin.valueOf(prevAmount), Transaction.SigHash.ALL, false);
+        TransactionSignature sig1 = tx.calculateWitnessSignature(0, eckey0, redeemScript.getProgram(), Coin.valueOf(prevAmount), Transaction.SigHash.ALL, false);
+        witness.setPush(0, sig0.encodeToBitcoin());
+        witness.setPush(1, sig1.encodeToBitcoin());
+        witness.setPush(2, saddress.redeemScript().getProgram());
+        tx.setWitness(0, witness);
+
+        Assertions.assertEquals("4b387d6a798653757bbf66acf9654bc0191e74a621389976a30b00c106e59897", tx.getHash().toString());
+
+      }
+
 }
