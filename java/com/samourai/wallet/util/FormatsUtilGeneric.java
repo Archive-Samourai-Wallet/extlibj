@@ -4,6 +4,8 @@ import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.segwit.bech32.Bech32;
 import com.samourai.wallet.segwit.bech32.Bech32Segwit;
+import com.samourai.wallet.segwit.SegwitAddress;
+import com.samourai.wallet.segwit.P2TRAddress;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.*;
@@ -296,6 +298,20 @@ public class FormatsUtilGeneric {
 				if(pair.getLeft() == (byte)0x00 && pair.getRight().length == 32 && triple.getRight() == Bech32.BECH32)    {
 						return true;
 				}
+		}
+
+		return false;
+	}
+
+	public boolean isValidP2SH(final String address, NetworkParameters params) {
+		
+		try  {
+			if(isValidBitcoinAddress(address, params))    {
+				return Address.fromBase58(params, address).isP2SHAddress();
+			}
+		}
+		catch(Exception e)  {
+			;
 		}
 
 		return false;
