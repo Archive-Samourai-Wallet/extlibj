@@ -1,8 +1,6 @@
 package com.samourai.wallet.bipWallet;
 
-import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.bipFormat.BipFormat;
-import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.client.indexHandler.IIndexHandler;
 import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
 import com.samourai.wallet.hd.*;
@@ -17,7 +15,6 @@ import java.util.Collection;
 public class BipWallet {
   private static final Logger log = LoggerFactory.getLogger(BipWallet.class);
 
-  private BipFormatSupplier bipFormatSupplier;
   private String id;
   private HD_Wallet hdWallet;
   private HD_Account hdAccount;
@@ -29,12 +26,11 @@ public class BipWallet {
   private String bipPub; // xpub, ypub, zpub...
   private String xPub; // pub forced as xpub
 
-  public BipWallet(BipFormatSupplier bipFormatSupplier, HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, BIP_WALLET bip) {
-    this(bipFormatSupplier, bip.name(), bip44w, indexHandlerSupplier, bip.getAccount(), bip.getBipDerivation(), bip.getBipFormats(), bip.getBipFormatDefault());
+  public BipWallet(HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, BIP_WALLET bip) {
+    this(bip.name(), bip44w, indexHandlerSupplier, bip.getAccount(), bip.getBipDerivation(), bip.getBipFormats(), bip.getBipFormatDefault());
   }
 
-  public BipWallet(BipFormatSupplier bipFormatSupplier, String id, HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, WhirlpoolAccount whirlpoolAccount, BipDerivation derivation, Collection<BipFormat> bipFormats, BipFormat bipFormatDefault) {
-    this.bipFormatSupplier = bipFormatSupplier;
+  public BipWallet(String id, HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, WhirlpoolAccount whirlpoolAccount, BipDerivation derivation, Collection<BipFormat> bipFormats, BipFormat bipFormatDefault) {
     this.id = id;
     this.hdWallet = new HD_Wallet(derivation.getPurpose(), bip44w);
     this.hdAccount = this.hdWallet.getAccount(derivation.getAccountIndex());
@@ -91,14 +87,6 @@ public class BipWallet {
   public BipAddress getAddressAt(int chainIndex, int addressIndex, BipFormat bipFormat) {
     HD_Address hdAddress = hdWallet.getAddressAt(derivation.getAccountIndex(), chainIndex, addressIndex);
     return new BipAddress(hdAddress, derivation, bipFormat);
-  }
-
-  public BipAddress getAddressAt(UnspentOutput utxo) {
-    if (!utxo.hasPath()) {
-      return null; // bip47
-    }
-    BipFormat bipFormat = bipFormatSupplier.findByAddress(utxo.addr, getParams());
-    return getAddressAt(utxo.computePathChainIndex(), utxo.computePathAddressIndex(), bipFormat);
   }
 
   //

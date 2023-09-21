@@ -1,15 +1,12 @@
 package com.samourai.wallet.bipWallet;
 
-import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
 import com.samourai.wallet.hd.BIP_WALLET;
-import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.util.Util;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +46,7 @@ public class WalletSupplierImpl implements WalletSupplier {
 
     // register Samourai derivations
     for (BIP_WALLET bip : BIP_WALLET.values()) {
-      BipWallet bipWallet = new BipWallet(bipFormatSupplier, bip44w, indexHandlerSupplier, bip);
+      BipWallet bipWallet = new BipWallet(bip44w, indexHandlerSupplier, bip);
       register(bipWallet);
     }
   }
@@ -68,7 +65,7 @@ public class WalletSupplierImpl implements WalletSupplier {
   }
 
   public void register(String id, HD_Wallet bip44w, WhirlpoolAccount whirlpoolAccount, BipDerivation derivation, Collection<BipFormat> bipFormats, BipFormat bipFormatDefault) {
-    BipWallet bipWallet = new BipWallet(bipFormatSupplier, id, bip44w, indexHandlerSupplier, whirlpoolAccount, derivation, bipFormats, bipFormatDefault);
+    BipWallet bipWallet = new BipWallet(id, bip44w, indexHandlerSupplier, whirlpoolAccount, derivation, bipFormats, bipFormatDefault);
     register(bipWallet);
   }
 
@@ -108,17 +105,6 @@ public class WalletSupplierImpl implements WalletSupplier {
   }
 
   @Override
-  public BipWallet getWallet(UnspentOutput unspentOutput) {
-    return getWalletByXPub(unspentOutput.xpub.m);
-  }
-
-  @Override
-  public BipAddress getAddress(UnspentOutput unspentOutput) {
-    BipWallet bipWallet = getWallet(unspentOutput);
-    return bipWallet != null ? bipWallet.getAddressAt(unspentOutput) : null;
-  }
-
-  @Override
   public String[] getXPubs(boolean withIgnoredAccounts, BipFormat... bipFormats) {
     List<String> xPubs = new LinkedList<>();
     for (BipWallet bipWallet : walletsByXPub.values()) {
@@ -134,5 +120,8 @@ public class WalletSupplierImpl implements WalletSupplier {
     return xPubs.toArray(new String[] {});
   }
 
-
+  @Override
+  public BipFormatSupplier getBipFormatSupplier() {
+    return bipFormatSupplier;
+  }
 }

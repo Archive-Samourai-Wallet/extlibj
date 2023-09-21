@@ -1,7 +1,9 @@
 package com.samourai.wallet.send;
 
-import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
+import com.samourai.wallet.util.UtxoUtil;
+import com.samourai.wallet.utxo.BipUtxo;
+import com.samourai.wallet.utxo.BipUtxoImpl;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.util.*;
@@ -30,10 +32,15 @@ public class UTXO {
         this.xpub = xpub;
     }
 
-    public Collection<UnspentOutput> toUnspentOutputs() {
-        List<UnspentOutput> unspentOutputs = new LinkedList<>();
+    public Collection<? extends BipUtxo> toBipUtxos() {
+        Integer chainIndex = UtxoUtil.getInstance().computeChainIndex(path);
+        Integer addressIndex = UtxoUtil.getInstance().computeAddressIndex(path);
+        boolean bip47 = addressIndex == null;
+
+        List<BipUtxo> unspentOutputs = new LinkedList<>();
         for (MyTransactionOutPoint outPoint : outpoints) {
-            unspentOutputs.add(new UnspentOutput(outPoint, path, xpub));
+            unspentOutputs.add(new BipUtxoImpl(outPoint.getTxHash().toString(), outPoint.getTxOutputN(), outPoint.getValue().getValue(), outPoint.getAddress(), null,
+                    xpub, bip47, chainIndex, addressIndex, outPoint.getScriptBytes()));
         }
         return unspentOutputs;
     }

@@ -57,15 +57,16 @@ public class SpendTxCahoots extends SpendTx {
 
     private static long findChangeAmount(Cahoots cahoots, CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) {
         return cahoots.getTransaction().getOutputs().stream()
-                .mapToLong(transactionOutput -> {
+                .filter(transactionOutput -> {
                     try {
                         String toAddress = utxoKeyProvider.getBipFormatSupplier().getToAddress(transactionOutput);
-                        if (toAddress != null && cahootsContext.getOutputAddresses().contains(toAddress)) {
-                            return transactionOutput.getValue().value;
-                        }
-                    } catch (Exception e) {}
-                    return 0;
-                }).sum();
+                        return toAddress != null && cahootsContext.getOutputAddresses().contains(toAddress);
+                    } catch (Exception e) {
+                        log.error("", e);
+                        return false;
+                    }
+                })
+                .mapToLong(transactionOutput -> transactionOutput.getValue().value).sum();
     }
 
     public Cahoots getCahoots() {

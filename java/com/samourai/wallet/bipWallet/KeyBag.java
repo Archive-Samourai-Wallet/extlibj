@@ -1,8 +1,7 @@
 package com.samourai.wallet.bipWallet;
 
-import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.hd.BipAddress;
-import com.samourai.wallet.hd.HD_Address;
+import com.samourai.wallet.utxo.BipUtxo;
 import org.bitcoinj.core.ECKey;
 
 import java.util.Collection;
@@ -16,13 +15,13 @@ public class KeyBag {
         this.privKeys = new LinkedHashMap<>();
     }
 
-    public void add(UnspentOutput unspentOutput, byte[] privKeyBytes) {
+    public void add(BipUtxo unspentOutput, byte[] privKeyBytes) {
         String hashKey = hashKey(unspentOutput);
         this.privKeys.put(hashKey, privKeyBytes);
     }
 
-    public void add(UnspentOutput unspentOutput, WalletSupplier walletSupplier) throws Exception {
-        BipAddress bipAddress = walletSupplier.getAddress(unspentOutput);
+    public void add(BipUtxo unspentOutput, WalletSupplier walletSupplier) throws Exception {
+        BipAddress bipAddress = unspentOutput.getBipAddress(walletSupplier);
         if (bipAddress == null) {
             throw new Exception("BipAddress not found for utxo: "+unspentOutput);
         }
@@ -30,9 +29,9 @@ public class KeyBag {
         add(unspentOutput, privKeyBytes);
     }
 
-    public void addAll(Collection<UnspentOutput> unspentOutputs, WalletSupplier walletSupplier) throws Exception {
-        for (UnspentOutput unspentOutput : unspentOutputs) {
-            BipAddress bipAddress = walletSupplier.getAddress(unspentOutput);
+    public void addAll(Collection<BipUtxo> unspentOutputs, WalletSupplier walletSupplier) throws Exception {
+        for (BipUtxo unspentOutput : unspentOutputs) {
+            BipAddress bipAddress = unspentOutput.getBipAddress(walletSupplier);
             if (bipAddress == null) {
                 throw new Exception("BipAddress not found for utxo: "+unspentOutput);
             }
@@ -41,7 +40,7 @@ public class KeyBag {
         }
     }
 
-    public byte[] getPrivKeyBytes(UnspentOutput unspentOutput) {
+    public byte[] getPrivKeyBytes(BipUtxo unspentOutput) {
         String hashKey = hashKey(unspentOutput);
         return privKeys.get(hashKey);
     }
@@ -58,8 +57,8 @@ public class KeyBag {
         return privKeys.size();
     }
 
-    private static String hashKey(UnspentOutput unspentOutput) {
-        return hashKey(unspentOutput.tx_hash, unspentOutput.tx_output_n);
+    private static String hashKey(BipUtxo unspentOutput) {
+        return hashKey(unspentOutput.getTxHash(), unspentOutput.getTxOutputIndex());
     }
 
     private static String hashKey(String hash, int index) {

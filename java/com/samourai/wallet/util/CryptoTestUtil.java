@@ -1,6 +1,5 @@
 package com.samourai.wallet.util;
 
-import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
@@ -9,8 +8,9 @@ import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
-import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.SendFactoryGeneric;
+import com.samourai.wallet.utxo.UtxoDetail;
+import com.samourai.wallet.utxo.UtxoDetailImpl;
 import org.bitcoinj.core.*;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
@@ -25,6 +25,7 @@ import java.util.List;
 
 public class CryptoTestUtil {
     protected static final Logger log = LoggerFactory.getLogger(CryptoTestUtil.class);
+    private static final UtxoUtil utxoUtil = UtxoUtil.getInstance();
     private static final HD_WalletFactoryGeneric hdWalletFactory = HD_WalletFactoryGeneric.getInstance();
     private static final NetworkParameters params = TestNet3Params.get();
     private static final ECKey ecKey = ECKey.fromPrivate(new BigInteger("45292090369707310635285627500870691371399357286012942906204494584441273561412"));
@@ -147,12 +148,8 @@ public class CryptoTestUtil {
         String address = bipFormat.getToAddress(privKey, params);
         String inputHash = "598cbf9f11ab9a1a5e788dbd11a7cf970089cec43e04fc073eb91c0a5717fd0e";
         byte[] scriptBytes = bipFormatSupplier.getTransactionOutput(address, value, params).getScriptBytes();
-        MyTransactionOutPoint outPoint = new MyTransactionOutPoint(params, new Sha256Hash(inputHash), tx.getInputs().size(), BigInteger.valueOf(value), scriptBytes, address, 9999);
-        String pubkey = privKey.getPublicKeyAsHex();
-        String path = "path...";
-        String xpub = "xpub...";
-        UnspentOutput utxo = new UnspentOutput(outPoint, path, xpub);
-        TransactionInput input = utxo.computeSpendInput(params);
+        UtxoDetail utxo = new UtxoDetailImpl(inputHash, tx.getInputs().size(), value, address, 0);
+        TransactionInput input = utxoUtil.computeOutpoint(utxo, scriptBytes, params).computeSpendInput();
         tx.addInput(input);
     }
 

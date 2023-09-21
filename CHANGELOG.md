@@ -4,6 +4,11 @@ Changelog for ExtLibJ.
 ## Unreleased
 ### 
 
+- refactor: add utxo abstraction with UtxoRef, UtxoDetail, BipUtxo *(2023-09-25)*
+
+## 0.0.47-featureTx0-beta1
+### 
+
 - build: add CHANGELOG generation *(2023-09-15)*
 - bitcoinj version with TransactionInput.setValue() *(2023-06-01)*
 

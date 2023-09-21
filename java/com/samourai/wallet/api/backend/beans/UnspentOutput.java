@@ -1,21 +1,21 @@
 package com.samourai.wallet.api.backend.beans;
 
-import com.samourai.wallet.hd.HD_Address;
+import com.samourai.wallet.bipFormat.BipFormat;
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.bipWallet.BipWallet;
+import com.samourai.wallet.bipWallet.WalletSupplier;
+import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.MyTransactionOutPoint;
-import com.samourai.wallet.util.FormatsUtilGeneric;
+import com.samourai.wallet.util.UtxoUtil;
+import com.samourai.wallet.utxo.BipUtxo;
 import org.apache.commons.lang3.StringUtils;
-import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Sha256Hash;
-import org.bitcoinj.core.TransactionInput;
-import org.bitcoinj.script.Script;
 import org.bouncycastle.util.encoders.Hex;
 
-import java.math.BigInteger;
 import java.util.Collection;
 
-public class UnspentOutput {
-    private static final String PATH_SEPARATOR = "/";
+public class UnspentOutput implements BipUtxo {
+    private static final UtxoUtil utxoUtil = UtxoUtil.getInstance();
     public String tx_hash;
     public int tx_output_n;
     public int tx_version;
@@ -24,6 +24,7 @@ public class UnspentOutput {
     public String script;
     public String addr;
     public int confirmations;
+    private Integer confirmedBlockHeight; // null when unconfirmed
     public Xpub xpub;
 
     public UnspentOutput() {
@@ -55,68 +56,15 @@ public class UnspentOutput {
         this.xpub.m = xpub;
     }
 
-    public boolean hasPath() {
-        return xpub != null && !StringUtils.isEmpty(xpub.path);
-    }
-
-    public int computePathChainIndex() {
-        try {
-            return Integer.parseInt(xpub.path.split(PATH_SEPARATOR)[1]);
-        } catch (Exception e) {
-            throw new RuntimeException("computePathChainIndex failed for utxo path: "+xpub.path);
-        }
-    }
-
-    public int computePathAddressIndex() {
-        try {
-            return Integer.parseInt(xpub.path.split(PATH_SEPARATOR)[2]);
-        } catch (Exception e) {
-            throw new RuntimeException("computePathAddressIndex failed for utxo path: "+xpub.path);
-        }
-    }
-
     public String getPath() {
         if (xpub == null) {
             return null;
         }
-      return xpub.path;
+        return xpub.path;
     }
 
-    public String getPathAddress(int purpose, int accountIndex, NetworkParameters params) {
-        int coinType = FormatsUtilGeneric.getInstance().getCoinType(params);
-        if (!hasPath()) {
-            // bip47
-            return HD_Address.getPathAddressBip47(purpose, coinType, accountIndex);
-        }
-        return HD_Address.getPathAddress(purpose, coinType, accountIndex, computePathChainIndex(), computePathAddressIndex());
-    }
-
-    public static String computePath(HD_Address hdAddress) {
-        return computePath(hdAddress.getChainIndex(), hdAddress.getAddressIndex());
-    }
-
-    public static String computePath(int chainIndex, int addressIndex) {
-        return "m"+PATH_SEPARATOR+chainIndex+PATH_SEPARATOR+addressIndex;
-    }
-
-    public MyTransactionOutPoint computeOutpoint(NetworkParameters params) {
-        Sha256Hash sha256Hash = Sha256Hash.wrap(Hex.decode(tx_hash));
-        // use MyTransactionOutPoint to forward scriptBytes + address
-        return new MyTransactionOutPoint(params, sha256Hash, tx_output_n, BigInteger.valueOf(value), getScriptBytes(), addr, confirmations);
-    }
-
-    public TransactionInput computeSpendInput(NetworkParameters params) {
-        return new TransactionInput(
-                        params, null, new byte[] {}, computeOutpoint(params), Coin.valueOf(value));
-
-    }
-
-    public byte[] getScriptBytes() {
-        return script != null ? Hex.decode(script) : null;
-    }
-
-    public Script computeScript() {
-        return new Script(getScriptBytes());
+    private String getXpubM() {
+        return xpub != null ? xpub.m : null;
     }
 
     public static long sumValue(Collection<UnspentOutput> utxos) {
@@ -148,4 +96,95 @@ public class UnspentOutput {
           + addr
           + ")";
     }
-  }
+
+    // implement BipUtxo
+
+    @Override
+    public String getTxHash() {
+        return tx_hash;
+    }
+
+    @Override
+    public int getTxOutputIndex() {
+        return tx_output_n;
+    }
+
+    @Override
+    public long getValue() {
+        return value;
+    }
+
+    @Override
+    public String getAddress() {
+        return addr;
+    }
+
+    @Override
+    public Integer getConfirmedBlockHeight() {
+        return confirmedBlockHeight;
+    }
+
+    @Override
+    public void setConfirmedBlockHeight(Integer confirmedBlockHeight) {
+        this.confirmedBlockHeight = confirmedBlockHeight;
+    }
+
+    @Override
+    public boolean isConfirmed() {
+        return confirmedBlockHeight != null || confirmations > 0;
+    }
+
+    @Override
+    public int getConfirmations(int latestBlockHeight) {
+        // use 'confirmedBlockHeight' when available
+        if (confirmedBlockHeight != null) {
+            return utxoUtil.computeConfirmations(confirmedBlockHeight, latestBlockHeight);
+        }
+        // fallback to 'confirmations' when 'confirmedBlockHeight' not set
+        return confirmations;
+    }
+
+    @Override
+    public BipWallet getBipWallet(WalletSupplier walletSupplier) {
+        if (isBip47()) {
+            return null; // bip47
+        }
+        return walletSupplier.getWalletByXPub(getXpubM());
+    }
+
+    @Override
+    public BipAddress getBipAddress(WalletSupplier walletSupplier) {
+        BipWallet bipWallet = getBipWallet(walletSupplier);
+        if (bipWallet == null) {
+            return null;
+        }
+        NetworkParameters params = bipWallet.getParams();
+        BipFormat bipFormat = getBipFormat(walletSupplier.getBipFormatSupplier(), params);
+        return bipWallet.getAddressAt(getChainIndex(), getAddressIndex(), bipFormat);
+    }
+
+    @Override
+    public BipFormat getBipFormat(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
+        return bipFormatSupplier.findByAddress(getAddress(), params);
+    }
+
+    @Override
+    public boolean isBip47() {
+        return xpub == null || StringUtils.isEmpty(xpub.path);
+    }
+
+    @Override
+    public Integer getChainIndex() {
+        return getPath() != null ? utxoUtil.computeChainIndex(getPath()) : null;
+    }
+
+    @Override
+    public Integer getAddressIndex() {
+        return getPath() != null ? utxoUtil.computeAddressIndex(getPath()) :  null;
+    }
+
+    @Override
+    public byte[] getScriptBytes() {
+        return script != null ? Hex.decode(script) : null;
+    }
+}

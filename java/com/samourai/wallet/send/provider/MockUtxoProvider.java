@@ -10,6 +10,7 @@ import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.Chain;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
+import com.samourai.wallet.util.UtxoUtil;
 import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.bitcoinj.core.*;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
  * utxo provider reserved for tests
  */
 public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvider {
+  private static final UtxoUtil utxoUtil = UtxoUtil.getInstance();
 
   private NetworkParameters params;
   private Map<WhirlpoolAccount, List<UTXO>> utxosByAccount;
@@ -77,7 +79,7 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
     BipFormat bipFormat = bipWallet.getBipFormatDefault();
     BipAddress bipAddress = bipWallet.getAddressAt(0, n, bipFormat);
     String address = bipAddress.getAddressString();
-    String path = UnspentOutput.computePath(bipAddress.getHdAddress());
+    String path = utxoUtil.computePath(bipAddress.getHdAddress());
     ECKey ecKey = bipAddress.getHdAddress().getECKey();
     // use a namespace specific to BipWallet for generating txid
     int walletUniqueId = new BigInteger(bipWallet.getHdAccount().xpubstr().getBytes()).intValue();
@@ -93,7 +95,7 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
   public UTXO addUtxo(BipWallet bipWallet, String txid, int n, long value, String address, ECKey ecKey, String path) throws Exception {
     String xpub = bipWallet.getXPub();
     UnspentOutput unspentOutput = computeUtxo(txid, n, path, xpub, address, value, 999, getBipFormatSupplier(), params);
-    MyTransactionOutPoint outPoint = unspentOutput.computeOutpoint(params);
+    MyTransactionOutPoint outPoint = utxoUtil.computeOutpoint(unspentOutput, params);
     UTXO utxo = new UTXO(Arrays.asList(outPoint), path, xpub);
     nbUtxos++;
 

@@ -41,7 +41,7 @@ public abstract class SpendTx {
         this.txid = txid;
 
         // consistency check
-        long sumSpendFrom = spendFrom.stream().mapToLong(o -> o.getValue().getValue()).sum();
+        long sumSpendFrom = MyTransactionOutPoint.sumValue(spendFrom);
         if((amount + samouraiFee + change + minerFeePaid) != sumSpendFrom){
             // should never happen
             log.error("inconsistency detected! (amount="+amount+" + samouraiFee="+samouraiFee+" + change="+change+" + minerFeePaid="+minerFeePaid+") != sumSpendFrom="+sumSpendFrom);

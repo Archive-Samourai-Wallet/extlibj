@@ -1,9 +1,9 @@
 package com.samourai.wallet.hd;
 
 import com.google.common.base.Joiner;
-import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.util.FormatsUtilGeneric;
+import com.samourai.wallet.utxo.BipUtxo;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.*;
@@ -151,10 +151,10 @@ public class HD_Wallet {
         return segwitAddress;
     }
 
-    public HD_Address getAddressAt(int account, UnspentOutput utxo) {
-        if (!utxo.hasPath()) {
+    public HD_Address getAddressAt(int account, BipUtxo utxo) {
+        if (utxo.isBip47()) {
             return null; // bip47
         }
-        return getAddressAt(account, utxo.computePathChainIndex(), utxo.computePathAddressIndex());
+        return getAddressAt(account, utxo.getChainIndex(), utxo.getAddressIndex());
     }
 }

@@ -1,14 +1,16 @@
 package com.samourai.wallet.bipWallet;
 
-import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.util.FormatsUtilGeneric;
+import com.samourai.wallet.util.UtxoUtil;
+import com.samourai.wallet.utxo.BipUtxo;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BipDerivation {
   private static final Logger log = LoggerFactory.getLogger(BipDerivation.class);
+  private static final UtxoUtil utxoUtil = UtxoUtil.getInstance();
 
   private int purpose;
   private int accountIndex;
@@ -28,8 +30,8 @@ public class BipDerivation {
     return HD_Address.getPathChain(purpose, coinType, accountIndex, chainIndex);
   }
 
-  public String getPathAddress(UnspentOutput utxo, NetworkParameters params) {
-    return utxo.getPathAddress(purpose, accountIndex, params);
+  public String getPathAddress(BipUtxo utxo, NetworkParameters params) {
+    return utxoUtil.getPathAddress(utxo, purpose, accountIndex, params);
   }
 
   public String getPathAddress(HD_Address hdAddress) {
