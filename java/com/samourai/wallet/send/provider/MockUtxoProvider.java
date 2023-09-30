@@ -45,11 +45,6 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
     }
   }
 
-  public void setRetroCompatibilityMode() {
-    // for retro-compatible tests
-    this.forcedWalletUniqueId = 1000;
-  }
-
   public void clear() {
     // reset indexs
     for (WhirlpoolAccount whirlpoolAccount : WhirlpoolAccount.values()) {
@@ -147,5 +142,9 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
 
   public CahootsUtxoProvider getCahootsUtxoProvider() {
     return cahootsUtxoProvider;
+  }
+
+  public WalletSupplier getWalletSupplier() {
+    return walletSupplier;
   }
 }

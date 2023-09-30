@@ -1,6 +1,11 @@
 package com.samourai.wallet.utxo;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class UtxoDetailImpl extends UtxoRefImpl implements UtxoDetail {
+    protected static final Logger log = LoggerFactory.getLogger(UtxoDetailImpl.class);
+
     private long value;
     private String address;
     private Integer confirmedBlockHeight; // null when unconfirmed
@@ -39,6 +44,10 @@ public class UtxoDetailImpl extends UtxoRefImpl implements UtxoDetail {
 
     @Override
     public int getConfirmations(int latestBlockHeight) {
+        if (confirmedBlockHeight == null) {
+            log.warn("getConfirmations() failed: confirmedBlockHeight=null");
+            return 0;
+        }
         return latestBlockHeight-confirmedBlockHeight;
     }
 

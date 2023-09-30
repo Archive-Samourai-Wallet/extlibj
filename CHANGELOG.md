@@ -4,6 +4,11 @@ Changelog for ExtLibJ.
 ## Unreleased
 ### 
 
+- refactor: prepare android integration for tx0x2 *(2023-09-30)*
+
+## 0.0.47-featureTx0-beta2
+### 
+
 - refactor: add utxo abstraction with UtxoRef, UtxoDetail, BipUtxo *(2023-09-25)*
 
 ## 0.0.47-featureTx0-beta1
