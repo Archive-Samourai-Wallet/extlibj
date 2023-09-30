@@ -3,9 +3,11 @@ package com.samourai.wallet.bipWallet;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.hd.BIP_WALLET;
+import com.samourai.wallet.hd.Chain;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 
 import java.util.Collection;
+import java.util.Map;
 
 public interface WalletSupplier {
   Collection<BipWallet> getWallets();
@@ -23,4 +25,7 @@ public interface WalletSupplier {
   String[] getXPubs(boolean withIgnoredAccounts, BipFormat... bipFormats);
 
   BipFormatSupplier getBipFormatSupplier();
+
+  Map<String,Map<Chain,Integer>> indexsBackup();
+  void indexsRestore(Map<String,Map<Chain,Integer>> indexsBackup);
 }

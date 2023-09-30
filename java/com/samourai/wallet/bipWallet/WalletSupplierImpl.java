@@ -4,6 +4,7 @@ import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
 import com.samourai.wallet.hd.BIP_WALLET;
+import com.samourai.wallet.hd.Chain;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.util.Util;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
@@ -123,5 +124,28 @@ public class WalletSupplierImpl implements WalletSupplier {
   @Override
   public BipFormatSupplier getBipFormatSupplier() {
     return bipFormatSupplier;
+  }
+
+  @Override
+  public Map<String, Map<Chain,Integer>> indexsBackup() {
+    Map<String, Map<Chain,Integer>> indexs = new LinkedHashMap<>();
+    for (BipWallet bipWallet : walletsById.values()) {
+      Map<Chain,Integer> indexsByChain = new LinkedHashMap<>();
+      for (Chain chain : Chain.values()) {
+        indexsByChain.put(chain, bipWallet.getIndexHandler(chain).get());
+      }
+      indexs.put(bipWallet.getId(), indexsByChain);
+    }
+    return indexs;
+  }
+
+  @Override
+  public void indexsRestore(Map<String, Map<Chain, Integer>> indexsBackup) {
+    for (BipWallet bipWallet : walletsById.values()) {
+      for (Chain chain : Chain.values()) {
+        int index = indexsBackup.get(bipWallet.getId()).get(chain);
+        bipWallet.getIndexHandler(chain).set(index, true);
+      }
+    }
   }
 }
