@@ -2,12 +2,10 @@ package com.samourai.wallet.bipFormat;
 
 import com.samourai.wallet.segwit.bech32.Bech32Segwit;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
+import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import org.apache.commons.lang3.tuple.Pair;
-import org.bitcoinj.core.Address;
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.TransactionOutput;
+import org.bitcoinj.core.*;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
@@ -69,6 +67,11 @@ public class BipFormatSupplierImpl implements BipFormatSupplier {
     @Override
     public String getToAddress(TransactionOutput output) throws Exception {
         return getToAddress(output.getScriptBytes(), output.getParams());
+    }
+
+    @Override
+    public String getToAddress(MyTransactionOutPoint outPoint) throws Exception {
+        return getToAddress(outPoint.getScriptBytes(), outPoint.getParams());
     }
 
     @Override

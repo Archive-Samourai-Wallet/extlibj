@@ -4,6 +4,7 @@ import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.bipWallet.KeyBag;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.provider.UtxoProvider;
@@ -124,7 +125,7 @@ public class StonewallUtil {
     }
 
     // this will increment change index
-    public SpendSelectionStonewall stonewall(List<UTXO> utxos, List<UTXO> utxosBis, BigInteger spendAmount, String address, WhirlpoolAccount account, UtxoProvider utxoProvider, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb) {
+    public SpendSelectionStonewall stonewall(List<UTXO> utxos, List<UTXO> utxosBis, BigInteger spendAmount, String address, WhirlpoolAccount account, UtxoProvider utxoProvider, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb) throws Exception {
 
         Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> set0 = stonewallSet(utxos, spendAmount, address, null, account, null, utxoProvider, forcedChangeFormat, params, feePerKb);
         if(set0 == null)    {
@@ -179,7 +180,10 @@ public class StonewallUtil {
 //        ret.getRight().addAll(set0.getMiddle());
         ret.getRight().addAll(set1.getMiddle());
 
-        return new SpendSelectionStonewall(utxoProvider.getBipFormatSupplier(), ret.getLeft(), ret.getRight());
+        KeyBag keyBag = new KeyBag();
+        keyBag.addAllUtxos(utxos, utxoProvider);
+
+        return new SpendSelectionStonewall(utxoProvider.getBipFormatSupplier(), ret.getLeft(), ret.getRight(), keyBag);
     }
 
     // this will increment change index
@@ -408,7 +412,7 @@ public class StonewallUtil {
         for(MyTransactionOutPoint outpoint : selectedOutpoints)   {
             inValue += outpoint.getValue().longValue();
             if (log.isDebugEnabled()) {
-                log.debug("input:" + outpoint.getHash().toString() + "-" + outpoint.getIndex() + "," + outpoint.getValue().longValue());
+                log.debug("input:" + outpoint.toString() + "," + outpoint.getValue().longValue());
             }
         }
         long outValue = 0L;

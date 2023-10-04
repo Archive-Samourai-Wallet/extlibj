@@ -3,6 +3,7 @@ package com.samourai.wallet.ricochet;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.BipWallet;
+import com.samourai.wallet.bipWallet.KeyBag;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.SendFactoryGeneric;
@@ -76,10 +77,12 @@ public class RicochetUtilGeneric {
         long hop0MinerFee = pair.getRight();
 
         // hop0 'leaves' wallet, change returned to wallet
+        KeyBag keyBag = new KeyBag();
         Collection<MyTransactionOutPoint> unspent = new ArrayList<MyTransactionOutPoint>();
         long totalValueSelected = UTXO.sumValue(utxos);
         for (UTXO u : utxos) {
             unspent.addAll(u.getOutpoints());
+            keyBag.addAll(u, config.getUtxoProvider());
         }
         long changeAmount = totalValueSelected - (biHop0SpendAmount.longValue() + hop0MinerFee);
         ricochet.setChange_amount(changeAmount);
@@ -88,7 +91,7 @@ public class RicochetUtilGeneric {
         BipWallet bipWalletRicochet = config.getBipWalletRicochet();
         BipAddress bipDestinationAddress = bipWalletRicochet.getNextAddressReceive(true);
         String destinationAddress = bipDestinationAddress.getAddressString();
-        Transaction txHop0 = getHop0Tx(unspent, biHop0SpendAmount.longValue(), changeAmount, destinationAddress, nTimeLock, config);
+        Transaction txHop0 = getHop0Tx(unspent, keyBag, biHop0SpendAmount.longValue(), changeAmount, destinationAddress, nTimeLock, config);
         if (log.isDebugEnabled()) {
             log.debug("+hop0: "+txHop0.toString());
         }
@@ -287,7 +290,7 @@ public class RicochetUtilGeneric {
         return Pair.of(selectedUTXO, minerFee);
     }
 
-    protected Transaction getHop0Tx(Collection<MyTransactionOutPoint> unspent, long spendAmount, long changeAmount, String destination, long nTimeLock, RicochetConfig config) throws Exception {
+    protected Transaction getHop0Tx(Collection<MyTransactionOutPoint> unspent, KeyBag keyBag, long spendAmount, long changeAmount, String destination, long nTimeLock, RicochetConfig config) throws Exception {
 
 //        Log.d("RicochetUtilGeneric", "spendAmount:" + spendAmount);
 //        Log.d("RicochetUtilGeneric", "fee:" + fee);
@@ -309,20 +312,18 @@ public class RicochetUtilGeneric {
             receivers.put(destination, BigInteger.valueOf(spendAmount - samouraiFeeAmount.longValue()));
         }
 
-        UtxoProvider utxoProvider = config.getUtxoProvider();
-        BipFormatSupplier bipFormatSupplier = utxoProvider.getBipFormatSupplier();
+        BipFormatSupplier bipFormatSupplier = config.getUtxoProvider().getBipFormatSupplier();
         NetworkParameters params = config.getBipWalletChange().getParams();
         Transaction tx = sendFactory.makeTransaction(unspent, receivers, bipFormatSupplier, config.isRbfOptIn(), params, config.getLatestBlock());
         if (nTimeLock > 0L) {
             tx.setLockTime(nTimeLock);
         }
-        tx = sendFactory.signTransaction(tx, utxoProvider);
+        tx = sendFactory.signTransaction(tx, keyBag, bipFormatSupplier);
         return tx;
     }
 
     protected Transaction getHopTx(MyTransactionOutPoint prevOutPoint, ECKey prevKey, long spendAmount, String destination, Pair<String, Long> samouraiFeePairBip47, long nTimeLock, RicochetConfig config) throws Exception {
-        UtxoProvider utxoProvider = config.getUtxoProvider();
-        BipFormatSupplier bipFormatSupplier = utxoProvider.getBipFormatSupplier();
+        BipFormatSupplier bipFormatSupplier = config.getUtxoProvider().getBipFormatSupplier();
         NetworkParameters params = prevOutPoint.getParams();
         TransactionOutput txOutputDestination = bipFormatSupplier.getTransactionOutput(destination, spendAmount, params);
 
@@ -349,8 +350,8 @@ public class RicochetUtilGeneric {
         }
         tx.addInput(txInput);
 
-        Map<String, ECKey> keyBag = new LinkedHashMap<>();
-        keyBag.put(txInput.getOutpoint().toString(), prevKey);
+        KeyBag keyBag = new KeyBag();
+        keyBag.add(txInput.getOutpoint(), prevKey.getPrivKeyBytes());
 
         sendFactory.signTransaction(tx, keyBag, bipFormatSupplier);
         assert (0 == tx.getInput(0).getScriptBytes().length);

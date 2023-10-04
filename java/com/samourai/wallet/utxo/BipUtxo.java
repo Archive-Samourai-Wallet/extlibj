@@ -14,6 +14,7 @@ public interface BipUtxo extends UtxoDetail {
     Integer getChainIndex();
     Integer getAddressIndex();
     byte[] getScriptBytes();
+    String getWalletXpub();
 
     BipWallet getBipWallet(WalletSupplier walletSupplier);
     BipAddress getBipAddress(WalletSupplier walletSupplier);

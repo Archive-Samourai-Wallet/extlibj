@@ -22,8 +22,7 @@ import org.bitcoinj.core.TransactionInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +30,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, MultiCahootsContext> {
     private static final Logger log = LoggerFactory.getLogger(MultiCahootsService.class);
@@ -179,7 +177,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
             throw new Exception("Invalid amount");
         }
         CahootsWallet cahootsWallet = cahootsContext.getCahootsWallet();
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowawayContext.getAccount());
+        Collection<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowawayContext.getAccount());
         ArrayList<CahootsUtxo> filteredUtxos = new ArrayList<>();
 
         // Filter out all Whirlpool UTXOs from all tiers (0.001, 0.01, 0.05, 0.5), so that change and other mixed UTXOs are included

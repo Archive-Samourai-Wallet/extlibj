@@ -6,6 +6,7 @@ import com.samourai.wallet.utxo.BipUtxo;
 import com.samourai.wallet.utxo.UtxoDetail;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.TransactionOutPoint;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,14 +26,14 @@ public class UtxoUtil {
     return instance;
   }
 
-  public MyTransactionOutPoint computeOutpoint(BipUtxo utxo, NetworkParameters params) {
-    return computeOutpoint(utxo, utxo.getScriptBytes(), params);
+  public MyTransactionOutPoint computeOutpoint(BipUtxo utxo) {
+    return computeOutpoint(utxo, utxo.getScriptBytes());
   }
 
-  public MyTransactionOutPoint computeOutpoint(UtxoDetail utxo, byte[] scriptBytes, NetworkParameters params) {
+  public MyTransactionOutPoint computeOutpoint(UtxoDetail utxo, byte[] scriptBytes) {
     Sha256Hash sha256Hash = Sha256Hash.wrap(Hex.decode(utxo.getTxHash()));
     // use MyTransactionOutPoint to forward scriptBytes + address
-    return new MyTransactionOutPoint(params, sha256Hash, utxo.getTxOutputIndex(), BigInteger.valueOf(utxo.getValue()), scriptBytes, utxo.getAddress(), 0);
+    return new MyTransactionOutPoint(utxo.getParams(), sha256Hash, utxo.getTxOutputIndex(), BigInteger.valueOf(utxo.getValue()), scriptBytes, utxo.getAddress(), 0);
   }
 
   public String getPathAddress(BipUtxo utxo, int purpose, int accountIndex, NetworkParameters params) {
@@ -84,5 +85,18 @@ public class UtxoUtil {
     } catch (Exception e) {
       return null;
     }
+  }
+
+  public String utxoToKey(BipUtxo bipUtxo) {
+    return utxoToKey(bipUtxo.getTxHash(), bipUtxo.getTxOutputIndex());
+  }
+
+  public String utxoToKey(TransactionOutPoint outPoint) {
+    return utxoToKey(outPoint.getHash().toString(), (int)outPoint.getIndex());
+  }
+
+
+  public String utxoToKey(String utxoHash, int utxoIndex) {
+    return utxoHash + ':' + utxoIndex;
   }
 }

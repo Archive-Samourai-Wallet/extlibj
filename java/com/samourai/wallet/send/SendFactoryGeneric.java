@@ -10,20 +10,22 @@ import com.samourai.wallet.bipWallet.KeyBag;
 import com.samourai.wallet.send.exceptions.MakeTxException;
 import com.samourai.wallet.send.exceptions.SignTxException;
 import com.samourai.wallet.send.exceptions.SignTxLengthException;
-import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.TxUtil;
+import com.samourai.wallet.util.UtxoUtil;
 import org.bitcoinj.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Function;
 
 //import android.util.Log;
 
 public class SendFactoryGeneric {
     private static final Logger log = LoggerFactory.getLogger(SendFactoryGeneric.class);
+    private static final UtxoUtil utxoUtil = UtxoUtil.getInstance();
 
     private static SendFactoryGeneric instance = null;
     public static SendFactoryGeneric getInstance() {
@@ -48,12 +50,6 @@ public class SendFactoryGeneric {
     Used by spends
      */
     public Transaction makeTransaction(Map<String, Long> receivers, Collection<MyTransactionOutPoint> unspent, BipFormatSupplier bipFormatSupplier, boolean rbfOptIn, NetworkParameters params, long blockHeight) throws MakeTxException {
-
-        BigInteger amount = BigInteger.ZERO;
-        for(Iterator<Map.Entry<String, Long>> iterator = receivers.entrySet().iterator(); iterator.hasNext();) {
-            Map.Entry<String, Long> mapEntry = iterator.next();
-            amount = amount.add(BigInteger.valueOf(mapEntry.getValue()));
-        }
 
         Transaction tx = new Transaction(params);
         if(receivers.size() == 4 && blockHeight > 0L)    {
@@ -128,50 +124,52 @@ public class SendFactoryGeneric {
         return tx;
     }
 
-    public Transaction signTransaction(Transaction unsignedTx, UtxoKeyProvider utxoProvider) throws SignTxException {
-        HashMap<String,ECKey> keyBag = new HashMap<String,ECKey>();
-        for (TransactionInput input : unsignedTx.getInputs()) {
-            try {
-//                Log.i("SendFactory", "connected pubkey script:" + Hex.toHexString(scriptBytes));
-//                Log.i("SendFactory", "address from script:" + address);
-                String hash = input.getOutpoint().getHash().toString();
-                int index = (int)input.getOutpoint().getIndex();
-                byte[] privKey = utxoProvider._getPrivKey(hash, index);
-                if(privKey == null) {
-                    throw new Exception("Key not found for input: "+hash+":"+index);
-                }
-                keyBag.put(input.getOutpoint().toString(), ECKey.fromPrivate(privKey));
-            }
-            catch(Exception e) {
-                throw new SignTxException(e);
-            }
-        }
-
-        return signTransaction(unsignedTx, keyBag, utxoProvider.getBipFormatSupplier());
-    }
-
     // used by Android
     public Transaction signTransaction(Transaction transaction, Map<String,ECKey> keyBag) throws SignTxException {
         return signTransaction(transaction, keyBag, BIP_FORMAT.PROVIDER);
+    }
+
+    public Transaction signTransaction(Transaction transaction, KeyBag keyBag) throws SignTxException {
+        return signTransaction(transaction, keyBag.toMap());
+    }
+
+    public Transaction signTransaction(Transaction transaction, Map<String,ECKey> keyBag, BipFormatSupplier bipFormatSupplier) throws SignTxException {
+        return signTransaction(transaction, keyBag, bipFormatSupplier, null);
     }
 
     public Transaction signTransaction(Transaction transaction, KeyBag keyBag, BipFormatSupplier bipFormatSupplier) throws SignTxException {
         return signTransaction(transaction, keyBag.toMap(), bipFormatSupplier);
     }
 
-    public synchronized Transaction signTransaction(Transaction transaction, Map<String,ECKey> keyBag, BipFormatSupplier bipFormatSupplier) throws SignTxException {
-        List<TransactionInput> inputs = transaction.getInputs();
-
-        for (int i = 0; i < inputs.size(); i++) {
+    public synchronized Transaction signTransaction(Transaction transaction, Map<String,ECKey> keyBag, BipFormatSupplier bipFormatSupplier, Function<TransactionInput,MyTransactionOutPoint> getInputOutPointOrNull) throws SignTxException {
+        int nbSigned = 0;
+        for (int i = 0; i < transaction.getInputs().size(); i++) {
             TransactionInput input = transaction.getInput(i);
-            ECKey key = keyBag.get(input.getOutpoint().toString());
-            try {
-                this.signInput(key, transaction, i, bipFormatSupplier);
-            } catch (Exception e) {
-                log.error("Signing input #"+i+" failed", e);
-                throw new SignTxException("Signing input #"+i+" failed", e);
+            ECKey key = keyBag.get(utxoUtil.utxoToKey(input.getOutpoint()));
+            if (key != null) {
+                try {
+                    // read input info from provided outPoint when available
+                    MyTransactionOutPoint outPoint = getInputOutPointOrNull != null ? getInputOutPointOrNull.apply(input) : null;
+                    this.signInput(key, transaction, i, bipFormatSupplier, outPoint);
+                    nbSigned++;
+                } catch (Exception e) {
+                    log.error("Signing input #" + i + " failed", e);
+                    throw new SignTxException("Signing input #" + i + " failed", e);
+                }
             }
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Signed "+nbSigned+"/"+transaction.getInputs().size()+" inputs");
+        }
+        verifySignedTx(transaction);
+        return transaction;
+    }
+
+    public synchronized Transaction signTransaction(Transaction transaction, KeyBag keyBag, BipFormatSupplier bipFormatSupplier, Function<TransactionInput,MyTransactionOutPoint> getInputOutPoint) throws SignTxException {
+        return signTransaction(transaction, keyBag.toMap(), bipFormatSupplier, getInputOutPoint);
+    }
+
+    protected void verifySignedTx(Transaction transaction) throws SignTxException {
         transaction.verify();
 
         String hexString = TxUtil.getInstance().getTxHex(transaction);
@@ -180,18 +178,33 @@ public class SendFactoryGeneric {
             throw new SignTxLengthException();
 //              Log.i("SendFactory", "Transaction length too long");
         }
-        return transaction;
     }
 
-    public void signInput(ECKey key, Transaction tx, int inputIndex, BipFormatSupplier bipFormatSupplier) throws Exception {
+    public void signInput(ECKey key, Transaction tx, int inputIndex, BipFormatSupplier bipFormatSupplier, MyTransactionOutPoint outPoint) throws Exception {
+        TransactionInput txInput = tx.getInput(inputIndex);
         if (key == null) {
-            throw new Exception("No key found for signing input #"+inputIndex);
+            throw new Exception("No key found for signing input: "+txInput);
         }
 
-        // sign input
-        TransactionInput txInput = tx.getInput(inputIndex);
-        TransactionOutput connectedOutput = txInput.getOutpoint().getConnectedOutput();
-        String inputAddress = bipFormatSupplier.getToAddress(connectedOutput);
+        String inputAddress;
+        if (outPoint != null) {
+            // read input info from provided outPoint
+            inputAddress = bipFormatSupplier.getToAddress(outPoint);
+
+            // set input value from provided outpoint
+            txInput.setValue(outPoint.getValue());
+        } else {
+            // read input info directly from txInput.connectedOutput
+            // this will only work for transactions build interactively, not when imported from raw (ie Cahoots)
+            // for such txs, you need to provide your own outPoint
+            TransactionOutput connectedOutput = txInput.getOutpoint().getConnectedOutput();
+            if (connectedOutput == null) {
+                log.error("Signing input #" + inputIndex + " failed: connectedOutput is null. Try providing getInputOutPoint argument to SendFactoryGeneric.signTransaction()");
+                throw new Exception("Signing input #" + inputIndex + " failed: connectedOutput is null");
+            }
+            inputAddress = bipFormatSupplier.getToAddress(connectedOutput);
+        }
+
         BipFormat addressFormat = bipFormatSupplier.findByAddress(inputAddress, tx.getParams());
 
         if (log.isDebugEnabled()) {

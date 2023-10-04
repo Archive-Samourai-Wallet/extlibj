@@ -2,6 +2,9 @@ package com.samourai.wallet.utxo;
 
 import java.util.Comparator;
 
+/**
+ * sort in ascending order by value
+ */
 public class UtxoDetailComparator implements Comparator<UtxoDetail> {
   public UtxoDetailComparator() {}
 

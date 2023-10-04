@@ -27,11 +27,7 @@ public class MyTransactionOutPoint extends TransactionOutPoint {
     }
 
     public static long sumValue(Collection<MyTransactionOutPoint> outpoints) {
-        long sum = 0L;
-        for (MyTransactionOutPoint outpoint : outpoints) {
-            sum += outpoint.getValue().longValue();
-        }
-        return sum;
+        return outpoints.stream().mapToLong(utxo -> utxo.getValue().getValue()).sum();
     }
 
     public int getConfirmations() {
@@ -78,5 +74,12 @@ public class MyTransactionOutPoint extends TransactionOutPoint {
 
     public Sha256Hash getTxHash() {
         return getHash();
+    }
+
+    @Override
+    public String toString() {
+        return "utxo="+super.toString()+
+                ", value=" + value +
+                ", address='" + address + '\'';
     }
 }

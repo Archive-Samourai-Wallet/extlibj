@@ -6,17 +6,21 @@ import com.samourai.soroban.cahoots.TxBroadcastInteraction;
 import com.samourai.soroban.cahoots.TypeInteraction;
 import com.samourai.soroban.client.SorobanInteraction;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.bipWallet.KeyBag;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.MyTransactionOutPoint;
+import com.samourai.wallet.util.UtxoUtil;
 import org.bitcoinj.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractCahootsService<T extends Cahoots, C extends CahootsContext> {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahootsService.class);
+    private static final UtxoUtil utxoUtil = UtxoUtil.getInstance();
 
     private CahootsType cahootsType;
     private BipFormatSupplier bipFormatSupplier;
@@ -67,42 +71,22 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
         return null;
     }
 
-    protected HashMap<String, ECKey> computeKeyBag(Cahoots2x cahoots, List<CahootsUtxo> utxos) {
-        // utxos by hash
-        HashMap<String, CahootsUtxo> utxosByHash = new HashMap<String, CahootsUtxo>();
-        for (CahootsUtxo utxo : utxos) {
-            MyTransactionOutPoint outpoint = utxo.getOutpoint();
-            utxosByHash.put(outpoint.getHash().toString() + "-" + outpoint.getIndex(), utxo);
-        }
-
-        Transaction transaction = cahoots.getTransaction();
-        HashMap<String, ECKey> keyBag = new HashMap<String, ECKey>();
-        for (TransactionInput input : transaction.getInputs()) {
-            TransactionOutPoint outpoint = input.getOutpoint();
-            String key = outpoint.getHash().toString() + "-" + outpoint.getIndex();
-            if (utxosByHash.containsKey(key)) {
-                CahootsUtxo utxo = utxosByHash.get(key);
-                ECKey eckey = ECKey.fromPrivate(utxo.getKey());
-                keyBag.put(outpoint.toString(), eckey);
-            }
-        }
-        return keyBag;
-    }
-
     // verify
 
-    protected long computeSpendAmount(HashMap<String,ECKey> keyBag, Cahoots2x cahoots, C cahootsContext) throws Exception {
+    protected long computeSpendAmount(Cahoots2x cahoots, C cahootsContext) throws Exception {
+        KeyBag keyBag = cahootsContext.getKeyBag();
         long spendAmount = 0;
 
         String prefix = "["+cahootsContext.getCahootsType()+"/"+cahootsContext.getTypeUser()+"] ";
         if (log.isDebugEnabled()) {
-            log.debug(prefix+"computeSpendAmount: keyBag="+keyBag.keySet());
+            log.debug(prefix+"computeSpendAmount: keyBag="+keyBag);
         }
         Transaction transaction = cahoots.getTransaction();
         for(TransactionInput input : transaction.getInputs()) {
             TransactionOutPoint outpoint = input.getOutpoint();
-            if (keyBag.containsKey(outpoint.toString())) {
-                Long inputValue = cahoots.getOutpoints().get(outpoint.getHash().toString() + "-" + outpoint.getIndex());
+
+            if (keyBag.getPrivKeyBytes(outpoint) != null) {
+                Long inputValue = cahoots.getOutpointValue(outpoint);
                 if (inputValue != null) {
                     if (log.isDebugEnabled()) {
                         log.debug(prefix+"computeSpendAmount: +input "+inputValue + " "+outpoint.toString());
@@ -144,8 +128,7 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
         Transaction tx = cahoots.getTransaction();
         long fee = 0;
         for (TransactionInput txInput : tx.getInputs()) {
-            TransactionOutPoint txOut = txInput.getOutpoint();
-            long value = cahoots.getOutpoints().get(txOut.getHash().toString()+"-"+txOut.getIndex());
+            long value = cahoots.getOutpointValue(txInput.getOutpoint());
             fee += value;
         }
         for (TransactionOutput txOut : tx.getOutputs()) {

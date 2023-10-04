@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 
 public class AbstractTest {
   protected static final Logger log = LoggerFactory.getLogger(AbstractTest.class);
+  private static final UtxoUtil utxoUtil = UtxoUtil.getInstance();
 
   protected static final String SEED_WORDS = "all all all all all all all all all all all all";
   protected static final String SEED_PASSPHRASE = "whirlpool";
@@ -176,9 +177,7 @@ public class AbstractTest {
   }
 
   protected void assertEquals(Collection<UTXO> utxos1, Collection<? extends TransactionOutPoint> utxos2) {
-    Function<TransactionOutPoint,String> outPointToString = outPoint -> {
-      return outPoint.getHash().toString()+"-"+outPoint.getIndex();
-    };
+    Function<TransactionOutPoint,String> outPointToString = outPoint -> utxoUtil.utxoToKey(outPoint);
     Collection<String> utxos1Str = UTXO.listOutpoints(utxos1).stream().map(outPointToString).collect(Collectors.toList());
     Collection<String> utxos2Str = utxos2.stream().map(outPointToString).collect(Collectors.toList());
     Assertions.assertEquals(utxos1Str, utxos2Str);

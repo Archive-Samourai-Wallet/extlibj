@@ -33,8 +33,8 @@ public class KeyBagTest extends AbstractTest {
     BipUtxo utxo3 = utxoProvider.addUtxo(bipWallet, 3333).toBipUtxos().iterator().next();
     byte[] key1 = utxo1.getBipAddress(walletSupplier).getHdAddress().getECKey().getPrivKeyBytes();
     byte[] key2 = utxo2.getBipAddress(walletSupplier).getHdAddress().getECKey().getPrivKeyBytes();
-    keyBag.add(utxo1, walletSupplier);
-    keyBag.add(utxo2, walletSupplier);
+    keyBag.add(utxo1, utxoProvider);
+    keyBag.add(utxo2, utxoProvider);
 
     // verify
     Assertions.assertArrayEquals(key1, keyBag.getPrivKeyBytes(utxo1));
@@ -50,7 +50,7 @@ public class KeyBagTest extends AbstractTest {
     BipUtxo utxo3 = utxoProvider.addUtxo(bipWallet, 3333).toBipUtxos().iterator().next();
     byte[] key1 = utxo1.getBipAddress(walletSupplier).getHdAddress().getECKey().getPrivKeyBytes();
     byte[] key2 = utxo2.getBipAddress(walletSupplier).getHdAddress().getECKey().getPrivKeyBytes();
-    keyBag.addAll(Arrays.asList(utxo1, utxo2), walletSupplier);
+    keyBag.addAll(Arrays.asList(utxo1, utxo2), utxoProvider);
 
     // verify
     Assertions.assertArrayEquals(key1, keyBag.getPrivKeyBytes(utxo1));

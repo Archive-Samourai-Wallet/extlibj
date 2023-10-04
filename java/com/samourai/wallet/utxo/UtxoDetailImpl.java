@@ -1,5 +1,6 @@
 package com.samourai.wallet.utxo;
 
+import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,12 +10,22 @@ public class UtxoDetailImpl extends UtxoRefImpl implements UtxoDetail {
     private long value;
     private String address;
     private Integer confirmedBlockHeight; // null when unconfirmed
+    private NetworkParameters params;
 
-    public UtxoDetailImpl(String txHash, int txOutputIndex, long value, String address, Integer confirmedBlockHeight) {
+    public UtxoDetailImpl(String txHash, int txOutputIndex, long value, String address, Integer confirmedBlockHeight, NetworkParameters params) {
         super(txHash, txOutputIndex);
         this.value = value;
         this.address = address;
         this.confirmedBlockHeight = confirmedBlockHeight;
+        this.params = params;
+    }
+
+    public UtxoDetailImpl(UtxoDetail utxoDetail) {
+        super(utxoDetail);
+        this.value = utxoDetail.getValue();
+        this.address = utxoDetail.getAddress();
+        this.confirmedBlockHeight = utxoDetail.getConfirmedBlockHeight();
+        this.params = utxoDetail.getParams();
     }
 
     @Override
@@ -49,6 +60,11 @@ public class UtxoDetailImpl extends UtxoRefImpl implements UtxoDetail {
             return 0;
         }
         return latestBlockHeight-confirmedBlockHeight;
+    }
+
+    @Override
+    public NetworkParameters getParams() {
+        return params;
     }
 
     @Override

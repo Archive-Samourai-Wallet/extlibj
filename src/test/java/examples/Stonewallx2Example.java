@@ -12,7 +12,7 @@ import org.bitcoinj.params.TestNet3Params;
 import java.util.Optional;
 
 public class Stonewallx2Example {
-    // TODO instanciate real wallets here!
+    // instanciate real wallets here!
     private static final CahootsWallet cahootsWalletSender = null; // new CahootsWallet(...)
     private static final CahootsWallet cahootsWalletCounterparty = null; // new CahootsWallet(...)
 

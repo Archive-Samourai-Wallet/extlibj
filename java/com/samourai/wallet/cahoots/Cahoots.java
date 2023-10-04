@@ -2,17 +2,14 @@ package com.samourai.wallet.cahoots;
 
 import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.api.backend.IPushTx;
-import com.samourai.wallet.cahoots.multi.MultiCahoots;
 import com.samourai.wallet.cahoots.psbt.PSBT;
-import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
-import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.util.TxUtil;
-import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionOutPoint;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
 import org.json.JSONException;
@@ -21,10 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
 
 // shared payload for any Cahoots: Stonewallx2, Stowaway, MultiCahoots
-public abstract class Cahoots {
+public abstract class Cahoots<C extends CahootsContext> {
     private static final Logger log = LoggerFactory.getLogger(Cahoots.class);
 
     private int version = 2;
@@ -163,13 +159,15 @@ public abstract class Cahoots {
         return toJSON().toString();
     }
 
-    public abstract void signTx(HashMap<String, ECKey> keyBag);
+    public abstract void signTx(C cahootsContext) throws Exception;
 
     // getters below are used by Android review fragment
 
     public abstract long getFeeAmount(); // fee amount expected
 
-    public abstract HashMap<String, Long> getOutpoints();
+    public abstract Long getOutpointValue(TransactionOutPoint txOut);
+    public abstract Long getOutpointsSum();
+    public abstract void setOutpointValue(TransactionOutPoint txOut, long value);
 
     public abstract String getDestination();
 
@@ -184,7 +182,7 @@ public abstract class Cahoots {
 
     public abstract PSBT getPSBT();
 
-    public abstract SpendTx getSpendTx(CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) throws SpendException;
+    public abstract SpendTx getSpendTx(C cahootsContext, UtxoKeyProvider utxoKeyProvider) throws SpendException;
 
     public void pushTx(IPushTx pushTx) throws Exception {
         String txHex = TxUtil.getInstance().getTxHex(getTransaction());

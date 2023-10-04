@@ -133,7 +133,7 @@ public class CryptoTestUtil {
         // sign
         for (int i=0; i<tx.getInputs().size(); i++) {
             ECKey privKey = privKeys.get(i);
-            SendFactoryGeneric.getInstance().signInput(privKey, tx, i, bipFormatSupplier);
+            SendFactoryGeneric.getInstance().signInput(privKey, tx, i, bipFormatSupplier, null);
         }
 
         tx.verify();
@@ -148,8 +148,8 @@ public class CryptoTestUtil {
         String address = bipFormat.getToAddress(privKey, params);
         String inputHash = "598cbf9f11ab9a1a5e788dbd11a7cf970089cec43e04fc073eb91c0a5717fd0e";
         byte[] scriptBytes = bipFormatSupplier.getTransactionOutput(address, value, params).getScriptBytes();
-        UtxoDetail utxo = new UtxoDetailImpl(inputHash, tx.getInputs().size(), value, address, 0);
-        TransactionInput input = utxoUtil.computeOutpoint(utxo, scriptBytes, params).computeSpendInput();
+        UtxoDetail utxo = new UtxoDetailImpl(inputHash, tx.getInputs().size(), value, address, 0, params);
+        TransactionInput input = utxoUtil.computeOutpoint(utxo, scriptBytes).computeSpendInput();
         tx.addInput(input);
     }
 

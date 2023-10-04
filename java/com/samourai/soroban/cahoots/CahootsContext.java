@@ -1,11 +1,13 @@
 package com.samourai.soroban.cahoots;
 
 import com.samourai.soroban.client.SorobanContext;
+import com.samourai.wallet.bipWallet.KeyBag;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsTypeUser;
 import com.samourai.wallet.cahoots.CahootsUtxo;
 import com.samourai.wallet.cahoots.CahootsWallet;
 import com.samourai.wallet.cahoots.multi.MultiCahootsContext;
+import com.samourai.wallet.send.MyTransactionOutPoint;
 import org.bitcoinj.core.TransactionInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +25,10 @@ public abstract class CahootsContext implements SorobanContext {
     private Long amount; // only set for initiator
     private String address; // only set for initiator
     private Set<String> outputAddresses; // keep track of our own change addresses outputs
-    private List<CahootsUtxo> inputs; // keep track of our own inputs
+    private Collection<MyTransactionOutPoint> inputs; // keep track of our own inputs
     private long samouraiFee; // keep track of samourai fee
     private long minerFeePaid; // keep track of paid minerFee (lower or equals cahoots.fee)
+    private KeyBag keyBag;
 
     protected CahootsContext(CahootsWallet cahootsWallet, CahootsTypeUser typeUser, CahootsType cahootsType, int account, Long feePerB, Long amount, String address) {
         this.cahootsWallet = cahootsWallet;
@@ -39,6 +42,7 @@ public abstract class CahootsContext implements SorobanContext {
         this.inputs = new LinkedList<>();
         this.samouraiFee = 0;
         this.minerFeePaid = 0;
+        this.keyBag = new KeyBag();
     }
 
     public static CahootsContext newCounterparty(CahootsWallet cahootsWallet, CahootsType cahootsType, int account) throws Exception {
@@ -119,22 +123,23 @@ public abstract class CahootsContext implements SorobanContext {
         outputAddresses.add(address);
     }
 
-    public void addInput(CahootsUtxo cahootsUtxo) {
-        inputs.add(cahootsUtxo);
+    public TransactionInput addInput(MyTransactionOutPoint input, byte[] key) {
+        inputs.add(input);
+        keyBag.add(input, key);
+        return input.computeSpendInput();
     }
 
-    public List<TransactionInput> addInputs(List<CahootsUtxo> inputs) {
+    public Collection<TransactionInput> addInputs(Collection<CahootsUtxo> inputs) {
         List<TransactionInput> inputsA = new LinkedList<>();
 
-        for (CahootsUtxo utxo : inputs) {
-            TransactionInput input = utxo.getOutpoint().computeSpendInput();
-            inputsA.add(input);
-            addInput(utxo);
+        for (CahootsUtxo input : inputs) {
+            TransactionInput txIn = addInput(input.getOutpoint(), input.getKey());
+            inputsA.add(txIn);
         }
         return inputsA;
     }
 
-    public List<CahootsUtxo> getInputs() {
+    public Collection<MyTransactionOutPoint> getInputs() {
         return inputs;
     }
 
@@ -152,5 +157,9 @@ public abstract class CahootsContext implements SorobanContext {
 
     public void setMinerFeePaid(long minerFeePaid) {
         this.minerFeePaid = minerFeePaid;
+    }
+
+    public KeyBag getKeyBag() {
+        return keyBag;
     }
 }

@@ -2,20 +2,20 @@ package com.samourai.wallet.cahoots;
 
 import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.SamouraiWalletConst;
-import com.samourai.wallet.bip69.BIP69InputComparator;
-import com.samourai.wallet.bip69.BIP69OutputComparator;
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.chain.ChainSupplier;
-import com.samourai.wallet.segwit.SegwitAddress;
+import com.samourai.wallet.send.MyTransactionOutPoint;
+import com.samourai.wallet.send.SendFactoryGeneric;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendTxCahoots;
 import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.util.RandomUtil;
+import com.samourai.wallet.util.TxUtil;
+import com.samourai.wallet.util.UtxoUtil;
 import com.samourai.wallet.util.Z85;
 import org.bitcoinj.core.*;
-import org.bitcoinj.crypto.TransactionSignature;
-import org.bitcoinj.script.Script;
 import org.bouncycastle.util.encoders.Hex;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -23,15 +23,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 // shared payload for 2x Cahoots: Stonewallx2, Stowaway, Tx0x2
 public abstract class Cahoots2x extends Cahoots {
     private static final Logger log = LoggerFactory.getLogger(Cahoots2x.class);
+    private static final TxUtil txUtil = TxUtil.getInstance();
+    private static final SendFactoryGeneric sendFactory = SendFactoryGeneric.getInstance();
 
     // used by Sparrow
     protected static final String BLOCK_HEIGHT_PROPERTY = "com.sparrowwallet.blockHeight";
@@ -42,7 +44,7 @@ public abstract class Cahoots2x extends Cahoots {
     protected PSBT psbt = null;
     protected long spendAmount = 0L;
     protected long feeAmount = 0L;
-    protected HashMap<String,Long> outpoints = null;
+    protected Map<String,Long> outpoints = null;
     protected String strDestination = null;
     protected String strPayNymCollab = null;
     protected String strPayNymInit = null;
@@ -53,7 +55,7 @@ public abstract class Cahoots2x extends Cahoots {
 
     public Cahoots2x()    {
         super();
-        outpoints = new HashMap<String,Long>();
+        outpoints = new HashMap<>();
     }
 
     protected Cahoots2x(Cahoots2x c)    {
@@ -63,7 +65,7 @@ public abstract class Cahoots2x extends Cahoots {
         this.psbt = c.getPSBT();
         this.spendAmount = c.getSpendAmount();
         this.feeAmount = c.getFeeAmount();
-        this.outpoints = c.getOutpoints();
+        this.outpoints = c.outpoints;
         this.strDestination = c.strDestination;
         this.strPayNymCollab = c.strPayNymCollab;
         this.strPayNymInit = c.strPayNymInit;
@@ -79,7 +81,7 @@ public abstract class Cahoots2x extends Cahoots {
         long randomLong = RandomUtil.getInstance().nextLong();
         this.strID = Hex.toHexString(Sha256Hash.hash(BigInteger.valueOf(randomLong).toByteArray()));
         this.spendAmount = spendAmount;
-        this.outpoints = new HashMap<String, Long>();
+        this.outpoints = new HashMap<>();
         this.strDestination = strDestination;
         this.account = account;
         this.fingerprint = fingerprint;
@@ -127,12 +129,24 @@ public abstract class Cahoots2x extends Cahoots {
     }
 
     @Override
-    public HashMap<String, Long> getOutpoints() {
-        return outpoints;
+    public Long getOutpointValue(TransactionOutPoint txOut) {
+        String hashKey = hashKey(txOut);
+        return outpoints.get(hashKey);
     }
 
-    public void setOutpoints(HashMap<String, Long> outpoints) {
-        this.outpoints = outpoints;
+    @Override
+    public Long getOutpointsSum() {
+        return outpoints.values().stream().mapToLong(v->v).sum();
+    }
+
+    @Override
+    public void setOutpointValue(TransactionOutPoint txOut, long value) {
+        String hashKey = hashKey(txOut);
+        outpoints.put(hashKey, value);
+    }
+
+    protected String hashKey(TransactionOutPoint txOut) {
+        return txOut.getHash().toString() + "-" + txOut.getIndex();
     }
 
     @Override
@@ -242,50 +256,25 @@ public abstract class Cahoots2x extends Cahoots {
     }
 
     @Override
-    public void signTx(HashMap<String,ECKey> keyBag) {
+    public void signTx(CahootsContext cahootsContext) throws Exception {
 
         Transaction transaction = psbt.getTransaction();
+
+        System.err.println("BEFORE SIGNATURE: "+txUtil.getTxHex(transaction));
         if (log.isDebugEnabled()) {
             log.debug("signTx:" + transaction.toString());
         }
 
-        for(int i = 0; i < transaction.getInputs().size(); i++)   {
-
-            TransactionInput input = transaction.getInput(i);
-            TransactionOutPoint outpoint = input.getOutpoint();
-            if(keyBag.containsKey(outpoint.toString())) {
-
-                if (log.isDebugEnabled()) {
-                    log.debug("signTx outpoint:" + outpoint.toString());
-                }
-
-                ECKey key = keyBag.get(outpoint.toString());
-                SegwitAddress segwitAddress = new SegwitAddress(key.getPubKey(), getParams());
-
-                if (log.isDebugEnabled()) {
-                    log.debug("signTx bech32:" + segwitAddress.getBech32AsString());
-                }
-
-                final Script redeemScript = segwitAddress.segwitRedeemScript();
-                final Script scriptCode = redeemScript.scriptCode();
-
-                long value = outpoints.get(outpoint.getHash().toString() + "-" + outpoint.getIndex());
-                if (log.isDebugEnabled()) {
-                    log.debug("signTx value:" + value);
-                }
-
-                TransactionSignature sig = transaction.calculateWitnessSignature(i, key, scriptCode, Coin.valueOf(value), Transaction.SigHash.ALL, false);
-                final TransactionWitness witness = new TransactionWitness(2);
-                witness.setPush(0, sig.encodeToBitcoin());
-                witness.setPush(1, key.getPubKey());
-                transaction.setWitness(i, witness);
-
-            }
-
-        }
+        Function<TransactionInput,MyTransactionOutPoint> getInputOutPoint = txInput ->
+                cahootsContext.getInputs().stream().filter(in ->
+                    UtxoUtil.getInstance().utxoToKey(in).equals(UtxoUtil.getInstance().utxoToKey(txInput.getOutpoint())))
+                    .findFirst().orElse(null);
+        Map<String, ECKey> keyBag = cahootsContext.getKeyBag().toMap();
+        sendFactory.signTransaction(transaction, keyBag, BIP_FORMAT.PROVIDER, getInputOutPoint);
 
         psbt.setTransaction(transaction);
 
+        System.err.println("AFTER SIGNATURE: "+TxUtil.getInstance().getTxHex(transaction));
     }
 
     public boolean isContributedAmountSufficient(long totalContributedAmount) {
@@ -309,9 +298,9 @@ public abstract class Cahoots2x extends Cahoots {
     }
 
     //
-    // counterparty
+    // counterparty: initialize TX, append inputs & outputs
     //
-    public void doStep1(List<TransactionInput> inputs, List<TransactionOutput> outputs, ChainSupplier chainSupplier) throws Exception    {
+    public void doStep1(Collection<TransactionInput> inputs, List<TransactionOutput> outputs, ChainSupplier chainSupplier) throws Exception    {
         if(this.getStep() != 0 || this.getSpendAmount() == 0L)   {
             throw new Exception("Invalid step/amount");
         }
@@ -327,9 +316,9 @@ public abstract class Cahoots2x extends Cahoots {
     }
 
     //
-    // sender
+    // sender: append inputs & outputs
     //
-    public void doStep2(List<TransactionInput> inputs, List<TransactionOutput> outputs) throws Exception    {
+    public void doStep2(Collection<TransactionInput> inputs, List<TransactionOutput> outputs) throws Exception    {
         Transaction transaction = psbt.getTransaction();
         appendTx(inputs, outputs, transaction, null); // no need to give chain supplier, psbt should have the lock time
 
@@ -337,57 +326,37 @@ public abstract class Cahoots2x extends Cahoots {
     }
 
     //
-    // counterparty
+    // counterparty: sign
     //
-    public void doStep3(HashMap<String,ECKey> keyBag)    {
-        Transaction transaction = this.getTransaction();
-
-        // sort inputs
-        List<TransactionInput> inputs = new ArrayList<TransactionInput>();
-        inputs.addAll(transaction.getInputs());
-        Collections.sort(inputs, new BIP69InputComparator());
-        transaction.clearInputs();
-        for(TransactionInput input : inputs)    {
-            transaction.addInput(input);
-        }
-
-        // sort outputs
-        List<TransactionOutput> outputs = new ArrayList<TransactionOutput>();
-        outputs.addAll(transaction.getOutputs());
-        Collections.sort(outputs, new BIP69OutputComparator());
-        transaction.clearOutputs();
-        for(TransactionOutput output : outputs)    {
-            transaction.addOutput(output);
-        }
-
-        psbt = new PSBT(transaction);
-
-        signTx(keyBag);
+    public void doStep3(CahootsContext cahootsContext) throws Exception {
+        signTx(cahootsContext);
 
         this.setStep(3);
     }
 
     //
-    // sender
+    // sender: sign
     //
-    public void doStep4(HashMap<String,ECKey> keyBag)    {
-        signTx(keyBag);
-
+    public void doStep4(CahootsContext cahootsContext) throws Exception {
+        signTx(cahootsContext);
         this.setStep(4);
     }
 
-    protected void appendTx(List<TransactionInput> inputs, List<TransactionOutput> outputs, Transaction transaction, ChainSupplier chainSupplier) {
+    protected void appendTx(Collection<TransactionInput> inputs, List<TransactionOutput> outputs, Transaction transaction, ChainSupplier chainSupplier) {
         // append inputs
         for(TransactionInput input : inputs)   {
             input.setSequenceNumber(SEQUENCE_RBF_ENABLED);
             transaction.addInput(input);
-            outpoints.put(input.getOutpoint().getHash().toString() + "-" + input.getOutpoint().getIndex(), input.getValue().longValue());
+            setOutpointValue(input.getOutpoint(), input.getValue().longValue());
         }
 
         // append outputs
         for(TransactionOutput output : outputs)   {
             transaction.addOutput(output);
         }
+
+        // normalize
+        txUtil.sortBip69InputsAndOutputs(transaction);
 
         // used by Sparrow
         String strBlockHeight = System.getProperty(BLOCK_HEIGHT_PROPERTY);

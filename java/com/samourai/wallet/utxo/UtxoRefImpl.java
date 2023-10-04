@@ -9,6 +9,11 @@ public class UtxoRefImpl implements UtxoRef {
         this.txOutputIndex = txOutputIndex;
     }
 
+    public UtxoRefImpl(UtxoRef utxoRef) {
+        this.txHash = utxoRef.getTxHash();
+        this.txOutputIndex = utxoRef.getTxOutputIndex();
+    }
+
     @Override
     public String getTxHash() {
         return txHash;

@@ -129,7 +129,7 @@ public class SweepUtilGeneric {
         final Map<String, Long> receivers = new LinkedHashMap<>();
         receivers.put(receive_address, sweepPreview.getAmount());
         Collection<MyTransactionOutPoint> outpoints = sweepPreview.getUtxos().stream()
-                .map(utxo -> utxoUtil.computeOutpoint(utxo, params)).collect(Collectors.toList());
+                .map(utxo -> utxoUtil.computeOutpoint(utxo)).collect(Collectors.toList());
 
         Transaction tx = sendFactory.makeTransaction(receivers, outpoints, bipFormatSupplier, rbfOptIn, params, blockHeight);
         try {

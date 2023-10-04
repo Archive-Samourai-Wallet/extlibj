@@ -1,10 +1,16 @@
 package com.samourai.wallet.util;
 
+import com.samourai.wallet.bip69.BIP69InputComparator;
+import com.samourai.wallet.bip69.BIP69OutputComparator;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import org.bitcoinj.core.*;
 import org.bitcoinj.script.Script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class TxUtil {
   private static final Logger log = LoggerFactory.getLogger(TxUtil.class);
@@ -90,5 +96,25 @@ public class TxUtil {
 
   public Transaction fromTxHex(NetworkParameters params, String txHex) {
     return new Transaction(params, org.bitcoinj.core.Utils.HEX.decode(txHex));
+  }
+
+  public void sortBip69InputsAndOutputs(Transaction transaction) {
+    // sort inputs
+    List<TransactionInput> inputs = new ArrayList<TransactionInput>();
+    inputs.addAll(transaction.getInputs());
+    Collections.sort(inputs, new BIP69InputComparator());
+    transaction.clearInputs();
+    for(TransactionInput input : inputs)    {
+      transaction.addInput(input);
+    }
+
+    // sort outputs
+    List<TransactionOutput> outputs = new ArrayList<TransactionOutput>();
+    outputs.addAll(transaction.getOutputs());
+    Collections.sort(outputs, new BIP69OutputComparator());
+    transaction.clearOutputs();
+    for(TransactionOutput output : outputs)    {
+      transaction.addOutput(output);
+    }
   }
 }

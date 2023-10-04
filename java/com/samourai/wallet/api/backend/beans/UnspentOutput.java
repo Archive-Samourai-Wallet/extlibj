@@ -26,6 +26,7 @@ public class UnspentOutput implements BipUtxo {
     public int confirmations;
     private Integer confirmedBlockHeight; // null when unconfirmed
     public Xpub xpub;
+    public NetworkParameters params;
 
     public UnspentOutput() {
     }
@@ -40,6 +41,7 @@ public class UnspentOutput implements BipUtxo {
         this.addr = copy.addr;
         this.confirmations = copy.confirmations;
         this.xpub = copy.xpub;
+        this.params = copy.params;
     }
 
     public UnspentOutput(MyTransactionOutPoint outPoint, String path, String xpub) {
@@ -54,6 +56,7 @@ public class UnspentOutput implements BipUtxo {
         this.xpub = new Xpub();
         this.xpub.path = path;
         this.xpub.m = xpub;
+        this.params = outPoint.getParams();
     }
 
     public String getPath() {
@@ -68,11 +71,7 @@ public class UnspentOutput implements BipUtxo {
     }
 
     public static long sumValue(Collection<UnspentOutput> utxos) {
-        long sumValue = 0;
-        for (UnspentOutput utxo : utxos) {
-            sumValue += utxo.value;
-        }
-        return sumValue;
+        return utxos.stream().mapToLong(utxo -> utxo.getValue()).sum();
     }
 
     public static class Xpub {
@@ -186,5 +185,15 @@ public class UnspentOutput implements BipUtxo {
     @Override
     public byte[] getScriptBytes() {
         return script != null ? Hex.decode(script) : null;
+    }
+
+    @Override
+    public String getWalletXpub() {
+        return getXpubM();
+    }
+
+    @Override
+    public NetworkParameters getParams() {
+        return params;
     }
 }

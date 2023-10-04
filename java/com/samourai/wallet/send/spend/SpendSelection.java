@@ -2,6 +2,7 @@ package com.samourai.wallet.send.spend;
 
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.bipWallet.KeyBag;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.SendFactoryGeneric;
 import com.samourai.wallet.send.UTXO;
@@ -31,11 +32,13 @@ public abstract class SpendSelection {
     private BipFormatSupplier bipFormatSupplier;
     private SpendType spendType;
     private List<UTXO> selectedUTXO;
+    private KeyBag keyBag;
 
     public SpendSelection(BipFormatSupplier bipFormatSupplier, SpendType spendType) {
         this.bipFormatSupplier = bipFormatSupplier;
         this.spendType = spendType;
         this.selectedUTXO = new ArrayList<>();
+        this.keyBag = new KeyBag();
     }
 
     protected BipFormatSupplier getBipFormatSupplier() {
@@ -46,8 +49,14 @@ public abstract class SpendSelection {
         return spendType;
     }
 
-    public void addSelectedUTXO(UTXO utxo) {
+    public void addSelectedUTXO(UTXO utxo, UtxoKeyProvider utxoKeyProvider) throws Exception {
         selectedUTXO.add(utxo);
+        keyBag.addAll(utxo, utxoKeyProvider);
+    }
+
+    public void addSelectedUTXO(UTXO utxo, KeyBag utxoKeyBag) {
+        selectedUTXO.add(utxo);
+        keyBag.addAll(utxo, utxoKeyBag);
     }
 
     public Collection<MyTransactionOutPoint> getSpendFrom() {
@@ -70,16 +79,17 @@ public abstract class SpendSelection {
     }
 
     protected SpendTx computeSpendTx(long amount, boolean entireBalance, long minerFee, long change, Map<String, Long> receivers, boolean rbfOptIn, UtxoKeyProvider keyProvider, NetworkParameters params, long blockHeight) throws SpendException {
+        BipFormatSupplier bipFormatSupplier = keyProvider.getBipFormatSupplier();
         // spend tx
         Transaction tx;
         try {
-            tx = SendFactoryGeneric.getInstance().makeTransaction(receivers, getSpendFrom(), keyProvider.getBipFormatSupplier(), rbfOptIn, params, blockHeight);
+            tx = SendFactoryGeneric.getInstance().makeTransaction(receivers, getSpendFrom(), bipFormatSupplier, rbfOptIn, params, blockHeight);
         } catch (MakeTxException e) {
             log.error("MakeTxException", e);
             throw new SpendException(SpendError.MAKING);
         }
         try {
-            tx = SendFactoryGeneric.getInstance().signTransaction(tx, keyProvider);
+            tx = SendFactoryGeneric.getInstance().signTransaction(tx, keyBag, bipFormatSupplier);
         } catch (SignTxException e) {
             log.error("spendTx failed", e);
             throw new SpendException(SpendError.SIGNING);

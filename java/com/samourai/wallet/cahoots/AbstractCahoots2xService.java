@@ -4,13 +4,11 @@ import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.soroban.cahoots.TypeInteraction;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
-import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Objects;
 
 public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends CahootsContext> extends AbstractCahootsService<T,C> {
@@ -85,14 +83,12 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
     public T doStep3(T cahoots2, C cahootsContext) throws Exception {
         debug("BEGIN doStep3", cahoots2, cahootsContext);
 
-        HashMap<String, ECKey> keyBag_A = computeKeyBag(cahoots2, cahootsContext.getInputs());
-
         T cahoots3 = (T)cahoots2.copy();
         checkLockTime(cahoots3, cahootsContext);
-        cahoots3.doStep3(keyBag_A);
+        cahoots3.doStep3(cahootsContext);
 
         // check verifiedSpendAmount
-        long verifiedSpendAmount = computeSpendAmount(keyBag_A, cahoots3, cahootsContext);
+        long verifiedSpendAmount = computeSpendAmount(cahoots3, cahootsContext);
         checkMaxSpendAmount(verifiedSpendAmount, cahoots3.getFeeAmount(), cahootsContext);
 
         debug("END doStep3", cahoots3, cahootsContext);
@@ -105,14 +101,12 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
     public T doStep4(T cahoots3, C cahootsContext) throws Exception {
         debug("BEGIN doStep4", cahoots3, cahootsContext);
 
-        HashMap<String, ECKey> keyBag_B = computeKeyBag(cahoots3, cahootsContext.getInputs());
-
         T cahoots4 = (T)cahoots3.copy();
         checkLockTime(cahoots4, cahootsContext);
-        cahoots4.doStep4(keyBag_B);
+        cahoots4.doStep4(cahootsContext);
 
         // check verifiedSpendAmount
-        long verifiedSpendAmount = computeSpendAmount(keyBag_B, cahoots4, cahootsContext);
+        long verifiedSpendAmount = computeSpendAmount(cahoots4, cahootsContext);
         checkMaxSpendAmount(verifiedSpendAmount, cahoots4.getFeeAmount(), cahootsContext);
 
         // check fee
@@ -135,7 +129,7 @@ public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends Ca
     public void debug(String info, T cahoots, C cahootsContext) {
         if (log.isDebugEnabled()) {
             log.debug("###### " +info+ " "+cahootsContext.getCahootsType()+"/"+cahootsContext.getTypeUser());
-            log.debug(" * outpoints="+cahoots.getOutpoints());
+            log.debug(" * outpoints="+cahoots.outpoints);
             log.debug(" * tx="+cahoots.getTransaction());
         }
     }

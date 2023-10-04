@@ -90,7 +90,7 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
   public UTXO addUtxo(BipWallet bipWallet, String txid, int n, long value, String address, ECKey ecKey, String path) throws Exception {
     String xpub = bipWallet.getXPub();
     UnspentOutput unspentOutput = computeUtxo(txid, n, path, xpub, address, value, 999, getBipFormatSupplier(), params);
-    MyTransactionOutPoint outPoint = utxoUtil.computeOutpoint(unspentOutput, params);
+    MyTransactionOutPoint outPoint = utxoUtil.computeOutpoint(unspentOutput);
     UTXO utxo = new UTXO(Arrays.asList(outPoint), path, xpub);
     nbUtxos++;
 
@@ -111,6 +111,7 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
     utxo.addr = address;
     utxo.value = value;
     utxo.script = Hex.toHexString(bipFormatSupplier.getTransactionOutput(address, value, params).getScriptBytes());
+    utxo.params = params;
     return utxo;
   }
 
@@ -137,7 +138,7 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
       // TODO zeroleak optimize
       String address = utxo.getOutpoints().iterator().next().getAddress();
       return getBipFormatSupplier().findByAddress(address, params)==bipFormat;
-    }).collect(Collectors.<UTXO>toList());
+    }).collect(Collectors.toList());
   }
 
   public CahootsUtxoProvider getCahootsUtxoProvider() {

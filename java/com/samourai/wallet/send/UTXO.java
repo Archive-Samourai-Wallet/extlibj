@@ -32,6 +32,12 @@ public class UTXO {
         this.xpub = xpub;
     }
 
+    public UTXO(UTXO utxo) {
+        this.outpoints = utxo.outpoints;
+        this.path = utxo.path;
+        this.xpub = utxo.xpub;
+    }
+
     public Collection<? extends BipUtxo> toBipUtxos() {
         Integer chainIndex = UtxoUtil.getInstance().computeChainIndex(path);
         Integer addressIndex = UtxoUtil.getInstance().computeAddressIndex(path);
@@ -39,8 +45,7 @@ public class UTXO {
 
         List<BipUtxo> unspentOutputs = new LinkedList<>();
         for (MyTransactionOutPoint outPoint : outpoints) {
-            unspentOutputs.add(new BipUtxoImpl(outPoint.getTxHash().toString(), outPoint.getTxOutputN(), outPoint.getValue().getValue(), outPoint.getAddress(), null,
-                    xpub, bip47, chainIndex, addressIndex, outPoint.getScriptBytes()));
+            unspentOutputs.add(new BipUtxoImpl(outPoint, null, xpub, bip47, chainIndex, addressIndex));
         }
         return unspentOutputs;
     }
@@ -70,22 +75,11 @@ public class UTXO {
     }
 
     public long getValue() {
-
-        long value = 0L;
-
-        for (MyTransactionOutPoint out : outpoints) {
-            value += out.getValue().longValue();
-        }
-
-        return value;
+        return MyTransactionOutPoint.sumValue(outpoints);
     }
 
     public static long sumValue(Collection<UTXO> utxos) {
-        long sum = 0L;
-        for (UTXO utxo : utxos) {
-            sum += utxo.getValue();
-        }
-        return sum;
+        return utxos.stream().mapToLong(utxo -> utxo.getValue()).sum();
     }
 
     // sorts in descending order by amount
@@ -155,4 +149,10 @@ public class UTXO {
         }).collect(Collectors.toList());
     }
 
+    @Override
+    public String toString() {
+        return  "path="+getPath()+
+                ", xpub="+getXpub()+
+                ", outpoints=" + outpoints;
+    }
 }

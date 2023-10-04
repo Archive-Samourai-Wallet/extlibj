@@ -7,7 +7,6 @@ import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 
 import java.util.Collection;
-import java.util.List;
 
 public class SimpleCahootsUtxoProvider implements CahootsUtxoProvider {
     private UtxoProvider utxoProvider;
@@ -17,7 +16,7 @@ public class SimpleCahootsUtxoProvider implements CahootsUtxoProvider {
     }
 
     @Override
-    public List<CahootsUtxo> getUtxosWpkhByAccount(int account) {
+    public Collection<CahootsUtxo> getUtxosWpkhByAccount(int account) {
         WhirlpoolAccount whirlpoolAccount = SamouraiAccountIndex.find(account);
         Collection<UTXO> utxos = utxoProvider.getUtxos(whirlpoolAccount, BIP_FORMAT.SEGWIT_NATIVE);
         return CahootsUtxo.toCahootsUtxos(utxos, utxoProvider);

@@ -3,6 +3,7 @@ package com.samourai.wallet.send.spend;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.bipWallet.KeyBag;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.beans.SpendError;
@@ -25,19 +26,19 @@ public class SpendSelectionSimple extends SpendSelection {
     private BipFormat changeFormat;
     private boolean entireBalance;
 
-    protected SpendSelectionSimple(BipFormatSupplier bipFormatSupplier, Collection<UTXO> utxos, BipFormat changeFormat, boolean entireBalance) {
+    protected SpendSelectionSimple(BipFormatSupplier bipFormatSupplier, Collection<UTXO> utxos, KeyBag keyBag, BipFormat changeFormat, boolean entireBalance) {
         super(bipFormatSupplier, SpendType.SIMPLE);
 
         for (UTXO utxo : utxos) {
-            addSelectedUTXO(utxo);
+            addSelectedUTXO(utxo, keyBag);
         }
         this.changeFormat = changeFormat;
         this.entireBalance = entireBalance;
     }
 
-    public static SpendSelectionSimple compute(Collection<UTXO> utxos, long amount, BipFormat changeFormat, BipFormatSupplier bipFormatSupplier, NetworkParameters params, BigInteger feePerKb) {
+    public static SpendSelectionSimple compute(Collection<UTXO> utxos, KeyBag keyBag, long amount, BipFormat changeFormat, BipFormatSupplier bipFormatSupplier, NetworkParameters params, BigInteger feePerKb) throws Exception {
         // get smallest 1 UTXO > than spend + fee + dust
-        SpendSelectionSimple spendSelection = computeSingleSmallestUtxo(utxos, amount, changeFormat, bipFormatSupplier, params, feePerKb);
+        SpendSelectionSimple spendSelection = computeSingleSmallestUtxo(utxos, keyBag, amount, changeFormat, bipFormatSupplier, params, feePerKb);
         if (spendSelection != null) {
             if (log.isDebugEnabled()) {
                 log.debug("SIMPLE spending smallest possible utxo");
@@ -46,7 +47,7 @@ public class SpendSelectionSimple extends SpendSelection {
         }
 
         // get largest UTXOs > than spend + fee + dust
-        spendSelection = SpendSelectionSimple.computeMultipleLargestUtxos(utxos, amount, changeFormat, bipFormatSupplier, params, feePerKb);
+        spendSelection = SpendSelectionSimple.computeMultipleLargestUtxos(utxos, keyBag, amount, changeFormat, bipFormatSupplier, params, feePerKb);
         if (spendSelection != null) {
             if (log.isDebugEnabled()) {
                 log.debug("SIMPLE spending multiple utxos");
@@ -56,7 +57,7 @@ public class SpendSelectionSimple extends SpendSelection {
         return null;
     }
 
-    private static SpendSelectionSimple computeSingleSmallestUtxo(Collection<UTXO> utxos, long amount, BipFormat changeFormat, BipFormatSupplier bipFormatSupplier, NetworkParameters params, BigInteger feePerKb) {
+    private static SpendSelectionSimple computeSingleSmallestUtxo(Collection<UTXO> utxos, KeyBag keyBag, long amount, BipFormat changeFormat, BipFormatSupplier bipFormatSupplier, NetworkParameters params, BigInteger feePerKb) throws Exception {
         // sort in ascending order by value
         List<UTXO> sortedUtxos = new ArrayList<>(utxos);
         Collections.sort(sortedUtxos, new UTXO.UTXOComparator());
@@ -74,13 +75,13 @@ public class SpendSelectionSimple extends SpendSelection {
                     log.debug("total value selected:" + u.getValue());
                     log.debug("nb inputs:" + u.getOutpoints().size());
                 }
-                return new SpendSelectionSimple(bipFormatSupplier, Arrays.asList(u), changeFormat, false);
+                return new SpendSelectionSimple(bipFormatSupplier, Arrays.asList(u), keyBag, changeFormat, false);
             }
         }
         return null;
     }
 
-    private static SpendSelectionSimple computeMultipleLargestUtxos(Collection<UTXO> utxos, long amount, BipFormat changeFormat, BipFormatSupplier bipFormatSupplier, NetworkParameters params, BigInteger feePerKb) {
+    private static SpendSelectionSimple computeMultipleLargestUtxos(Collection<UTXO> utxos, KeyBag keyBag, long amount, BipFormat changeFormat, BipFormatSupplier bipFormatSupplier, NetworkParameters params, BigInteger feePerKb) throws Exception {
         // sort in descending order by value
         List<UTXO> sortedUtxos = new ArrayList<>(utxos);
         Collections.sort(sortedUtxos, new UTXO.UTXOComparator());
@@ -113,7 +114,7 @@ public class SpendSelectionSimple extends SpendSelection {
                     log.debug("total value selected:" + totalValueSelected);
                     log.debug("nb inputs:" + selected);
                 }
-                return new SpendSelectionSimple(bipFormatSupplier, selectedUTXO, changeFormat, false);
+                return new SpendSelectionSimple(bipFormatSupplier, selectedUTXO, keyBag, changeFormat, false);
             }
         }
         return null;

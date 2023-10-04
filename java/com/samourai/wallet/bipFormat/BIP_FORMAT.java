@@ -107,6 +107,9 @@ public class BIP_FORMAT {
         public void sign(Transaction tx, int inputIndex, ECKey key) throws Exception {
             TransactionInput txInput = tx.getInput(inputIndex);
             Coin value = txInput.getValue();
+            if (value == null) {
+                throw new Exception("Input value not set: "+txInput);
+            }
 
             SegwitAddress segwitAddress = new SegwitAddress(key.getPubKey(), tx.getParams());
             final Script redeemScript = segwitAddress.segwitRedeemScript();

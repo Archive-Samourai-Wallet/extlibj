@@ -4,14 +4,12 @@ import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.api.backend.IPushTx;
 import com.samourai.wallet.cahoots.Cahoots;
 import com.samourai.wallet.cahoots.CahootsType;
-import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -28,17 +26,13 @@ public class SpendTxCahoots extends SpendTx {
                 cahootsContext.getMinerFeePaid(),
                 cahootsContext.getSamouraiFee(),
                 findChangeAmount(cahoots, cahootsContext, utxoKeyProvider),
-                findSpendFrom(cahootsContext, utxoKeyProvider),
+                cahootsContext.getInputs(),
                 findReceivers(cahoots, utxoKeyProvider),
                 cahoots.getTransaction().getVirtualTransactionSize(),
                 cahoots.getTransaction().getWeight(),
                 cahoots.getTransaction().getHashAsString());
         this.cahoots = cahoots;
         this.cahootsContext = cahootsContext;
-    }
-
-    private static List<MyTransactionOutPoint> findSpendFrom(CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) {
-        return cahootsContext.getInputs().stream().map(input -> input.getOutpoint()).collect(Collectors.toList());
     }
 
     private static Map<String,Long> findReceivers(Cahoots cahoots, UtxoKeyProvider utxoKeyProvider) {

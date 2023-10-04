@@ -2,6 +2,7 @@ package com.samourai.wallet.send.spend;
 
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.bipWallet.KeyBag;
 import com.samourai.wallet.client.indexHandler.IIndexHandler;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
@@ -25,14 +26,16 @@ public class SpendSelectionStonewall extends SpendSelection {
     private static final StonewallUtil stonewallUtil = StonewallUtil.getInstance();
     private List<MyTransactionOutPoint> inputs;
     private List<TransactionOutput> outputs;
+    private KeyBag keyBag;
 
-    protected SpendSelectionStonewall(BipFormatSupplier bipFormatSupplier, List<MyTransactionOutPoint> inputs, List<TransactionOutput> outputs) {
+    protected SpendSelectionStonewall(BipFormatSupplier bipFormatSupplier, List<MyTransactionOutPoint> inputs, List<TransactionOutput> outputs, KeyBag keyBag) {
         super(bipFormatSupplier, SpendType.STONEWALL);
         this.inputs = inputs;
         this.outputs = outputs;
+        this.keyBag = keyBag;
     }
 
-    public static SpendSelectionStonewall compute(UtxoProvider utxoProvider, BipFormat changeFormat, long amount, String address, WhirlpoolAccount account, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb, IIndexHandler changeIndexHandler) {
+    public static SpendSelectionStonewall compute(UtxoProvider utxoProvider, BipFormat changeFormat, long amount, String address, WhirlpoolAccount account, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb, IIndexHandler changeIndexHandler) throws Exception {
         // find inputs
         List<Collection<UTXO>> utxoSets = stonewallUtil.utxoSets(utxoProvider, changeFormat, account);
         Pair<List<UTXO>,List<UTXO>> utxosPair = stonewallUtil.stonewallInputs(utxoSets, changeFormat, amount, params, feePerKb);
@@ -59,7 +62,7 @@ public class SpendSelectionStonewall extends SpendSelection {
             List<MyTransactionOutPoint> outs = new ArrayList<MyTransactionOutPoint>();
             outs.add(outpoint);
             u.setOutpoints(outs);
-            addSelectedUTXO(u);
+            addSelectedUTXO(u, keyBag);
             inputAmount += u.getValue();
         }
 

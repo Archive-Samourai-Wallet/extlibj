@@ -6,19 +6,17 @@ import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.hd.BipAddress;
-import com.samourai.wallet.send.UTXO;
+import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.RandomUtil;
+import com.samourai.wallet.utxo.UtxoDetailComparator;
 import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import org.bitcoinj.core.*;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class StowawayService extends AbstractCahoots2xService<Stowaway, StowawayContext> {
     private static final Logger log = LoggerFactory.getLogger(StowawayService.class);
@@ -106,12 +104,12 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
     public Stowaway doStowaway1(Stowaway stowaway0, StowawayContext cahootsContext, List<String> seenTxs) throws Exception {
         CahootsWallet cahootsWallet = cahootsContext.getCahootsWallet();
         int account = cahootsContext.getAccount();
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
+        Collection<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
         int receiveAccount = SamouraiAccountIndex.DEPOSIT; //counterparty should always receive Stowaway to DEPOSIT
         return doStowaway1(stowaway0, cahootsContext, utxos, receiveAccount, seenTxs);
     }
 
-    public Stowaway doStowaway1(Stowaway stowaway0, StowawayContext cahootsContext, List<CahootsUtxo> utxos, int receiveAccount, List<String> seenTxs) throws Exception {
+    public Stowaway doStowaway1(Stowaway stowaway0, StowawayContext cahootsContext, Collection<CahootsUtxo> utxos, int receiveAccount, List<String> seenTxs) throws Exception {
         debug("BEGIN doStowaway1", stowaway0, cahootsContext);
 
         CahootsWallet cahootsWallet = cahootsContext.getCahootsWallet();
@@ -124,8 +122,8 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         //
         //
 
-        List<CahootsUtxo> selectedUTXO = selectUtxos1(stowaway0, utxos, seenTxs);
-        List<TransactionInput> inputsA = cahootsContext.addInputs(selectedUTXO);
+        Collection<CahootsUtxo> selectedUTXO = selectUtxos1(stowaway0, utxos, seenTxs);
+        Collection<TransactionInput> inputsA = cahootsContext.addInputs(selectedUTXO);
 
         // receive output
         BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(receiveAccount, true, BIP_FORMAT.SEGWIT_NATIVE);
@@ -146,15 +144,16 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         return stowaway1;
     }
 
-    protected List<CahootsUtxo> selectUtxos1(Cahoots2x stowaway0, List<CahootsUtxo> utxos, List<String> seenTxs) throws Exception {
-        // sort in ascending order by value
-        Collections.sort(utxos, new UTXO.UTXOComparator());
+    protected Collection<CahootsUtxo> selectUtxos1(Cahoots2x stowaway0, Collection<CahootsUtxo> utxosUnsorted, List<String> seenTxs) throws Exception {
+        // sort in descending order by value
+        List<CahootsUtxo> utxos = new LinkedList<>(utxosUnsorted);
+        Collections.sort(utxos, new UtxoDetailComparator().reversed());
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
         }
 
         List<String> _seenTxs = seenTxs;
-        List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
+        List<CahootsUtxo> selectedUTXO = new ArrayList<>();
         long totalContributedAmount = 0L;
         List<CahootsUtxo> highUTXO = new ArrayList<CahootsUtxo>();
         for (CahootsUtxo utxo : utxos) {
@@ -217,17 +216,16 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         int nbIncomingInputs = transaction.getInputs().size();
 
         CahootsWallet cahootsWallet = cahootsContext.getCahootsWallet();
-        List<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(stowaway1.getAccount());
+        List<CahootsUtxo> utxos = new LinkedList<>(cahootsWallet.getUtxosWpkhByAccount(stowaway1.getAccount()));
         // sort in ascending order by value
-        Collections.sort(utxos, new UTXO.UTXOComparator());
-        Collections.reverse(utxos);
+        Collections.sort(utxos, new UtxoDetailComparator());
 
         if (log.isDebugEnabled()) {
             log.debug("BIP84 utxos:" + utxos.size());
         }
 
         List<String> _seenTxs = seenTxs;
-        List<CahootsUtxo> selectedUTXO = new ArrayList<CahootsUtxo>();
+        List<CahootsUtxo> selectedUTXO = new ArrayList<>();
         int nbTotalSelectedOutPoints = 0;
         long totalSelectedAmount = 0L;
         List<CahootsUtxo> lowUTXO = new ArrayList<CahootsUtxo>();
@@ -266,7 +264,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
                 if (stowaway1.isContributedAmountSufficient(totalSelectedAmount, estimatedFee(nbTotalSelectedOutPoints, nbIncomingInputs, feePerB))) {
 
                     // discard "extra" utxo, if any
-                    List<CahootsUtxo> _selectedUTXO = new ArrayList<CahootsUtxo>();
+                    List<CahootsUtxo> _selectedUTXO = new ArrayList<>();
                     Collections.reverse(selectedUTXO);
                     int _nbTotalSelectedOutPoints = 0;
                     long _totalSelectedAmount = 0L;
@@ -309,15 +307,12 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         //
         //
 
-        List<TransactionInput> inputsB = cahootsContext.addInputs(selectedUTXO);
+        Collection<TransactionInput> inputsB = cahootsContext.addInputs(selectedUTXO);
 
         List<TransactionOutput> outputsB = new LinkedList<>();
 
         // tx: modify receive output: spendAmount + sum(counterparty inputs)
-        long counterpartyContributedAmount = 0L;
-        for(Long value : stowaway1.getOutpoints().values())   {
-            counterpartyContributedAmount += value;
-        }
+        long counterpartyContributedAmount = stowaway1.getOutpointsSum();
         long spendAmount = transaction.getOutput(0).getValue().longValue();
         TransactionOutput spendOutput = transaction.getOutput(0);
         spendOutput.setValue(Coin.valueOf(spendAmount + counterpartyContributedAmount));

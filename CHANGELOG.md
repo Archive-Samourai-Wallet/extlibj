@@ -4,6 +4,8 @@ Changelog for ExtLibJ.
 ## Unreleased
 ### 
 
+- refactor: integrate utxo abstraction with Android & CLI + use KeyBag with SpendSelection for cascading spending + use SendFactoryGeneric for signing Cahoots *(2023-10-05)*
+- feature: add WalletSupplier.indexsBackup() & indexsRestore() *(2023-09-30)*
 - refactor: prepare android integration for tx0x2 *(2023-09-30)*
 
 ## 0.0.47-featureTx0-beta2

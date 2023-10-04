@@ -12,16 +12,14 @@ import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.util.TxUtil;
-import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionOutPoint;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-
-public class MultiCahoots extends Cahoots {
+public class MultiCahoots extends Cahoots<MultiCahootsContext> {
     private static final Logger log = LoggerFactory.getLogger(MultiCahoots.class);
 
     protected Stowaway stowaway;
@@ -72,11 +70,11 @@ public class MultiCahoots extends Cahoots {
     }
 
     @Override
-    public void signTx(HashMap<String,ECKey> keyBag) {
+    public void signTx(MultiCahootsContext cahootsContext) throws Exception {
         if(getStep() > 3) {
-            stonewallx2.signTx(keyBag);
+            stonewallx2.signTx(cahootsContext.getStonewallx2Context());
         } else {
-            stowaway.signTx(keyBag);
+            stowaway.signTx(cahootsContext.getStowawayContext());
         }
     }
 
@@ -110,8 +108,18 @@ public class MultiCahoots extends Cahoots {
     }
 
     @Override
-    public HashMap<String, Long> getOutpoints() {
-        return stonewallx2.getOutpoints();
+    public Long getOutpointValue(TransactionOutPoint txOut) {
+        return stonewallx2.getOutpointValue(txOut);
+    }
+
+    @Override
+    public Long getOutpointsSum() {
+        return stonewallx2.getOutpointsSum();
+    }
+
+    @Override
+    public void setOutpointValue(TransactionOutPoint txOut, long value) {
+        stonewallx2.setOutpointValue(txOut, value);
     }
 
     @Override
@@ -146,9 +154,9 @@ public class MultiCahoots extends Cahoots {
     }
 
     @Override
-    public SpendTx getSpendTx(CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) throws SpendException {
+    public SpendTx getSpendTx(MultiCahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) throws SpendException {
         // forward stonewallx2 SpendTx
-        CahootsContext stonewallx2Context = ((MultiCahootsContext)cahootsContext).getStonewallx2Context();
+        CahootsContext stonewallx2Context = cahootsContext.getStonewallx2Context();
         return stonewallx2.getSpendTx(stonewallx2Context, utxoKeyProvider);
     }
 }

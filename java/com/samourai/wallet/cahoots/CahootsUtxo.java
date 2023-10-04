@@ -1,68 +1,65 @@
 package com.samourai.wallet.cahoots;
 
+import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.provider.UtxoKeyProvider;
-import com.samourai.wallet.util.TxUtil;
-import org.bitcoinj.core.Coin;
+import com.samourai.wallet.util.UtxoUtil;
+import com.samourai.wallet.utxo.BipUtxo;
+import com.samourai.wallet.utxo.BipUtxoImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.stream.Collectors;
 
-public class CahootsUtxo extends UTXO {
+public class CahootsUtxo extends BipUtxoImpl implements BipUtxo {
     private static final Logger log = LoggerFactory.getLogger(CahootsUtxo.class);
+    private static final UtxoUtil utxoUtil = UtxoUtil.getInstance();
 
-    private MyTransactionOutPoint outpoint;
     private byte[] key;
 
-    public CahootsUtxo(MyTransactionOutPoint cahootsOutpoint, String path, String xpub, byte[] key) {
-        super(new LinkedList<>(Arrays.asList(new MyTransactionOutPoint[]{cahootsOutpoint})), path, xpub);
-        this.outpoint = cahootsOutpoint;
+    public CahootsUtxo(BipUtxo bipUtxo, byte[] key) {
+        super(bipUtxo);
         this.key = key;
     }
 
-    public MyTransactionOutPoint getOutpoint() {
-        return outpoint;
+    public CahootsUtxo(MyTransactionOutPoint outPoint, Integer confirmedBlockHeight, String walletXpub, HD_Address hdAddress) {
+        super(new BipUtxoImpl(outPoint, confirmedBlockHeight, walletXpub, hdAddress));
+        this.key = hdAddress.getECKey().getPrivKeyBytes();
+    }
+
+    public CahootsUtxo(CahootsUtxo cahootsUtxo) {
+        super(cahootsUtxo);
+        this.key = cahootsUtxo.getKey();
     }
 
     public byte[] getKey() {
         return key;
     }
 
-    public static Coin sumValue(List<CahootsUtxo> utxos) {
-        Coin balance = Coin.ZERO;
-        for(CahootsUtxo cahootsUtxo : utxos) {
-            balance = balance.add(cahootsUtxo.getOutpoint().getValue());
-        }
-        return balance;
+    public static long sumValue(Collection<CahootsUtxo> utxos) {
+        return utxos.stream().mapToLong(utxo -> utxo.getValue()).sum();
     }
 
-    public static List<CahootsUtxo> toCahootsUtxos(Collection<UTXO> utxos, UtxoKeyProvider keyProvider) {
+    public MyTransactionOutPoint getOutpoint() {
+        return utxoUtil.computeOutpoint(this);
+    }
+
+    public static Collection<CahootsUtxo> toCahootsUtxos(Collection<UTXO> utxos, UtxoKeyProvider keyProvider) {
         return utxos.stream().map(utxo -> {
-            MyTransactionOutPoint outPoint = utxo.getOutpoints().get(0); // TODO
             try {
-                byte[] key = keyProvider._getPrivKey(outPoint.getHash().toString(), (int) outPoint.getIndex());
-                return new CahootsUtxo(outPoint, utxo.getPath(), utxo.getXpub(), key);
+                // TODO currently we only only consider first outpoint
+                BipUtxo bipUtxo = utxo.toBipUtxos().iterator().next();
+                byte[] key = keyProvider._getPrivKey(bipUtxo);
+                if (key == null) {
+                    throw new Exception("Key not found for utxo: "+bipUtxo);
+                }
+                return new CahootsUtxo(bipUtxo, key);
             } catch (Exception e) {
-                log.warn("Skipping CahootsUtxo: "+outPoint+": key not found");
+                log.warn("Skipping CahootsUtxo: "+utxo+": "+e.getMessage());
                 return null;
             }
         }).filter(utxo -> utxo != null).collect(Collectors.toList());
-    }
-
-    @Override
-    public String toString() {
-        return "CahootsUtxo{" +
-                "utxo=" + outpoint.toString() +
-                ", value=" + outpoint.getValue() +
-                ", address="+outpoint.getAddress() +
-                ", path="+getPath()+
-                ", xpub="+getXpub()+
-                '}';
     }
 }

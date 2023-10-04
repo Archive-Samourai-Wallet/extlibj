@@ -17,6 +17,7 @@ import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.bitcoinj.core.NetworkParameters;
 
+import java.util.Collection;
 import java.util.List;
 
 public class CahootsWallet {
@@ -96,7 +97,7 @@ public class CahootsWallet {
         return hdWallet.getFingerprint();
     }
 
-    public List<CahootsUtxo> getUtxosWpkhByAccount(int account) {
+    public Collection<CahootsUtxo> getUtxosWpkhByAccount(int account) {
         return utxoProvider.getUtxosWpkhByAccount(account);
     }
 }

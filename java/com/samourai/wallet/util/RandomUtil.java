@@ -4,7 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -70,6 +72,14 @@ public class RandomUtil {
         if (testMode) {
             return;
         }
+        Collections.shuffle(list);
+    }
+
+    public void shuffle(Collection collection) {
+        if (testMode) {
+            return;
+        }
+        List list = new LinkedList(collection);
         Collections.shuffle(list);
     }
 

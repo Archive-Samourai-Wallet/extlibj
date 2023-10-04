@@ -4,6 +4,7 @@ import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.BipWallet;
+import com.samourai.wallet.bipWallet.KeyBag;
 import com.samourai.wallet.client.indexHandler.IIndexHandler;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
@@ -62,7 +63,14 @@ public class SpendBuilder {
             if (log.isDebugEnabled()) {
                 log.debug("SIMPLE spending (entire balance)");
             }
-            spendSelection = new SpendSelectionSimple(utxoProvider.getBipFormatSupplier(), allUtxos, changeFormat, true);
+            try {
+                KeyBag keyBag = new KeyBag();
+                keyBag.addAllUtxos(allUtxos, utxoProvider);
+                spendSelection = new SpendSelectionSimple(utxoProvider.getBipFormatSupplier(), allUtxos, keyBag, changeFormat, true);
+            } catch (Exception e) {
+                log.error("", e);
+                throw new SpendException(SpendError.MAKING);
+            }
         }
         else if (preselectedInputs != null && !preselectedInputs.isEmpty()) {
             // spend preselected UTXOs
@@ -136,7 +144,14 @@ public class SpendBuilder {
             throw new SpendException(SpendError.INSUFFICIENT_FUNDS);
         }
 
-        return new SpendSelectionSimple(utxoProvider.getBipFormatSupplier(), utxos, changeFormat, false);
+        try {
+            KeyBag keyBag = new KeyBag();
+            keyBag.addAllUtxos(utxos, utxoProvider);
+            return new SpendSelectionSimple(utxoProvider.getBipFormatSupplier(), utxos, keyBag, changeFormat, false);
+        } catch (Exception e) {
+            log.error("", e);
+            throw new SpendException(SpendError.MAKING);
+        }
     }
 
     private SpendSelection computeSpendSelectionForUtxosAvailable(BipWallet spendWallet, BipWallet changeWallet, String address, boolean stonewall, long amount, BipFormat changeFormat, BigInteger feePerKb, BipFormat forcedChangeFormat) throws SpendException {
@@ -146,20 +161,28 @@ public class SpendBuilder {
         // get all UTXO (throws SpendException on insufficient balance)
         Collection<UTXO> utxos = findUtxosAvailableForAddressFormat(amount, account, changeFormat, feePerKb, params);
 
-        // stonewall spend
-        if (stonewall) {
-            IIndexHandler changeIndexHandler = changeWallet.getIndexHandlerChange();
-            SpendSelection spendSelection = SpendSelectionStonewall.compute(utxoProvider, changeFormat, amount, address, account, forcedChangeFormat, params, feePerKb, changeIndexHandler);
+        try {
+            KeyBag keyBag = new KeyBag();
+            keyBag.addAllUtxos(utxos, utxoProvider);
+
+            // stonewall spend
+            if (stonewall) {
+                IIndexHandler changeIndexHandler = changeWallet.getIndexHandlerChange();
+                SpendSelection spendSelection = SpendSelectionStonewall.compute(utxoProvider, changeFormat, amount, address, account, forcedChangeFormat, params, feePerKb, changeIndexHandler);
+                if (spendSelection != null) {
+                    return spendSelection;
+                }
+            }
+
+            // simple spend (less than balance)
+            BipFormatSupplier bipFormatSupplier = utxoProvider.getBipFormatSupplier();
+            SpendSelection spendSelection = SpendSelectionSimple.compute(utxos, keyBag, amount, changeFormat, bipFormatSupplier, params, feePerKb);
             if (spendSelection != null) {
                 return spendSelection;
             }
-        }
-
-        // simple spend (less than balance)
-        BipFormatSupplier bipFormatSupplier = utxoProvider.getBipFormatSupplier();
-        SpendSelection spendSelection = SpendSelectionSimple.compute(utxos, amount, changeFormat, bipFormatSupplier, params, feePerKb);
-        if (spendSelection != null) {
-            return spendSelection;
+        } catch (Exception e) {
+            log.error("", e);
+            throw new SpendException(SpendError.MAKING);
         }
 
         // no selection found

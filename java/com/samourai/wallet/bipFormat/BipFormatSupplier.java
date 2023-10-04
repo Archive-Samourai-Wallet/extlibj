@@ -1,5 +1,6 @@
 package com.samourai.wallet.bipFormat;
 
+import com.samourai.wallet.send.MyTransactionOutPoint;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.TransactionOutput;
 
@@ -10,6 +11,7 @@ public interface BipFormatSupplier {
     BipFormat findByAddress(String address, NetworkParameters params);
     BipFormat findById(String bipFormatId);
     String getToAddress(TransactionOutput output) throws Exception;
+    String getToAddress(MyTransactionOutPoint outPoint) throws Exception;
     String getToAddress(byte[] scriptBytes, NetworkParameters params) throws Exception;
     TransactionOutput getTransactionOutput(String address, long amount, NetworkParameters params) throws Exception;
   }
