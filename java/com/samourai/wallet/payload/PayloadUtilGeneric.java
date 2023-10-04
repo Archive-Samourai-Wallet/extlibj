@@ -117,6 +117,15 @@ public class PayloadUtilGeneric {
         whirlpool_account.put(exportBipWallet(badBankWallet));
         wallet.put("whirlpool_account", whirlpool_account);
 
+        //
+        // export Atomic Swaps accounts for debug payload
+        //;
+        JSONArray swaps_account = new JSONArray();
+
+        BipWallet swapsAsbWallet = walletSupplier.getWallet(BIP_WALLET.ASB_BIP84);
+        swaps_account.put(exportBipWallet(swapsAsbWallet));
+
+        wallet.put("swaps_accounts", bip84_account);
 
         JSONObject meta = new JSONObject();
 

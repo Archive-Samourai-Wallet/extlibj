@@ -6,6 +6,7 @@ public class SamouraiAccountIndex {
   public static final int POSTMIX = Integer.MAX_VALUE - 1;
   public static final int BADBANK = Integer.MAX_VALUE - 3;
   public static final int RICOCHET = Integer.MAX_VALUE;
+  public static final int SWAPS_ASB = 2147483641;
 
   public static int find(WhirlpoolAccount whirlpoolAccount) {
     switch (whirlpoolAccount) {
