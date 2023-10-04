@@ -14,6 +14,7 @@ public class SamouraiAccountIndex {
       case POSTMIX: return POSTMIX;
       case BADBANK: return BADBANK;
       case RICOCHET: return RICOCHET;
+      case SWAPS_ASB: return SWAPS_ASB;
       default: return DEPOSIT;
     }
   }
