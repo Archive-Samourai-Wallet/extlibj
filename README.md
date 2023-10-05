@@ -1,7 +1,7 @@
 [![](https://jitpack.io/v/io.samourai.code.wallet/ExtLibJ.svg)](https://jitpack.io/#io.samourai.code.wallet/ExtLibJ)
 
 # ExtLibJ
-BitcoinJ extensions: BIP39/44/47/49/84/86/340, bech32, bech32m, PSBT (BIP174).
+BitcoinJ extensions: BIP39/44/47/49/69/84/86/125/141/340, bech32, bech32m, PSBT (BIP174).
 
 Samourai toolkit.
 
@@ -47,6 +47,8 @@ Run JUnit Test Methods with Maven:
 ```
 mvn clean test -Dtest=xxxxTest#testA+testB
 ```
+
+<br />
 
 
 ## Features
@@ -95,6 +97,8 @@ Samourai implementation based on [original BIP](https://github.com/bitcoin/bips/
 
 Samourai signing via PSBT implementation based on [original BIP](https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki) by  Andrew Chow.
 
+<br />
+
 ### Spending:
 
 Samourai spends include the possibility of including custom fees as well as the use of batch spending (build up a list of batched outputs for grouped spend and fee savings).
@@ -107,23 +111,26 @@ Ricochet using nLockTime (staggered) will spread out hops over different blocks 
 
 ### STONEWALL:
 
-STONEWALL spend is designed to increase the number of combinations between inputs and outputs (transaction entropy). It replaces the previously used BIP126. The objective is to obtain a positive entropy score using [Boltzmann](https://github.com/Samourai-Wallet/boltzmann) evaluation of the transaction.
+STONEWALL spend is designed to increase the number of combinations between inputs and outputs (transaction entropy). It replaces the previously used BIP126. The objective is to obtain a positive entropy score using [Boltzmann](https://code.samourai.io/oxt/boltzmann) evaluation of the transaction.
+
+### STONEWALLx2:
+
+STONEWALL spend is a 2-person collaborative coinjoin spend carried out with another user. It is indistinguishable from a regular STONEWALL. Manually coordinate with QR codes or automatically coordinate with [Soroban](https://code.samourai.io/wallet/soroban-client-java) over Tor. See [doc/cahoots](doc/cahoots/README.md).
+
 
 ### Stowaway:
 
-A Stowaway spend, also implemented as [PayJoin](https://joinmarket.me/blog/blog/payjoin/), is a collaborative-spend carried out with another user. UTXOs are joined and the spend amount is cloaked. It is based on an [idea](https://bitcointalk.org/index.php?topic=139581.0) by Gregory Maxwell.
-
-### Tor:
-
-Includes Tor bundled in-app.
+A Stowaway spend, also known as a [PayJoin](https://en.bitcoin.it/wiki/PayJoin), is a collaborative-spend carried out with another user. UTXOs are joined and the spend amount is cloaked. Manually coordinate with QR codes or automatically coordinate with [Soroban](https://code.samourai.io/wallet/soroban-client-java) over Tor. It is based on an [idea](https://bitcointalk.org/index.php?topic=139581.0) by Gregory Maxwell. See [doc/cahoots](doc/cahoots/README.md).
 
 ### TestNet3:
 
-MainNet/TestNet selection is displayed when sideloading a new installation. To switch networks, make a backup of your current wallet, uninstall/reinstall (sideload) and select desired network.
+MainNet/TestNet options available.
 
 ### License:
 
 [GNU General Public License 3](https://code.samourai.io/wallet/ExtLibJ/-/blob/develop/LICENSE-ExtLibJ)
+
+<br />
 
 ### Contributing:
 
