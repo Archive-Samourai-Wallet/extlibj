@@ -92,12 +92,12 @@ public class FeeUtilTest extends AbstractTest {
     estimatedSizeSegwit(0, 0, 1, 1, 1, 0);
 
     estimatedSizeSegwit(1, 0, 0, 1, 0, 0);
-    estimatedSizeSegwit(1, 0, 0, 1, 1,0);
+    estimatedSizeSegwit(1, 0, 0, 1, 1, 0);
 
-    estimatedSizeSegwit( 1, 0, 0, 1, 0,1);
+    estimatedSizeSegwit(1, 0, 0, 1, 0, 1);
     estimatedSizeSegwit(1, 0, 0, 1, 1, 1);
 
-    estimatedSizeSegwit(0, 0, 3, 3, 0,0);
+    estimatedSizeSegwit(0, 0, 3, 3, 0, 0);
     estimatedSizeSegwit(0, 0, 3, 3, 1,0);
 
     estimatedSizeSegwit(0, 0, 4, 4, 0, 0);
@@ -109,41 +109,41 @@ public class FeeUtilTest extends AbstractTest {
 
   @Test
   public void estimatedFeeSegwit_nonP2TR() throws Exception {
-    Assertions.assertEquals(115, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 0));
-    Assertions.assertEquals(110, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 1));
-    Assertions.assertEquals(1100, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 10));
-    Assertions.assertEquals(11000, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 100));
+    Assertions.assertEquals(118, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 0));
+    Assertions.assertEquals(113, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 1));
+    Assertions.assertEquals(1130, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 10));
+    Assertions.assertEquals(11300, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 100));
 
-    Assertions.assertEquals(1890, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 0, 10));
-    Assertions.assertEquals(2810, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 1, 10));
-    Assertions.assertEquals(3100, feeUtil.estimatedFeeSegwit(0, 0, 3, 3, 0, 10));
+    Assertions.assertEquals(1920, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 0, 10));
+    Assertions.assertEquals(2840, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 1, 10));
+    Assertions.assertEquals(3190, feeUtil.estimatedFeeSegwit(0, 0, 3, 3, 0, 10));
   }
 
   @Test
   public void estimatedFeeSegwit_taproot() throws Exception {
-    Assertions.assertEquals(115, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 0, 0));
+    Assertions.assertEquals(118, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 0, 0));
     Assertions.assertEquals(128, feeUtil.estimatedFeeSegwit(0, 0, 1, 0, 1, 0, 0));
-    Assertions.assertEquals(205, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 2, 0, 0));
+    Assertions.assertEquals(208, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 2, 0, 0));
 
-    Assertions.assertEquals(110, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 0, 1));
+    Assertions.assertEquals(113, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 0, 1));
     Assertions.assertEquals(122, feeUtil.estimatedFeeSegwit(0, 0, 1, 0, 1, 0, 1));
-    Assertions.assertEquals(196, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 2, 0, 1));
+    Assertions.assertEquals(199, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 2, 0, 1));
 
-    Assertions.assertEquals(1100, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 0, 10));
+    Assertions.assertEquals(1130, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 0, 10));
     Assertions.assertEquals(1220, feeUtil.estimatedFeeSegwit(0, 0, 1, 0, 1, 0, 10));
-    Assertions.assertEquals(1960, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 2, 0, 10));
+    Assertions.assertEquals(1990, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 2, 0, 10));
 
-    Assertions.assertEquals(11000, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 0, 100));
+    Assertions.assertEquals(11300, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 0, 0, 100));
     Assertions.assertEquals(12200, feeUtil.estimatedFeeSegwit(0, 0, 1, 0, 1, 0, 100));
-    Assertions.assertEquals(19600, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 2, 0, 100));
+    Assertions.assertEquals(19900, feeUtil.estimatedFeeSegwit(0, 0, 1, 1, 2, 0, 100));
 
-    Assertions.assertEquals(1890, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 0, 0, 10));
+    Assertions.assertEquals(1920, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 0, 0, 10));
     Assertions.assertEquals(2010, feeUtil.estimatedFeeSegwit(1, 0, 0, 0, 1, 0, 10));
-    Assertions.assertEquals(2750, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 2, 0, 10));
+    Assertions.assertEquals(2780, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 2, 0, 10));
 
-    Assertions.assertEquals(2810, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 0, 1, 10));
+    Assertions.assertEquals(2840, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 0, 1, 10));
     Assertions.assertEquals(2930, feeUtil.estimatedFeeSegwit(1, 0, 0, 0, 1, 1, 10));
-    Assertions.assertEquals(3670, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 2, 1, 10));
+    Assertions.assertEquals(3700, feeUtil.estimatedFeeSegwit(1, 0, 0, 1, 2, 1, 10));
   }
 
   private void estimatedSizeSegwit(int inputsP2PKH,
@@ -163,6 +163,6 @@ public class FeeUtilTest extends AbstractTest {
 
     // must not underestimate realSize
     Assertions.assertTrue(estimatedSize >= realSize, "estimatedSize < realSize");
-    Assertions.assertTrue(diff<6, "estimation is too far from realSize");
+    Assertions.assertTrue(diff<21, "estimation is too far from realSize");
   }
 }

@@ -23,7 +23,7 @@ public class FeeUtil {
   private static final int ESTIMATED_INPUT_LEN_P2WPKH = 68; // bech32, p2wpkh
   private static final int ESTIMATED_INPUT_LEN_P2TR = 58; // bech32m, taproot
 
-  private static final int ESTIMATED_OUTPUT_LEN = 31;
+  private static final int ESTIMATED_OUTPUT_LEN = 34;
   private static final int ESTIMATED_OUTPUT_P2TR_P2WSH_LEN = 43;
   private static final int ESTIMATED_OPRETURN_LEN = 92; // 80 bytes + overhead
 
