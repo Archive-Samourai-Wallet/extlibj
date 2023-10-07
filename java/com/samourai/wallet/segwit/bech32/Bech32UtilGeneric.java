@@ -3,14 +3,12 @@ package com.samourai.wallet.segwit.bech32;
 import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.segwit.SegwitAddress;
 import org.apache.commons.lang3.tuple.Pair;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.params.MainNetParams;
-import org.bouncycastle.util.encoders.Hex;
-
-import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.core.Coin;
+import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.TransactionOutput;
+import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
+import org.bouncycastle.util.encoders.Hex;
 
 public class Bech32UtilGeneric {
     public static final String SCRIPT_P2WPKH = "0014";

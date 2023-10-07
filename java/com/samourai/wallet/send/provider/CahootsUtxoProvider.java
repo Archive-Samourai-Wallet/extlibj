@@ -6,4 +6,5 @@ import java.util.Collection;
 
 public interface CahootsUtxoProvider {
     Collection<CahootsUtxo> getUtxosWpkhByAccount(int account);
+    UtxoKeyProvider getUtxoKeyProvider();
 }

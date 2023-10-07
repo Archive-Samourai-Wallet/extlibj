@@ -2,6 +2,7 @@ package com.samourai.wallet.cahoots;
 
 import com.samourai.soroban.cahoots.Stonewallx2Context;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
+import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
@@ -38,8 +39,9 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         Stonewallx2Context cahootsContextSender = Stonewallx2Context.newInitiator(cahootsWalletSender, account, FEE_PER_B, spendAmount, address, null);
         Stonewallx2Context cahootsContextCp = Stonewallx2Context.newCounterparty(cahootsWalletCounterparty, account);
 
-        Cahoots cahoots = doCahoots(stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
-
+        CahootsResult cahootsResult = doCahoots(stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
+        STONEWALLx2 cahoots = (STONEWALLx2)cahootsResult.getCahoots();
+        
         // verify TX
         String txid = "7455f15769b0f876bf3853cf20ef60090255bffea5dd26e5a521eb2dd0b88faf";
         String raw = "02000000000102d54f4c6e366d8fc11b8630d4dd1536765ec8022bd3ab8a62fefc2ee96b9ccf140100000000fdffffffad05bb9c893f5cb9762ea57729efaf4a4b8eb1e377533fddc49d15d01fb307940100000000fdffffff04001300000000000016001440852bf6ea044204b826a182d1b75528364fd0bd00130000000000001600144e4fed51986dbaf322d2b36e690b8638fa0f020488130000000000001600142ecf8c3e5697f0513999ed3aa8ea9cd04d1273558813000000000000160014657b6afdeef6809fdabce7face295632fbd94feb02473044022079a012b8bc5197e8c0ff1750f91432d78cbb6e742f76e512be05739ec648525402206316231492a7b4789c93487d08d04d1417688dec863315e3a59cf97533e552b9012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f202483045022100df600bb360487f1f2b48438c77f85978c96353794357fca8de8d3c59898dcf7a022076f284c4bc7142ee94d536e36ffea126481c3aa48899ff7853d7dd69e05b3880012102e37648435c60dcd181b3d41d50857ba5b5abebe279429aa76558f6653f1658f2d2040000";
@@ -71,7 +73,8 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         Stonewallx2Context cahootsContextSender = Stonewallx2Context.newInitiator(cahootsWalletSender, account, FEE_PER_B, spendAmount, address, null);
         Stonewallx2Context cahootsContextCp = Stonewallx2Context.newCounterparty(cahootsWalletCounterparty, account);
 
-        Cahoots cahoots = doCahoots(stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
+        CahootsResult cahootsResult = doCahoots(stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
+        STONEWALLx2 cahoots = (STONEWALLx2)cahootsResult.getCahoots();
 
         // verify TX
         String txid = "d062b854a61e1e2c5470f1517590f1b5b0b9b701ce6a5918f1c1305575d4037e";
@@ -104,7 +107,8 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         Stonewallx2Context cahootsContextSender = Stonewallx2Context.newInitiator(cahootsWalletSender, account, FEE_PER_B, spendAmount, address, null);
         Stonewallx2Context cahootsContextCp = Stonewallx2Context.newCounterparty(cahootsWalletCounterparty, account);
 
-        Cahoots cahoots = doCahoots(stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
+        CahootsResult cahootsResult = doCahoots(stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
+        STONEWALLx2 cahoots = (STONEWALLx2)cahootsResult.getCahoots();
 
         // verify TX
         String txid = "619748af8371d3f070d8bc8bc7a7d1e7895fbafbb840e2e2aed93205b620c318";
@@ -137,7 +141,8 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         Stonewallx2Context cahootsContextSender = Stonewallx2Context.newInitiator(cahootsWalletSender, account, FEE_PER_B, spendAmount, address, null);
         Stonewallx2Context cahootsContextCp = Stonewallx2Context.newCounterparty(cahootsWalletCounterparty, account);
 
-        Cahoots cahoots = doCahoots(stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
+        CahootsResult cahootsResult = doCahoots(stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
+        STONEWALLx2 cahoots = (STONEWALLx2)cahootsResult.getCahoots();
 
         // verify TX
         String txid = "a774b3a2ae1f8e9d3efa7e893fa4cf1bdb7ce2086598ecb0cfa389f3e7ffaca5";
@@ -170,7 +175,8 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         Stonewallx2Context cahootsContextSender = Stonewallx2Context.newInitiator(cahootsWalletSender, account, FEE_PER_B, spendAmount, address, null);
         Stonewallx2Context cahootsContextCp = Stonewallx2Context.newCounterparty(cahootsWalletCounterparty, account);
 
-        Cahoots cahoots = doCahoots(stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
+        CahootsResult cahootsResult = doCahoots(stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
+        STONEWALLx2 cahoots = (STONEWALLx2)cahootsResult.getCahoots();
 
         // verify TX
         String txid = "f0ee149ebdb38a1b729942805147ab85be028451c85fc23496e9466b227270dc";
@@ -203,7 +209,8 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         Stonewallx2Context cahootsContextSender = Stonewallx2Context.newInitiator(cahootsWalletSender, account, FEE_PER_B, spendAmount, address, null);
         Stonewallx2Context cahootsContextCp = Stonewallx2Context.newCounterparty(cahootsWalletCounterparty, account);
 
-        Cahoots cahoots = doCahoots(stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
+        CahootsResult cahootsResult = doCahoots(stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
+        STONEWALLx2 cahoots = (STONEWALLx2)cahootsResult.getCahoots();
 
         // verify TX
         String txid = "8abfdd674d249222bd7939b157b946fd208f99f78be80e274ef7a93a6aa92987";
@@ -237,7 +244,8 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
         Stonewallx2Context cahootsContextSender = Stonewallx2Context.newInitiator(cahootsWalletSender, account, FEE_PER_B, spendAmount, address, paynymDestination);
         Stonewallx2Context cahootsContextCp = Stonewallx2Context.newCounterparty(cahootsWalletCounterparty, account);
 
-        Cahoots cahoots = doCahoots(stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
+        CahootsResult cahootsResult = doCahoots(stonewallx2Service, cahootsContextSender, cahootsContextCp, null);
+        STONEWALLx2 cahoots = (STONEWALLx2)cahootsResult.getCahoots();
 
         // verify TX
         String txid = "7455f15769b0f876bf3853cf20ef60090255bffea5dd26e5a521eb2dd0b88faf";

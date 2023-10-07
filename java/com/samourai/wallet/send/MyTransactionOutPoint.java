@@ -1,12 +1,17 @@
 package com.samourai.wallet.send;
 
+import com.samourai.wallet.api.backend.beans.UnspentOutput;
+import com.samourai.wallet.utxo.InputOutPoint;
+import com.samourai.wallet.utxo.UtxoConfirmInfo;
+import com.samourai.wallet.utxo.UtxoOutPoint;
 import org.bitcoinj.core.*;
 import org.bitcoinj.script.Script;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.util.Collection;
 
-public class MyTransactionOutPoint extends TransactionOutPoint {
+public class MyTransactionOutPoint extends TransactionOutPoint implements UtxoOutPoint, InputOutPoint {
 
     private static final long serialVersionUID = 1L;
     private byte[] scriptBytes;
@@ -26,6 +31,14 @@ public class MyTransactionOutPoint extends TransactionOutPoint {
         this(txOutput.getParams(), txOutput.getParentTransactionHash(), txOutput.getIndex(), BigInteger.valueOf(txOutput.getValue().getValue()), txOutput.getScriptBytes(), address, confirmations);
     }
 
+    public MyTransactionOutPoint(UtxoOutPoint o, NetworkParameters params, int confirmations) {
+        this(params, Sha256Hash.wrap(Hex.decode(o.getTxHash())), o.getTxOutputIndex(), BigInteger.valueOf(o.getValueLong()), o.getScriptBytes(), o.getAddress(), confirmations);
+    }
+
+    public MyTransactionOutPoint(UnspentOutput o, NetworkParameters params) {
+        this(params, Sha256Hash.wrap(Hex.decode(o.getTxHash())), o.getTxOutputIndex(), BigInteger.valueOf(o.getValueLong()), o.getScriptBytes(), o.getAddress(), o.confirmations);
+    }
+
     public static long sumValue(Collection<MyTransactionOutPoint> outpoints) {
         return outpoints.stream().mapToLong(utxo -> utxo.getValue().getValue()).sum();
     }
@@ -42,8 +55,19 @@ public class MyTransactionOutPoint extends TransactionOutPoint {
         return Coin.valueOf(value.longValue());
     }
 
+    @Override
     public String getAddress() {
         return address;
+    }
+
+    @Override
+    public UtxoConfirmInfo getConfirmInfo() {
+        return null;
+    }
+
+    @Override
+    public void setConfirmInfo(UtxoConfirmInfo confirmInfo) {
+
     }
 
     public void setConfirmations(int confirmations) {
@@ -52,10 +76,6 @@ public class MyTransactionOutPoint extends TransactionOutPoint {
 
     public Script computeScript() {
         return new Script(scriptBytes);
-    }
-
-    public TransactionInput computeSpendInput() {
-        return new TransactionInput(params, null, new byte[]{}, this, getValue());
     }
 
     @Override
@@ -68,18 +88,28 @@ public class MyTransactionOutPoint extends TransactionOutPoint {
         return scriptBytes;
     }
 
-    public int getTxOutputN() {
-        return (int)getIndex();
-    }
-
-    public Sha256Hash getTxHash() {
-        return getHash();
-    }
-
     @Override
     public String toString() {
         return "utxo="+super.toString()+
                 ", value=" + value +
                 ", address='" + address + '\'';
     }
+
+    // implement UtxoOutPoint
+
+    @Override
+    public long getValueLong() {
+        return getValue().getValue();
+    }
+
+    @Override
+    public String getTxHash() {
+        return getHash().toString();
+    }
+
+    @Override
+    public int getTxOutputIndex() {
+        return (int)getIndex();
+    }
+
 }

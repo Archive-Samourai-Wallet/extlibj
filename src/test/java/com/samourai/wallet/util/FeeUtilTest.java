@@ -87,6 +87,11 @@ public class FeeUtilTest extends AbstractTest {
   }
 
   @Test
+  public void estimatedSizeSegwitTx0() throws Exception {
+    estimatedSizeSegwit(0, 0, 2, 31, 0, 1);
+  }
+
+  @Test
   public void estimatedSizeSegwit_taproot() throws Exception {
     estimatedSizeSegwit(0, 0, 1, 1, 0, 0);
     estimatedSizeSegwit(0, 0, 1, 1, 1, 0);

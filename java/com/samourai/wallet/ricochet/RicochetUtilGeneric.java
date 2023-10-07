@@ -10,6 +10,8 @@ import com.samourai.wallet.send.SendFactoryGeneric;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.util.FeeUtil;
+import com.samourai.wallet.util.UtxoUtil;
+import com.samourai.wallet.utxo.UtxoOutPoint;
 import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.*;
@@ -314,7 +316,7 @@ public class RicochetUtilGeneric {
 
         BipFormatSupplier bipFormatSupplier = config.getUtxoProvider().getBipFormatSupplier();
         NetworkParameters params = config.getBipWalletChange().getParams();
-        Transaction tx = sendFactory.makeTransaction(unspent, receivers, bipFormatSupplier, config.isRbfOptIn(), params, config.getLatestBlock());
+        Transaction tx = sendFactory.makeTransaction((Collection<UtxoOutPoint>)(Collection<? extends UtxoOutPoint>)unspent, receivers, bipFormatSupplier, config.isRbfOptIn(), params, config.getLatestBlock());
         if (nTimeLock > 0L) {
             tx.setLockTime(nTimeLock);
         }
@@ -344,7 +346,7 @@ public class RicochetUtilGeneric {
 //        Log.d("RicochetUtilGeneric", "spending from:" + p2wpkh.getBech32AsString());
 //        Log.d("RicochetUtilGeneric", "pubkey:" + Hex.toHexString(ecKey.getPubKey()));
 
-        TransactionInput txInput = prevOutPoint.computeSpendInput();
+        TransactionInput txInput = UtxoUtil.getInstance().computeSpendInput(prevOutPoint, params);
         if (config.isRbfOptIn()) {
             txInput.setSequenceNumber(SamouraiWalletConst.RBF_SEQUENCE_VAL.longValue());
         }

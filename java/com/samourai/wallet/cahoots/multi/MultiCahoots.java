@@ -1,20 +1,12 @@
 package com.samourai.wallet.cahoots.multi;
 
-import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.soroban.cahoots.ManualCahootsMessage;
-import com.samourai.wallet.api.backend.IPushTx;
 import com.samourai.wallet.cahoots.Cahoots;
 import com.samourai.wallet.cahoots.CahootsType;
-import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
-import com.samourai.wallet.send.beans.SpendTx;
-import com.samourai.wallet.send.exceptions.SpendException;
-import com.samourai.wallet.send.provider.UtxoKeyProvider;
-import com.samourai.wallet.util.TxUtil;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
-import org.bitcoinj.core.TransactionOutPoint;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,11 +42,6 @@ public class MultiCahoots extends Cahoots<MultiCahootsContext> {
     }
 
     @Override
-    public String getPaynymDestination() {
-        return stonewallx2.getPaynymDestination();
-    }
-
-    @Override
     public JSONObject toJSON() {
         JSONObject jsonObject = super.toJSON();
         jsonObject.put("stonewallx2", stonewallx2.toJSON());
@@ -67,15 +54,6 @@ public class MultiCahoots extends Cahoots<MultiCahootsContext> {
         super.fromJSON(cObj);
         stonewallx2 = new STONEWALLx2(cObj.getJSONObject("stonewallx2"));
         stowaway = new Stowaway(cObj.getJSONObject("stowaway"));
-    }
-
-    @Override
-    public void signTx(MultiCahootsContext cahootsContext) throws Exception {
-        if(getStep() > 3) {
-            stonewallx2.signTx(cahootsContext.getStonewallx2Context());
-        } else {
-            stowaway.signTx(cahootsContext.getStowawayContext());
-        }
     }
 
     public Stowaway getStowaway() {
@@ -100,63 +78,5 @@ public class MultiCahoots extends Cahoots<MultiCahootsContext> {
 
     public Transaction getStonewallTransaction() {
         return getStonewallx2().getTransaction();
-    }
-
-    @Override
-    public long getFeeAmount() {
-        return stonewallx2.getFeeAmount() + stowaway.getFeeAmount();
-    }
-
-    @Override
-    public Long getOutpointValue(TransactionOutPoint txOut) {
-        return stonewallx2.getOutpointValue(txOut);
-    }
-
-    @Override
-    public Long getOutpointsSum() {
-        return stonewallx2.getOutpointsSum();
-    }
-
-    @Override
-    public void setOutpointValue(TransactionOutPoint txOut, long value) {
-        stonewallx2.setOutpointValue(txOut, value);
-    }
-
-    @Override
-    public String getDestination() {
-        return stonewallx2.getDestination();
-    }
-
-    @Override
-    public long getSpendAmount() {
-        return stonewallx2.getSpendAmount();
-    }
-
-    @Override
-    public Transaction getTransaction() {
-        return stonewallx2.getTransaction();
-    }
-
-    @Override
-    public PSBT getPSBT() {
-        return stonewallx2.getPSBT();
-    }
-
-    @Override
-    public void pushTx(IPushTx pushTx) throws Exception {
-        // push stonewallx2
-        String stonewallHex = TxUtil.getInstance().getTxHex(getStonewallTransaction());
-        pushTx.pushTx(stonewallHex);
-
-        // push stowaway
-        String stowawayHex = TxUtil.getInstance().getTxHex(getStowawayTransaction());
-        pushTx.pushTx(stowawayHex);
-    }
-
-    @Override
-    public SpendTx getSpendTx(MultiCahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) throws SpendException {
-        // forward stonewallx2 SpendTx
-        CahootsContext stonewallx2Context = cahootsContext.getStonewallx2Context();
-        return stonewallx2.getSpendTx(stonewallx2Context, utxoKeyProvider);
     }
 }

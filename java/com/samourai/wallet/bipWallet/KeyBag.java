@@ -4,6 +4,7 @@ import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.util.UtxoUtil;
 import com.samourai.wallet.utxo.BipUtxo;
+import com.samourai.wallet.utxo.UtxoRef;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.TransactionOutPoint;
 
@@ -19,8 +20,8 @@ public class KeyBag {
         this.privKeys = new LinkedHashMap<>();
     }
 
-    public void add(BipUtxo bipUtxo, byte[] privKeyBytes) {
-        String hashKey = utxoUtil.utxoToKey(bipUtxo);
+    public void add(UtxoRef utxo, byte[] privKeyBytes) {
+        String hashKey = utxoUtil.utxoToKey(utxo);
         add(hashKey, privKeyBytes);
     }
 
@@ -58,8 +59,8 @@ public class KeyBag {
         }
     }
 
-    public byte[] getPrivKeyBytes(BipUtxo bipUtxo) {
-        String hashKey = utxoUtil.utxoToKey(bipUtxo);
+    public byte[] getPrivKeyBytes(UtxoRef utxo) {
+        String hashKey = utxoUtil.utxoToKey(utxo);
         return privKeys.get(hashKey);
     }
 
@@ -68,8 +69,8 @@ public class KeyBag {
         return privKeys.get(hashKey);
     }
 
-    public ECKey getECKey(BipUtxo bipUtxo) {
-        return getECKey(getPrivKeyBytes(bipUtxo));
+    public ECKey getECKey(UtxoRef utxo) {
+        return getECKey(getPrivKeyBytes(utxo));
     }
 
     public ECKey getECKey(TransactionOutPoint outPoint) {

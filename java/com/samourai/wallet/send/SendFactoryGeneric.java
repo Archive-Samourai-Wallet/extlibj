@@ -1,8 +1,6 @@
 package com.samourai.wallet.send;
 
 import com.samourai.wallet.SamouraiWalletConst;
-import com.samourai.wallet.bip69.BIP69InputComparator;
-import com.samourai.wallet.bip69.BIP69OutputComparator;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
@@ -13,6 +11,8 @@ import com.samourai.wallet.send.exceptions.SignTxLengthException;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.TxUtil;
 import com.samourai.wallet.util.UtxoUtil;
+import com.samourai.wallet.utxo.InputOutPoint;
+import com.samourai.wallet.utxo.UtxoOutPoint;
 import org.bitcoinj.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +26,7 @@ import java.util.function.Function;
 public class SendFactoryGeneric {
     private static final Logger log = LoggerFactory.getLogger(SendFactoryGeneric.class);
     private static final UtxoUtil utxoUtil = UtxoUtil.getInstance();
+    private static final TxUtil txUtil = TxUtil.getInstance();
 
     private static SendFactoryGeneric instance = null;
     public static SendFactoryGeneric getInstance() {
@@ -38,7 +39,7 @@ public class SendFactoryGeneric {
     protected SendFactoryGeneric() { ; }
 
     // used by android
-    public Transaction makeTransaction(Collection<MyTransactionOutPoint> unspent, Map<String, BigInteger> receivers, BipFormatSupplier bipFormatSupplier, boolean rbfOptIn, NetworkParameters params, long blockHeight) throws MakeTxException {
+    public Transaction makeTransaction(Collection<UtxoOutPoint> unspent, Map<String, BigInteger> receivers, BipFormatSupplier bipFormatSupplier, boolean rbfOptIn, NetworkParameters params, long blockHeight) throws MakeTxException {
         Map<String, Long> receiversLong = new LinkedHashMap<>();
         for (Map.Entry<String,BigInteger> entry : receivers.entrySet()) {
             receiversLong.put(entry.getKey(), entry.getValue().longValue());
@@ -49,7 +50,7 @@ public class SendFactoryGeneric {
     /*
     Used by spends
      */
-    public Transaction makeTransaction(Map<String, Long> receivers, Collection<MyTransactionOutPoint> unspent, BipFormatSupplier bipFormatSupplier, boolean rbfOptIn, NetworkParameters params, long blockHeight) throws MakeTxException {
+    public Transaction makeTransaction(Map<String, Long> receivers, Collection<UtxoOutPoint> unspent, BipFormatSupplier bipFormatSupplier, boolean rbfOptIn, NetworkParameters params, long blockHeight) throws MakeTxException {
 
         Transaction tx = new Transaction(params);
         if(receivers.size() == 4 && blockHeight > 0L)    {
@@ -83,7 +84,7 @@ public class SendFactoryGeneric {
         }
 
         List<TransactionInput> inputs = new ArrayList<>();
-        for(MyTransactionOutPoint outPoint : unspent) {
+        for(UtxoOutPoint outPoint : unspent) {
             // check outpoint format
             try {
                 bipFormatSupplier.getToAddress(outPoint.getScriptBytes(), params);
@@ -94,7 +95,7 @@ public class SendFactoryGeneric {
                 continue;
             }
 
-            TransactionInput input = outPoint.computeSpendInput();
+            TransactionInput input = utxoUtil.computeSpendInput(outPoint, params);
             if (rbfOptIn) {
                 input.setSequenceNumber(SamouraiWalletConst.RBF_SEQUENCE_VAL.longValue());
             }
@@ -111,16 +112,13 @@ public class SendFactoryGeneric {
         //
         // deterministically sort inputs and outputs, see BIP69 (OBPP)
         //
-        Collections.sort(inputs, new BIP69InputComparator());
         for(TransactionInput input : inputs) {
             tx.addInput(input);
         }
-
-        Collections.sort(outputs, new BIP69OutputComparator());
         for(TransactionOutput to : outputs) {
             tx.addOutput(to);
         }
-
+        txUtil.sortBip69InputsAndOutputs(tx);
         return tx;
     }
 
@@ -141,7 +139,7 @@ public class SendFactoryGeneric {
         return signTransaction(transaction, keyBag.toMap(), bipFormatSupplier);
     }
 
-    public synchronized Transaction signTransaction(Transaction transaction, Map<String,ECKey> keyBag, BipFormatSupplier bipFormatSupplier, Function<TransactionInput,MyTransactionOutPoint> getInputOutPointOrNull) throws SignTxException {
+    public synchronized Transaction signTransaction(Transaction transaction, Map<String,ECKey> keyBag, BipFormatSupplier bipFormatSupplier, Function<TransactionOutPoint, InputOutPoint> getInputOutPointOrNull) throws SignTxException {
         int nbSigned = 0;
         for (int i = 0; i < transaction.getInputs().size(); i++) {
             TransactionInput input = transaction.getInput(i);
@@ -149,7 +147,7 @@ public class SendFactoryGeneric {
             if (key != null) {
                 try {
                     // read input info from provided outPoint when available
-                    MyTransactionOutPoint outPoint = getInputOutPointOrNull != null ? getInputOutPointOrNull.apply(input) : null;
+                    InputOutPoint outPoint = getInputOutPointOrNull != null ? getInputOutPointOrNull.apply(input.getOutpoint()) : null;
                     this.signInput(key, transaction, i, bipFormatSupplier, outPoint);
                     nbSigned++;
                 } catch (Exception e) {
@@ -165,7 +163,7 @@ public class SendFactoryGeneric {
         return transaction;
     }
 
-    public synchronized Transaction signTransaction(Transaction transaction, KeyBag keyBag, BipFormatSupplier bipFormatSupplier, Function<TransactionInput,MyTransactionOutPoint> getInputOutPoint) throws SignTxException {
+    public synchronized Transaction signTransaction(Transaction transaction, KeyBag keyBag, BipFormatSupplier bipFormatSupplier, Function<TransactionOutPoint,InputOutPoint> getInputOutPoint) throws SignTxException {
         return signTransaction(transaction, keyBag.toMap(), bipFormatSupplier, getInputOutPoint);
     }
 
@@ -180,27 +178,26 @@ public class SendFactoryGeneric {
         }
     }
 
-    public void signInput(ECKey key, Transaction tx, int inputIndex, BipFormatSupplier bipFormatSupplier, MyTransactionOutPoint outPoint) throws Exception {
+    public void signInput(ECKey key, Transaction tx, int inputIndex, BipFormatSupplier bipFormatSupplier, InputOutPoint inputOutPointOrNull) throws Exception {
         TransactionInput txInput = tx.getInput(inputIndex);
         if (key == null) {
             throw new Exception("No key found for signing input: "+txInput);
         }
 
         String inputAddress;
-        if (outPoint != null) {
+        if (inputOutPointOrNull != null) {
             // read input info from provided outPoint
-            inputAddress = bipFormatSupplier.getToAddress(outPoint);
+            inputAddress = bipFormatSupplier.getToAddress(inputOutPointOrNull.getScriptBytes(), tx.getParams());
 
             // set input value from provided outpoint
-            txInput.setValue(outPoint.getValue());
+            txInput.setValue(Coin.valueOf(inputOutPointOrNull.getValueLong()));
         } else {
             // read input info directly from txInput.connectedOutput
             // this will only work for transactions build interactively, not when imported from raw (ie Cahoots)
             // for such txs, you need to provide your own outPoint
             TransactionOutput connectedOutput = txInput.getOutpoint().getConnectedOutput();
             if (connectedOutput == null) {
-                log.error("Signing input #" + inputIndex + " failed: connectedOutput is null. Try providing getInputOutPoint argument to SendFactoryGeneric.signTransaction()");
-                throw new Exception("Signing input #" + inputIndex + " failed: connectedOutput is null");
+                throw new Exception("Signing input #" + inputIndex + " failed: connectedOutput is null. Try providing getInputOutPoint argument for SendFactoryGeneric.signTransaction() when signing a tx built from raw");
             }
             inputAddress = bipFormatSupplier.getToAddress(connectedOutput);
         }

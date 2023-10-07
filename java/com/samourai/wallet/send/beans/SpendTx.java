@@ -1,14 +1,11 @@
 package com.samourai.wallet.send.beans;
 
-import com.samourai.wallet.api.backend.IPushTx;
-import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.exceptions.SpendException;
-import org.bitcoinj.core.TransactionOutPoint;
+import com.samourai.wallet.utxo.UtxoOutPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 public abstract class SpendTx {
@@ -20,13 +17,13 @@ public abstract class SpendTx {
     private long minerFeePaid;
     private long samouraiFee;
     private long change;
-    private Collection<MyTransactionOutPoint> spendFrom;
+    private Collection<UtxoOutPoint> spendFrom;
     private Map<String, Long> receivers;
     private int virtualTransactionSize;
     private int weight;
     private String txid;
 
-    public SpendTx(SpendType spendType, long amount, boolean entireBalance, long minerFeeTotal, long minerFeePaid, long samouraiFee, long change, Collection<MyTransactionOutPoint> spendFrom, Map<String, Long> receivers, int virtualTransactionSize, int weight, String txid) throws SpendException {
+    public SpendTx(SpendType spendType, long amount, boolean entireBalance, long minerFeeTotal, long minerFeePaid, long samouraiFee, long change, Collection<UtxoOutPoint> spendFrom, Map<String, Long> receivers, int virtualTransactionSize, int weight, String txid) throws SpendException {
         this.spendType = spendType;
         this.amount = amount;
         this.entireBalance = entireBalance;
@@ -41,7 +38,7 @@ public abstract class SpendTx {
         this.txid = txid;
 
         // consistency check
-        long sumSpendFrom = MyTransactionOutPoint.sumValue(spendFrom);
+        long sumSpendFrom = UtxoOutPoint.sumValue(spendFrom);
         if((amount + samouraiFee + change + minerFeePaid) != sumSpendFrom){
             // should never happen
             log.error("inconsistency detected! (amount="+amount+" + samouraiFee="+samouraiFee+" + change="+change+" + minerFeePaid="+minerFeePaid+") != sumSpendFrom="+sumSpendFrom);
@@ -87,7 +84,7 @@ public abstract class SpendTx {
         return receivers;
     }
 
-    public Collection<? extends TransactionOutPoint> getSpendFrom() {
+    public Collection<UtxoOutPoint> getSpendFrom() {
         return spendFrom;
     }
 
@@ -106,6 +103,4 @@ public abstract class SpendTx {
     public String getTxid() {
         return txid;
     }
-
-    public abstract void pushTx(IPushTx pushTx) throws Exception;
 }

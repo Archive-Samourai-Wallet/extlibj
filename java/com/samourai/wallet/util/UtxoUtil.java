@@ -3,15 +3,14 @@ package com.samourai.wallet.util;
 import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.utxo.BipUtxo;
-import com.samourai.wallet.utxo.UtxoDetail;
+import com.samourai.wallet.utxo.UtxoOutPoint;
+import com.samourai.wallet.utxo.UtxoRef;
+import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutPoint;
-import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.math.BigInteger;
 
 public class UtxoUtil {
   private static final Logger log = LoggerFactory.getLogger(UtxoUtil.class);
@@ -26,14 +25,9 @@ public class UtxoUtil {
     return instance;
   }
 
-  public MyTransactionOutPoint computeOutpoint(BipUtxo utxo) {
-    return computeOutpoint(utxo, utxo.getScriptBytes());
-  }
-
-  public MyTransactionOutPoint computeOutpoint(UtxoDetail utxo, byte[] scriptBytes) {
-    Sha256Hash sha256Hash = Sha256Hash.wrap(Hex.decode(utxo.getTxHash()));
-    // use MyTransactionOutPoint to forward scriptBytes + address
-    return new MyTransactionOutPoint(utxo.getParams(), sha256Hash, utxo.getTxOutputIndex(), BigInteger.valueOf(utxo.getValue()), scriptBytes, utxo.getAddress(), 0);
+  public TransactionInput computeSpendInput(UtxoOutPoint o, NetworkParameters params) {
+    MyTransactionOutPoint myOutPoint = new MyTransactionOutPoint(o, params, 0);
+    return new TransactionInput(params, null, new byte[]{}, myOutPoint, Coin.valueOf(o.getValueLong()));
   }
 
   public String getPathAddress(BipUtxo utxo, int purpose, int accountIndex, NetworkParameters params) {
@@ -87,14 +81,13 @@ public class UtxoUtil {
     }
   }
 
-  public String utxoToKey(BipUtxo bipUtxo) {
-    return utxoToKey(bipUtxo.getTxHash(), bipUtxo.getTxOutputIndex());
+  public String utxoToKey(UtxoRef utxoRef) {
+    return utxoToKey(utxoRef.getTxHash(), utxoRef.getTxOutputIndex());
   }
 
   public String utxoToKey(TransactionOutPoint outPoint) {
     return utxoToKey(outPoint.getHash().toString(), (int)outPoint.getIndex());
   }
-
 
   public String utxoToKey(String utxoHash, int utxoIndex) {
     return utxoHash + ':' + utxoIndex;

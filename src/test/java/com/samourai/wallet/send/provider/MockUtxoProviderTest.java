@@ -22,10 +22,10 @@ public class MockUtxoProviderTest extends AbstractTest {
         BipWallet bipWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84);
 
         UTXO utxo1 = utxoProvider.addUtxo(bipWallet, 100000);
-        assertUtxo(utxo1, 100000, "2b007b4c6aa6e9b9f191e434f3bf57005aa286e0aeee7e154bd627af917fafcb", 1, 0, "tb1q4crk5fzlr7qcz0nsun67luk982mn4wtlyydvlh", "02hNvy9WddFQ{17<N@0j-x7E?XQK", "m/0/1");
+        assertUtxo(utxo1, 100000, "2b007b4c6aa6e9b9f191e434f3bf57005aa286e0aeee7e154bd627af917fafcb", 1, MockUtxoProvider.CONFIRMATIONS_DEFAUT, "tb1q4crk5fzlr7qcz0nsun67luk982mn4wtlyydvlh", "02hNvy9WddFQ{17<N@0j-x7E?XQK", "m/0/1");
 
         UTXO utxo2 = utxoProvider.addUtxo(bipWallet, 100000);
-        assertUtxo(utxo2, 100000, "0d13ddd55e910d38d168abf387e0b1438cf696576941a0982fd39d833545930f", 2, 0, "tb1qfqd55aeuuhj6jl2v0v6ckudd7wecdv6ss9ands", "02d%yn{rzV</9V4DO{.3T[e(NVRQ", "m/0/2");
+        assertUtxo(utxo2, 100000, "0d13ddd55e910d38d168abf387e0b1438cf696576941a0982fd39d833545930f", 2, MockUtxoProvider.CONFIRMATIONS_DEFAUT, "tb1qfqd55aeuuhj6jl2v0v6ckudd7wecdv6ss9ands", "02d%yn{rzV</9V4DO{.3T[e(NVRQ", "m/0/2");
     }
 
     @Test
@@ -38,15 +38,15 @@ public class MockUtxoProviderTest extends AbstractTest {
 
         BipWallet bipWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84);
         UTXO utxo1 = utxoProvider.addUtxo(bipWallet, 100000);
-        assertUtxo(utxo1, 100000, "2b007b4c6aa6e9b9f191e434f3bf57005aa286e0aeee7e154bd627af917fafcb", 1, 0, "tb1q4crk5fzlr7qcz0nsun67luk982mn4wtlyydvlh", "02hNvy9WddFQ{17<N@0j-x7E?XQK", "m/0/1");
+        assertUtxo(utxo1, 100000, "2b007b4c6aa6e9b9f191e434f3bf57005aa286e0aeee7e154bd627af917fafcb", 1, MockUtxoProvider.CONFIRMATIONS_DEFAUT, "tb1q4crk5fzlr7qcz0nsun67luk982mn4wtlyydvlh", "02hNvy9WddFQ{17<N@0j-x7E?XQK", "m/0/1");
 
         UTXO utxo2 = utxoProvider.addUtxo(bipWallet, 100000);
-        assertUtxo(utxo2, 100000, "0d13ddd55e910d38d168abf387e0b1438cf696576941a0982fd39d833545930f", 2, 0, "tb1qfqd55aeuuhj6jl2v0v6ckudd7wecdv6ss9ands", "02d%yn{rzV</9V4DO{.3T[e(NVRQ", "m/0/2");
+        assertUtxo(utxo2, 100000, "0d13ddd55e910d38d168abf387e0b1438cf696576941a0982fd39d833545930f", 2, MockUtxoProvider.CONFIRMATIONS_DEFAUT, "tb1qfqd55aeuuhj6jl2v0v6ckudd7wecdv6ss9ands", "02d%yn{rzV</9V4DO{.3T[e(NVRQ", "m/0/2");
 
         // utxos for walletSupplier2 use a different namespace for txid & indexs
         BipWallet bipWallet2 = walletSupplier2.getWallet(BIP_WALLET.DEPOSIT_BIP84);
         UTXO utxo3 = utxoProvider2.addUtxo(bipWallet2, 100000);
-        assertUtxo(utxo3, 100000, "39cfe074d0c394c6da282a61d83bc15d84b38581399cd627e8440cbe1d467a8b", 1, 0, "tb1qpvy6z7avyaqmta4dg8ze6257wx4djpx0enxefj", "02b!EP)J<*lacA*lb/xAO]H^-1Kv", "m/0/1");
+        assertUtxo(utxo3, 100000, "39cfe074d0c394c6da282a61d83bc15d84b38581399cd627e8440cbe1d467a8b", 1, MockUtxoProvider.CONFIRMATIONS_DEFAUT, "tb1qpvy6z7avyaqmta4dg8ze6257wx4djpx0enxefj", "02b!EP)J<*lacA*lb/xAO]H^-1Kv", "m/0/1");
     }
 
     private void assertUtxo(UTXO utxo, long value, String txid, int n, int confirmations, String address, String scriptBytesZ85, String path) {
@@ -55,8 +55,8 @@ public class MockUtxoProviderTest extends AbstractTest {
 
         Assertions.assertEquals(1, utxo.getOutpoints().size());
         MyTransactionOutPoint outPoint = utxo.getOutpoints().get(0);
-        Assertions.assertEquals(txid, outPoint.getTxHash().toString());
-        Assertions.assertEquals(n, outPoint.getTxOutputN());
+        Assertions.assertEquals(txid, outPoint.getTxHash());
+        Assertions.assertEquals(n, outPoint.getTxOutputIndex());
         Assertions.assertEquals(address, outPoint.getAddress());
         Assertions.assertEquals(scriptBytesZ85, z85.encode(outPoint.getScriptBytes()));
         Assertions.assertEquals(confirmations, outPoint.getConfirmations());

@@ -4,15 +4,11 @@ import com.samourai.soroban.cahoots.Stonewallx2Context;
 import com.samourai.soroban.cahoots.StowawayContext;
 import com.samourai.soroban.cahoots.TypeInteraction;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
-import com.samourai.wallet.cahoots.AbstractCahootsService;
-import com.samourai.wallet.cahoots.CahootsType;
-import com.samourai.wallet.cahoots.CahootsUtxo;
-import com.samourai.wallet.cahoots.CahootsWallet;
+import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
-import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.util.TxUtil;
 import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import com.samourai.xmanager.client.XManagerClient;
@@ -182,7 +178,8 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
 
         // Filter out all Whirlpool UTXOs from all tiers (0.001, 0.01, 0.05, 0.5), so that change and other mixed UTXOs are included
         for (CahootsUtxo cahootsUtxo : utxos) {
-            long value = cahootsUtxo.getValue();
+            long value = cahootsUtxo.getValueLong();
+            // TODO hardcoded values
             if (value != 100000 && value != 1000000 && value != 5000000 && value != 50000000) {
                 filteredUtxos.add(cahootsUtxo);
             }
@@ -323,5 +320,10 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
         } catch (IOException e) {
             return Stonewallx2Service.THRESHOLD.getValue(); // default value of 2 BTC
         }
+    }
+
+    @Override
+    protected CahootsResult computeCahootsResult(MultiCahootsContext cahootsContext, MultiCahoots cahoots) {
+        return new MultiCahootsResult(cahootsContext, cahoots);
     }
 }

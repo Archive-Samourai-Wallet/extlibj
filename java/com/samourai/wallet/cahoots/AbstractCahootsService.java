@@ -5,22 +5,26 @@ import com.samourai.soroban.cahoots.ManualCahootsMessage;
 import com.samourai.soroban.cahoots.TxBroadcastInteraction;
 import com.samourai.soroban.cahoots.TypeInteraction;
 import com.samourai.soroban.client.SorobanInteraction;
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.KeyBag;
-import com.samourai.wallet.hd.BipAddress;
-import com.samourai.wallet.send.MyTransactionOutPoint;
+import com.samourai.wallet.send.SendFactoryGeneric;
+import com.samourai.wallet.util.TxUtil;
 import com.samourai.wallet.util.UtxoUtil;
-import org.bitcoinj.core.*;
+import com.samourai.wallet.utxo.InputOutPoint;
+import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionOutPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.function.Function;
 
 public abstract class AbstractCahootsService<T extends Cahoots, C extends CahootsContext> {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahootsService.class);
-    private static final UtxoUtil utxoUtil = UtxoUtil.getInstance();
+    protected static final UtxoUtil utxoUtil = UtxoUtil.getInstance();
+    protected static final TxUtil txUtil = TxUtil.getInstance();
+    protected static final SendFactoryGeneric sendFactory = SendFactoryGeneric.getInstance();
 
     private CahootsType cahootsType;
     private BipFormatSupplier bipFormatSupplier;
@@ -63,91 +67,48 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
         }
     }
 
-    public SorobanInteraction checkInteraction(ManualCahootsMessage request, Cahoots cahootsResponse) {
+    public SorobanInteraction checkInteraction(ManualCahootsMessage request, T cahootsResponse, C cahootsContext) {
         // broadcast by SENDER
         if (request.getTypeUser().getPartner().equals(typeInteractionBroadcast.getTypeUser()) && (request.getStep()+1) == typeInteractionBroadcast.getStep()) {
-            return new TxBroadcastInteraction(typeInteractionBroadcast, cahootsResponse);
+            CahootsResult cahootsResult = computeCahootsResult(cahootsContext, cahootsResponse);
+            return new TxBroadcastInteraction(typeInteractionBroadcast, new ManualCahootsMessage(cahootsResponse), cahootsContext, cahootsResult);
         }
         return null;
     }
 
-    // verify
+    protected Transaction signTx(C cahootsContext, Transaction transaction) throws Exception {
+        if (log.isDebugEnabled()) {
+            log.debug("signTx:" + transaction.toString());
+        }
+        // set input info from cahoots context
+        Function<TransactionOutPoint, InputOutPoint> getInputOutPoint = i -> cahootsContext.findInput(i);
+        return sendFactory.signTransaction(transaction, cahootsContext.getKeyBag(), BIP_FORMAT.PROVIDER, getInputOutPoint);
+    }
 
-    protected long computeSpendAmount(Cahoots2x cahoots, C cahootsContext) throws Exception {
+    protected void checkMaxSpendAmount(C cahootsContext, long verifiedSpendAmount, long maxSpendAmount) throws Exception {
+        String prefix = "["+cahootsContext.getCahootsType()+"/"+cahootsContext.getTypeUser()+"] ";
+        if (log.isDebugEnabled()) {
+            log.debug(prefix+cahootsContext.getTypeUser()+" verifiedSpendAmount="+verifiedSpendAmount+", maxSpendAmount="+maxSpendAmount);
+        }
+        if (verifiedSpendAmount == 0) {
+            throw new Exception(prefix+"Cahoots spendAmount verification failed");
+        }
+        if (verifiedSpendAmount > maxSpendAmount) {
+            throw new Exception(prefix+"Cahoots verifiedSpendAmount mismatch: " + verifiedSpendAmount+" > "+maxSpendAmount);
+        }
+    }
+
+    protected long computeSpendAmount(Transaction tx, C cahootsContext) throws Exception {
         KeyBag keyBag = cahootsContext.getKeyBag();
-        long spendAmount = 0;
-
         String prefix = "["+cahootsContext.getCahootsType()+"/"+cahootsContext.getTypeUser()+"] ";
         if (log.isDebugEnabled()) {
             log.debug(prefix+"computeSpendAmount: keyBag="+keyBag);
         }
-        Transaction transaction = cahoots.getTransaction();
-        for(TransactionInput input : transaction.getInputs()) {
-            TransactionOutPoint outpoint = input.getOutpoint();
-
-            if (keyBag.getPrivKeyBytes(outpoint) != null) {
-                Long inputValue = cahoots.getOutpointValue(outpoint);
-                if (inputValue != null) {
-                    if (log.isDebugEnabled()) {
-                        log.debug(prefix+"computeSpendAmount: +input "+inputValue + " "+outpoint.toString());
-                    }
-                    spendAmount += inputValue;
-                }
-            }
-        }
-
-        for(TransactionOutput output : transaction.getOutputs()) {
-            if (!output.getScriptPubKey().isOpReturn()) {
-                String outputAddress = bipFormatSupplier.getToAddress(output);
-                if (outputAddress != null && cahootsContext.getOutputAddresses().contains(outputAddress)) {
-                    if (output.getValue() != null) {
-                        if (log.isDebugEnabled()) {
-                            log.debug(prefix + "computeSpendAmount: -output " + output.getValue().longValue() + " " + outputAddress);
-                        }
-                        spendAmount -= output.getValue().longValue();
-                    }
-                }
-            }
-        }
-        if (log.isDebugEnabled()) {
-            log.debug(prefix+"computeSpendAmount = " + spendAmount);
-        }
-        return spendAmount;
+        Function<TransactionOutPoint, InputOutPoint> getInputOutPoint = i -> cahootsContext.findInput(i);
+        return txUtil.computeSpendAmount(tx, keyBag, cahootsContext.getOutputAddresses(), getBipFormatSupplier(), getInputOutPoint);
     }
 
-    protected  TransactionOutput computeTxOutput(BipAddress bipAddress, long amount, C cahootsContext) throws Exception{
-        return computeTxOutput(bipAddress.getAddressString(), amount, cahootsContext);
-    }
-
-    protected  TransactionOutput computeTxOutput(String receiveAddressString, long amount, C cahootsContext) throws Exception{
-        cahootsContext.addOutputAddress(receiveAddressString); // save output address for computeSpendAmount()
-        return bipFormatSupplier.getTransactionOutput(receiveAddressString, amount, params);
-    }
-
-    private long computeFeeAmountActual(Cahoots cahoots) {
-        Transaction tx = cahoots.getTransaction();
-        long fee = 0;
-        for (TransactionInput txInput : tx.getInputs()) {
-            long value = cahoots.getOutpointValue(txInput.getOutpoint());
-            fee += value;
-        }
-        for (TransactionOutput txOut : tx.getOutputs()) {
-            fee -= txOut.getValue().getValue();
-        }
-        return fee;
-    }
-
-    protected void checkFee(Cahoots cahoots) throws Exception {
-        long feeActual = computeFeeAmountActual(cahoots);
-        long feeExpected = cahoots.getFeeAmount();
-        if (log.isDebugEnabled()) {
-            log.debug("checkFee: feeActual="+feeActual+", feeExpected="+feeExpected);
-        }
-        int PRECISION = 2;
-        if (Math.abs(feeActual - feeExpected) > PRECISION) {
-            throw new Exception("Invalid Cahoots fee: actual="+feeActual+", expected="+feeExpected);
-        }
-    }
+    protected abstract CahootsResult computeCahootsResult(C cahootsContext, T cahoots);
 
     public BipFormatSupplier getBipFormatSupplier() {
         return bipFormatSupplier;

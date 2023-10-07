@@ -21,6 +21,8 @@ import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
 import com.samourai.wallet.send.provider.MockUtxoProvider;
 import com.samourai.wallet.util.*;
+import com.samourai.wallet.utxo.UtxoOutPoint;
+import com.samourai.wallet.utxo.UtxoRef;
 import com.samourai.xmanager.client.XManagerClient;
 import com.samourai.xmanager.protocol.XManagerService;
 import org.bitcoinj.core.*;
@@ -56,6 +58,7 @@ public class AbstractTest {
   protected IHttpClient httpClient;
   protected BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;
   protected CryptoTestUtil cryptoTestUtil = CryptoTestUtil.getInstance();
+  protected TxUtil txUtil = TxUtil.getInstance();
 
   protected ChainSupplier mockChainSupplier = () -> {
     WalletResponse.InfoBlock infoBlock = new WalletResponse.InfoBlock();
@@ -167,7 +170,7 @@ public class AbstractTest {
 
   protected void verifySpendTx(SpendTx spendTx, SpendType spendType, Collection<com.samourai.wallet.send.UTXO> utxos, long minerFeeTotal, long minerFeePaid, long samouraiFee, long amount, boolean entireBalanceExpected, long change) throws Exception {
     Assertions.assertEquals(spendType, spendTx.getSpendType());
-    assertEquals(utxos, spendTx.getSpendFrom());
+    assertUtxos(utxos, spendTx.getSpendFrom());
     Assertions.assertEquals(minerFeeTotal, spendTx.getMinerFeeTotal());
     Assertions.assertEquals(minerFeePaid, spendTx.getMinerFeePaid());
     Assertions.assertEquals(samouraiFee, spendTx.getSamouraiFee());
@@ -176,10 +179,16 @@ public class AbstractTest {
     Assertions.assertEquals(change, spendTx.getChange());
   }
 
-  protected void assertEquals(Collection<UTXO> utxos1, Collection<? extends TransactionOutPoint> utxos2) {
+  protected void assertEquals(Collection<UTXO> utxos1, Collection<TransactionOutPoint> utxos2) {
     Function<TransactionOutPoint,String> outPointToString = outPoint -> utxoUtil.utxoToKey(outPoint);
     Collection<String> utxos1Str = UTXO.listOutpoints(utxos1).stream().map(outPointToString).collect(Collectors.toList());
     Collection<String> utxos2Str = utxos2.stream().map(outPointToString).collect(Collectors.toList());
+    Assertions.assertEquals(utxos1Str, utxos2Str);
+  }
+
+  protected void assertUtxos(Collection<UTXO> utxos1, Collection<UtxoOutPoint> utxos2) {
+    Collection<String> utxos1Str = UTXO.listOutpoints(utxos1).stream().map(outPoint -> utxoUtil.utxoToKey((UtxoRef)outPoint)).collect(Collectors.toList());
+    Collection<String> utxos2Str = utxos2.stream().map(outPoint -> utxoUtil.utxoToKey(outPoint)).collect(Collectors.toList());
     Assertions.assertEquals(utxos1Str, utxos2Str);
   }
 }

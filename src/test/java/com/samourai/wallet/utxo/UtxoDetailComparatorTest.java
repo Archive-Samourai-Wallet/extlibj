@@ -18,9 +18,9 @@ public class UtxoDetailComparatorTest extends AbstractTest {
 
     @Test
     public void compare() throws Exception {
-        UtxoDetail utxo1 = new UtxoDetailImpl("utxo1", 1, 10000, "myrDKvdCUNAMEoxWT4r3116i21R93s5vUV", null, params);
-        UtxoDetail utxo2 = new UtxoDetailImpl("utxo2", 2, 20000, "mpZYLcbacAdehXp3max1h2Lubk4GRnnpLj", null, params);
-        UtxoDetail utxo3 = new UtxoDetailImpl("utxo3", 3, 30000, "mhAaH3UGm6NYeHHvHx3KRGGCddwYdBj3VH", null, params);
+        UtxoDetail utxo1 = new UtxoDetailImpl("utxo1", 1, 10000, "myrDKvdCUNAMEoxWT4r3116i21R93s5vUV", null);
+        UtxoDetail utxo2 = new UtxoDetailImpl("utxo2", 2, 20000, "mpZYLcbacAdehXp3max1h2Lubk4GRnnpLj", null);
+        UtxoDetail utxo3 = new UtxoDetailImpl("utxo3", 3, 30000, "mhAaH3UGm6NYeHHvHx3KRGGCddwYdBj3VH", null);
 
         List<UtxoDetail> utxos = Arrays.asList(utxo2, utxo1, utxo3);
 

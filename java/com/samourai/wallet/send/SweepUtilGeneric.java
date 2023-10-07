@@ -10,6 +10,7 @@ import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.PrivKeyReader;
 import com.samourai.wallet.util.TxUtil;
 import com.samourai.wallet.util.UtxoUtil;
+import com.samourai.wallet.utxo.UtxoOutPoint;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
 import org.slf4j.Logger;
@@ -128,8 +129,7 @@ public class SweepUtilGeneric {
         NetworkParameters params = sweepPreview.getParams();
         final Map<String, Long> receivers = new LinkedHashMap<>();
         receivers.put(receive_address, sweepPreview.getAmount());
-        Collection<MyTransactionOutPoint> outpoints = sweepPreview.getUtxos().stream()
-                .map(utxo -> utxoUtil.computeOutpoint(utxo)).collect(Collectors.toList());
+        Collection<UtxoOutPoint> outpoints = (Collection<UtxoOutPoint>)(Collection<? extends UtxoOutPoint>)sweepPreview.getUtxos();
 
         Transaction tx = sendFactory.makeTransaction(receivers, outpoints, bipFormatSupplier, rbfOptIn, params, blockHeight);
         try {

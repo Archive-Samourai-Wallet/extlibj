@@ -9,8 +9,8 @@ import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.send.SendFactoryGeneric;
-import com.samourai.wallet.utxo.UtxoDetail;
-import com.samourai.wallet.utxo.UtxoDetailImpl;
+import com.samourai.wallet.utxo.UtxoOutPoint;
+import com.samourai.wallet.utxo.UtxoOutPointImpl;
 import org.bitcoinj.core.*;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
@@ -148,8 +148,8 @@ public class CryptoTestUtil {
         String address = bipFormat.getToAddress(privKey, params);
         String inputHash = "598cbf9f11ab9a1a5e788dbd11a7cf970089cec43e04fc073eb91c0a5717fd0e";
         byte[] scriptBytes = bipFormatSupplier.getTransactionOutput(address, value, params).getScriptBytes();
-        UtxoDetail utxo = new UtxoDetailImpl(inputHash, tx.getInputs().size(), value, address, 0, params);
-        TransactionInput input = utxoUtil.computeOutpoint(utxo, scriptBytes).computeSpendInput();
+        UtxoOutPoint utxo = new UtxoOutPointImpl(inputHash, tx.getInputs().size(), value, address, null, scriptBytes);
+        TransactionInput input = utxoUtil.computeSpendInput(utxo, params);
         tx.addInput(input);
     }
 

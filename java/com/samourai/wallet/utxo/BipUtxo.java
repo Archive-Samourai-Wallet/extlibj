@@ -9,11 +9,10 @@ import org.bitcoinj.core.NetworkParameters;
 
 import java.util.Collection;
 
-public interface BipUtxo extends UtxoDetail {
+public interface BipUtxo extends UtxoOutPoint {
     boolean isBip47();
     Integer getChainIndex();
     Integer getAddressIndex();
-    byte[] getScriptBytes();
     String getWalletXpub();
 
     BipWallet getBipWallet(WalletSupplier walletSupplier);

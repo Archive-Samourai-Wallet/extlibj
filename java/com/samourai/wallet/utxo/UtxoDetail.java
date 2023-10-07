@@ -1,20 +1,14 @@
 package com.samourai.wallet.utxo;
 
-import com.samourai.wallet.hd.Chain;
-import org.bitcoinj.core.NetworkParameters;
-
 import java.util.Collection;
 
 public interface UtxoDetail extends UtxoRef {
-    long getValue();
+    long getValueLong();
     String getAddress();
-    Integer getConfirmedBlockHeight();
-    void setConfirmedBlockHeight(Integer confirmedBlockHeight);
-    boolean isConfirmed();
-    int getConfirmations(int latestBlockHeight);
-    NetworkParameters getParams();
+    UtxoConfirmInfo getConfirmInfo();
+    void setConfirmInfo(UtxoConfirmInfo confirmInfo);
 
     static long sumValue(Collection<? extends UtxoDetail> utxos) {
-        return utxos.stream().mapToLong(utxo -> utxo.getValue()).sum();
+        return utxos.stream().mapToLong(utxo -> utxo.getValueLong()).sum();
     }
 }

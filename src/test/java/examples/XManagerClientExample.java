@@ -11,7 +11,7 @@ public class XManagerClientExample {
     // configuration
     boolean testnet = true;
     boolean onion = false;
-    IHttpClient httpClient = null; // TODO provide AndroidHttpClient or CliHttpClient
+    IHttpClient httpClient = null; // provide AndroidHttpClient or CliHttpClient
 
     // instantiation
     XManagerClient xManagerClient = new XManagerClient(httpClient, testnet, onion);

@@ -20,8 +20,6 @@ import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
 public abstract class AbstractCahootsTest extends AbstractTest {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahootsTest.class);
 
@@ -146,7 +144,7 @@ public abstract class AbstractCahootsTest extends AbstractTest {
         Assertions.assertEquals(typeUser, cahootsMessage.getTypeUser());
     }
 
-    protected Cahoots doCahoots(AbstractCahootsService cahootsService, CahootsContext cahootsContextSender, CahootsContext cahootsContextCp, String[] EXPECTED_PAYLOADS) throws Exception {
+    protected <T extends Cahoots, C extends CahootsContext> CahootsResult doCahoots(AbstractCahootsService<T,C> cahootsService, C cahootsContextSender, C cahootsContextCp, String[] EXPECTED_PAYLOADS) throws Exception {
         int nbSteps = EXPECTED_PAYLOADS != null ? EXPECTED_PAYLOADS.length : ManualCahootsMessage.getNbSteps(cahootsContextSender.getCahootsType());
 
         // sender => _0
@@ -159,7 +157,7 @@ public abstract class AbstractCahootsTest extends AbstractTest {
         }
 
         // counterparty => _1
-        lastPayload = cahootsService.startCollaborator(cahootsContextCp, Cahoots.parse(lastPayload)).toJSONString();
+        lastPayload = cahootsService.startCollaborator(cahootsContextCp, (T)Cahoots.parse(lastPayload)).toJSONString();
         if (log.isDebugEnabled()) {
             log.debug("#1 COUNTERPARTY => "+lastPayload);
         }
@@ -170,13 +168,13 @@ public abstract class AbstractCahootsTest extends AbstractTest {
         for (int i=2; i<nbSteps; i++) {
             if (i%2 == 0) {
                 // sender
-                lastPayload = cahootsService.reply(cahootsContextSender, Cahoots.parse(lastPayload)).toJSONString();
+                lastPayload = cahootsService.reply(cahootsContextSender, (T)Cahoots.parse(lastPayload)).toJSONString();
                 if (log.isDebugEnabled()) {
                     log.debug("#"+i+" SENDER => "+lastPayload);
                 }
             } else {
                 // counterparty
-                lastPayload = cahootsService.reply(cahootsContextCp, Cahoots.parse(lastPayload)).toJSONString();
+                lastPayload = cahootsService.reply(cahootsContextCp, (T)Cahoots.parse(lastPayload)).toJSONString();
                 if (log.isDebugEnabled()) {
                     log.debug("#"+i+" COUNTERPARTY => "+lastPayload);
                 }
@@ -185,8 +183,11 @@ public abstract class AbstractCahootsTest extends AbstractTest {
                 verify(EXPECTED_PAYLOADS[i], lastPayload);
             }
         }
-        Cahoots cahoots = Cahoots.parse(lastPayload);
-        cahoots.pushTx(pushTx);
-        return cahoots;
+        T cahoots = (T)Cahoots.parse(lastPayload);
+
+        // sender broadcasts signed cahoots
+        CahootsResult cahootsResult = cahootsService.computeCahootsResult(cahootsContextSender, cahoots);
+        cahootsResult.pushTx(pushTx);
+        return cahootsResult;
     }
 }

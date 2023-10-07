@@ -21,4 +21,9 @@ public class SimpleCahootsUtxoProvider implements CahootsUtxoProvider {
         Collection<UTXO> utxos = utxoProvider.getUtxos(whirlpoolAccount, BIP_FORMAT.SEGWIT_NATIVE);
         return CahootsUtxo.toCahootsUtxos(utxos, utxoProvider);
     }
+
+    @Override
+    public UtxoKeyProvider getUtxoKeyProvider() {
+        return utxoProvider;
+    }
 }

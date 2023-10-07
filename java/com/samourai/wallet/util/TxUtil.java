@@ -3,14 +3,18 @@ package com.samourai.wallet.util;
 import com.samourai.wallet.bip69.BIP69InputComparator;
 import com.samourai.wallet.bip69.BIP69OutputComparator;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.bipWallet.KeyBag;
+import com.samourai.wallet.utxo.InputOutPoint;
 import org.bitcoinj.core.*;
 import org.bitcoinj.script.Script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 public class TxUtil {
   private static final Logger log = LoggerFactory.getLogger(TxUtil.class);
@@ -98,23 +102,80 @@ public class TxUtil {
     return new Transaction(params, org.bitcoinj.core.Utils.HEX.decode(txHex));
   }
 
-  public void sortBip69InputsAndOutputs(Transaction transaction) {
-    // sort inputs
+  public void sortBip69Inputs(Transaction transaction) {
     List<TransactionInput> inputs = new ArrayList<TransactionInput>();
     inputs.addAll(transaction.getInputs());
     Collections.sort(inputs, new BIP69InputComparator());
-    transaction.clearInputs();
-    for(TransactionInput input : inputs)    {
-      transaction.addInput(input);
-    }
+    replaceInputs(transaction, inputs);
+  }
 
-    // sort outputs
+  public void sortBip69Outputs(Transaction transaction) {
     List<TransactionOutput> outputs = new ArrayList<TransactionOutput>();
     outputs.addAll(transaction.getOutputs());
     Collections.sort(outputs, new BIP69OutputComparator());
-    transaction.clearOutputs();
-    for(TransactionOutput output : outputs)    {
-      transaction.addOutput(output);
+    replaceOutputs(transaction, outputs);
+  }
+
+  public void sortBip69InputsAndOutputs(Transaction transaction) {
+    sortBip69Inputs(transaction);
+    sortBip69Outputs(transaction);
+  }
+
+  public boolean isBip69Sorted(Transaction transaction) {
+    String raw = getTxHex(transaction);
+
+    // sort
+    Transaction bip69Tx = fromTxHex(transaction.getParams(), raw);
+    TxUtil.getInstance().sortBip69InputsAndOutputs(bip69Tx);
+
+    // compare
+    return getTxHex(bip69Tx).equals(raw);
+  }
+
+  public void replaceInputs(Transaction transaction, List<TransactionInput> allInputs) {
+    transaction.clearInputs();
+    for (TransactionInput txIn : allInputs) {
+      transaction.addInput(txIn);
     }
+  }
+
+  public void replaceOutputs(Transaction transaction, List<TransactionOutput> allOutputs) {
+    transaction.clearOutputs();
+    for (TransactionOutput txOut : allOutputs) {
+      transaction.addOutput(txOut);
+    }
+  }
+
+  public long computeSpendAmount(Transaction tx, KeyBag keyBag, Collection<String> outputAddresses, BipFormatSupplier bipFormatSupplier, Function<TransactionOutPoint, InputOutPoint> getInputOutPoint) throws Exception {
+    long spendAmount = 0;
+
+    for(TransactionInput input : tx.getInputs()) {
+      if (keyBag.getPrivKeyBytes(input.getOutpoint()) != null) {
+        // read inputValue from provided InputOutPoint
+        long value = getInputOutPoint.apply(input.getOutpoint()).getValueLong();
+        if (log.isDebugEnabled()) {
+          log.debug("computeSpendAmount... +input " + value + " " + input);
+        }
+        spendAmount += value;
+      }
+    }
+
+    for(TransactionOutput output : tx.getOutputs()) {
+      if (!output.getScriptPubKey().isOpReturn()) {
+        String outputAddress = bipFormatSupplier.getToAddress(output);
+        if (outputAddress != null && outputAddresses.contains(outputAddress)) {
+          if (output.getValue() != null) {
+            if (log.isDebugEnabled()) {
+              log.debug("computeSpendAmount... -output " + output.getValue().longValue() + " " + outputAddress);
+            }
+            spendAmount -= output.getValue().longValue();
+          }
+        }
+      }
+    }
+    if (log.isDebugEnabled()) {
+      log.debug("computeSpendAmount = " + spendAmount);
+    }
+    return spendAmount;
   }
 }

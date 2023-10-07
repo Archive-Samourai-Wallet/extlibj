@@ -1,17 +1,21 @@
 package com.samourai.wallet.util;
 
+import com.samourai.wallet.cahoots.psbt.PSBT;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import java.util.*;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collection;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Util  {
@@ -125,5 +129,13 @@ public class Util  {
         return value.substring(0, Math.min(startEnd, value.length()))
                 + "..."
                 + value.substring(Math.max(0, value.length() - startEnd), value.length());
+    }
+
+    public static long sumLong(Collection<Long> values) {
+      return values.stream().mapToLong(v -> v).sum();
+    }
+
+    public static int sumInt(Collection<Integer> values) {
+        return values.stream().mapToInt(v -> v).sum();
     }
 }

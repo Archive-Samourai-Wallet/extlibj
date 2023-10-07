@@ -1,6 +1,7 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.soroban.cahoots.StowawayContext;
+import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
@@ -36,7 +37,8 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         StowawayContext cahootsContextSender = StowawayContext.newInitiator(cahootsWalletSender, account, FEE_PER_B, spendAmount);
         StowawayContext cahootsContextCp = StowawayContext.newCounterparty(cahootsWalletCounterparty, account);
 
-        Cahoots cahoots = doCahoots(stowawayService, cahootsContextSender, cahootsContextCp, null);
+        CahootsResult cahootsResult = doCahoots(stowawayService, cahootsContextSender, cahootsContextCp, null);
+        Stowaway cahoots = (Stowaway)cahootsResult.getCahoots();
 
         // verify TX
         String txid = "e5c6df03befcf1e70382066d2011186383d53c7d9a48f13f5f16f2557d858252";
@@ -66,7 +68,8 @@ public class StowawayServiceTest extends AbstractCahootsTest {
         StowawayContext cahootsContextSender = StowawayContext.newInitiator(cahootsWalletSender, account, FEE_PER_B, spendAmount);
         StowawayContext cahootsContextCp = StowawayContext.newCounterparty(cahootsWalletCounterparty, account);
 
-        Cahoots cahoots = doCahoots(stowawayService, cahootsContextSender, cahootsContextCp, null);
+        CahootsResult cahootsResult = doCahoots(stowawayService, cahootsContextSender, cahootsContextCp, null);
+        Stowaway cahoots = (Stowaway)cahootsResult.getCahoots();
 
         // verify TX
         String txid = "c655eed464d24741d4c78bd780e415522a8614466ff878b82665d76704f79558";

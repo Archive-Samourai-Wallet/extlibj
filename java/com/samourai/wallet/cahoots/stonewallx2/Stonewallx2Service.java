@@ -6,7 +6,6 @@ import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.hd.BipAddress;
-import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.RandomUtil;
@@ -155,7 +154,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
                     seenTxs.add(utxo.getTxHash());
 
                     selectedUTXO.add(utxo);
-                    totalContributedAmount += utxo.getValue();
+                    totalContributedAmount += utxo.getValueLong();
                     if (log.isDebugEnabled()) {
                         log.debug("BIP84 selected utxo: " + utxo);
                     }
@@ -241,7 +240,8 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
 
         Collection<CahootsUtxo> utxos = cahootsWallet.getUtxosWpkhByAccount(account);
         List<CahootsUtxo> selectedUTXO = selectUtxos1(stonewall0, utxos, seenTxs);
-        Collection<TransactionInput> inputsA = cahootsContext.addInputs(selectedUTXO);
+        cahootsContext.addInputs(selectedUTXO);
+        Collection<TransactionInput> inputsA = computeSpendInputs(selectedUTXO);
         long contributedAmount = CahootsUtxo.sumValue(selectedUTXO);
 
         List<TransactionOutput> outputsA = new LinkedList<>();
@@ -326,11 +326,11 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
                         break;
                 }
 
-                if (!_seenTxs.contains(utxo.getOutpoint().getHash().toString())) {
-                    _seenTxs.add(utxo.getOutpoint().getHash().toString());
+                if (!_seenTxs.contains(utxo.getTxHash())) {
+                    _seenTxs.add(utxo.getTxHash());
 
                     selectedUTXO.add(utxo);
-                    totalSelectedAmount += utxo.getValue();
+                    totalSelectedAmount += utxo.getValueLong();
                     nbTotalSelectedOutPoints ++;
                     if (log.isDebugEnabled()) {
                         log.debug("BIP84 selected utxo: " + utxo);
@@ -394,7 +394,8 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         //
         //
 
-        Collection<TransactionInput> inputsB = cahootsContext.addInputs(selectedUTXO);
+        cahootsContext.addInputs(selectedUTXO);
+        Collection<TransactionInput> inputsB = computeSpendInputs(selectedUTXO);
 
         // spender change output
         List<TransactionOutput> outputsB = new LinkedList<>();
@@ -445,9 +446,10 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
     }
 
     @Override
-    protected long computeMaxSpendAmount(long minerFee, Stonewallx2Context cahootsContext) throws Exception {
+    protected long computeMaxSpendAmount(STONEWALLx2 cahoots, Stonewallx2Context cahootsContext) throws Exception {
         // shares minerFee
         long maxSpendAmount;
+        long minerFee = cahoots.getFeeAmount();
         long sharedMinerFee = minerFee / 2;
         String prefix = "["+cahootsContext.getCahootsType()+"/"+cahootsContext.getTypeUser()+"] ";
         switch (cahootsContext.getTypeUser()) {

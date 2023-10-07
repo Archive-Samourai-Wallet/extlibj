@@ -8,6 +8,7 @@ import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.UtxoUtil;
 import com.samourai.wallet.utxo.BipUtxo;
+import com.samourai.wallet.utxo.UtxoConfirmInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.NetworkParameters;
 import org.bouncycastle.util.encoders.Hex;
@@ -24,9 +25,8 @@ public class UnspentOutput implements BipUtxo {
     public String script;
     public String addr;
     public int confirmations;
-    private Integer confirmedBlockHeight; // null when unconfirmed
     public Xpub xpub;
-    public NetworkParameters params;
+    private UtxoConfirmInfo confirmInfo; // used for BipUtxo
 
     public UnspentOutput() {
     }
@@ -41,12 +41,11 @@ public class UnspentOutput implements BipUtxo {
         this.addr = copy.addr;
         this.confirmations = copy.confirmations;
         this.xpub = copy.xpub;
-        this.params = copy.params;
     }
 
     public UnspentOutput(MyTransactionOutPoint outPoint, String path, String xpub) {
-        this.tx_hash = outPoint.getTxHash().toString();
-        this.tx_output_n = outPoint.getTxOutputN();
+        this.tx_hash = outPoint.getTxHash();
+        this.tx_output_n = outPoint.getTxOutputIndex();
         this.tx_version = -1; // ignored
         this.tx_locktime = -1; // ignored
         this.value = outPoint.getValue().getValue();
@@ -56,7 +55,6 @@ public class UnspentOutput implements BipUtxo {
         this.xpub = new Xpub();
         this.xpub.path = path;
         this.xpub.m = xpub;
-        this.params = outPoint.getParams();
     }
 
     public String getPath() {
@@ -71,7 +69,7 @@ public class UnspentOutput implements BipUtxo {
     }
 
     public static long sumValue(Collection<UnspentOutput> utxos) {
-        return utxos.stream().mapToLong(utxo -> utxo.getValue()).sum();
+        return utxos.stream().mapToLong(utxo -> utxo.getValueLong()).sum();
     }
 
     public static class Xpub {
@@ -109,7 +107,7 @@ public class UnspentOutput implements BipUtxo {
     }
 
     @Override
-    public long getValue() {
+    public long getValueLong() {
         return value;
     }
 
@@ -119,28 +117,31 @@ public class UnspentOutput implements BipUtxo {
     }
 
     @Override
-    public Integer getConfirmedBlockHeight() {
-        return confirmedBlockHeight;
-    }
+    public UtxoConfirmInfo getConfirmInfo() {
+        if (confirmInfo == null) {
+            confirmInfo = new UtxoConfirmInfo() {
+                @Override
+                public Integer getConfirmedBlockHeight() {
+                    return null; // unknown
+                }
 
-    @Override
-    public void setConfirmedBlockHeight(Integer confirmedBlockHeight) {
-        this.confirmedBlockHeight = confirmedBlockHeight;
-    }
+                @Override
+                public boolean isConfirmed() {
+                    return confirmations > 0;
+                }
 
-    @Override
-    public boolean isConfirmed() {
-        return confirmedBlockHeight != null || confirmations > 0;
-    }
-
-    @Override
-    public int getConfirmations(int latestBlockHeight) {
-        // use 'confirmedBlockHeight' when available
-        if (confirmedBlockHeight != null) {
-            return utxoUtil.computeConfirmations(confirmedBlockHeight, latestBlockHeight);
+                @Override
+                public int getConfirmations(int latestBlockHeight) {
+                    return confirmations;
+                }
+            };
         }
-        // fallback to 'confirmations' when 'confirmedBlockHeight' not set
-        return confirmations;
+        return confirmInfo;
+    }
+
+    @Override
+    public void setConfirmInfo(UtxoConfirmInfo confirmInfo) {
+        this.confirmInfo = confirmInfo;
     }
 
     @Override
@@ -190,10 +191,5 @@ public class UnspentOutput implements BipUtxo {
     @Override
     public String getWalletXpub() {
         return getXpubM();
-    }
-
-    @Override
-    public NetworkParameters getParams() {
-        return params;
     }
 }

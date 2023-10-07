@@ -6,10 +6,14 @@ import com.samourai.wallet.bip340.Schnorr;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.send.SendFactoryGeneric;
 import com.samourai.wallet.test.AbstractTest;
+import com.samourai.wallet.util.TxUtil;
+import com.samourai.wallet.utxo.InputOutPoint;
+import com.samourai.wallet.utxo.InputOutPointImpl;
 import org.bitcoinj.core.*;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
+import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -45,6 +49,12 @@ public class SendFactoryGenericTest extends AbstractTest {
         TransactionOutput txOutput = txCoinbase.getOutput(0);
         Transaction tx = computeSpendTxUnsigned(txOutput);
         Assertions.assertEquals("876e9d14e51a6992377435b51cfbe506ed33743667a292039424cef30e1d633f", tx.getHashAsString());
+        String raw = TxUtil.getInstance().getTxHex(tx);
+        Assertions.assertEquals("010000000184143c8a660fb32b72ac1887974d4b13f8edc9e137a1f94c76bf3a75fd5d7b040000000000ffffffff013f420f000000000017a91430a3a154ab9b649fc4f57dff2ac8ec3a400c825b8700000000", raw);
+
+        TransactionOutPoint inputOutPoint = tx.getInput(0).getOutpoint();
+        byte[] input0ConnectedScriptBytes = inputOutPoint.getConnectedOutput().getScriptBytes();
+        Assertions.assertEquals("00148700481b5d2bf577c2eddf37ad4bb0a45ec36a14", Hex.toHexString(input0ConnectedScriptBytes));
 
         // sign tx
         Map<String,ECKey> keyBag = new LinkedHashMap<>();
@@ -57,13 +67,37 @@ public class SendFactoryGenericTest extends AbstractTest {
     }
 
     @Test
+    public void signTransactionP2WPKH_fromHex() throws Exception {
+        // rebuild tx from hex
+        Transaction tx = TxUtil.getInstance().fromTxHex(params, "010000000184143c8a660fb32b72ac1887974d4b13f8edc9e137a1f94c76bf3a75fd5d7b040000000000ffffffff013f420f000000000017a91430a3a154ab9b649fc4f57dff2ac8ec3a400c825b8700000000");
+        Assertions.assertEquals("876e9d14e51a6992377435b51cfbe506ed33743667a292039424cef30e1d633f", tx.getHashAsString());
+
+        // input values are missing because we rebuilt tx from hex
+        for (TransactionInput txIn : tx.getInputs()) {
+            log.debug("input: "+txIn);
+            Assertions.assertNull(txIn.getValue());
+        }
+
+        // keybag
+        Map<String,ECKey> keyBag = new LinkedHashMap<>();
+        keyBag.put(tx.getInput(0).getOutpoint().toString(), inputKey);
+
+        // signing failure without providing InputOutPoint
+        Assertions.assertThrows(Exception.class, () -> sendFactory.signTransaction(tx, keyBag, bipFormatSupplier));
+
+        // signing success when providing InputOutPoint
+        InputOutPoint o = new InputOutPointImpl(999999, Hex.decode("00148700481b5d2bf577c2eddf37ad4bb0a45ec36a14"));
+        sendFactory.signTransaction(tx, keyBag, bipFormatSupplier, i -> o);
+    }
+
+    @Test
     public void signTransactionP2PKH() throws Exception {
         // spend coinbase -> P2PKH
         Address inputAddressP2PKH = new Address(params, inputKey.getPubKeyHash());
         Script outputScript = ScriptBuilder.createOutputScript(inputAddressP2PKH);
         Transaction txCoinbase = computeTxCoinbase(999999, outputScript);
 
-        // spend tx
+        // sptend tx
         TransactionOutput txOutput = txCoinbase.getOutput(0);
         Transaction tx = computeSpendTxUnsigned(txOutput);
         Assertions.assertEquals("7a359d7a01ae9eb38019ddafecd32b7a5831bbb75919bbed3e1198444f811d2c", tx.getHashAsString());

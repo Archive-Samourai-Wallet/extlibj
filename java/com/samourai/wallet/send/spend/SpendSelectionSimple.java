@@ -12,6 +12,7 @@ import com.samourai.wallet.send.beans.SpendType;
 import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.util.FeeUtil;
+import com.samourai.wallet.utxo.UtxoOutPoint;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.NetworkParameters;
@@ -122,7 +123,7 @@ public class SpendSelectionSimple extends SpendSelection {
 
     @Override
     public SpendTx spendTx(long amount, String address, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, UtxoProvider utxoProvider, long blockHeight) throws SpendException {
-        Collection<MyTransactionOutPoint> outpoints = getSpendFrom();
+        Collection<UtxoOutPoint> outpoints = getSpendFrom();
         Triple<Integer, Integer, Integer> outpointTypes = FeeUtil.getInstance().getOutpointCount(new Vector(outpoints), params);
         BigInteger fee;
         long change;

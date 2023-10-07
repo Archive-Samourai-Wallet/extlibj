@@ -67,7 +67,7 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
             Cahoots cahootsResponse = cahootsService.reply(cahootsContext, payload);
 
             // check for interaction
-            SorobanInteraction interaction = cahootsService.checkInteraction(request, cahootsResponse);
+            SorobanInteraction interaction = cahootsService.checkInteraction(request, cahootsResponse, cahootsContext);
             if (interaction != null) {
                 // reply interaction
                 response = interaction;

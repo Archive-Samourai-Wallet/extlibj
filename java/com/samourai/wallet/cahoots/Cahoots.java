@@ -1,15 +1,8 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.soroban.cahoots.CahootsContext;
-import com.samourai.wallet.api.backend.IPushTx;
-import com.samourai.wallet.cahoots.psbt.PSBT;
-import com.samourai.wallet.send.beans.SpendTx;
-import com.samourai.wallet.send.exceptions.SpendException;
-import com.samourai.wallet.send.provider.UtxoKeyProvider;
-import com.samourai.wallet.util.TxUtil;
+import com.samourai.wallet.util.UtxoUtil;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Transaction;
-import org.bitcoinj.core.TransactionOutPoint;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
 import org.json.JSONException;
@@ -22,6 +15,8 @@ import java.lang.reflect.Constructor;
 // shared payload for any Cahoots: Stonewallx2, Stowaway, MultiCahoots
 public abstract class Cahoots<C extends CahootsContext> {
     private static final Logger log = LoggerFactory.getLogger(Cahoots.class);
+    protected static final long SEQUENCE_RBF_ENABLED = 4294967293L;
+    protected static final UtxoUtil utxoUtil = UtxoUtil.getInstance();
 
     private int version = 2;
     private int type = -1;
@@ -157,35 +152,5 @@ public abstract class Cahoots<C extends CahootsContext> {
 
     public String toJSONString() {
         return toJSON().toString();
-    }
-
-    public abstract void signTx(C cahootsContext) throws Exception;
-
-    // getters below are used by Android review fragment
-
-    public abstract long getFeeAmount(); // fee amount expected
-
-    public abstract Long getOutpointValue(TransactionOutPoint txOut);
-    public abstract Long getOutpointsSum();
-    public abstract void setOutpointValue(TransactionOutPoint txOut, long value);
-
-    public abstract String getDestination();
-
-    // android checks getPaynymDestination() to increment paynym counter after successfull broadcast
-    public String getPaynymDestination() {
-        return null; // overridable
-    }
-
-    public abstract long getSpendAmount();
-
-    public abstract Transaction getTransaction();
-
-    public abstract PSBT getPSBT();
-
-    public abstract SpendTx getSpendTx(C cahootsContext, UtxoKeyProvider utxoKeyProvider) throws SpendException;
-
-    public void pushTx(IPushTx pushTx) throws Exception {
-        String txHex = TxUtil.getInstance().getTxHex(getTransaction());
-        pushTx.pushTx(txHex);
     }
 }

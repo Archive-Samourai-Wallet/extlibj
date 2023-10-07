@@ -4,18 +4,17 @@ import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.provider.UtxoKeyProvider;
-import com.samourai.wallet.util.UtxoUtil;
 import com.samourai.wallet.utxo.BipUtxo;
 import com.samourai.wallet.utxo.BipUtxoImpl;
+import com.samourai.wallet.utxo.UtxoConfirmInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-public class CahootsUtxo extends BipUtxoImpl implements BipUtxo {
+public class CahootsUtxo extends BipUtxoImpl  {
     private static final Logger log = LoggerFactory.getLogger(CahootsUtxo.class);
-    private static final UtxoUtil utxoUtil = UtxoUtil.getInstance();
 
     private byte[] key;
 
@@ -24,8 +23,8 @@ public class CahootsUtxo extends BipUtxoImpl implements BipUtxo {
         this.key = key;
     }
 
-    public CahootsUtxo(MyTransactionOutPoint outPoint, Integer confirmedBlockHeight, String walletXpub, HD_Address hdAddress) {
-        super(new BipUtxoImpl(outPoint, confirmedBlockHeight, walletXpub, hdAddress));
+    public CahootsUtxo(MyTransactionOutPoint outPoint, UtxoConfirmInfo confirmInfo, String walletXpub, HD_Address hdAddress) {
+        super(new BipUtxoImpl(outPoint, confirmInfo, walletXpub, hdAddress));
         this.key = hdAddress.getECKey().getPrivKeyBytes();
     }
 
@@ -39,11 +38,7 @@ public class CahootsUtxo extends BipUtxoImpl implements BipUtxo {
     }
 
     public static long sumValue(Collection<CahootsUtxo> utxos) {
-        return utxos.stream().mapToLong(utxo -> utxo.getValue()).sum();
-    }
-
-    public MyTransactionOutPoint getOutpoint() {
-        return utxoUtil.computeOutpoint(this);
+        return utxos.stream().mapToLong(utxo -> utxo.getValueLong()).sum();
     }
 
     public static Collection<CahootsUtxo> toCahootsUtxos(Collection<UTXO> utxos, UtxoKeyProvider keyProvider) {

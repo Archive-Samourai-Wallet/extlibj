@@ -13,12 +13,12 @@ import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.send.provider.CahootsUtxoProvider;
+import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.bitcoinj.core.NetworkParameters;
 
 import java.util.Collection;
-import java.util.List;
 
 public class CahootsWallet {
     private WalletSupplier walletSupplier;
@@ -65,6 +65,10 @@ public class CahootsWallet {
         return getReceiveWallet(account, bipFormat).getNextAddressChange(bipFormat, increment);
     }
 
+    public BipWallet getWalletPremix() throws Exception {
+        return getReceiveWallet(SamouraiAccountIndex.PREMIX, BIP_FORMAT.SEGWIT_NATIVE);
+    }
+
     public BipFormatSupplier getBipFormatSupplier() {
         return bipFormatSupplier;
     }
@@ -99,5 +103,9 @@ public class CahootsWallet {
 
     public Collection<CahootsUtxo> getUtxosWpkhByAccount(int account) {
         return utxoProvider.getUtxosWpkhByAccount(account);
+    }
+
+    public UtxoKeyProvider getUtxoKeyProvider() {
+        return utxoProvider.getUtxoKeyProvider();
     }
 }

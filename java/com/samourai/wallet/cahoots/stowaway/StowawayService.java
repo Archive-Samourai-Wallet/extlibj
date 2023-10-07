@@ -6,7 +6,6 @@ import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.hd.BipAddress;
-import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.RandomUtil;
 import com.samourai.wallet.utxo.UtxoDetailComparator;
@@ -123,7 +122,8 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         //
 
         Collection<CahootsUtxo> selectedUTXO = selectUtxos1(stowaway0, utxos, seenTxs);
-        Collection<TransactionInput> inputsA = cahootsContext.addInputs(selectedUTXO);
+        cahootsContext.addInputs(selectedUTXO);
+        Collection<TransactionInput> inputsA = computeSpendInputs(selectedUTXO);
 
         // receive output
         BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(receiveAccount, true, BIP_FORMAT.SEGWIT_NATIVE);
@@ -157,9 +157,9 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         long totalContributedAmount = 0L;
         List<CahootsUtxo> highUTXO = new ArrayList<CahootsUtxo>();
         for (CahootsUtxo utxo : utxos) {
-            if (utxo.getValue() > stowaway0.getSpendAmount() + SamouraiWalletConst.bDust.longValue()) {
-                if (!_seenTxs.contains(utxo.getOutpoint().getHash().toString())) {
-                    _seenTxs.add(utxo.getOutpoint().getHash().toString());
+            if (utxo.getValueLong() > stowaway0.getSpendAmount() + SamouraiWalletConst.bDust.longValue()) {
+                if (!_seenTxs.contains(utxo.getTxHash())) {
+                    _seenTxs.add(utxo.getTxHash());
                     highUTXO.add(utxo);
                 }
             }
@@ -171,15 +171,15 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
                 log.debug("BIP84 selected random utxo: " + utxo);
             }
             selectedUTXO.add(utxo);
-            totalContributedAmount = utxo.getValue();
+            totalContributedAmount = utxo.getValueLong();
         }
         if (selectedUTXO.size() == 0) {
             // select multiple utxos
             for (CahootsUtxo utxo : utxos) {
-                if (!_seenTxs.contains(utxo.getOutpoint().getHash().toString())) {
-                    _seenTxs.add(utxo.getOutpoint().getHash().toString());
+                if (!_seenTxs.contains(utxo.getTxHash())) {
+                    _seenTxs.add(utxo.getTxHash());
                     selectedUTXO.add(utxo);
-                    totalContributedAmount += utxo.getValue();
+                    totalContributedAmount += utxo.getValueLong();
                     if (log.isDebugEnabled()) {
                         log.debug("BIP84 selected utxo: " + utxo);
                     }
@@ -230,9 +230,9 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         long totalSelectedAmount = 0L;
         List<CahootsUtxo> lowUTXO = new ArrayList<CahootsUtxo>();
         for (CahootsUtxo utxo : utxos) {
-            if(utxo.getValue() < stowaway1.getSpendAmount())    {
-                if (!_seenTxs.contains(utxo.getOutpoint().getHash().toString())) {
-                    _seenTxs.add(utxo.getOutpoint().getHash().toString());
+            if(utxo.getValueLong() < stowaway1.getSpendAmount())    {
+                if (!_seenTxs.contains(utxo.getTxHash())) {
+                    _seenTxs.add(utxo.getTxHash());
                     lowUTXO.add(utxo);
                 }
             }
@@ -252,10 +252,10 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
             nbTotalSelectedOutPoints = 0;
 
             for (CahootsUtxo utxo : list) {
-                if (!_seenTxs.contains(utxo.getOutpoint().getHash().toString())) {
-                    _seenTxs.add(utxo.getOutpoint().getHash().toString());
+                if (!_seenTxs.contains(utxo.getTxHash())) {
+                    _seenTxs.add(utxo.getTxHash());
                     selectedUTXO.add(utxo);
-                    totalSelectedAmount += utxo.getValue();
+                    totalSelectedAmount += utxo.getValueLong();
                     if (log.isDebugEnabled()) {
                         log.debug("BIP84 selected utxo: " + utxo);
                     }
@@ -270,7 +270,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
                     long _totalSelectedAmount = 0L;
                     for (CahootsUtxo utxoSel : selectedUTXO) {
                         _selectedUTXO.add(utxoSel);
-                        _totalSelectedAmount += utxoSel.getValue();
+                        _totalSelectedAmount += utxoSel.getValueLong();
                         if (log.isDebugEnabled()) {
                             log.debug("BIP84 post selected utxo: " + utxoSel);
                         }
@@ -307,7 +307,8 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         //
         //
 
-        Collection<TransactionInput> inputsB = cahootsContext.addInputs(selectedUTXO);
+        cahootsContext.addInputs(selectedUTXO);
+        Collection<TransactionInput> inputsB = computeSpendInputs(selectedUTXO);
 
         List<TransactionOutput> outputsB = new LinkedList<>();
 
@@ -354,12 +355,13 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
     }
 
     @Override
-    protected long computeMaxSpendAmount(long minerFee, StowawayContext cahootsContext) throws Exception {
+    protected long computeMaxSpendAmount(Stowaway cahoots, StowawayContext cahootsContext) throws Exception {
         long maxSpendAmount;
         String prefix = "["+cahootsContext.getCahootsType()+"/"+cahootsContext.getTypeUser()+"] ";
         switch (cahootsContext.getTypeUser()) {
             case SENDER:
                 // spends amount + minerFee
+                long minerFee = cahoots.getFeeAmount();
                 maxSpendAmount = cahootsContext.getAmount()+minerFee;
                 if (log.isDebugEnabled()) {
                     log.debug(prefix+"maxSpendAmount = "+maxSpendAmount+": amount="+cahootsContext.getAmount()+" + minerFee="+minerFee);

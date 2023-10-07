@@ -7,15 +7,20 @@ import com.samourai.wallet.cahoots.CahootsTypeUser;
 import com.samourai.wallet.cahoots.CahootsUtxo;
 import com.samourai.wallet.cahoots.CahootsWallet;
 import com.samourai.wallet.cahoots.multi.MultiCahootsContext;
-import com.samourai.wallet.send.MyTransactionOutPoint;
-import org.bitcoinj.core.TransactionInput;
+import com.samourai.wallet.util.UtxoUtil;
+import com.samourai.wallet.utxo.UtxoOutPoint;
+import org.bitcoinj.core.TransactionOutPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.Set;
 
 public abstract class CahootsContext implements SorobanContext {
     private static final Logger log = LoggerFactory.getLogger(CahootsContext.class);
+    private static final UtxoUtil utxoUtil = UtxoUtil.getInstance();
 
     private CahootsWallet cahootsWallet;
     private CahootsTypeUser typeUser;
@@ -25,7 +30,7 @@ public abstract class CahootsContext implements SorobanContext {
     private Long amount; // only set for initiator
     private String address; // only set for initiator
     private Set<String> outputAddresses; // keep track of our own change addresses outputs
-    private Collection<MyTransactionOutPoint> inputs; // keep track of our own inputs
+    private Collection<UtxoOutPoint> inputs; // keep track of our own inputs
     private long samouraiFee; // keep track of samourai fee
     private long minerFeePaid; // keep track of paid minerFee (lower or equals cahoots.fee)
     private KeyBag keyBag;
@@ -123,23 +128,32 @@ public abstract class CahootsContext implements SorobanContext {
         outputAddresses.add(address);
     }
 
-    public TransactionInput addInput(MyTransactionOutPoint input, byte[] key) {
+    public void addInput(UtxoOutPoint input, byte[] key) {
         inputs.add(input);
         keyBag.add(input, key);
-        return input.computeSpendInput();
     }
 
-    public Collection<TransactionInput> addInputs(Collection<CahootsUtxo> inputs) {
-        List<TransactionInput> inputsA = new LinkedList<>();
-
+    public void addInputs(Collection<CahootsUtxo> inputs) {
         for (CahootsUtxo input : inputs) {
-            TransactionInput txIn = addInput(input.getOutpoint(), input.getKey());
-            inputsA.add(txIn);
+            addInput(input, input.getKey());
         }
-        return inputsA;
     }
 
-    public Collection<MyTransactionOutPoint> getInputs() {
+    public void addInputs(Collection<UtxoOutPoint> inputs, KeyBag keyBag) {
+        for (UtxoOutPoint input : inputs) {
+            byte[] key = keyBag.getPrivKeyBytes(input);
+            addInput(input, key);
+        }
+    }
+
+    public UtxoOutPoint findInput(TransactionOutPoint inputOutPoint) {
+        String utxoKey = utxoUtil.utxoToKey(inputOutPoint);
+        return inputs.stream().filter(in ->
+                        utxoUtil.utxoToKey(in).equals(utxoKey))
+                        .findFirst().orElse(null);
+    }
+
+    public Collection<UtxoOutPoint> getInputs() {
         return inputs;
     }
 

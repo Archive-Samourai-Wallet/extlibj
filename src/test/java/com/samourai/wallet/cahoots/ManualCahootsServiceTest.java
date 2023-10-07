@@ -4,6 +4,8 @@ import com.samourai.soroban.cahoots.*;
 import com.samourai.soroban.client.SorobanInteraction;
 import com.samourai.wallet.cahoots.multi.MultiCahoots;
 import com.samourai.wallet.cahoots.multi.MultiCahootsContext;
+import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
+import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import org.bitcoinj.core.Transaction;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,7 +67,7 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
         // sender => doStowaway4
         ManualCahootsMessage payload4 = (ManualCahootsMessage)txBroadcastInteraction.getReplyAccept();
         verify(EXPECTED_PAYLOADS[4], payload4, true, CahootsType.STOWAWAY, CahootsTypeUser.SENDER);
-        Cahoots cahoots = payload4.getCahoots();
+        Stowaway cahoots = (Stowaway)payload4.getCahoots();
 
         // verify TX
         String txid = "e5c6df03befcf1e70382066d2011186383d53c7d9a48f13f5f16f2557d858252";
@@ -120,7 +122,7 @@ public class ManualCahootsServiceTest extends AbstractCahootsTest {
         // sender => doSTONEWALLx2_4
         ManualCahootsMessage payload4 = (ManualCahootsMessage)payload4Interaction.getReplyAccept();
         verify(EXPECTED_PAYLOADS[4], payload4, true, CahootsType.STONEWALLX2, CahootsTypeUser.SENDER);
-        Cahoots cahoots = payload4.getCahoots();
+        STONEWALLx2 cahoots = (STONEWALLx2)payload4.getCahoots();
 
         // verify TX
         String txid = "7455f15769b0f876bf3853cf20ef60090255bffea5dd26e5a521eb2dd0b88faf";

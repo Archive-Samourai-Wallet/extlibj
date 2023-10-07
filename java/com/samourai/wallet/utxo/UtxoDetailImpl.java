@@ -1,35 +1,26 @@
 package com.samourai.wallet.utxo;
 
-import org.bitcoinj.core.NetworkParameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class UtxoDetailImpl extends UtxoRefImpl implements UtxoDetail {
-    protected static final Logger log = LoggerFactory.getLogger(UtxoDetailImpl.class);
-
     private long value;
     private String address;
-    private Integer confirmedBlockHeight; // null when unconfirmed
-    private NetworkParameters params;
+    private UtxoConfirmInfo confirmInfo;
 
-    public UtxoDetailImpl(String txHash, int txOutputIndex, long value, String address, Integer confirmedBlockHeight, NetworkParameters params) {
+    public UtxoDetailImpl(String txHash, int txOutputIndex, long value, String address, UtxoConfirmInfo confirmInfo) {
         super(txHash, txOutputIndex);
         this.value = value;
         this.address = address;
-        this.confirmedBlockHeight = confirmedBlockHeight;
-        this.params = params;
+        this.confirmInfo = confirmInfo != null ? confirmInfo : new UtxoConfirmInfoImpl((Integer)null);
     }
 
     public UtxoDetailImpl(UtxoDetail utxoDetail) {
         super(utxoDetail);
-        this.value = utxoDetail.getValue();
+        this.value = utxoDetail.getValueLong();
         this.address = utxoDetail.getAddress();
-        this.confirmedBlockHeight = utxoDetail.getConfirmedBlockHeight();
-        this.params = utxoDetail.getParams();
+        this.confirmInfo = new UtxoConfirmInfoImpl(utxoDetail.getConfirmInfo());
     }
 
     @Override
-    public long getValue() {
+    public long getValueLong() {
         return value;
     }
 
@@ -39,32 +30,13 @@ public class UtxoDetailImpl extends UtxoRefImpl implements UtxoDetail {
     }
 
     @Override
-    public Integer getConfirmedBlockHeight() {
-        return confirmedBlockHeight;
+    public UtxoConfirmInfo getConfirmInfo() {
+        return confirmInfo;
     }
 
     @Override
-    public void setConfirmedBlockHeight(Integer confirmedBlockHeight) {
-        this.confirmedBlockHeight = confirmedBlockHeight;
-    }
-
-    @Override
-    public boolean isConfirmed() {
-        return confirmedBlockHeight != null;
-    }
-
-    @Override
-    public int getConfirmations(int latestBlockHeight) {
-        if (confirmedBlockHeight == null) {
-            log.warn("getConfirmations() failed: confirmedBlockHeight=null");
-            return 0;
-        }
-        return latestBlockHeight-confirmedBlockHeight;
-    }
-
-    @Override
-    public NetworkParameters getParams() {
-        return params;
+    public void setConfirmInfo(UtxoConfirmInfo confirmInfo) {
+        this.confirmInfo = confirmInfo;
     }
 
     @Override
@@ -72,6 +44,6 @@ public class UtxoDetailImpl extends UtxoRefImpl implements UtxoDetail {
         return super.toString()+
                 ", value=" + value +
                 ", address='" + address + '\'' +
-                ", confirmedBlockHeight=" + confirmedBlockHeight;
+                ", confirmInfo=" + (confirmInfo!=null?"{"+confirmInfo+"}":"null");
     }
 }

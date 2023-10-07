@@ -1,21 +1,18 @@
 package com.samourai.soroban.cahoots;
 
 import com.samourai.soroban.client.SorobanInteraction;
-import com.samourai.wallet.cahoots.Cahoots;
+import com.samourai.soroban.client.SorobanMessage;
+import com.samourai.wallet.cahoots.CahootsResult;
 
 public class TxBroadcastInteraction extends SorobanInteraction {
-    private Cahoots signedCahoots;
+    private CahootsResult cahootsResult;
 
-    public TxBroadcastInteraction(Cahoots signedCahoots) {
-        this(TypeInteraction.TX_BROADCAST, signedCahoots);
+    public TxBroadcastInteraction(TypeInteraction typeInteraction, SorobanMessage replyAccept, CahootsContext cahootsContext, CahootsResult cahootsResult) {
+        super(typeInteraction, replyAccept, cahootsContext);
+        this.cahootsResult = cahootsResult;
     }
 
-    public TxBroadcastInteraction(TypeInteraction typeInteraction, Cahoots signedCahoots) {
-        super(typeInteraction, new ManualCahootsMessage(signedCahoots));
-        this.signedCahoots = signedCahoots;
-    }
-
-    public Cahoots getSignedCahoots() {
-        return signedCahoots;
+    public CahootsResult getCahootsResult() {
+        return cahootsResult;
     }
 }

@@ -1,8 +1,7 @@
 package com.samourai.wallet.send.beans;
 
 import com.samourai.soroban.cahoots.CahootsContext;
-import com.samourai.wallet.api.backend.IPushTx;
-import com.samourai.wallet.cahoots.Cahoots;
+import com.samourai.wallet.cahoots.Cahoots2x;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoKeyProvider;
@@ -13,12 +12,12 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class SpendTxCahoots extends SpendTx {
-    private static final Logger log = LoggerFactory.getLogger(SpendTxCahoots.class);
-    private Cahoots cahoots;
+public class SpendTxCahoots2x extends SpendTx {
+    private static final Logger log = LoggerFactory.getLogger(SpendTxCahoots2x.class);
+    private Cahoots2x cahoots;
     private CahootsContext cahootsContext;
 
-    public SpendTxCahoots(Cahoots cahoots, CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) throws SpendException {
+    public SpendTxCahoots2x(Cahoots2x cahoots, CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) throws SpendException {
         super(CahootsType.find(cahoots.getType()).get().getSpendType(),
                 cahoots.getSpendAmount(),
                 false,
@@ -35,7 +34,7 @@ public class SpendTxCahoots extends SpendTx {
         this.cahootsContext = cahootsContext;
     }
 
-    private static Map<String,Long> findReceivers(Cahoots cahoots, UtxoKeyProvider utxoKeyProvider) {
+    private static Map<String,Long> findReceivers(Cahoots2x cahoots, UtxoKeyProvider utxoKeyProvider) {
         return cahoots.getTransaction().getOutputs().stream()
                 .map(transactionOutput -> {
                     try {
@@ -49,7 +48,7 @@ public class SpendTxCahoots extends SpendTx {
                 .collect(Collectors.toMap(pair -> pair.getLeft(), pair -> pair.getRight()));
     }
 
-    private static long findChangeAmount(Cahoots cahoots, CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) {
+    private static long findChangeAmount(Cahoots2x cahoots, CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) {
         return cahoots.getTransaction().getOutputs().stream()
                 .filter(transactionOutput -> {
                     try {
@@ -63,15 +62,11 @@ public class SpendTxCahoots extends SpendTx {
                 .mapToLong(transactionOutput -> transactionOutput.getValue().value).sum();
     }
 
-    public Cahoots getCahoots() {
+    public Cahoots2x getCahoots() {
         return cahoots;
     }
 
     public CahootsContext getCahootsContext() {
         return cahootsContext;
-    }
-
-    public void pushTx(IPushTx pushTx) throws Exception {
-        cahoots.pushTx(pushTx);
     }
 }

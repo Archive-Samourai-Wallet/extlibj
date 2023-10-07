@@ -15,6 +15,8 @@ import com.samourai.wallet.send.exceptions.SignTxException;
 import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.send.provider.UtxoProvider;
+import com.samourai.wallet.utxo.UtxoOutPoint;
+import com.samourai.wallet.utxo.UtxoOutPointImpl;
 import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public abstract class SpendSelection {
     private static final Logger log = LoggerFactory.getLogger(SpendSelection.class);
@@ -59,8 +62,8 @@ public abstract class SpendSelection {
         keyBag.addAll(utxo, utxoKeyBag);
     }
 
-    public Collection<MyTransactionOutPoint> getSpendFrom() {
-        return UTXO.listOutpoints(selectedUTXO);
+    public Collection<UtxoOutPoint> getSpendFrom() {
+        return (Collection<UtxoOutPoint>)(Collection<? extends UtxoOutPoint>)UTXO.listOutpoints(selectedUTXO);
     }
 
     public long getTotalValueSelected() {
