@@ -1,8 +1,4 @@
-package com.samourai.wallet.hd.swaps;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.security.SignatureException;
+package com.samourai.wallet.swaps;
 
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ECKey;
@@ -21,7 +17,6 @@ import org.bitcoinj.crypto.TransactionSignature;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.samourai.wallet.segwit.bech32.Bech32Segwit;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import com.samourai.wallet.segwit.SwapSupportAddress;
 import com.samourai.wallet.util.Util;
