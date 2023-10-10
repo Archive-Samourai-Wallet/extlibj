@@ -9,7 +9,9 @@ public enum WhirlpoolAccount {
   POSTMIX(true),
   BADBANK(false),
   RICOCHET(false),
-  SWAPS_ASB(true);
+  SWAPS_ASB(true),
+  SWAPS_DEPOSIT(true),
+  SWAPS_REFUNDS(true);
 
   private boolean active;
 

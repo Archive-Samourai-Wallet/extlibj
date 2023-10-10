@@ -125,6 +125,12 @@ public class PayloadUtilGeneric {
         BipWallet swapsAsbWallet = walletSupplier.getWallet(BIP_WALLET.ASB_BIP84);
         swaps_account.put(exportBipWallet(swapsAsbWallet));
 
+        BipWallet swapsDepositWallet = walletSupplier.getWallet(BIP_WALLET.SWAPS_DEPOSIT);
+        swaps_account.put(exportBipWallet(swapsDepositWallet));
+
+        BipWallet swapsRefundsWallet = walletSupplier.getWallet(BIP_WALLET.SWAPS_REFUNDS);
+        swaps_account.put(exportBipWallet(swapsRefundsWallet));
+
         wallet.put("swaps_accounts", bip84_account);
 
         JSONObject meta = new JSONObject();
