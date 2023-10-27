@@ -2,6 +2,7 @@ package com.samourai.wallet.util;
 
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.TestNet3Params;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -147,6 +148,15 @@ public class FormatsUtilGenericTest {
     Assertions.assertFalse(formatsUtil.isValidP2TR(BTC_ADDRESS_BECH32));
     Assertions.assertFalse(formatsUtil.isValidP2TR(BTC_ADDRESS_P2SH));
     Assertions.assertFalse(formatsUtil.isValidP2TR(BTC_ADDRESS_P2PKH));
+  }
+
+  @Test
+  public void isValidP2SH() throws Exception {
+    Assertions.assertTrue(formatsUtil.isValidP2SH(BTC_ADDRESS_P2SH, MainNetParams.get()));
+
+    Assertions.assertFalse(formatsUtil.isValidP2SH(BTC_ADDRESS_BECH32, MainNetParams.get()));
+    Assertions.assertFalse(formatsUtil.isValidP2SH(BTC_ADDRESS_P2TR, TestNet3Params.get()));
+    Assertions.assertFalse(formatsUtil.isValidP2SH(BTC_ADDRESS_P2PKH, MainNetParams.get()));
   }
 
   @Test

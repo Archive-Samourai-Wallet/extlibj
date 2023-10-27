@@ -4,6 +4,8 @@ import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.cahoots.psbt.PSBT;
 import com.samourai.wallet.segwit.bech32.Bech32;
 import com.samourai.wallet.segwit.bech32.Bech32Segwit;
+import com.samourai.wallet.segwit.SegwitAddress;
+import com.samourai.wallet.segwit.P2TRAddress;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.*;
@@ -301,6 +303,20 @@ public class FormatsUtilGeneric {
 		return false;
 	}
 
+	public boolean isValidP2SH(final String address, NetworkParameters params) {
+		
+		try  {
+			if(isValidBitcoinAddress(address, params))    {
+				return Address.fromBase58(params, address).isP2SHAddress();
+			}
+		}
+		catch(Exception e)  {
+			;
+		}
+
+		return false;
+	}
+
 	public boolean isValidP2WSH_P2TR(final String address) {
 
 		return isValidP2TR(address) || isValidP2WSH(address);
@@ -480,20 +496,6 @@ public class FormatsUtilGeneric {
 		bb.get(pub);
 
 		return HDKeyDerivation.createMasterPubKeyFromBytes(pub, chain);
-	}
-
-	public byte[] getFingerprintFromXPUB(String xpubstr) throws AddressFormatException {
-
-		if(!isValidXpub(xpubstr))	{
-			return null;
-		}
-
-		byte[] xpubBytes = Base58.decodeChecked(xpubstr);
-		// parent fingerprint:
-		byte[] fingerprint = new byte[4];
-		System.arraycopy(xpubBytes, 5, fingerprint, 0, fingerprint.length);
-
-		return fingerprint;
 	}
 
 	public boolean isHex(String s)   {
