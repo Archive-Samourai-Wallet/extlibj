@@ -261,7 +261,6 @@ public class Stonewallx2ServiceTest extends AbstractCahootsTest {
 
     @Test
     public void invalidStonewallExcetion() throws Exception {
-        long spendAmount = 5000;
         String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
 
         // throw Exception for 0 spend amount

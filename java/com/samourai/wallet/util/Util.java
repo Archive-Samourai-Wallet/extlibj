@@ -3,6 +3,7 @@ package com.samourai.wallet.util;
 import com.samourai.wallet.api.backend.beans.HttpException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.bitcoinj.core.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import java.nio.ByteOrder;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -161,5 +163,9 @@ public class Util  {
                 throw e;
             }
         }
+    }
+
+    public static String formatDuration(Duration duration) {
+        return DurationFormatUtils.formatDuration(duration.toMillis(), "HH:mm:ss", true);
     }
 }

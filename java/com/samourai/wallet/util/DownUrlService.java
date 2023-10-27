@@ -3,8 +3,8 @@ package com.samourai.wallet.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.Collection;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,17 +27,13 @@ public class DownUrlService {
   }
 
   public boolean isUp(String url) {
-    Long downtime = downtimeByUrl.get(url);
-    if (downtime != null) {
-      if (downtime > System.currentTimeMillis()) {
-        // down
-        if (log.isDebugEnabled()) {
-          log.debug("url is down til " + new Date(downtime) + ": " + url);
-          return false;
-        }
-      } else {
-        // expired
-        clear(url);
+    Long downTimeRetry = getDownTimeNextRetry(url);
+    if (downTimeRetry != null) {
+      // down
+      if (log.isDebugEnabled()) {
+        Duration remainingDuration = Duration.ofMillis(downTimeRetry - System.currentTimeMillis());
+        log.debug("url is down: "+ url + " (next retry in "+Util.formatDuration(remainingDuration));
+        return false;
       }
     }
     return true;
@@ -50,6 +46,20 @@ public class DownUrlService {
   public void setDown(String url, long downDelayMs) {
     long downtime = System.currentTimeMillis()+downDelayMs;
     downtimeByUrl.put(url, downtime);
+  }
+
+  public Long getDownTimeNextRetry(String url) {
+    Long downtime = downtimeByUrl.get(url);
+    if (downtime != null) {
+      if (downtime > System.currentTimeMillis()) {
+        // down
+        return downtime;
+      } else {
+        // expired
+        clear(url);
+      }
+    }
+    return null;
   }
 
   public void clear(String url) {
