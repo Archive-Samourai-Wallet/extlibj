@@ -29,15 +29,15 @@ public class SamouraiConfig {
             "http://212.47.230.157:4242"
     );
     private Collection<String> sorobanServerDexTestnetOnion = Arrays.asList(
-            "http://sorin6xws7lfvz2ikma3ceqzlbmmp4huyfwla3d5mzkcjnta2djgggid.onion/test",
-            "http://sor2aduqon52pngz56b3pp2niq5vp4l7xstco654gfa37fcaoblle5yd.onion/test",
-            "http://sor3xcg6i4tyt4uawt2t3i3ml4dzubh46wyloptl3g5jyshkgekuumyd.onion/test",
-            "http://sor4ky4w6iywr3terpofu3xlnwrnawbb4aq2okobixojatswelfpsuad.onion/test",
-            "http://sor5qv4q3uvg3cyfaay5dazkvuytukepexlqehgirxbq7ynszpqo4uad.onion/test",
-            "http://sor6jatlc2pim7mg4paxy6kgzuw7qidajlxk7xy6ic6ytcpcy47lucyd.onion/test",
-            "http://sor7qfbf24l3gdba5ed625pfwfebwctiao5po3zux3c6udlboowkucid.onion/test",
-            "http://sorark2anb6q6oz6egxo4zo67cmlnfvjxz2h34v74ta6jozceqclw5yd.onion/test",
-            "http://sorbutari3lpxmqhpzu3jojflteluekxnfyu2jgs4vqkgtsxrjyv4byd.onion/test"
+            "http://sorin6xws7lfvz2ikma3ceqzlbmmp4huyfwla3d5mzkcjnta2djgggid.onion",
+            "http://sor2aduqon52pngz56b3pp2niq5vp4l7xstco654gfa37fcaoblle5yd.onion",
+            "http://sor3xcg6i4tyt4uawt2t3i3ml4dzubh46wyloptl3g5jyshkgekuumyd.onion",
+            "http://sor4ky4w6iywr3terpofu3xlnwrnawbb4aq2okobixojatswelfpsuad.onion",
+            "http://sor5qv4q3uvg3cyfaay5dazkvuytukepexlqehgirxbq7ynszpqo4uad.onion",
+            "http://sor6jatlc2pim7mg4paxy6kgzuw7qidajlxk7xy6ic6ytcpcy47lucyd.onion",
+            "http://sor7qfbf24l3gdba5ed625pfwfebwctiao5po3zux3c6udlboowkucid.onion",
+            "http://sorark2anb6q6oz6egxo4zo67cmlnfvjxz2h34v74ta6jozceqclw5yd.onion",
+            "http://sorbutari3lpxmqhpzu3jojflteluekxnfyu2jgs4vqkgtsxrjyv4byd.onion"
     );
     private Collection<String> sorobanServerDexMainnetClear = Arrays.asList(
             "http://163.172.128.201:4242",
@@ -59,7 +59,18 @@ public class SamouraiConfig {
             "http://sor6jatlc2pim7mg4paxy6kgzuw7qidajlxk7xy6ic6ytcpcy47lucyd.onion",
             "http://sor7qfbf24l3gdba5ed625pfwfebwctiao5po3zux3c6udlboowkucid.onion",
             "http://sorark2anb6q6oz6egxo4zo67cmlnfvjxz2h34v74ta6jozceqclw5yd.onion",
-            "http://sorbutari3lpxmqhpzu3jojflteluekxnfyu2jgs4vqkgtsxrjyv4byd.onion"
+            "http://sorbutari3lpxmqhpzu3jojflteluekxnfyu2jgs4vqkgtsxrjyv4byd.onion",
+
+            // onion only
+            "http://g35mf2l5zzbzldqfq5sfdsw3fibajh5rytnppyb634gn6b5o3fhif6yd.onion",
+            "http://3y3j4dgul5767ibxkll3siadcojmhqudeaz7f2i3grsgmklkpntrbbyd.onion",
+            "http://jvdzspo3kkhztcyoddcgednw6643zuvfubha43bj4zh7jqre27lgvvad.onion",
+            "http://so4cne7cfg5tbqe6d5c2q5ci2ezpg7ii4vm2w5cu7v37bvyjfv6g6fid.onion",
+            "http://7m4eaaxxpbwnoy77qx6nfxqjgbe3ttbkb6f4lftvohzia2ph5qnx2vad.onion",
+            "http://lyxiuvhkbvrp2krprwlj5z5oip52qlle6woryty6fhs4r7vqxrnkupad.onion",
+            "http://thcywo6avdbjwamyt2vilfw7kb254a7adb42nud63qfvpysdetxzphqd.onion",
+            "http://v5uevs57okmzsrz5bdald2qvs7k3m3ekotujjvpnaqiuwnuafbnhadqd.onion",
+            "http://445hebzvpkm2gwohxxzwohdw5wnxwg5lth67nakmg7fmdqbcry4irvqd.onion"
     );
 
     // whrilpool-client: WhrilpoolServer
