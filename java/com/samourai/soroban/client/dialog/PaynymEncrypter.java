@@ -1,6 +1,5 @@
 package com.samourai.soroban.client.dialog;
 
-import com.samourai.soroban.client.RpcWallet;
 import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.crypto.CryptoUtil;
 import com.samourai.wallet.crypto.impl.ECDHKeySet;

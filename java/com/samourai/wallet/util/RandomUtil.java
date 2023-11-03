@@ -3,6 +3,7 @@ package com.samourai.wallet.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,6 +40,11 @@ public class RandomUtil {
         return b;
     }
 
+    public String nextString(int length) {
+        byte[] bytes = nextBytes(length);
+        return new String(bytes, Charset.forName("UTF-8"));
+    }
+
     public static int random(int minInclusive, int maxInclusive) {
         if (testMode) {
             return minInclusive;
@@ -53,12 +59,17 @@ public class RandomUtil {
         return ThreadLocalRandom.current().nextLong(minInclusive, maxInclusive + 1);
     }
 
+    // returns random number between [min, bound-1]
+    public int nextInt(int min, int bound) {
+        if (testMode) {
+            return min;
+        }
+        return min+getSecureRandom().nextInt(bound-min);
+    }
+
     // returns random number between [0, bound-1]
     public int nextInt(int bound) {
-        if (testMode) {
-            return 0;
-        }
-        return getSecureRandom().nextInt(bound);
+        return nextInt(0, bound);
     }
 
     public long nextLong() {

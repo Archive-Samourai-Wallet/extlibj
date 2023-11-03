@@ -40,22 +40,8 @@ public class CryptoTestUtil {
         return instance;
     }
 
-    public byte[] generateSeed() throws Exception {
-        int nbWords = 12;
-        // len == 16 (12 words), len == 24 (18 words), len == 32 (24 words)
-        int len = (nbWords / 3) * 4;
-
-        byte seed[] = RandomUtil.getInstance().nextBytes(len);
-        return seed;
-    }
-
-    public HD_Wallet generateWallet(int purpose, NetworkParameters networkParameters) throws Exception {
-        byte seed[] = generateSeed();
-        return hdWalletFactory.getHD(purpose, seed, "test", networkParameters);
-    }
-
     public BIP47Wallet generateBip47Wallet(NetworkParameters networkParameters) throws Exception {
-        HD_Wallet bip44Wallet = generateWallet(44, networkParameters);
+        HD_Wallet bip44Wallet = hdWalletFactory.generateWallet(44, networkParameters);
         BIP47Wallet bip47Wallet = new BIP47Wallet(bip44Wallet);
         return bip47Wallet;
     }

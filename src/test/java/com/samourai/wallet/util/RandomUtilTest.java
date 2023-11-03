@@ -33,6 +33,13 @@ public class RandomUtilTest extends AbstractTest {
     }
 
     @Test
+    public void nextString() {
+        int len = 10;
+        String res = RandomUtil.getInstance().nextString(len);
+        Assertions.assertTrue(res.length() == len);
+    }
+
+    @Test
     public void randomInt() {
         int res = RandomUtil.random(2,10);
         Assertions.assertTrue(res >= 2 && res <= 10);

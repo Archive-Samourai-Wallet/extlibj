@@ -6,7 +6,10 @@ import com.samourai.wallet.bip47.rpc.BIP47Account;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.crypto.CryptoUtil;
+import com.samourai.wallet.hd.HD_Wallet;
+import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.NetworkParameters;
 
 public class RpcWalletImpl implements RpcWallet {
     private BIP47Wallet bip47Wallet;
@@ -15,6 +18,12 @@ public class RpcWalletImpl implements RpcWallet {
     public RpcWalletImpl(BIP47Wallet bip47Wallet, CryptoUtil cryptoUtil) {
         this.bip47Wallet = bip47Wallet;
         this.cryptoUtil = cryptoUtil;
+    }
+
+    public static RpcWallet generate(CryptoUtil cryptoUtil, NetworkParameters params) throws Exception {
+        HD_Wallet hdw = HD_WalletFactoryGeneric.getInstance().generateWallet(44, params);
+        BIP47Wallet bip47Wallet = new BIP47Wallet(hdw);
+        return new RpcWalletImpl(bip47Wallet, cryptoUtil);
     }
 
     @Override

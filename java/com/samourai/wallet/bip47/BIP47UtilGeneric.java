@@ -14,11 +14,6 @@ import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bouncycastle.util.encoders.Hex;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
-
 public abstract class BIP47UtilGeneric {
 
     private static ISecretPointFactory secretPointFactory;

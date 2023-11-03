@@ -2,6 +2,7 @@ package com.samourai.wallet.hd;
 
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.TestNet3Params;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -86,6 +87,14 @@ public class HD_WalletFactoryGenericTest {
 
         Assertions.assertNotEquals(hdw1.getSeedHex(), hdw2.getSeedHex());
         Assertions.assertNotEquals(hdw1.getMnemonic(), hdw2.getMnemonic());
+    }
+
+    @Test
+    public void generateWallet() throws Exception {
+        NetworkParameters params = TestNet3Params.get();
+        HD_Wallet hdw1 = hdWalletFactory.generateWallet(44, params);
+        Assertions.assertTrue(hdw1.getPassphrase().length() >= 15 && hdw1.getPassphrase().length() < 30);
+        Assertions.assertTrue(hdw1.getMnemonic().split(" ").length == 24);
     }
 
     private void verifyNewWallet(HD_Wallet hdw, String passphrase) {

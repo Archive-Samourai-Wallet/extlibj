@@ -19,6 +19,10 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Util  {
@@ -165,7 +169,45 @@ public class Util  {
         }
     }
 
-    public static String formatDuration(Duration duration) {
-        return DurationFormatUtils.formatDuration(duration.toMillis(), "HH:mm:ss", true);
+    public static String formatDurationFromNow(long milliseconds) {
+        int seconds = (int) (System.currentTimeMillis() - milliseconds);
+        return formatDuration(seconds, true);
+    }
+
+    public static String formatDuration(long milliseconds) {
+      return formatDuration(milliseconds, true);
+    }
+
+    public static String formatDuration(long milliseconds, boolean withSeconds) {
+        StringBuffer sb = new StringBuffer();
+        long seconds = milliseconds/1000;
+        if (seconds >= 60) {
+            int minutes = (int) Math.floor(seconds / 60);
+            int displayMinutes = minutes;
+            if (minutes >= 60) {
+                int hours = (int) Math.floor(minutes / 60);
+                int displayHours = hours;
+                if (hours >= 24) {
+                    int days = (int)Math.floor(hours / 24);
+                    sb.append(days+"d ");
+                    displayHours -= days*24;
+                }
+                sb.append(displayHours + "h ");
+                displayMinutes -= hours * 60;
+            }
+            sb.append(displayMinutes + "m ");
+            seconds -= minutes * 60;
+        }
+        if (withSeconds) {
+            sb.append(seconds + "s");
+        }
+        return sb.toString();
+    }
+
+    public static <T> Predicate<T> distinctBy(
+            Function<? super T, ?> keyExtractor) {
+
+        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
+        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 }
