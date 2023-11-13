@@ -78,6 +78,10 @@ public class PaymentAddress {
         return segwitAddress;
     }
 
+    public SegwitAddress getSegwitAddress(boolean send) throws Exception {
+        return send ? getSegwitAddressSend() : getSegwitAddressReceive();
+    }
+
     private ECPoint get_sG(BigInteger s) {
         return CURVE_PARAMS.getG().multiply(s);
     }

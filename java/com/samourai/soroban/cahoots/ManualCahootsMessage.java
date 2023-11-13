@@ -65,6 +65,11 @@ public class ManualCahootsMessage implements SorobanMessage {
     }
 
     @Override
+    public String getTypePayload() {
+        return getClass().getName();
+    }
+
+    @Override
     public String toString() {
         return "(ManualCahootsMessage)step="+getStep()+"/"+getNbSteps()+", type="+getType()+", typeUser="+getTypeUser()+", payload="+toPayload();
     }

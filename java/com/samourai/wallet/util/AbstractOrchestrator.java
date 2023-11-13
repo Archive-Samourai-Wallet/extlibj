@@ -32,6 +32,10 @@ public abstract class AbstractOrchestrator {
     this.lastRun = 0;
   }
 
+  protected String getThreadName() {
+    return getClass().getSimpleName();
+  }
+
   public synchronized void start(boolean daemon) {
     if (isStarted()) {
       log.error("Cannot start: already started");
@@ -74,7 +78,7 @@ public abstract class AbstractOrchestrator {
                   }
                   resetOrchestrator();
                 },
-            getClass().getSimpleName());
+            getThreadName());
     this.myThread.setDaemon(daemon);
     this.myThread.start();
   }
@@ -158,5 +162,9 @@ public abstract class AbstractOrchestrator {
 
   public boolean isDontDisturb() {
     return dontDisturb;
+  }
+
+  protected int getLOOP_DELAY() {
+    return LOOP_DELAY;
   }
 }

@@ -471,6 +471,15 @@ public class FormatsUtilGeneric {
 
 	}
 
+	public boolean isValidTxHash(String txHash) {
+		try {
+			Sha256Hash.wrap(txHash);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
 	public DeterministicKey createMasterPubKeyFromXPub(String xpubstr) throws AddressFormatException {
 
 		if(!isValidXpub(xpubstr))	{

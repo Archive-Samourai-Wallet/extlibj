@@ -1,5 +1,6 @@
 package com.samourai.wallet.bip47.rpc;
 
+import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.hd.HD_Wallet;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.MnemonicCode;
@@ -47,4 +48,11 @@ public class BIP47Wallet extends HD_Wallet {
         return new BIP47Account(mParams, mRoot, accountId);
     }
 
+    public PaymentCode getPaymentCode() {
+        return new PaymentCode(getAccount(0).getPaymentCode());
+    }
+
+    public HD_Address getNotificationAddress() {
+        return getAccount(0).getNotificationAddress();
+    }
 }

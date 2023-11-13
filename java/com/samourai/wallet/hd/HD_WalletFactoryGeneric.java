@@ -106,10 +106,14 @@ public class HD_WalletFactoryGeneric {
     return seed;
   }
 
-  public HD_Wallet generateWallet(int purpose, NetworkParameters networkParameters) throws Exception {
-    byte seed[] = generateSeed(24);
-    String passphrase = generatePassphrase(15, 30);
-    return getHD(purpose, seed, passphrase, networkParameters);
+  public HD_Wallet generateWallet(int purpose, NetworkParameters networkParameters) {
+    try {
+      byte seed[] = generateSeed(24);
+      String passphrase = generatePassphrase(15, 30);
+      return getHD(purpose, seed, passphrase, networkParameters);
+    } catch(Exception e) {
+      throw new RuntimeException(e); // should never happen
+    }
   }
 
   protected String generatePassphrase(int min, int bound) {
@@ -117,7 +121,7 @@ public class HD_WalletFactoryGeneric {
     return randomUtil.nextString(len);
   }
 
-  protected byte[] generateSeed(int nbWords) throws Exception {
+  public byte[] generateSeed(int nbWords) {
     // len == 16 (12 words), len == 24 (18 words), len == 32 (24 words)
     int len = (nbWords / 3) * 4;
     byte seed[] = randomUtil.nextBytes(len);

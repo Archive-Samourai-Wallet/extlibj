@@ -11,8 +11,10 @@ import org.slf4j.LoggerFactory;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
+import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -89,12 +91,16 @@ public class Util  {
         return ret;
     }
 
-    public static byte[] sha256(byte[] b) throws NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        return digest.digest(b);
+    public static byte[] sha256(byte[] b) {
+      try {
+          MessageDigest digest = MessageDigest.getInstance("SHA-256");
+          return digest.digest(b);
+      } catch (Exception e) {
+          throw new RuntimeException(e);
+      }
     }
 
-    public static String sha256Hex(String str) throws NoSuchAlgorithmException {
+    public static String sha256Hex(String str) {
         return new String(Hex.encodeHex(sha256(str.getBytes())));
     }
 
@@ -209,5 +215,9 @@ public class Util  {
 
         Map<Object, Boolean> seen = new ConcurrentHashMap<>();
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+    }
+
+    public static String encodeUrl(String value) throws Exception {
+        return URLEncoder.encode(value, "UTF-8");
     }
 }

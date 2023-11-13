@@ -14,23 +14,23 @@ public class BIP47UtilGenericTest extends AbstractTest {
 
     @Test
     public void getNotificationAddress() {
-        Assertions.assertEquals("mwkeyEBt55Jvg3TbqLKuL4BZ2SJd2VpZTM", bip47Util.getNotificationAddress(bip47Wallet).getAddressString());
-        Assertions.assertEquals("mwkeyEBt55Jvg3TbqLKuL4BZ2SJd2VpZTM", bip47Util.getNotificationAddress(bip47Wallet, 0).getAddressString());
-        Assertions.assertEquals("mn1GbUVNJ7NbwdNKocBYW2ZtWXbfbdQrcH", bip47Util.getNotificationAddress(bip47Wallet, 1).getAddressString());
+        Assertions.assertEquals("mwkeyEBt55Jvg3TbqLKuL4BZ2SJd2VpZTM", bip47Util.getNotificationAddress(bip47WalletInitiator).getAddressString());
+        Assertions.assertEquals("mwkeyEBt55Jvg3TbqLKuL4BZ2SJd2VpZTM", bip47Util.getNotificationAddress(bip47WalletInitiator, 0).getAddressString());
+        Assertions.assertEquals("mn1GbUVNJ7NbwdNKocBYW2ZtWXbfbdQrcH", bip47Util.getNotificationAddress(bip47WalletInitiator, 1).getAddressString());
     }
 
     @Test
     public void getPaymentCode() {
-        Assertions.assertEquals("PM8TJXp19gCE6hQzqRi719FGJzF6AreRwvoQKLRnQ7dpgaakakFns22jHUqhtPQWmfevPQRCyfFbdDrKvrfw9oZv5PjaCerQMa3BKkPyUf9yN1CDR3w6", bip47Util.getPaymentCode(bip47Wallet).toString());
-        Assertions.assertEquals("PM8TJXp19gCE6hQzqRi719FGJzF6AreRwvoQKLRnQ7dpgaakakFns22jHUqhtPQWmfevPQRCyfFbdDrKvrfw9oZv5PjaCerQMa3BKkPyUf9yN1CDR3w6", bip47Util.getPaymentCode(bip47Wallet, 0).toString());
-        Assertions.assertEquals("PM8TJhN7RsazMbzmSBzA8HQEZBcarpdbJiuPWPF6cBZFo7iP9VXHMb6LADUosCbHogYVn8LGxLZmKS4mCXgzTvJkJDyVFvXj1gPZXThCjB7nWoqwNg81", bip47Util.getPaymentCode(bip47Wallet, 1).toString());
+        Assertions.assertEquals("PM8TJXp19gCE6hQzqRi719FGJzF6AreRwvoQKLRnQ7dpgaakakFns22jHUqhtPQWmfevPQRCyfFbdDrKvrfw9oZv5PjaCerQMa3BKkPyUf9yN1CDR3w6", bip47Util.getPaymentCode(bip47WalletInitiator).toString());
+        Assertions.assertEquals("PM8TJXp19gCE6hQzqRi719FGJzF6AreRwvoQKLRnQ7dpgaakakFns22jHUqhtPQWmfevPQRCyfFbdDrKvrfw9oZv5PjaCerQMa3BKkPyUf9yN1CDR3w6", bip47Util.getPaymentCode(bip47WalletInitiator, 0).toString());
+        Assertions.assertEquals("PM8TJhN7RsazMbzmSBzA8HQEZBcarpdbJiuPWPF6cBZFo7iP9VXHMb6LADUosCbHogYVn8LGxLZmKS4mCXgzTvJkJDyVFvXj1gPZXThCjB7nWoqwNg81", bip47Util.getPaymentCode(bip47WalletInitiator, 1).toString());
     }
 
     @Test
     public void getFeaturePaymentCode() {
-        Assertions.assertEquals("PM8TJXp19gCE6hQzqRi719FGJzF6AreRwvoQKLRnQ7dpgaakakFns22jHUqhtPQWmfevPQRCyfFbdDrKvrfw9oZv5PjaCerQMa3BKkPyUf9yN1M8Y8XN", bip47Util.getFeaturePaymentCode(bip47Wallet).toString());
-        Assertions.assertEquals("PM8TJXp19gCE6hQzqRi719FGJzF6AreRwvoQKLRnQ7dpgaakakFns22jHUqhtPQWmfevPQRCyfFbdDrKvrfw9oZv5PjaCerQMa3BKkPyUf9yN1M8Y8XN", bip47Util.getFeaturePaymentCode(bip47Wallet, 0).toString());
-        Assertions.assertEquals("PM8TJhN7RsazMbzmSBzA8HQEZBcarpdbJiuPWPF6cBZFo7iP9VXHMb6LADUosCbHogYVn8LGxLZmKS4mCXgzTvJkJDyVFvXj1gPZXThCjB7nWp1UNdFD", bip47Util.getFeaturePaymentCode(bip47Wallet, 1).toString());
+        Assertions.assertEquals("PM8TJXp19gCE6hQzqRi719FGJzF6AreRwvoQKLRnQ7dpgaakakFns22jHUqhtPQWmfevPQRCyfFbdDrKvrfw9oZv5PjaCerQMa3BKkPyUf9yN1M8Y8XN", bip47Util.getFeaturePaymentCode(bip47WalletInitiator).toString());
+        Assertions.assertEquals("PM8TJXp19gCE6hQzqRi719FGJzF6AreRwvoQKLRnQ7dpgaakakFns22jHUqhtPQWmfevPQRCyfFbdDrKvrfw9oZv5PjaCerQMa3BKkPyUf9yN1M8Y8XN", bip47Util.getFeaturePaymentCode(bip47WalletInitiator, 0).toString());
+        Assertions.assertEquals("PM8TJhN7RsazMbzmSBzA8HQEZBcarpdbJiuPWPF6cBZFo7iP9VXHMb6LADUosCbHogYVn8LGxLZmKS4mCXgzTvJkJDyVFvXj1gPZXThCjB7nWp1UNdFD", bip47Util.getFeaturePaymentCode(bip47WalletInitiator, 1).toString());
     }
 
     @Test

@@ -23,6 +23,7 @@ import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
 import com.samourai.wallet.send.provider.MockUtxoProvider;
 import com.samourai.wallet.util.*;
+import com.samourai.whirlpool.client.wallet.beans.WhirlpoolNetwork;
 import com.samourai.xmanager.client.XManagerClient;
 import com.samourai.xmanager.protocol.XManagerService;
 import org.bitcoinj.core.*;
@@ -53,6 +54,7 @@ public class AbstractTest {
   protected static final String ADDRESS_XMANAGER = "tb1q6m3urxjc8j2l8fltqj93jarmzn0975nnxuymnx";
 
   protected NetworkParameters params = TestNet3Params.get();
+  protected WhirlpoolNetwork whirlpoolNetwork = WhirlpoolNetwork.TESTNET;
   protected HD_WalletFactoryGeneric hdWalletFactory = HD_WalletFactoryGeneric.getInstance();
   protected IHttpClient httpClient;
   protected BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;

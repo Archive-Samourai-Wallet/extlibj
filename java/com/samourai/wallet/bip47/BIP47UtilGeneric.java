@@ -1,6 +1,5 @@
 package com.samourai.wallet.bip47;
 
-import com.samourai.soroban.client.RpcWallet;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.bip47.rpc.NotSecp256k1Exception;
 import com.samourai.wallet.bip47.rpc.PaymentAddress;
@@ -64,12 +63,6 @@ public abstract class BIP47UtilGeneric {
         return getReceiveAddress(wallet, 0, pcode, idx, params);
     }
 
-    public SegwitAddress getReceiveAddress(RpcWallet rpcWallet, PaymentCode paymentCodeCounterparty, int idx, NetworkParameters params) throws Exception {
-        BIP47Wallet bip47Wallet = rpcWallet.getBip47Wallet();
-        int bip47Account = rpcWallet.getBip47Account().getId();
-        return getReceiveAddress(bip47Wallet, bip47Account, paymentCodeCounterparty, idx, params);
-    }
-
     public SegwitAddress getReceiveAddress(BIP47Wallet wallet, int account, PaymentCode pcode, int idx, NetworkParameters params) throws Exception {
         HD_Address address = wallet.getAccount(account).addressAt(idx);
         return getPaymentAddress(pcode, 0, address, params).getSegwitAddressReceive();
@@ -86,12 +79,6 @@ public abstract class BIP47UtilGeneric {
 
     public SegwitAddress getSendAddress(BIP47Wallet wallet, PaymentCode pcode, int idx, NetworkParameters params) throws Exception {
         return getSendAddress(wallet, 0, pcode, idx, params);
-    }
-
-    public SegwitAddress getSendAddress(RpcWallet rpcWallet, PaymentCode pcode, int idx, NetworkParameters params) throws Exception {
-        BIP47Wallet bip47Wallet = rpcWallet.getBip47Wallet();
-        int bip47Account = rpcWallet.getBip47Account().getId();
-        return getSendAddress(bip47Wallet, bip47Account, pcode, idx, params);
     }
 
     public SegwitAddress getSendAddress(BIP47Wallet wallet, int account, PaymentCode pcode, int idx, NetworkParameters params) throws Exception {
@@ -131,7 +118,11 @@ public abstract class BIP47UtilGeneric {
     }
 
     public PaymentAddress getPaymentAddress(PaymentCode pcode, int idx, HD_Address address, NetworkParameters params) throws AddressFormatException, NotSecp256k1Exception {
-        DumpedPrivateKey dpk = new DumpedPrivateKey(params, address.getPrivateKeyString());
+        return getPaymentAddress(pcode, idx, address.getECKey(), params);
+    }
+
+    public PaymentAddress getPaymentAddress(PaymentCode pcode, int idx, ECKey addressPrivateKey, NetworkParameters params) throws AddressFormatException, NotSecp256k1Exception {
+        DumpedPrivateKey dpk = new DumpedPrivateKey(params, addressPrivateKey.getPrivateKeyEncoded(params).toString());
         ECKey eckey = dpk.getKey();
         PaymentAddress paymentAddress = new PaymentAddress(pcode, idx, eckey.getPrivKeyBytes(), params, secretPointFactory);
         return paymentAddress;

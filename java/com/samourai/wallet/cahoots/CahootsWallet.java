@@ -1,7 +1,7 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.soroban.client.RpcWallet;
-import com.samourai.soroban.client.RpcWalletImpl;
+import com.samourai.wallet.bip47.BIP47UtilGeneric;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
@@ -28,9 +28,10 @@ public class CahootsWallet {
 
     private HD_Wallet hdWallet;
     private BIP47Wallet bip47Wallet;
-    private RpcWallet rpcWallet;
+    private CryptoUtil cryptoUtil;
+    private BIP47UtilGeneric bip47Util;
 
-    public CahootsWallet(WalletSupplier walletSupplier, ChainSupplier chainSupplier, BipFormatSupplier bipFormatSupplier, CahootsUtxoProvider utxoProvider, CryptoUtil cryptoUtil) {
+    public CahootsWallet(WalletSupplier walletSupplier, ChainSupplier chainSupplier, BipFormatSupplier bipFormatSupplier, CahootsUtxoProvider utxoProvider, CryptoUtil cryptoUtil, BIP47UtilGeneric bip47Util) {
         this.walletSupplier = walletSupplier;
         this.chainSupplier = chainSupplier;
         this.bipFormatSupplier = bipFormatSupplier;
@@ -38,7 +39,8 @@ public class CahootsWallet {
 
         this.hdWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84).getHdWallet();
         this.bip47Wallet = new BIP47Wallet(hdWallet);
-        this.rpcWallet = new RpcWalletImpl(bip47Wallet, cryptoUtil);
+        this.cryptoUtil = cryptoUtil;
+        this.bip47Util = bip47Util;
     }
 
     private BipFormat likeTypedBipFormat(BipFormat bipFormat) {
@@ -73,19 +75,15 @@ public class CahootsWallet {
         return chainSupplier;
     }
 
-    public RpcWallet getRpcWallet() {
-        return rpcWallet;
-    }
-
-    public PaymentCode getPaymentCode() {
-        return rpcWallet.getPaymentCode();
-    }
-
     public byte[] getFingerprint() {
         return hdWallet.getFingerprint();
     }
 
     public List<CahootsUtxo> getUtxosWpkhByAccount(int account) {
         return utxoProvider.getUtxosWpkhByAccount(account);
+    }
+
+    public BIP47Wallet getBip47Wallet() {
+        return bip47Wallet;
     }
 }
