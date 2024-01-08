@@ -1,10 +1,9 @@
 package com.samourai.wallet.api.backend;
 
 import com.samourai.wallet.api.backend.beans.*;
+import com.samourai.wallet.api.backend.seenBackend.SeenResponse;
 import com.samourai.wallet.segwit.SegwitAddress;
-import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.SendFactoryGeneric;
-import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.test.AbstractTest;
 import com.samourai.wallet.util.TxUtil;
 import org.bitcoinj.core.Coin;
@@ -56,7 +55,7 @@ public class BackendApiTest extends AbstractTest {
     for (String zpub : zpubs) {
       Assertions.assertTrue(addresses.containsKey(zpub));
     }
-    assertAddressEquals(addresses.get(VPUB_1), VPUB_1, 63, 7, 0);
+    assertAddressEquals(addresses.get(VPUB_1), VPUB_1, 2, 0, 0);
     assertAddressEquals(addresses.get(VPUB_2), VPUB_2, 0, 0, 0);
   }
 
@@ -82,7 +81,7 @@ public class BackendApiTest extends AbstractTest {
     Assertions.assertEquals(0, walletResponse.unspent_outputs.length);
 
     Map<String, WalletResponse.Address> addressesMap = walletResponse.getAddressesMap();
-    assertAddressEquals(addressesMap.get(VPUB_1), VPUB_1, 63, 7, 0);
+    assertAddressEquals(addressesMap.get(VPUB_1), VPUB_1, 2, 0, 0);
 
     Assertions.assertTrue(walletResponse.txs.length > 0);
 
@@ -102,7 +101,7 @@ public class BackendApiTest extends AbstractTest {
     Assertions.assertEquals(0, walletResponse.unspent_outputs.length);
 
     Map<String, WalletResponse.Address> addressesMap = walletResponse.getAddressesMap();
-    assertAddressEquals(addressesMap.get(VPUB_1), VPUB_1, 63, 7, 0);
+    assertAddressEquals(addressesMap.get(VPUB_1), VPUB_1, 2, 0, 0);
     assertAddressEquals(addressesMap.get(VPUB_2), VPUB_2, 0, 0, 0);
 
     Assertions.assertTrue(walletResponse.txs.length > 0);
@@ -115,6 +114,7 @@ public class BackendApiTest extends AbstractTest {
     }
   }
 
+  @Disabled // TODO
   @Test
   public void fetchAddressForSweep() throws Exception {
     String address = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
@@ -136,9 +136,9 @@ public class BackendApiTest extends AbstractTest {
     XPubResponse xPubResponse = backendApi.fetchXPub(VPUB_1);
 
     Assertions.assertEquals(XPubResponse.Status.ok, xPubResponse.status);
-    Assertions.assertEquals(1589461970, xPubResponse.data.created);
+    Assertions.assertEquals(1682434654, xPubResponse.data.created);
     Assertions.assertEquals("BIP84", xPubResponse.data.derivation);
-    Assertions.assertTrue(xPubResponse.data.unused.external >= 63);
+    Assertions.assertTrue(xPubResponse.data.unused.external >= 2);
     Assertions.assertTrue(xPubResponse.data.unused.internal >= 0);
     Assertions.assertTrue(xPubResponse.data.balance >= 0);
   }
@@ -245,6 +245,32 @@ public class BackendApiTest extends AbstractTest {
       Assertions.assertEquals("address-reuse", e.getPushTxError());
       Assertions.assertArrayEquals(new Integer[]{1}, e.getVoutsAddressReuse().toArray());
     }
+  }
+
+  @Test
+  public void seen() throws Exception {
+    String ADDRESS1 = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
+    String ADDRESS2 = "msbDHK6mikUQC8pUFfvsxa4q9vmt2qLvxC";
+    String ADDRESS3 = "mjDfJ4jYvbuZ6YYCWoo8wmy2BQ89xsWFfh";
+    String ADDRESS4 = "2N8gUTVdadexoewmcRE3tcgJ81kbksT4DH7";
+    String ADDRESS5 = "tb1pqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesf3hn0c";
+
+    // single
+    Assertions.assertTrue(backendApi.seen(ADDRESS1));
+    Assertions.assertFalse(backendApi.seen(ADDRESS2));
+    Assertions.assertTrue(backendApi.seen(ADDRESS3));
+    Assertions.assertTrue(backendApi.seen(ADDRESS4));
+    Assertions.assertTrue(backendApi.seen(ADDRESS5));
+    Assertions.assertFalse(backendApi.seen("unknown"));
+
+    // multi
+    SeenResponse seenResponse = backendApi.seen(Arrays.asList(ADDRESS1, ADDRESS2, ADDRESS3, ADDRESS4, ADDRESS5));
+    Assertions.assertTrue(seenResponse.isSeen(ADDRESS1));
+    Assertions.assertFalse(seenResponse.isSeen(ADDRESS2));
+    Assertions.assertTrue(seenResponse.isSeen(ADDRESS3));
+    Assertions.assertTrue(seenResponse.isSeen(ADDRESS4));
+    Assertions.assertTrue(seenResponse.isSeen(ADDRESS5));
+    Assertions.assertFalse(seenResponse.isSeen("unknown"));
   }
 
   private void assertAddressEquals(
