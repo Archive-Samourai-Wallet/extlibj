@@ -1,6 +1,7 @@
 package com.samourai.wallet.api.backend;
 
 import com.samourai.wallet.api.backend.beans.*;
+import com.samourai.wallet.api.backend.seenBackend.SeenResponse;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.send.SendFactoryGeneric;
 import com.samourai.wallet.test.AbstractTest;
@@ -244,6 +245,32 @@ public class BackendApiTest extends AbstractTest {
       Assertions.assertEquals("address-reuse", e.getPushTxError());
       Assertions.assertArrayEquals(new Integer[]{1}, e.getVoutsAddressReuse().toArray());
     }
+  }
+
+  @Test
+  public void seen() throws Exception {
+    String ADDRESS1 = "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4";
+    String ADDRESS2 = "msbDHK6mikUQC8pUFfvsxa4q9vmt2qLvxC";
+    String ADDRESS3 = "mjDfJ4jYvbuZ6YYCWoo8wmy2BQ89xsWFfh";
+    String ADDRESS4 = "2N8gUTVdadexoewmcRE3tcgJ81kbksT4DH7";
+    String ADDRESS5 = "tb1pqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesf3hn0c";
+
+    // single
+    Assertions.assertTrue(backendApi.seen(ADDRESS1));
+    Assertions.assertFalse(backendApi.seen(ADDRESS2));
+    Assertions.assertTrue(backendApi.seen(ADDRESS3));
+    Assertions.assertTrue(backendApi.seen(ADDRESS4));
+    Assertions.assertTrue(backendApi.seen(ADDRESS5));
+    Assertions.assertFalse(backendApi.seen("unknown"));
+
+    // multi
+    SeenResponse seenResponse = backendApi.seen(Arrays.asList(ADDRESS1, ADDRESS2, ADDRESS3, ADDRESS4, ADDRESS5));
+    Assertions.assertTrue(seenResponse.isSeen(ADDRESS1));
+    Assertions.assertFalse(seenResponse.isSeen(ADDRESS2));
+    Assertions.assertTrue(seenResponse.isSeen(ADDRESS3));
+    Assertions.assertTrue(seenResponse.isSeen(ADDRESS4));
+    Assertions.assertTrue(seenResponse.isSeen(ADDRESS5));
+    Assertions.assertFalse(seenResponse.isSeen("unknown"));
   }
 
   private void assertAddressEquals(

@@ -1,16 +1,15 @@
 package com.samourai.wallet.util;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
+import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
 public class Util  {
 
@@ -100,6 +99,10 @@ public class Util  {
         }
 
         return mac_data;
+    }
+
+    public static String encodeUrl(String value) throws Exception {
+        return URLEncoder.encode(value, "UTF-8");
     }
 
 }
