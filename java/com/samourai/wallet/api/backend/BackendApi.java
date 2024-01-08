@@ -211,7 +211,6 @@ public class BackendApi implements ISweepBackend, ISeenBackend {
     return seen(Arrays.asList(address)).isSeen(address);
   }
 
-  @Override
   public String pushTx(String txHex) throws Exception {
     return pushTx(txHex, null);
   }
