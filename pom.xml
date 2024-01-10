@@ -100,7 +100,7 @@
 		</dependency>
 	</dependencies>
 	<build>
-        <sourceDirectory>java</sourceDirectory>
+		<sourceDirectory>java</sourceDirectory>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -179,7 +179,7 @@
 						</goals>
 					</execution>
 				</executions>
-            </plugin>
+			</plugin>
 		</plugins>
 	</build>
 	<repositories>
@@ -189,7 +189,7 @@
 		</repository>
 	</repositories>
 	<scm>
-    <connection>scm:git:git@code.samourai.io:wallet/ExtLibJ.git</connection>
-    <tag>0.0.43-dexwp1</tag>
-  </scm>
+		<connection>scm:git:git@code.samourai.io:wallet/ExtLibJ.git</connection>
+		<tag>0.0.43-dexwp1</tag>
+	</scm>
 </project>
