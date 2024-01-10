@@ -5,6 +5,7 @@ import com.samourai.wallet.api.backend.seenBackend.ISeenBackend;
 import com.samourai.wallet.api.backend.seenBackend.SeenBackendWithFallback;
 import com.samourai.wallet.api.backend.seenBackend.SeenResponse;
 import com.samourai.wallet.test.AbstractTest;
+import org.bitcoinj.params.MainNetParams;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -52,7 +53,7 @@ public class OxtApiTest extends AbstractTest {
   @Test
   public void withOxtFallback() throws Exception {
     ISeenBackend failingBackend = new BackendApi(httpClient, "http://127.0.0.1/invalid", null);
-    ISeenBackend seenBackend = SeenBackendWithFallback.withOxt(failingBackend);
+    ISeenBackend seenBackend = SeenBackendWithFallback.withOxt(failingBackend, MainNetParams.get());
 
     String ADDRESS1 = "1Nv54Mqt5C9Yj8vMe8uQXa5LbTa3tKLBL3";
 

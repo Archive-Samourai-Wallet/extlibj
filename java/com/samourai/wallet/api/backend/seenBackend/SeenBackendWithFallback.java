@@ -2,6 +2,8 @@ package com.samourai.wallet.api.backend.seenBackend;
 
 import com.samourai.wallet.api.backend.IBackendClient;
 import com.samourai.wallet.api.backend.OxtApi;
+import com.samourai.wallet.util.FormatsUtilGeneric;
+import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +21,10 @@ public class SeenBackendWithFallback implements ISeenBackend {
         this.fallbackBackend = fallbackBackend;
     }
 
-    public static SeenBackendWithFallback withOxt(ISeenBackend mainBackend) {
+    public static ISeenBackend withOxt(ISeenBackend mainBackend, NetworkParameters params) {
+        if (FormatsUtilGeneric.getInstance().isTestNet(params)) {
+            return mainBackend; // disable OXT for testnet
+        }
         return new SeenBackendWithFallback(mainBackend, new OxtApi(mainBackend.getHttpClient()));
     }
 
