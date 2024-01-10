@@ -89,7 +89,7 @@ public class KeyBag {
         return privKeys.size();
     }
 
-    protected void add(String hashKey, byte[] privKeyBytes) {
+    public void add(String hashKey, byte[] privKeyBytes) { // TODO public?
         if (privKeyBytes == null) {
             throw new RuntimeException("privKey not found for utxo: "+hashKey);
         }

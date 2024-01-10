@@ -9,6 +9,18 @@ Changelog for ExtLibJ.
 - feature: add WalletSupplier.indexsBackup() & indexsRestore() *(2023-09-30)*
 - refactor: prepare android integration for tx0x2 *(2023-09-30)*
 
+## 0.0.33.3.2
+### 
+
+- fix: disable OXT SeenBackend for Testnet *(2024-01-10)*
+- fix: disable OXT SeenBackend for Testnet *(2024-01-10)*
+
+## 0.0.33.3.1
+### 
+
+- feat: upgrade xmanager-protocol 1.0.10 *(2024-01-08)*
+- feat: add ISeenBackend *(2024-01-08)*
+
 ## 0.0.47-featureTx0-beta2
 ### 
 

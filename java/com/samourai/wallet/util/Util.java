@@ -4,9 +4,13 @@ import com.samourai.wallet.cahoots.psbt.PSBT;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
+import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -137,5 +141,9 @@ public class Util  {
 
     public static int sumInt(Collection<Integer> values) {
         return values.stream().mapToInt(v -> v).sum();
+    }
+
+    public static String encodeUrl(String value) throws Exception {
+        return URLEncoder.encode(value, "UTF-8");
     }
 }

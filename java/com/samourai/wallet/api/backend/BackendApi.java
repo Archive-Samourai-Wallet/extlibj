@@ -1,8 +1,11 @@
 package com.samourai.wallet.api.backend;
 
 import com.samourai.wallet.api.backend.beans.*;
+import com.samourai.wallet.api.backend.seenBackend.ISeenBackend;
+import com.samourai.wallet.api.backend.seenBackend.SeenResponse;
 import com.samourai.wallet.api.backend.websocket.BackendWsApi;
 import com.samourai.wallet.util.JSONUtils;
+import com.samourai.wallet.util.Util;
 import com.samourai.wallet.util.oauth.OAuthApi;
 import com.samourai.wallet.util.oauth.OAuthManager;
 import com.samourai.wallet.util.oauth.OAuthManagerJava;
@@ -13,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class BackendApi implements ISweepBackend {
+public class BackendApi implements ISweepBackend, ISeenBackend {
   private static Logger log = LoggerFactory.getLogger(BackendApi.class);
 
   private static final String URL_UNSPENT = "/unspent?active=";
@@ -24,6 +27,7 @@ public class BackendApi implements ISweepBackend {
   private static final String URL_TX = "/tx/";
   private static final String URL_INIT_BIP84 = "/xpub";
   private static final String URL_MINER_FEES = "/fees";
+  private static final String URL_SEEN = "/seen?addresses=";
   private static final String URL_PUSHTX = "/pushtx/";
   private static final String ZPUB_SEPARATOR = "%7C";
 
@@ -199,6 +203,23 @@ public class BackendApi implements ISweepBackend {
   }
 
   @Override
+  public SeenResponse seen(Collection<String> addresses) throws Exception {
+    String addressesStr = String.join("|", addresses);
+    String url = computeAuthUrl(urlBackend + URL_SEEN + Util.encodeUrl(addressesStr));
+    Map<String,String> headers = computeHeaders();
+    Map<String, Boolean> seenResponse = httpClient.getJson(url, Map.class, headers);
+    if (seenResponse == null) {
+      throw new Exception("Invalid seen response from server");
+    }
+    return new SeenResponse(seenResponse);
+  }
+
+  @Override
+  public boolean seen(String address) throws Exception {
+    return seen(Arrays.asList(address)).isSeen(address);
+  }
+
+  @Override
   public String pushTx(String txHex) throws Exception {
     return pushTx(txHex, null);
   }
@@ -285,7 +306,7 @@ public class BackendApi implements ISweepBackend {
     return url;
   }
 
-  protected IBackendClient getHttpClient() {
+  public IBackendClient getHttpClient() {
     return httpClient;
   }
 
