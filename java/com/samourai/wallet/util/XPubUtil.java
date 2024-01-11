@@ -1,5 +1,7 @@
 package com.samourai.wallet.util;
 
+import com.samourai.wallet.hd.HD_Address;
+import com.samourai.wallet.hd.Purpose;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.segwit.bech32.Bech32UtilGeneric;
 import org.bitcoinj.core.ECKey;
@@ -39,7 +41,9 @@ public class XPubUtil {
     return addressBech32;
   }
 
-  public String getPath(int x, int chainIndex) {
-    return "m/84'/"+chainIndex+"'/"+x+"'";
+  public String getPathSegwit(int x, int chainIndex, NetworkParameters params) {
+    int coinType = FormatsUtilGeneric.getInstance().getCoinType(params);
+    int accountIndex = 0;
+    return HD_Address.getPathAddress(Purpose.PURPOSE_84, coinType, accountIndex, chainIndex, x);
   }
 }
