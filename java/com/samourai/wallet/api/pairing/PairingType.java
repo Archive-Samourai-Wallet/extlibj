@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Optional;
 
 public enum PairingType {
-    WHIRLPOOL_GUI("whirlpool.gui");
+    WHIRLPOOL_GUI("whirlpool.gui"),
+    SWAPS_GUI("swaps.gui");
 
     private String value;
 
