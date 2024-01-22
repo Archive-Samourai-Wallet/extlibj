@@ -40,10 +40,4 @@ public class XPubUtil {
     String addressBech32 = Bech32UtilGeneric.getInstance().toBech32(ecKey.getPubKey(), params);
     return addressBech32;
   }
-
-  public String getPathSegwit(int x, int chainIndex, NetworkParameters params) {
-    int coinType = FormatsUtilGeneric.getInstance().getCoinType(params);
-    int accountIndex = 0;
-    return HD_Address.getPathAddress(Purpose.PURPOSE_84, coinType, accountIndex, chainIndex, x);
-  }
 }
