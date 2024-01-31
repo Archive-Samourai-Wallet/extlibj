@@ -8,6 +8,7 @@ import org.bitcoinj.core.Transaction;
 import org.bitcoinj.params.TestNet3Params;
 import org.junit.jupiter.api.Assertions;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -24,11 +25,16 @@ public class MockPushTx implements IPushTx {
     }
 
     @Override
-    public String pushTx(String hexTx) throws Exception {
-        Transaction tx = TxUtil.getInstance().fromTxHex(params, hexTx);
+    public String pushTx(String txHex, Collection<Integer> strictModeVouts) throws Exception {
+        return pushTx(txHex);
+    }
+
+    @Override
+    public String pushTx(String txHex) throws Exception {
+        Transaction tx = TxUtil.getInstance().fromTxHex(params, txHex);
         String txid = tx.getHashAsString();
         txids.add(txid);
-        txRaws.add(hexTx);
+        txRaws.add(txHex);
         return txid;
     }
 

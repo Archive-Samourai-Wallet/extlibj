@@ -1,5 +1,7 @@
 package com.samourai.wallet.bip47.rpc;
 
+import org.bitcoinj.core.NetworkParameters;
+
 public interface Bip47Encrypter {
 
   String sign(String message) throws Exception;
@@ -10,4 +12,5 @@ public interface Bip47Encrypter {
 
   PaymentAddress getSharedPaymentAddress(PaymentCode paymentCodePartner) throws Exception;
   PaymentCode getPaymentCode();
+  NetworkParameters getParams();
 }

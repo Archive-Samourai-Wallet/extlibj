@@ -295,4 +295,16 @@ public class PaymentCode {
         return xor(dataToMask64bytes, mask);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof PaymentCode) {
+            return o.toString().equals(toString());
+        }
+        return super.equals(o);
+    }
+
+    public boolean equals(String paymentCode) {
+        return paymentCode.equals(toString());
+    }
+
 }

@@ -1,5 +1,5 @@
 package com.samourai.soroban.client;
 
-public interface SorobanMessage extends SorobanPayload {
+public interface SorobanMessage extends SorobanPayloadable {
     boolean isDone();
 }

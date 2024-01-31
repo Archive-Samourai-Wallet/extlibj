@@ -69,4 +69,9 @@ public class Bip47EncrypterImpl implements Bip47Encrypter {
   public PaymentCode getPaymentCode() {
     return bip47Wallet.getPaymentCode();
   }
+
+  @Override
+  public NetworkParameters getParams() {
+    return bip47Wallet.getParams();
+  }
 }

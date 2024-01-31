@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -60,6 +61,8 @@ public class AbstractTest {
   protected BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;
   protected CryptoTestUtil cryptoTestUtil = CryptoTestUtil.getInstance();
   protected CryptoUtil cryptoUtil = CryptoUtil.getInstanceJava();
+  protected AsyncUtil asyncUtil = AsyncUtil.getInstance();
+  protected ThreadUtil threadUtil = ThreadUtil.getInstance();
 
   protected ChainSupplier mockChainSupplier = () -> {
     WalletResponse.InfoBlock infoBlock = new WalletResponse.InfoBlock();
@@ -115,6 +118,37 @@ public class AbstractTest {
     };
 
     backendApi = computeBackendApi(params);
+
+    setLogLevel(Level.DEBUG);
+  }
+
+  protected static void setLogLevel(Level logLevel) {
+    LogbackUtils.setLogLevel("com.samourai", logLevel.toString());
+
+    LogbackUtils.setLogLevel("com.samourai.whirlpool.client", logLevel.toString());
+    LogbackUtils.setLogLevel("com.samourai.whirlpool.client.mix.dialog", logLevel.toString());
+    LogbackUtils.setLogLevel("com.samourai.stomp.client", logLevel.toString());
+    LogbackUtils.setLogLevel("com.samourai.wallet.util.FeeUtil", logLevel.toString());
+
+    LogbackUtils.setLogLevel("com.samourai.whirlpool.client.utils", logLevel.toString());
+    LogbackUtils.setLogLevel("com.samourai.whirlpool.client.wallet", logLevel.toString());
+
+    LogbackUtils.setLogLevel("com.samourai.wallet.cahoots", logLevel.toString());
+    LogbackUtils.setLogLevel("com.samourai.wallet.cahoots.stowaway", logLevel.toString());
+    LogbackUtils.setLogLevel("com.samourai.wallet.cahoots.stonewallx2", logLevel.toString());
+    LogbackUtils.setLogLevel("com.samourai.soroban.client", logLevel.toString());
+    LogbackUtils.setLogLevel("com.samourai.soroban.client.rpc", logLevel.toString());
+    LogbackUtils.setLogLevel("com.samourai.soroban.client.dialog", logLevel.toString());
+    LogbackUtils.setLogLevel("com.samourai.soroban.client.meeting", logLevel.toString());
+
+    LogbackUtils.setLogLevel(
+            "com.samourai.whirlpool.client.wallet.orchestrator", logLevel.toString());
+
+    // skip noisy logs
+    LogbackUtils.setLogLevel("org.bitcoinj", org.slf4j.event.Level.ERROR.toString());
+    LogbackUtils.setLogLevel(
+            "org.bitcoin", org.slf4j.event.Level.WARN.toString()); // "no wallycore"
+    LogbackUtils.setLogLevel("org.eclipse.jetty", org.slf4j.event.Level.INFO.toString());
   }
 
   protected BackendApi computeBackendApi(NetworkParameters params) {

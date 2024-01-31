@@ -1,7 +1,5 @@
 package com.samourai.wallet.bip47;
 
-import com.samourai.soroban.client.RpcWallet;
-import com.samourai.soroban.client.RpcWalletImpl;
 import com.samourai.wallet.bip47.rpc.Bip47EncrypterImpl;
 import com.samourai.wallet.test.AbstractTest;
 import org.junit.jupiter.api.Assertions;
@@ -17,11 +15,8 @@ public class Bip47EncrypterImplTest extends AbstractTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        RpcWallet rpcWalletInitiator = new RpcWalletImpl(bip47WalletInitiator, cryptoUtil, bip47Util);
-        paynymEncrypterInitiator = (Bip47EncrypterImpl) rpcWalletInitiator.getBip47Encrypter();
-
-        RpcWallet rpcWalletCounterparty = new RpcWalletImpl(bip47WalletCounterparty, cryptoUtil, bip47Util);
-        paynymEncrypterCounterparty = (Bip47EncrypterImpl) rpcWalletCounterparty.getBip47Encrypter();
+        paynymEncrypterInitiator = new Bip47EncrypterImpl(bip47WalletInitiator, cryptoUtil, bip47Util);
+        paynymEncrypterCounterparty = new Bip47EncrypterImpl(bip47WalletCounterparty, cryptoUtil, bip47Util);
     }
 
     @Test

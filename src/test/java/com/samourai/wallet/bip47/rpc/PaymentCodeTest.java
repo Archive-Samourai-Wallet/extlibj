@@ -100,4 +100,15 @@ public class PaymentCodeTest {
                 PaymentCode paymentCode1 = new PaymentCode("PM8TJdufVsRkwm8K4uLBUdPEzoZCsq2JCN47wQxcD");
             });
     }
+
+    @Test
+    public void equals() throws Exception {
+        BIP47Wallet bip47Wallet1 = cryptoTestUtil.generateBip47Wallet(params);
+
+        PaymentCode paymentCode1 = new PaymentCode(bip47Wallet1.getAccount(0).getPaymentCode());
+        PaymentCode paymentCode2 = new PaymentCode(bip47Wallet1.getAccount(1).getPaymentCode());
+
+        Assertions.assertEquals(paymentCode1, new PaymentCode(bip47Wallet1.getAccount(0).getPaymentCode()));
+        Assertions.assertNotEquals(paymentCode1, paymentCode2);
+    }
 }
