@@ -46,8 +46,9 @@ public class PaymentCode {
 
     public PaymentCode(String payment_code) throws AddressFormatException {
         strPaymentCode = payment_code;
-        this.pubkey = parse().getLeft();
-        this.chain = parse().getRight();
+        Pair<byte[], byte[]> parse = parse();
+        this.pubkey = parse.getLeft();
+        this.chain = parse.getRight();
     }
 
     public PaymentCode(byte[] payload)    {
@@ -204,7 +205,7 @@ public class PaymentCode {
         return base58EncodeChecked(payment_code);
     }
 
-    public String makeSamouraiPaymentCode() throws AddressFormatException {
+    public String makePaymentCodeSamourai() throws AddressFormatException {
 
         byte[] payload = getPayload();
         // set bit0 = 1 in 'Samourai byte' for segwit. Can send/receive P2PKH, P2SH-P2WPKH, P2WPKH (bech32)

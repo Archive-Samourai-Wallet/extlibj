@@ -1,16 +1,13 @@
 package com.samourai.wallet.cahoots;
 
-import com.samourai.soroban.client.RpcWallet;
-import com.samourai.wallet.bip47.BIP47UtilGeneric;
+import com.samourai.wallet.bip47.rpc.BIP47Account;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
-import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.BipWallet;
 import com.samourai.wallet.bipWallet.WalletSupplier;
 import com.samourai.wallet.chain.ChainSupplier;
-import com.samourai.wallet.crypto.CryptoUtil;
 import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.HD_Wallet;
@@ -26,24 +23,25 @@ public class CahootsWallet {
     private ChainSupplier chainSupplier;
     private CahootsUtxoProvider utxoProvider;
 
-    private HD_Wallet hdWallet;
-    private BIP47Wallet bip47Wallet;
-    private CryptoUtil cryptoUtil;
-    private BIP47UtilGeneric bip47Util;
+    private byte[] fingerprint;
+    private BIP47Account bip47Account;
 
-    public CahootsWallet(WalletSupplier walletSupplier, ChainSupplier chainSupplier, BipFormatSupplier bipFormatSupplier, CahootsUtxoProvider utxoProvider, CryptoUtil cryptoUtil, BIP47UtilGeneric bip47Util) {
+    public CahootsWallet(WalletSupplier walletSupplier, ChainSupplier chainSupplier, BipFormatSupplier bipFormatSupplier, CahootsUtxoProvider utxoProvider, HD_Wallet hdWallet, int account) {
         this.walletSupplier = walletSupplier;
         this.chainSupplier = chainSupplier;
         this.bipFormatSupplier = bipFormatSupplier;
         this.utxoProvider = utxoProvider;
 
-        this.hdWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84).getHdWallet();
-        this.bip47Wallet = new BIP47Wallet(hdWallet);
-        this.cryptoUtil = cryptoUtil;
-        this.bip47Util = bip47Util;
+        this.fingerprint = hdWallet.getFingerprint();
+        this.bip47Account = new BIP47Wallet(hdWallet).getAccount(account);
     }
 
-    private BipFormat likeTypedBipFormat(BipFormat bipFormat) {
+    public CahootsWallet(WalletSupplier walletSupplier, ChainSupplier chainSupplier, BipFormatSupplier bipFormatSupplier, CahootsUtxoProvider utxoProvider) {
+        this(walletSupplier, chainSupplier, bipFormatSupplier, utxoProvider,
+                walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84).getHdWallet(), 0);
+    }
+
+        private BipFormat likeTypedBipFormat(BipFormat bipFormat) {
         if (bipFormat == BIP_FORMAT.TAPROOT) {
             // like-typed output is not implemented for TAPROOT => handle TAPROOT mix output as SEGWIT_NATIVE
             return BIP_FORMAT.SEGWIT_NATIVE;
@@ -76,14 +74,14 @@ public class CahootsWallet {
     }
 
     public byte[] getFingerprint() {
-        return hdWallet.getFingerprint();
+        return fingerprint;
     }
 
     public List<CahootsUtxo> getUtxosWpkhByAccount(int account) {
         return utxoProvider.getUtxosWpkhByAccount(account);
     }
 
-    public BIP47Wallet getBip47Wallet() {
-        return bip47Wallet;
+    public BIP47Account getBip47Account() {
+        return bip47Account;
     }
 }

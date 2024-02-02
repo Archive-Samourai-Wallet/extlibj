@@ -14,8 +14,8 @@ public class Bip47PartnerImplTest extends AbstractTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        bip47PartnerInitiator = new Bip47PartnerImpl(bip47WalletInitiator, paymentCodeCounterparty, true, cryptoUtil, bip47Util);
-        bip47PartnerCounterparty = new Bip47PartnerImpl(bip47WalletCounterparty, paymentCodeInitiator, false, cryptoUtil, bip47Util);
+        bip47PartnerInitiator = new Bip47PartnerImpl(bip47AccountInitiator, paymentCodeCounterparty, true, cryptoUtil, bip47Util);
+        bip47PartnerCounterparty = new Bip47PartnerImpl(bip47AccountCounterparty, paymentCodeInitiator, false, cryptoUtil, bip47Util);
     }
 
     @Test

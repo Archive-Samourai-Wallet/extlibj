@@ -2,6 +2,7 @@ package com.samourai.wallet.ricochet;
 
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bip47.BIP47UtilGeneric;
+import com.samourai.wallet.bip47.rpc.BIP47Account;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.bipWallet.BipWallet;
@@ -31,10 +32,10 @@ public class RicochetConfig {
     private BipWallet bipWalletChange;
     private WhirlpoolAccount spendAccount;
 
-    private BIP47Wallet bip47Wallet;
+    private BIP47Account bip47Account;
     private int bip47WalletOutgoingIdx;
 
-    public RicochetConfig(int feePerB, boolean samouraiFeeViaBIP47, String samouraiFeeAddress, boolean useTimeLock, boolean rbfOptIn, long latestBlock, UtxoProvider utxoProvider, BIP47UtilGeneric bip47Util, BipWallet bipWalletRicochet, BipWallet bipWalletChange, WhirlpoolAccount spendAccount, BIP47Wallet bip47Wallet, int bip47WalletOutgoingIdx) {
+    public RicochetConfig(int feePerB, boolean samouraiFeeViaBIP47, String samouraiFeeAddress, boolean useTimeLock, boolean rbfOptIn, long latestBlock, UtxoProvider utxoProvider, BIP47UtilGeneric bip47Util, BipWallet bipWalletRicochet, BipWallet bipWalletChange, WhirlpoolAccount spendAccount, BIP47Account bip47Account, int bip47WalletOutgoingIdx) {
         this.feePerB = feePerB;
         this.nbHops = 4;
         this.samouraiFeeViaBIP47 = samouraiFeeViaBIP47;
@@ -47,16 +48,16 @@ public class RicochetConfig {
         this.bipWalletRicochet = bipWalletRicochet;
         this.bipWalletChange = bipWalletChange;
         this.spendAccount = spendAccount;
-        this.bip47Wallet = bip47Wallet;
+        this.bip47Account = bip47Account;
         this.bip47WalletOutgoingIdx = bip47WalletOutgoingIdx;
     }
 
     public String getBip47NextFeeAddress() {
         String strAddress = samouraiFeeAddress; // fallback
-        NetworkParameters params = bip47Wallet.getParams();
+        NetworkParameters params = bip47Account.getParams();
         try {
             PaymentCode pcode = new PaymentCode(SamouraiWalletConst.samouraiDonationPCode);
-            SegwitAddress segwitAddress = bip47Util.getSendAddress(bip47Wallet, pcode, bip47WalletOutgoingIdx, params);
+            SegwitAddress segwitAddress = bip47Util.getSendAddress(bip47Account, pcode, bip47WalletOutgoingIdx, params);
             // derive as bech32
             strAddress = segwitAddress.getBech32AsString();
             bip47WalletOutgoingIdx++;

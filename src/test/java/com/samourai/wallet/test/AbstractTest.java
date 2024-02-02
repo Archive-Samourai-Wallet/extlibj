@@ -6,6 +6,7 @@ import com.samourai.wallet.api.backend.BackendApi;
 import com.samourai.wallet.api.backend.BackendServer;
 import com.samourai.wallet.api.backend.beans.WalletResponse;
 import com.samourai.wallet.bip47.BIP47UtilGeneric;
+import com.samourai.wallet.bip47.rpc.BIP47Account;
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.bip47.rpc.java.Bip47UtilJava;
@@ -75,7 +76,9 @@ public class AbstractTest {
   protected BIP47Wallet bip47Wallet;
 
   protected BIP47Wallet bip47WalletInitiator;
+  protected BIP47Account bip47AccountInitiator;
   protected BIP47Wallet bip47WalletCounterparty;
+  protected BIP47Account bip47AccountCounterparty;
   protected PaymentCode paymentCodeInitiator;
   protected PaymentCode paymentCodeCounterparty;
 
@@ -105,8 +108,10 @@ public class AbstractTest {
 
     bip47WalletInitiator = bip47Wallet;
     bip47WalletCounterparty = new BIP47Wallet(hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE+"counterparty", params));
-    paymentCodeInitiator = bip47Util.getPaymentCode(bip47WalletInitiator);
-    paymentCodeCounterparty = bip47Util.getPaymentCode(bip47WalletCounterparty);
+    bip47AccountInitiator = bip47WalletInitiator.getAccount(0);
+    bip47AccountCounterparty = bip47WalletCounterparty.getAccount(0);
+    paymentCodeInitiator = bip47AccountInitiator.getPaymentCode();
+    paymentCodeCounterparty = bip47AccountCounterparty.getPaymentCode();
 
     walletSupplier = new WalletSupplierImpl(bipFormatSupplier, new MemoryIndexHandlerSupplier(), bip44w);
     utxoProvider = new MockUtxoProvider(bip44w.getParams(), walletSupplier);

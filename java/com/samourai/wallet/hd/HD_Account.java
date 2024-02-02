@@ -126,4 +126,8 @@ public class HD_Account {
             throw new RuntimeException(ex);
         }
     }
+
+    public NetworkParameters getParams() {
+        return mParams;
+    }
 }

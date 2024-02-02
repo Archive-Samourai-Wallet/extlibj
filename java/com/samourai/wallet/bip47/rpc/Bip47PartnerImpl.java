@@ -5,7 +5,6 @@ import com.samourai.wallet.crypto.CryptoUtil;
 import com.samourai.wallet.crypto.impl.ECDHKeySet;
 import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.util.MessageSignUtilGeneric;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolNetwork;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
@@ -15,12 +14,12 @@ public class Bip47PartnerImpl implements Bip47Partner {
   private static final Logger log = LoggerFactory.getLogger(Bip47PartnerImpl.class);
   private static final MessageSignUtilGeneric messageSignUtil = MessageSignUtilGeneric.getInstance();
 
-  private BIP47Wallet bip47Wallet;
+  private BIP47Account bip47Account;
   private PaymentCode paymentCodePartner;
   private boolean initiator; // true if my role is initiator, false if partner is initiator
 
   private CryptoUtil cryptoUtil;
-  BIP47UtilGeneric bip47Util;
+  private BIP47UtilGeneric bip47Util;
 
   private HD_Address notificationAddressMine;
   private HD_Address notificationAddressPartner;
@@ -28,12 +27,12 @@ public class Bip47PartnerImpl implements Bip47Partner {
   private String sharedAddressBech32;
 
   public Bip47PartnerImpl(
-      BIP47Wallet bip47Wallet,
+          BIP47Account bip47Account,
       PaymentCode paymentCodePartner,
       boolean initiator,
       CryptoUtil cryptoUtil,
       BIP47UtilGeneric bip47Util) throws Exception {
-    this.bip47Wallet = bip47Wallet;
+    this.bip47Account = bip47Account;
     this.paymentCodePartner = paymentCodePartner;
     this.initiator = initiator;
 
@@ -41,8 +40,8 @@ public class Bip47PartnerImpl implements Bip47Partner {
     this.bip47Util = bip47Util;
 
     // precompute these values and throw on invalid paymentcode
-    NetworkParameters params = bip47Wallet.getParams();
-    this.notificationAddressMine = bip47Wallet.getNotificationAddress();
+    NetworkParameters params = bip47Account.getParams();
+    this.notificationAddressMine = bip47Account.getNotificationAddress();
     this.notificationAddressPartner = paymentCodePartner.notificationAddress(params);
     this.sharedSecret = cryptoUtil.getSharedSecret(notificationAddressMine.getECKey(), notificationAddressPartner.getECKey());
     PaymentAddress sharedPaymentAddress = bip47Util.getPaymentAddress(paymentCodePartner, 0, notificationAddressMine.getECKey(), params);
@@ -50,8 +49,8 @@ public class Bip47PartnerImpl implements Bip47Partner {
   }
 
   @Override
-  public Bip47Partner createNewIdentity(BIP47Wallet bip47WalletNewIdentity) throws Exception {
-    return new Bip47PartnerImpl(bip47WalletNewIdentity, paymentCodePartner, initiator, cryptoUtil, bip47Util);
+  public Bip47Partner createNewIdentity(BIP47Account bip47AccountNewIdentity) throws Exception {
+    return new Bip47PartnerImpl(bip47AccountNewIdentity, paymentCodePartner, initiator, cryptoUtil, bip47Util);
   }
 
   @Override
@@ -62,7 +61,7 @@ public class Bip47PartnerImpl implements Bip47Partner {
 
   @Override
   public boolean verifySignature(String message, String signature) {
-    NetworkParameters params = bip47Wallet.getParams();
+    NetworkParameters params = bip47Account.getParams();
     String signingAddress = notificationAddressPartner.getAddressString();
     return messageSignUtil.verifySignedMessage(signingAddress, message, signature, params);
   }
@@ -78,8 +77,8 @@ public class Bip47PartnerImpl implements Bip47Partner {
   }
 
   @Override
-  public BIP47Wallet getBip47Wallet() {
-    return bip47Wallet;
+  public BIP47Account getBip47Account() {
+    return bip47Account;
   }
 
   @Override
