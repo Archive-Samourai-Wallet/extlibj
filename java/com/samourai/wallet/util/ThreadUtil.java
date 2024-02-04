@@ -7,12 +7,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.concurrent.*;
-import java.util.function.Supplier;
 
 public class ThreadUtil {
     private static final Logger log = LoggerFactory.getLogger(ThreadUtil.class);
     private static ThreadUtil instance;
-    private static final AsyncUtil asyncUtil = AsyncUtil.getInstance();
 
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(5);
 

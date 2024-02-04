@@ -46,6 +46,11 @@ public enum WhirlpoolNetwork {
     return signingAddress;
   }
 
+  // for tests
+  public void _setSigningAddress(String signingAddress) {
+    this.signingAddress = signingAddress;
+  }
+
   public PaymentCode getSigningPaymentCode() {
     return signingPaymentCode;
   }

@@ -9,6 +9,7 @@ import io.reactivex.schedulers.Schedulers;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
@@ -110,11 +111,19 @@ public class AsyncUtil {
         blockingAwait(runIOAsyncCompletable(action));
     }
 
+    public Future<?> runAsync(Runnable runnable) {
+        return threadUtil.getExecutorService().submit(runnable);
+    }
+
+    public <T> Future<T> runAsync(Callable<T> runnable) {
+        return threadUtil.getExecutorService().submit(runnable);
+    }
+
     /**
      * Run loop (without timeout) every <loopFrequencyMs>
      */
-    public <T> Single<T> runAndRetry(
-            Callable<T> doLoop, long retryFrequencyMs, Supplier<Boolean> isDoneOrNull) {
+    public <T> Single<T> loopUntilSuccess(
+            Callable<Optional<T>> doLoop, long retryFrequencyMs, Supplier<Boolean> isDoneOrNull) {
         return Single.fromCallable(() -> {
             while (true) {
                 if (isDoneOrNull != null && isDoneOrNull.get()) {
@@ -123,20 +132,27 @@ public class AsyncUtil {
                 long loopStartTime = System.currentTimeMillis();
                 try {
                     // run loop (without timeout)
-                    return doLoop.call();
+                    Optional<T> opt = doLoop.call();
+                    if (opt.isPresent()) {
+                        // value found
+                        return opt.get();
+                    }
+                    // if no value, continue looping
                 } catch (TimeoutException e) {
                     // continue looping
-                    long loopSpentTime = System.currentTimeMillis() - loopStartTime;
-                    long waitTime = retryFrequencyMs - loopSpentTime;
-                    //if (log.isDebugEnabled()) {
-                    //    log.debug("runWithTimeoutFrequency(): loop timed out, loopSpentTime=" + loopSpentTime + ", waitTime=" + waitTime);
-                    //}
-                    if (waitTime > 0) {
-                        synchronized (this) {
-                            try {
-                                wait(waitTime);
-                            } catch (InterruptedException ee) {
-                            }
+                }
+
+                // wait delay before next loop
+                long loopSpentTime = System.currentTimeMillis() - loopStartTime;
+                long waitTime = retryFrequencyMs - loopSpentTime;
+                //if (log.isDebugEnabled()) {
+                //    log.debug("runWithTimeoutFrequency(): loop timed out, loopSpentTime=" + loopSpentTime + ", waitTime=" + waitTime);
+                //}
+                if (waitTime > 0) {
+                    synchronized (this) {
+                        try {
+                            wait(waitTime);
+                        } catch (InterruptedException ee) {
                         }
                     }
                 }
@@ -144,7 +160,7 @@ public class AsyncUtil {
         });
     }
 
-    public <T> Single<T> runAndRetry(Callable<T> doLoop, long retryFrequencyMs) {
-        return runAndRetry(doLoop, retryFrequencyMs, null);
+    public <T> Single<T> loopUntilSuccess(Callable<Optional<T>> doLoop, long retryFrequencyMs) {
+        return loopUntilSuccess(doLoop, retryFrequencyMs, null);
     }
 }

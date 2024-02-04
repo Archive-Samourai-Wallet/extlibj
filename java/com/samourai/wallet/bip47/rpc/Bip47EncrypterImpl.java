@@ -4,6 +4,7 @@ import com.samourai.wallet.bip47.BIP47UtilGeneric;
 import com.samourai.wallet.crypto.CryptoUtil;
 import com.samourai.wallet.crypto.impl.ECDHKeySet;
 import com.samourai.wallet.util.MessageSignUtilGeneric;
+import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
@@ -28,8 +29,13 @@ public class Bip47EncrypterImpl implements Bip47Encrypter {
 
   @Override
   public String sign(String message) throws Exception {
-    ECKey notificationAddressKey = bip47Account.getNotificationAddress().getECKey();
+    ECKey notificationAddressKey = getSigningKey();
     return messageSignUtil.signMessage(notificationAddressKey, message);
+  }
+
+  @Override
+  public ECKey getSigningKey() throws Exception {
+    return bip47Account.getNotificationAddress().getECKey();
   }
 
   @Override
@@ -37,6 +43,12 @@ public class Bip47EncrypterImpl implements Bip47Encrypter {
     NetworkParameters params = bip47Account.getParams();
     String signingAddress = signingPaymentCode.notificationAddress(params).getAddressString();
     return messageSignUtil.verifySignedMessage(signingAddress, message, signature, params);
+  }
+
+  @Override
+  public String getSigningAddress(PaymentCode signingPaymentCode) throws Exception {
+    NetworkParameters params = getParams();
+    return signingPaymentCode.notificationAddress(params).getAddressString();
   }
 
   protected ECDHKeySet getSharedSecret(PaymentCode paymentCodePartner) throws Exception {

@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class AsyncUtilTest extends AbstractTest {
@@ -20,7 +20,8 @@ public class AsyncUtilTest extends AbstractTest {
   private MutableInt countRuns;
   private Single<Long> single2sec;
   private Completable completable2sec;
-  private Callable<Long> callable2sec;
+  private Callable<Optional<Long>> callable2sec;
+  private Callable<Optional<Long>> callableEmpty;
   private long RESULT = 1L;
   private long SLEEP = 2000;
   private long TIMEOUT = 2100;
@@ -52,7 +53,12 @@ public class AsyncUtilTest extends AbstractTest {
       try {
         Thread.sleep(SLEEP);
       } catch (InterruptedException e) {}
-      return RESULT;
+      return Optional.of(RESULT);
+    };
+
+    callableEmpty = () -> {
+      countRuns.increment();
+      return Optional.empty();
     };
   }
 
@@ -221,21 +227,31 @@ public class AsyncUtilTest extends AbstractTest {
   //
 
   @Test
-  public void runAndRetry_timeout() throws Exception{
+  public void loopUntilSuccess_timeout() throws Exception{
     // global timeout before end of loop
     Assertions.assertThrows(TimeoutException.class, () -> {
       asyncUtil.blockingGet(
-              asyncUtil.runAndRetry(callable2sec, 500),1000);
+              asyncUtil.loopUntilSuccess(callable2sec, 500),1000);
     });
     Assertions.assertEquals(1, countRuns.intValue());
   }
 
   @Test
-  public void runAndRetry_success() throws Exception{
+  public void loopUntilSuccess_noValue() throws Exception{
+    // global timeout before end of loop
+    Assertions.assertThrows(TimeoutException.class, () -> {
+      asyncUtil.blockingGet(
+              asyncUtil.loopUntilSuccess(callableEmpty, 500),2000);
+    });
+    Assertions.assertEquals(5, countRuns.intValue());
+  }
+
+  @Test
+  public void loopUntilSuccess_success() throws Exception{
     // success before timeout
     Assertions.assertEquals(RESULT,
             asyncUtil.blockingGet(
-                    asyncUtil.runAndRetry(callable2sec, 3000), 4000));
+                    asyncUtil.loopUntilSuccess(callable2sec, 3000), 4000));
     Assertions.assertEquals(1, countRuns.intValue());
   }
 }
