@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Optional;
 
 public enum PairingType {
-    WHIRLPOOL_GUI("whirlpool.gui");
+    WHIRLPOOL_GUI("whirlpool.gui"),
+    SAMOURAI_WALLET_FULL("samourai.wallet.full");
 
     private String value;
 
@@ -13,16 +14,16 @@ public enum PairingType {
     }
 
     public static Optional<PairingType> find(String value) {
-      for (PairingType item : PairingType.values()) {
-          if (item.value.equals(value)) {
-              return Optional.of(item);
-          }
-      }
-      return Optional.absent();
+        for (PairingType item : PairingType.values()) {
+            if (item.value.equals(value)) {
+                return Optional.of(item);
+            }
+        }
+        return Optional.absent();
     }
 
     @JsonValue
     public String getValue() {
         return value;
     }
-  }
+}
