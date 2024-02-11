@@ -1,6 +1,7 @@
 package com.samourai.soroban.client;
 
 import com.samourai.dex.config.DexConfigProvider;
+import com.samourai.dex.config.SamouraiConfig;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.RandomUtil;
 import org.bitcoinj.core.NetworkParameters;
@@ -36,12 +37,29 @@ public enum SorobanServerDex {
     this.params = params;
   }
 
+  /*
+  public static void setFrom(SamouraiConfig samouraiConfig) {
+    TESTNET.setServerUrlsClear(samouraiConfig.getSorobanServerDexTestnetClear());
+    TESTNET.setServerUrlsOnion(samouraiConfig.getSorobanServerDexTestnetOnion());
+
+    MAINNET.setServerUrlsClear(samouraiConfig.getSorobanServerDexMainnetClear());
+    MAINNET.setServerUrlsOnion(samouraiConfig.getSorobanServerDexMainnetOnion());
+  }*/
+
   public Collection<String> getServerUrlsClear() {
     return serverUrlsClear;
   }
 
+  public void setServerUrlsClear(Collection<String> serverUrlsClear) {
+    this.serverUrlsClear = serverUrlsClear;
+  }
+
   public Collection<String> getServerUrlsOnion() {
     return serverUrlsOnion;
+  }
+
+  public void setServerUrlsOnion(Collection<String> serverUrlsOnion) {
+    this.serverUrlsOnion = serverUrlsOnion;
   }
 
   public String getServerUrlRandom(boolean onion) {

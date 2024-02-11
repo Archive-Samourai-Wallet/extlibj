@@ -1,5 +1,6 @@
 package com.samourai.dex.config;
 
+import com.samourai.soroban.client.SorobanServerDex;
 import com.samourai.wallet.api.backend.IBackendClient;
 import com.samourai.wallet.util.JSONUtils;
 import com.samourai.wallet.util.MessageSignUtilGeneric;
@@ -41,6 +42,9 @@ public class DexConfigProvider {
                 networkParameters)) {
             this.samouraiConfig = JSONUtils.getInstance().getObjectMapper().readValue(dexConfigResponse.getSamouraiConfig(), SamouraiConfig.class);
             this.lastLoad = System.currentTimeMillis();
+
+            // update SorobanServerDex
+            //SorobanServerDex.setFrom(samouraiConfig);
         } else {
             throw new Exception("Invalid DexConfig signature");
         }

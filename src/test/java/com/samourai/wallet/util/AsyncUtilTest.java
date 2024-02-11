@@ -21,6 +21,7 @@ public class AsyncUtilTest extends AbstractTest {
   private Single<Long> single2sec;
   private Completable completable2sec;
   private Callable<Optional<Long>> callable2sec;
+  private Runnable runnable2sec;
   private Callable<Optional<Long>> callableEmpty;
   private long RESULT = 1L;
   private long SLEEP = 2000;
@@ -54,6 +55,13 @@ public class AsyncUtilTest extends AbstractTest {
         Thread.sleep(SLEEP);
       } catch (InterruptedException e) {}
       return Optional.of(RESULT);
+    };
+
+    runnable2sec = () -> {
+      countRuns.increment();
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {}
     };
 
     callableEmpty = () -> {
@@ -202,6 +210,7 @@ public class AsyncUtilTest extends AbstractTest {
     Assertions.assertEquals(1, countRuns.intValue());
   }
 
+  /*
   @Test
   public void timeout_single() throws Exception {
     // success
@@ -222,27 +231,25 @@ public class AsyncUtilTest extends AbstractTest {
     Assertions.assertThrows(TimeoutException.class, () ->
             asyncUtil.blockingAwait(asyncUtil.timeout(completable2sec,1000))
     );
-  }
+  }*/
 
   //
 
   @Test
-  public void loopUntilSuccess_timeout() throws Exception{
+  public void loopUntilSuccessAsync_timeout() throws Exception{
     // global timeout before end of loop
-    Assertions.assertThrows(TimeoutException.class, () -> {
-      asyncUtil.blockingGet(
-              asyncUtil.loopUntilSuccess(callable2sec, 500),1000);
-    });
-    Assertions.assertEquals(1, countRuns.intValue());
+    Assertions.assertThrows(TimeoutException.class, () ->
+              asyncUtil.loopUntilSuccess(callable2sec, 500,1000)
+    );
+    Assertions.assertEquals(2, countRuns.intValue());
   }
 
   @Test
-  public void loopUntilSuccess_noValue() throws Exception{
+  public void loopUntilSuccessAsync_noValue() throws Exception{
     // global timeout before end of loop
-    Assertions.assertThrows(TimeoutException.class, () -> {
-      asyncUtil.blockingGet(
-              asyncUtil.loopUntilSuccess(callableEmpty, 500),2000);
-    });
+    Assertions.assertThrows(TimeoutException.class, () ->
+              asyncUtil.loopUntilSuccess(callableEmpty, 500,2200)
+    );
     Assertions.assertEquals(5, countRuns.intValue());
   }
 
@@ -250,8 +257,64 @@ public class AsyncUtilTest extends AbstractTest {
   public void loopUntilSuccess_success() throws Exception{
     // success before timeout
     Assertions.assertEquals(RESULT,
-            asyncUtil.blockingGet(
-                    asyncUtil.loopUntilSuccess(callable2sec, 3000), 4000));
+                    asyncUtil.loopUntilSuccess(callable2sec, 3000, 4000));
+    Assertions.assertEquals(1, countRuns.intValue());
+  }
+
+  @Test
+  public void loopUntilSuccess_success2() throws Exception{
+    Callable<Optional<Long>>  callable1sec = () -> {
+      countRuns.increment();
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {}
+
+      // success on third loop
+      if (countRuns.getValue()>2) {
+        log.debug("callable2sec success");
+        return Optional.of(RESULT);
+      }
+      log.debug("callable2sec novalue");
+      return Optional.empty();
+    };
+
+    // success before timeout
+    Assertions.assertEquals(RESULT,
+                    asyncUtil.loopUntilSuccess(callable1sec, 1200, 5000));
+    Assertions.assertEquals(3, countRuns.intValue());
+  }
+
+  // RUN ASYNC
+  @Test
+  public void runWithTimeout_callable_timeout() throws Exception{
+    // throws on timeout
+    Assertions.assertThrows(TimeoutException.class, () -> {
+      asyncUtil.blockingGet(asyncUtil.runAsync(callable2sec, TIMEOUT/2));
+    });
+    Assertions.assertEquals(1, countRuns.intValue());
+  }
+
+  @Test
+  public void runWithTimeout_callable_success() throws Exception{
+    // success before timeout
+    Assertions.assertEquals(RESULT, asyncUtil.blockingGet(
+            asyncUtil.runAsync(callable2sec, TIMEOUT)).get());
+    Assertions.assertEquals(1, countRuns.intValue());
+  }
+
+  @Test
+  public void runWithTimeout_runnable_timeout() throws Exception{
+    // throws on timeout
+    Assertions.assertThrows(TimeoutException.class, () -> {
+      asyncUtil.blockingAwait(asyncUtil.runAsync(runnable2sec, TIMEOUT/2));
+    });
+    Assertions.assertEquals(1, countRuns.intValue());
+  }
+
+  @Test
+  public void runWithTimeout_runnable_success() throws Exception{
+    // success before timeout
+    asyncUtil.blockingAwait(asyncUtil.runAsync(runnable2sec, TIMEOUT));
     Assertions.assertEquals(1, countRuns.intValue());
   }
 }

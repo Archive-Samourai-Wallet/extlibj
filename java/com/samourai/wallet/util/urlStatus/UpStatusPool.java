@@ -21,7 +21,7 @@ public class UpStatusPool {
 
   public UpStatus getUrlStatus(String id) {
     UpStatus upStatus = upStatusById.get(id);
-    if (upStatus != null && upStatus.isExpired()) {
+    if (upStatus == null || upStatus.isExpired()) {
       upStatus = null;
     }
     return upStatus;
@@ -29,10 +29,8 @@ public class UpStatusPool {
 
   public boolean isDown(String id) {
     UpStatus upStatus = getUrlStatus(id);
-    if (upStatus != null) {
-      if (!upStatus.isUp()) {
+    if (upStatus != null && !upStatus.isUp()) {
         return true; // down
-      }
     }
     return false; // up
   }
@@ -41,15 +39,15 @@ public class UpStatusPool {
     return urls.stream().filter(url -> !isDown(url)).collect(Collectors.toList());
   }
 
-  protected void setStatus(String id, boolean up, Exception downReason) {
+  protected void setStatus(String id, boolean up, String info) {
     UpStatus upStatus = upStatusById.get(id);
     boolean statusChanged = (upStatus == null && !up) || (upStatus != null && up != upStatus.isUp());
     if (upStatus != null) {
       // update existing status
-      upStatus.setStatus(up, retryDelayMs, downReason);
+      upStatus.setStatus(up, retryDelayMs, info);
     } else {
       // create new status
-      upStatus = new UpStatus(id, up, retryDelayMs, downReason);
+      upStatus = new UpStatus(id, up, retryDelayMs, info);
       upStatusById.put(id, upStatus);
     }
     if (statusChanged) {
@@ -59,12 +57,23 @@ public class UpStatusPool {
     }
   }
 
-  public void setStatusUp(String url) {
-    setStatus(url, true, null);
+  public void setStatusUp(String url, String info) {
+    setStatus(url, true, info);
   }
 
-  public void setStatusDown(String url, Exception downReason) {
-    setStatus(url, false, downReason);
+  public void setStatusDown(String url, String info) {
+    setStatus(url, false, info);
+  }
+
+  public void expireAll() {
+    long now = System.currentTimeMillis();
+    for (UpStatus upStatus : upStatusById.values()) {
+      upStatus.setExpiration(now);
+    }
+  }
+
+  public void clear() {
+    upStatusById.clear();
   }
 
   public void clear(String url) {
@@ -75,7 +84,11 @@ public class UpStatusPool {
     urls.stream().forEach(url -> clear(url));
   }
 
-  public Collection<UpStatus> getList() {
+  public Collection<UpStatus> getListNotExpired() {
     return upStatusById.values().stream().filter(upStatus -> !upStatus.isExpired()).collect(Collectors.toList());
+  }
+
+  public Collection<UpStatus> getListWithExpired() {
+    return upStatusById.values();
   }
 }

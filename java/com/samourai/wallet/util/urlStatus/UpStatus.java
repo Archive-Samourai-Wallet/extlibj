@@ -6,19 +6,16 @@ public class UpStatus {
     private long lastCheck;
     private long expiration;
     private long since;
-    private Exception downReason;
+    private String info;
 
-    public UpStatus(String id, boolean up, long expirationDelay, Exception downReason) {
+    public UpStatus(String id, boolean up, long expirationDelay, String info) {
         long now = System.currentTimeMillis();
         this.id = id;
-        this.up = up;
-        this.lastCheck = now;
-        this.expiration = now+expirationDelay;
         this.since = now;
-        this.downReason = downReason;
+        setStatus(up, expirationDelay, info);
     }
 
-    public void setStatus(boolean up, long expirationDelay, Exception downReason) {
+    public void setStatus(boolean up, long expirationDelay, String info) {
         long now = System.currentTimeMillis();
         if (up != this.up) {
             this.up = up;
@@ -26,7 +23,7 @@ public class UpStatus {
         }
         this.lastCheck = now;
         this.expiration = now+expirationDelay;
-        this.downReason = downReason;
+        this.info = info;
     }
 
     public String getId() {
@@ -49,12 +46,16 @@ public class UpStatus {
         return expiration;
     }
 
+    public void setExpiration(long expiration) {
+        this.expiration = expiration;
+    }
+
     public long getSince() {
         return since;
     }
 
-    public Exception getDownReason() {
-        return downReason;
+    public String getInfo() {
+        return info;
     }
 
     @Override
@@ -64,6 +65,6 @@ public class UpStatus {
                 ", lastCheck=" + lastCheck +
                 ", expiration=" + expiration +
                 ", since=" + since +
-                ", downReason=" + downReason;
+                ", info=" + info;
     }
 }

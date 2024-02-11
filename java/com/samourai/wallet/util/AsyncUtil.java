@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public class AsyncUtil {
@@ -53,7 +53,11 @@ public class AsyncUtil {
 
     public <T> T blockingGet(Single<T> o, long timeoutMs) throws Exception {
         Callable<T> callable = () -> blockingGet(o);
-        return blockingGet(threadUtil.runWithTimeout(callable, timeoutMs));
+        return blockingGet(runAsync(callable, timeoutMs));
+    }
+
+    public <T> T blockingGet(Future<T> o, long timeoutMs) throws Exception {
+        return o.get(timeoutMs, TimeUnit.MILLISECONDS);
     }
 
     public <T> T blockingLast(Observable<T> o) throws Exception {
@@ -73,7 +77,7 @@ public class AsyncUtil {
             o.blockingAwait();
             return Optional.empty();
         };
-        blockingGet(threadUtil.runWithTimeout(callable, timeoutMs));
+        blockingGet(runAsync(callable, timeoutMs));
     }
 
     public <T> Single<T> timeout(Single<T> o, long timeoutMs) {
@@ -82,7 +86,7 @@ public class AsyncUtil {
         } catch (Exception e) {
             return Single.error(e);
         }
-    }
+    }/*
 
     public Completable timeout(Completable o, long timeoutMs) {
         try {
@@ -93,7 +97,7 @@ public class AsyncUtil {
         } catch (Exception e) {
             return Completable.error(e);
         }
-    }
+    }*/
 
     public <T> Single<T> runIOAsync(final Callable<T> callable) {
         return Single.fromCallable(() -> callable.call()).subscribeOn(Schedulers.io());
@@ -111,56 +115,36 @@ public class AsyncUtil {
         blockingAwait(runIOAsyncCompletable(action));
     }
 
-    public Future<?> runAsync(Runnable runnable) {
+    /*public Future<?> runAsync(Runnable runnable) {
         return threadUtil.getExecutorService().submit(runnable);
+    }*/
+
+    public Completable runAsync(Runnable runnable, long timeoutMs) {
+        Future<?> future = runAsync(() -> {
+            runnable.run();
+            return Optional.empty(); // must return an object for using Completable.fromSingle()
+        });
+        return Completable.fromSingle(Single.fromFuture(future, timeoutMs, TimeUnit.MILLISECONDS));
     }
 
-    public <T> Future<T> runAsync(Callable<T> runnable) {
-        return threadUtil.getExecutorService().submit(runnable);
+    public <T> Future<T> runAsync(Callable<T> callable) {
+        return threadUtil.getExecutorService().submit(callable);
+    }
+
+    public <T> Single<T> runAsync(Callable<T> callable, long timeoutMs) {
+        Future<T> future = runAsync(callable);
+        return Single.fromFuture(future, timeoutMs, TimeUnit.MILLISECONDS);
     }
 
     /**
      * Run loop (without timeout) every <loopFrequencyMs>
      */
-    public <T> Single<T> loopUntilSuccess(
-            Callable<Optional<T>> doLoop, long retryFrequencyMs, Supplier<Boolean> isDoneOrNull) {
-        return Single.fromCallable(() -> {
-            while (true) {
-                if (isDoneOrNull != null && isDoneOrNull.get()) {
-                    throw new InterruptedException("exit (done)");
-                }
-                long loopStartTime = System.currentTimeMillis();
-                try {
-                    // run loop (without timeout)
-                    Optional<T> opt = doLoop.call();
-                    if (opt.isPresent()) {
-                        // value found
-                        return opt.get();
-                    }
-                    // if no value, continue looping
-                } catch (TimeoutException e) {
-                    // continue looping
-                }
-
-                // wait delay before next loop
-                long loopSpentTime = System.currentTimeMillis() - loopStartTime;
-                long waitTime = retryFrequencyMs - loopSpentTime;
-                //if (log.isDebugEnabled()) {
-                //    log.debug("runWithTimeoutFrequency(): loop timed out, loopSpentTime=" + loopSpentTime + ", waitTime=" + waitTime);
-                //}
-                if (waitTime > 0) {
-                    synchronized (this) {
-                        try {
-                            wait(waitTime);
-                        } catch (InterruptedException ee) {
-                        }
-                    }
-                }
-            }
-        });
+    public <T> T loopUntilSuccess(
+            Callable<Optional<T>> doLoop, long retryFrequencyMs, long timeoutMs, Supplier<Boolean> isDoneOrNull) throws Exception {
+        return new LoopUntilSuccess<>(doLoop, retryFrequencyMs, isDoneOrNull, timeoutMs).run();
     }
 
-    public <T> Single<T> loopUntilSuccess(Callable<Optional<T>> doLoop, long retryFrequencyMs) {
-        return loopUntilSuccess(doLoop, retryFrequencyMs, null);
+    public <T> T loopUntilSuccess(Callable<Optional<T>> doLoop, long retryFrequencyMs, long timeoutMs) throws Exception {
+        return loopUntilSuccess(doLoop, retryFrequencyMs, timeoutMs,null);
     }
 }
