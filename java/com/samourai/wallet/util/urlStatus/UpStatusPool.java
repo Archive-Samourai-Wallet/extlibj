@@ -51,9 +51,14 @@ public class UpStatusPool {
       upStatusById.put(id, upStatus);
     }
     if (statusChanged) {
-      if (log.isDebugEnabled()) {
-        log.debug("upStatus changed: "+upStatus);
-      }
+      onChange(upStatus);
+    }
+  }
+
+  // overridable
+  protected void onChange(UpStatus upStatus) {
+    if (log.isDebugEnabled()) {
+      log.debug("upStatus changed: "+upStatus);
     }
   }
 

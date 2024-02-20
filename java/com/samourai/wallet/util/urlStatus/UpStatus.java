@@ -60,7 +60,7 @@ public class UpStatus {
 
     @Override
     public String toString() {
-        return "id=" + id +
+        return "upStatusId=" + id +
                 ", up=" + up +
                 ", lastCheck=" + lastCheck +
                 ", expiration=" + expiration +

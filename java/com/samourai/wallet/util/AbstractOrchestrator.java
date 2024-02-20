@@ -2,6 +2,7 @@ package com.samourai.wallet.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 public abstract class AbstractOrchestrator {
   private Logger log;
@@ -49,9 +50,11 @@ public abstract class AbstractOrchestrator {
               + (LAST_RUN_DELAY != null ? LAST_RUN_DELAY : "null"));
     }
     this.started = true;
+    String mdc = LogbackUtils.mdcAppend("orchestrator="+getThreadName());
     this.myThread =
         new Thread(
                 () -> {
+                  MDC.put("mdc",mdc);
                   if (START_DELAY > 0) {
                     doSleep(START_DELAY);
                   }

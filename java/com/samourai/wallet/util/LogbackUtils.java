@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * Contains methods to access and manipulate logback framework dynamically at run-time. Here
@@ -81,5 +82,16 @@ public final class LogbackUtils {
     } catch (Exception e) {
       return null;
     }
+  }
+
+  public static final String mdcAppend(String info) {
+    String mdc = MDC.get("mdc");
+    if (mdc == null) {
+      mdc = "";
+    } else {
+      mdc += ",";
+    }
+    mdc += info;
+    return mdc;
   }
 }

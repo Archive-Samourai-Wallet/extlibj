@@ -1,7 +1,6 @@
 package com.samourai.soroban.client;
 
 import com.samourai.dex.config.DexConfigProvider;
-import com.samourai.dex.config.SamouraiConfig;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.RandomUtil;
 import org.bitcoinj.core.NetworkParameters;
@@ -11,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public enum SorobanServerDex {
@@ -27,52 +24,43 @@ public enum SorobanServerDex {
 
   private static final Logger log = LoggerFactory.getLogger(SorobanServerDex.class);
 
-  private Collection<String> serverUrlsClear;
-  private Collection<String> serverUrlsOnion;
+  private Collection<String> sorobanUrlsClear;
+  private Collection<String> sorobanUrlsOnion;
   private NetworkParameters params;
 
-  SorobanServerDex(Collection<String> serverUrlsClear, Collection<String> serverUrlsOnion, NetworkParameters params) {
-    this.serverUrlsClear = serverUrlsClear;
-    this.serverUrlsOnion = serverUrlsOnion;
+  SorobanServerDex(Collection<String> sorobanUrlsClear, Collection<String> sorobanUrlsOnion, NetworkParameters params) {
+    this.sorobanUrlsClear = sorobanUrlsClear;
+    this.sorobanUrlsOnion = sorobanUrlsOnion;
     this.params = params;
   }
 
-  /*
-  public static void setFrom(SamouraiConfig samouraiConfig) {
-    TESTNET.setServerUrlsClear(samouraiConfig.getSorobanServerDexTestnetClear());
-    TESTNET.setServerUrlsOnion(samouraiConfig.getSorobanServerDexTestnetOnion());
-
-    MAINNET.setServerUrlsClear(samouraiConfig.getSorobanServerDexMainnetClear());
-    MAINNET.setServerUrlsOnion(samouraiConfig.getSorobanServerDexMainnetOnion());
-  }*/
-
-  public Collection<String> getServerUrlsClear() {
-    return serverUrlsClear;
+  public Collection<String> getSorobanUrlsClear() {
+    return sorobanUrlsClear;
   }
 
-  public void setServerUrlsClear(Collection<String> serverUrlsClear) {
-    this.serverUrlsClear = serverUrlsClear;
+  public void setSorobanUrlsClear(Collection<String> sorobanUrlsClear) {
+    this.sorobanUrlsClear = sorobanUrlsClear;
   }
 
-  public Collection<String> getServerUrlsOnion() {
-    return serverUrlsOnion;
+  public Collection<String> getSorobanUrlsOnion() {
+    return sorobanUrlsOnion;
   }
 
-  public void setServerUrlsOnion(Collection<String> serverUrlsOnion) {
-    this.serverUrlsOnion = serverUrlsOnion;
+  public void setSorobanUrlsOnion(Collection<String> sorobanUrlsOnion) {
+    this.sorobanUrlsOnion = sorobanUrlsOnion;
   }
 
-  public String getServerUrlRandom(boolean onion) {
-    String url = RandomUtil.getInstance().next(getServerUrls(onion));
+  public String getSorobanUrlRandom(boolean onion) {
+    String url = RandomUtil.getInstance().next(getSorobanUrls(onion));
     if (log.isDebugEnabled()) {
       log.debug("using SorobanServer: "+url);
     }
     return url;
   }
 
-  public Collection<String> getServerUrls(boolean onion) {
-    Collection<String> serverUrls = onion ? getServerUrlsOnion() : getServerUrlsClear();
-    return serverUrls;
+  public Collection<String> getSorobanUrls(boolean onion) {
+    Collection<String> sorobanUrls = onion ? getSorobanUrlsOnion() : getSorobanUrlsClear();
+    return sorobanUrls;
   }
 
   public NetworkParameters getParams() {

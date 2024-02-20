@@ -18,27 +18,27 @@ public enum SorobanServer {
           DexConfigProvider.getInstance().getSamouraiConfig().getSorobanServerMainnetOnion(),
           MainNetParams.get());
 
-  private String serverUrlClear;
-  private String serverUrlOnion;
+  private String sorobanUrlClear;
+  private String sorobanUrlOnion;
   private NetworkParameters params;
 
-  SorobanServer(String serverUrlClear, String serverUrlOnion, NetworkParameters params) {
-    this.serverUrlClear = serverUrlClear;
-    this.serverUrlOnion = serverUrlOnion;
+  SorobanServer(String sorobanUrlClear, String sorobanUrlOnion, NetworkParameters params) {
+    this.sorobanUrlClear = sorobanUrlClear;
+    this.sorobanUrlOnion = sorobanUrlOnion;
     this.params = params;
   }
 
-  public String getServerUrlClear() {
-    return serverUrlClear;
+  public String getSorobanUrlClear() {
+    return sorobanUrlClear;
   }
 
-  public String getServerUrlOnion() {
-    return serverUrlOnion;
+  public String getSorobanUrlOnion() {
+    return sorobanUrlOnion;
   }
 
-  public String getServerUrl(boolean onion) {
-    String serverUrl = onion ? getServerUrlOnion() : getServerUrlClear();
-    return serverUrl;
+  public String getSorobanUrl(boolean onion) {
+    String sorobanUrl = onion ? getSorobanUrlOnion() : getSorobanUrlClear();
+    return sorobanUrl;
   }
 
   public NetworkParameters getParams() {

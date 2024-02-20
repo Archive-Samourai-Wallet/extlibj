@@ -5,6 +5,7 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.functions.Action;
 import io.reactivex.schedulers.Schedulers;
+import org.slf4j.MDC;
 
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -128,7 +129,13 @@ public class AsyncUtil {
     }
 
     public <T> Future<T> runAsync(Callable<T> callable) {
-        return threadUtil.getExecutorService().submit(callable);
+        // preserve logging context
+        String mdc = LogbackUtils.mdcAppend("runAsync="+System.currentTimeMillis());
+        final Callable<T> callableFinal = () -> {
+            MDC.put("mdc", mdc);
+            return callable.call();
+        };
+        return threadUtil.getExecutorService().submit(callableFinal);
     }
 
     public <T> Single<T> runAsync(Callable<T> callable, long timeoutMs) {
