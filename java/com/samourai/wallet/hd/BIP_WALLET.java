@@ -23,10 +23,10 @@ public enum BIP_WALLET {
   SWAPS_DEPOSIT(WhirlpoolAccount.SWAPS_DEPOSIT, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.SWAPS_DEPOSIT), BIP_FORMAT.SEGWIT_NATIVE),
   SWAPS_REFUNDS(WhirlpoolAccount.SWAPS_REFUNDS, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.SWAPS_REFUNDS), BIP_FORMAT.SEGWIT_NATIVE),
 
+  // ignored accounts
   BADBANK_BIP84(WhirlpoolAccount.BADBANK, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.BADBANK), BIP_FORMAT.SEGWIT_NATIVE),
   RICOCHET_BIP84(WhirlpoolAccount.RICOCHET, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.RICOCHET), BIP_FORMAT.SEGWIT_NATIVE);
 
-  private static final Logger log = LoggerFactory.getLogger(BIP_WALLET.class);
   private WhirlpoolAccount account;
   private BipDerivation bipDerivation;
   private Collection<BipFormat> bipFormats;
