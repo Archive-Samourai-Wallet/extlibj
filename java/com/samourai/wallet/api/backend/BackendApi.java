@@ -110,12 +110,12 @@ public class BackendApi implements ISweepBackend, ISeenBackend {
 
     if (log.isDebugEnabled()) {
       log.debug(
-          "fetchAddress "
-              + zpub
-              + ": account_index="
-              + address.account_index
-              + ", change_index="
-              + address.change_index);
+              "fetchAddress "
+                      + zpub
+                      + ": account_index="
+                      + address.account_index
+                      + ", change_index="
+                      + address.change_index);
     }
     return address;
   }

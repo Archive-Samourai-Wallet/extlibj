@@ -5,7 +5,8 @@ import com.google.common.base.Optional;
 
 public enum PairingType {
     WHIRLPOOL_GUI("whirlpool.gui"),
-    SAMOURAI_WALLET_FULL("samourai.wallet.full");
+    SAMOURAI_WALLET_FULL("samourai.wallet.full"),
+    SWAPS_GUI("swaps.gui");
 
     private String value;
 
@@ -14,16 +15,16 @@ public enum PairingType {
     }
 
     public static Optional<PairingType> find(String value) {
-        for (PairingType item : PairingType.values()) {
-            if (item.value.equals(value)) {
-                return Optional.of(item);
-            }
-        }
-        return Optional.absent();
+      for (PairingType item : PairingType.values()) {
+          if (item.value.equals(value)) {
+              return Optional.of(item);
+          }
+      }
+      return Optional.absent();
     }
 
     @JsonValue
     public String getValue() {
         return value;
     }
-}
+  }

@@ -1,7 +1,9 @@
 package com.samourai.wallet.whirlpool;
 
+import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
+
 public class WhirlpoolConst {
-    public final static int WHIRLPOOL_BADBANK_ACCOUNT = Integer.MAX_VALUE - 3;
-    public final static int WHIRLPOOL_PREMIX_ACCOUNT = Integer.MAX_VALUE - 2;
-    public final static int WHIRLPOOL_POSTMIX_ACCOUNT = Integer.MAX_VALUE - 1;
+    public final static int WHIRLPOOL_BADBANK_ACCOUNT = SamouraiAccountIndex.BADBANK;
+    public final static int WHIRLPOOL_PREMIX_ACCOUNT = SamouraiAccountIndex.PREMIX;
+    public final static int WHIRLPOOL_POSTMIX_ACCOUNT = SamouraiAccountIndex.POSTMIX;
 }

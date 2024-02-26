@@ -19,6 +19,10 @@ public enum BIP_WALLET {
   PREMIX_BIP84(WhirlpoolAccount.PREMIX, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.PREMIX), BIP_FORMAT.SEGWIT_NATIVE),
   POSTMIX_BIP84(WhirlpoolAccount.POSTMIX, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.POSTMIX), BIP_FORMAT.SEGWIT_NATIVE, BIP_FORMAT.SEGWIT_COMPAT, BIP_FORMAT.LEGACY),
 
+  ASB_BIP84(WhirlpoolAccount.SWAPS_ASB, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.SWAPS_ASB), BIP_FORMAT.SEGWIT_NATIVE),
+  SWAPS_DEPOSIT(WhirlpoolAccount.SWAPS_DEPOSIT, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.SWAPS_DEPOSIT), BIP_FORMAT.SEGWIT_NATIVE),
+  SWAPS_REFUNDS(WhirlpoolAccount.SWAPS_REFUNDS, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.SWAPS_REFUNDS), BIP_FORMAT.SEGWIT_NATIVE),
+
   BADBANK_BIP84(WhirlpoolAccount.BADBANK, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.BADBANK), BIP_FORMAT.SEGWIT_NATIVE),
   RICOCHET_BIP84(WhirlpoolAccount.RICOCHET, new BipDerivation(Purpose.PURPOSE_84, SamouraiAccountIndex.RICOCHET), BIP_FORMAT.SEGWIT_NATIVE);
 
