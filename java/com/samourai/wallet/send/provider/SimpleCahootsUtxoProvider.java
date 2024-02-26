@@ -3,8 +3,8 @@ package com.samourai.wallet.send.provider;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.cahoots.CahootsUtxo;
 import com.samourai.wallet.send.UTXO;
-import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccountIndex;
+import com.samourai.wallet.constants.WhirlpoolAccount;
 
 import java.util.Collection;
 import java.util.List;

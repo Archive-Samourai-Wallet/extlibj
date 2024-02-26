@@ -3,8 +3,8 @@ package com.samourai.wallet.hd;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipWallet.BipDerivation;
-import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccountIndex;
+import com.samourai.wallet.constants.WhirlpoolAccount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,8 +1,7 @@
 package com.samourai.wallet.cahoots;
 
-import com.samourai.soroban.cahoots.CahootsContext;
-import com.samourai.soroban.cahoots.ManualCahootsMessage;
-import com.samourai.soroban.cahoots.ManualCahootsService;
+import com.samourai.wallet.cahoots.manual.ManualCahootsMessage;
+import com.samourai.wallet.cahoots.manual.ManualCahootsService;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipWallet.WalletSupplier;
 import com.samourai.wallet.bipWallet.WalletSupplierImpl;
@@ -19,8 +18,6 @@ import com.samourai.wallet.util.TestUtil;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 public abstract class AbstractCahootsTest extends AbstractTest {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahootsTest.class);

@@ -8,7 +8,7 @@ import com.samourai.wallet.bip47.rpc.PaymentCode;
 import com.samourai.wallet.bipWallet.BipWallet;
 import com.samourai.wallet.segwit.SegwitAddress;
 import com.samourai.wallet.send.provider.UtxoProvider;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
+import com.samourai.wallet.constants.WhirlpoolAccount;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

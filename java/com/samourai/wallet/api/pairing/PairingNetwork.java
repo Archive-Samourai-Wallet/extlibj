@@ -2,7 +2,7 @@ package com.samourai.wallet.api.pairing;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Optional;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolNetwork;
+import com.samourai.wallet.constants.WhirlpoolNetwork;
 
 public enum PairingNetwork {
     MAINNET("mainnet", WhirlpoolNetwork.MAINNET),

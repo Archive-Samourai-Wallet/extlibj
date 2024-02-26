@@ -1,6 +1,6 @@
 package com.samourai.wallet.test;
 
-import com.samourai.http.client.IHttpClient;
+import com.samourai.wallet.httpClient.IHttpClient;
 import com.samourai.http.client.JettyHttpClient;
 import com.samourai.wallet.api.backend.BackendApi;
 import com.samourai.wallet.api.backend.BackendServer;
@@ -24,8 +24,8 @@ import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
 import com.samourai.wallet.send.provider.MockUtxoProvider;
 import com.samourai.wallet.util.*;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolNetwork;
-import com.samourai.xmanager.client.XManagerClient;
+import com.samourai.wallet.constants.WhirlpoolNetwork;
+import com.samourai.wallet.xmanagerClient.XManagerClient;
 import com.samourai.xmanager.protocol.XManagerService;
 import org.bitcoinj.core.*;
 import org.bitcoinj.params.TestNet3Params;

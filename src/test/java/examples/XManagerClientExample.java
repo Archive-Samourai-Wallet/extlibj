@@ -1,7 +1,7 @@
 package examples;
 
-import com.samourai.http.client.IHttpClient;
-import com.samourai.xmanager.client.XManagerClient;
+import com.samourai.wallet.httpClient.IHttpClient;
+import com.samourai.wallet.xmanagerClient.XManagerClient;
 import com.samourai.xmanager.protocol.XManagerEnv;
 import com.samourai.xmanager.protocol.XManagerService;
 import com.samourai.xmanager.protocol.rest.AddressIndexResponse;

@@ -1,12 +1,12 @@
 package com.samourai.wallet.cahoots.multi;
 
-import com.samourai.soroban.cahoots.CahootsContext;
-import com.samourai.soroban.cahoots.Stonewallx2Context;
-import com.samourai.soroban.cahoots.StowawayContext;
+import com.samourai.wallet.cahoots.CahootsContext;
+import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Context;
+import com.samourai.wallet.cahoots.stowaway.StowawayContext;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.cahoots.CahootsTypeUser;
 import com.samourai.wallet.cahoots.CahootsWallet;
-import com.samourai.xmanager.client.XManagerClient;
+import com.samourai.wallet.xmanagerClient.XManagerClient;
 
 public class MultiCahootsContext extends CahootsContext {
     private Stonewallx2Context stonewallx2Context;

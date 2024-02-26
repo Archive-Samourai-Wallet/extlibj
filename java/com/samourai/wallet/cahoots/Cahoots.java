@@ -1,6 +1,5 @@
 package com.samourai.wallet.cahoots;
 
-import com.samourai.soroban.cahoots.CahootsContext;
 import com.samourai.wallet.api.backend.IPushTx;
 import com.samourai.wallet.cahoots.multi.MultiCahoots;
 import com.samourai.wallet.cahoots.psbt.PSBT;
