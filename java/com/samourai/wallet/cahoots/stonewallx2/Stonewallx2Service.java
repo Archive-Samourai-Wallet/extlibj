@@ -1,6 +1,5 @@
 package com.samourai.wallet.cahoots.stonewallx2;
 
-import com.samourai.soroban.cahoots.Stonewallx2Context;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
@@ -10,7 +9,7 @@ import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.RandomUtil;
-import com.samourai.xmanager.client.XManagerClient;
+import com.samourai.wallet.xmanagerClient.XManagerClient;
 import com.samourai.xmanager.protocol.XManagerService;
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.*;

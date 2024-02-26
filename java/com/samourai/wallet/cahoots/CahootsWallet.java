@@ -14,7 +14,7 @@ import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.send.provider.CahootsUtxoProvider;
 import com.samourai.wallet.whirlpool.WhirlpoolConst;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
+import com.samourai.wallet.constants.WhirlpoolAccount;
 import org.bitcoinj.core.NetworkParameters;
 
 import java.util.List;

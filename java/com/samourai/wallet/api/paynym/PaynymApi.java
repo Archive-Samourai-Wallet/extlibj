@@ -1,6 +1,6 @@
 package com.samourai.wallet.api.paynym;
 
-import com.samourai.http.client.IHttpClient;
+import com.samourai.wallet.httpClient.IHttpClient;
 import com.samourai.wallet.api.backend.IBackendClient;
 import com.samourai.wallet.api.backend.beans.HttpException;
 import com.samourai.wallet.api.paynym.beans.*;

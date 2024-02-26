@@ -30,12 +30,12 @@
 		<dependency>
 			<groupId>io.samourai.code.wallet.bitcoinj</groupId>
 			<artifactId>bitcoinj-core</artifactId>
-			<version>004</version>
+			<version>006</version>
 		</dependency>
 		<dependency>
 			<groupId>io.samourai.code.wallet</groupId>
 			<artifactId>xmanager-protocol</artifactId>
-			<version>1.0.10</version>
+			<version>1.0.11</version>
 		</dependency>
 		<dependency>
 			<groupId>com.auth0</groupId>
@@ -180,6 +180,17 @@
 					</execution>
 				</executions>
 			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Automatic-Module-Name>com.samourai.extlibj</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 	<repositories>

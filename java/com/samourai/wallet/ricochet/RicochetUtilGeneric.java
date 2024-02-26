@@ -9,7 +9,7 @@ import com.samourai.wallet.send.SendFactoryGeneric;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.util.FeeUtil;
-import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
+import com.samourai.wallet.constants.SamouraiAccountIndex;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.*;
 import org.bouncycastle.util.encoders.Hex;

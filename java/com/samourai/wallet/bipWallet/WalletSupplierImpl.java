@@ -4,7 +4,7 @@ import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
 import com.samourai.wallet.hd.BIP_WALLET;
 import com.samourai.wallet.hd.HD_Wallet;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
+import com.samourai.wallet.constants.WhirlpoolAccount;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

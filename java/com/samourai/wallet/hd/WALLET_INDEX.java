@@ -1,7 +1,7 @@
 package com.samourai.wallet.hd;
 
 import com.samourai.wallet.bipWallet.BipDerivation;
-import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
+import com.samourai.wallet.constants.SamouraiAccountIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

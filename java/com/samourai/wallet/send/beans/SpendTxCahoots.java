@@ -1,6 +1,6 @@
 package com.samourai.wallet.send.beans;
 
-import com.samourai.soroban.cahoots.CahootsContext;
+import com.samourai.wallet.cahoots.CahootsContext;
 import com.samourai.wallet.api.backend.IPushTx;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.cahoots.Cahoots;

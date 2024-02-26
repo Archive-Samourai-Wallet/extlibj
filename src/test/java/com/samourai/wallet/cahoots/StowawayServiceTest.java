@@ -1,11 +1,11 @@
 package com.samourai.wallet.cahoots;
 
-import com.samourai.soroban.cahoots.StowawayContext;
+import com.samourai.wallet.cahoots.stowaway.StowawayContext;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
-import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
+import com.samourai.wallet.constants.SamouraiAccountIndex;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

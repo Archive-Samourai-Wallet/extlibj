@@ -6,7 +6,7 @@ import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.send.spend.SpendBuilder;
 import com.samourai.wallet.util.FeeUtil;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
+import com.samourai.wallet.constants.WhirlpoolAccount;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.Coin;

@@ -1,7 +1,9 @@
 package com.samourai.wallet.cahoots;
 
-import com.samourai.soroban.cahoots.*;
-import com.samourai.soroban.client.SorobanInteraction;
+import com.samourai.wallet.cahoots.manual.ManualCahootsMessage;
+import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Context;
+import com.samourai.wallet.cahoots.stowaway.StowawayContext;
+import com.samourai.wallet.sorobanClient.SorobanInteraction;
 import com.samourai.wallet.cahoots.multi.MultiCahoots;
 import com.samourai.wallet.cahoots.multi.MultiCahootsContext;
 import org.bitcoinj.core.Transaction;

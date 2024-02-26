@@ -13,7 +13,7 @@ import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.util.FeeUtil;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
+import com.samourai.wallet.constants.WhirlpoolAccount;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

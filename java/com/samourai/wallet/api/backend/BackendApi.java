@@ -9,7 +9,7 @@ import com.samourai.wallet.util.Util;
 import com.samourai.wallet.util.oauth.OAuthApi;
 import com.samourai.wallet.util.oauth.OAuthManager;
 import com.samourai.wallet.util.oauth.OAuthManagerJava;
-import com.samourai.websocket.client.IWebsocketClient;
+import com.samourai.wallet.websocketClient.IWebsocketClient;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

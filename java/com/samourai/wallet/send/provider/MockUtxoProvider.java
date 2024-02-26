@@ -10,8 +10,8 @@ import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.Chain;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
-import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccountIndex;
+import com.samourai.wallet.constants.WhirlpoolAccount;
 import org.bitcoinj.core.*;
 import org.bouncycastle.util.encoders.Hex;
 
