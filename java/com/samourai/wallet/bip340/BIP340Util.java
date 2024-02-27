@@ -11,7 +11,6 @@ import org.bouncycastle.util.BigIntegers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -57,7 +56,7 @@ public class BIP340Util {
      * @return Returns a private key in bytes.
      * @throws IOException
      */
-    public static ECKey getTweakedPrivKey(ECKey originalPrivKey, @Nullable byte[] hash) throws IOException {
+    public static ECKey getTweakedPrivKey(ECKey originalPrivKey, byte[] hash) throws IOException {
         BigInteger privKey0 = originalPrivKey.getPrivKey();
         Point privPoint = Point.mul(Point.getG(), originalPrivKey.getPrivKey());
         BigInteger privKey;
