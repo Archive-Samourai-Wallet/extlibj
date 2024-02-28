@@ -55,6 +55,14 @@ public class JacksonHttpClientTest extends AbstractTest {
       }
 
       @Override
+      protected String requestStringPost(String urlStr, Map<String, String> headers, String contentType, String content) throws Exception {
+        if (mockException != null) {
+          throw mockException;
+        }
+        return mockResponse;
+      }
+
+      @Override
       public void connect() throws Exception {}
     };
   }
