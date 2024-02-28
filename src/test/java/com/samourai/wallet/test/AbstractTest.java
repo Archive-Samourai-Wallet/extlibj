@@ -141,6 +141,7 @@ public class AbstractTest {
     LogbackUtils.setLogLevel("com.samourai.wallet.cahoots", logLevel.toString());
     LogbackUtils.setLogLevel("com.samourai.wallet.cahoots.stowaway", logLevel.toString());
     LogbackUtils.setLogLevel("com.samourai.wallet.cahoots.stonewallx2", logLevel.toString());
+    LogbackUtils.setLogLevel("com.samourai.wallet.sorobanClient", logLevel.toString());
     LogbackUtils.setLogLevel("com.samourai.soroban.client", logLevel.toString());
     LogbackUtils.setLogLevel("com.samourai.soroban.client.rpc", logLevel.toString());
     LogbackUtils.setLogLevel("com.samourai.soroban.client.dialog", logLevel.toString());

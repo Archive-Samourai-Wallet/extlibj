@@ -1,6 +1,5 @@
 package com.samourai.wallet.dexConfig;
 
-import com.samourai.soroban.client.SorobanServerDex;
 import com.samourai.wallet.api.backend.IBackendClient;
 import com.samourai.wallet.constants.WhirlpoolServer;
 import com.samourai.wallet.util.JSONUtils;

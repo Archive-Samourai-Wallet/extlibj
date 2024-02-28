@@ -1,4 +1,4 @@
-package com.samourai.soroban.client;
+package com.samourai.wallet.sorobanClient;
 
 import com.samourai.wallet.dexConfig.DexConfigProvider;
 import com.samourai.wallet.util.FormatsUtilGeneric;
