@@ -82,21 +82,10 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.jetbrains.kotlin</groupId>
-			<artifactId>kotlin-stdlib</artifactId>
-			<version>${kotlin.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>io.samourai.code.wallet</groupId>
 			<artifactId>java-http-client</artifactId>
 			<version>1.0.8-SNAPSHOT</version>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>io.samourai.code.wallet</groupId>
-					<artifactId>extlibj</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 	</dependencies>
 	<build>

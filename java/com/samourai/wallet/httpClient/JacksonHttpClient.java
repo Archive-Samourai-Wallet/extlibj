@@ -25,10 +25,12 @@ public abstract class JacksonHttpClient implements IHttpClient {
   protected abstract String requestJsonPost(
       String urlStr, Map<String, String> headers, String jsonBody) throws Exception;
 
+  protected abstract String requestStringPost(String urlStr, Map<String, String> headers, String contentType, String content) throws Exception;
+
   protected abstract String requestJsonPostUrlEncoded(
       String urlStr, Map<String, String> headers, Map<String, String> body) throws Exception;
 
-  @Override
+    @Override
   public <T> T getJson(String urlStr, Class<T> responseType, Map<String, String> headers)
       throws HttpException {
       return getJson(urlStr, responseType, headers, false);
@@ -64,6 +66,21 @@ public abstract class JacksonHttpClient implements IHttpClient {
                 String responseContent = requestJsonPost(urlStr, headers, jsonBody);
                 T result = parseJson(responseContent, responseType);
                 return result;
+              } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                  log.error("postJson failed: " + urlStr + ": " + e.toString());
+                }
+                throw httpException(e);
+              }
+            });
+  }
+
+  @Override
+  public Single<Optional<String>> postString(String urlStr, Map<String, String> headers, String contentType, String content) {
+    return httpObservable(
+            () -> {
+              try {
+                return requestStringPost(urlStr, headers, contentType, content);
               } catch (Exception e) {
                 if (log.isDebugEnabled()) {
                   log.error("postJson failed: " + urlStr + ": " + e.toString());
