@@ -131,7 +131,7 @@ public abstract class JacksonHttpClient implements IHttpClient {
 
   protected HttpException httpException(Exception e) {
     if (!(e instanceof HttpException)) {
-      return new HttpException(e, null);
+      return new HttpException(e);
     }
     return (HttpException) e;
   }

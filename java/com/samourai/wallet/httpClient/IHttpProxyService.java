@@ -4,5 +4,5 @@ import java.util.Optional;
 
 public interface IHttpProxyService {
   Optional<HttpProxy> getHttpProxy(HttpUsage httpUsage);
-  void changeIdentity();
+  void changeIdentity(); // called by httpClient.changeIdentity()
 }
