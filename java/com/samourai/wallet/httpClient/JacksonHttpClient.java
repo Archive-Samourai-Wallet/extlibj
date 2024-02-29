@@ -113,7 +113,7 @@ public abstract class JacksonHttpClient implements IHttpClient {
     if (log.isTraceEnabled()) {
       String responseStr = (responseContent != null ? responseContent : "null");
       if (responseStr.length()>500) {
-        responseStr = responseStr.substring(0, 500);
+        responseStr = responseStr.substring(0, 500)+"...";
       }
       log.trace(
           "response["

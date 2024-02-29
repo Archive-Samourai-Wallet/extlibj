@@ -25,12 +25,12 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20180130</version>
+			<version>20240205</version>
 		</dependency>
 		<dependency>
 			<groupId>io.samourai.code.wallet.bitcoinj</groupId>
 			<artifactId>bitcoinj-core</artifactId>
-			<version>007.beta8</version>
+			<version>007-beta14</version>
 		</dependency>
 		<dependency>
 			<groupId>io.samourai.code.wallet</groupId>
@@ -67,7 +67,7 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.2.10</version>
+			<version>1.2.13</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

@@ -4,12 +4,11 @@ import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
-import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.FormatsUtilGeneric;
-import com.samourai.wallet.util.TxUtil;
 import com.samourai.wallet.util.RandomUtil;
+import com.samourai.wallet.util.TxUtil;
 import com.samourai.wallet.xmanagerClient.XManagerClient;
 import com.samourai.xmanager.protocol.XManagerService;
 import org.apache.commons.lang3.StringUtils;
@@ -182,9 +181,9 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         return selectedUTXO;
     }
 
-    private BipAddress getContributorMixAddress(CahootsWallet cahootsWallet, STONEWALLx2 stonewall0, boolean increment, BipFormat bipFormat) throws Exception {
-        BipAddress receiveAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), increment, bipFormat);
-        if (receiveAddress.getAddressString().equalsIgnoreCase(stonewall0.getDestination())) {
+    private String getContributorMixAddress(CahootsWallet cahootsWallet, STONEWALLx2 stonewall0, boolean increment, BipFormat bipFormat) throws Exception {
+        String receiveAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), increment, bipFormat);
+        if (receiveAddress.equalsIgnoreCase(stonewall0.getDestination())) {
             receiveAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), increment, bipFormat);
         }
         return receiveAddress;
@@ -223,10 +222,10 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         // contributor mix output: like-typed with destination
         BipFormat bipFormatDestination = getBipFormatSupplier().findByAddress(stonewall0.getDestination(), params);
         log.debug("BIP FORMAT:: " + bipFormatDestination.getId());
-        BipAddress receiveAddress = getContributorMixAddress(cahootsWallet, stonewall0, true, bipFormatDestination);
+        String receiveAddress = getContributorMixAddress(cahootsWallet, stonewall0, true, bipFormatDestination);
         TransactionOutput mixOutput = computeTxOutput(receiveAddress, stonewall0.getSpendAmount(), cahootsContext);
         if (log.isDebugEnabled()) {
-            log.debug("+output (CounterParty Mix) = " + receiveAddress.getAddressString());
+            log.debug("+output (CounterParty Mix) = " + receiveAddress);
         }
         return doSTONEWALLx2_1(mixOutput, stonewall0, cahootsContext, seenTxs);
     }
@@ -252,13 +251,13 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         outputsA.add(mixOutput);
 
         // contributor change output
-        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), true, BIP_FORMAT.SEGWIT_NATIVE);
+        String changeAddress = cahootsWallet.fetchAddressChange(stonewall0.getCounterpartyAccount(), true, BIP_FORMAT.SEGWIT_NATIVE);
         if (log.isDebugEnabled()) {
             log.debug("+output (CounterParty change) = " + changeAddress);
         }
         TransactionOutput output_A1 = computeTxOutput(changeAddress, contributedAmount - stonewall0.getSpendAmount(), cahootsContext);
         outputsA.add(output_A1);
-        stonewall0.setCollabChange(changeAddress.getAddressString());
+        stonewall0.setCollabChange(changeAddress);
 
         STONEWALLx2 stonewall1 = stonewall0.copy();
         stonewall1.doStep1(inputsA, outputsA, cahootsWallet.getChainSupplier());
@@ -402,7 +401,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
 
         // spender change output
         List<TransactionOutput> outputsB = new LinkedList<>();
-        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stonewall1.getAccount(), true, BIP_FORMAT.SEGWIT_NATIVE);
+        String changeAddress = cahootsWallet.fetchAddressChange(stonewall1.getAccount(), true, BIP_FORMAT.SEGWIT_NATIVE);
         if (log.isDebugEnabled()) {
             log.debug("+output (Spender change) = " + changeAddress);
         }
