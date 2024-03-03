@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>io.samourai.code.wallet.bitcoinj</groupId>
 			<artifactId>bitcoinj-core</artifactId>
-			<version>007-beta14</version>
+			<version>007-beta18</version>
 		</dependency>
 		<dependency>
 			<groupId>io.samourai.code.wallet</groupId>

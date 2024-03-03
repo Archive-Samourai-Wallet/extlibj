@@ -42,8 +42,8 @@ public abstract class AbstractOrchestrator {
       log.error("Cannot start: already started");
       return;
     }
-    if (log.isDebugEnabled()) {
-      log.debug(
+    if (log.isTraceEnabled()) {
+      log.trace(
           "Starting... loopDelay="
               + LOOP_DELAY
               + ", lastRunDelay="
@@ -76,8 +76,8 @@ public abstract class AbstractOrchestrator {
 
                   // thread exiting
                   myThread = null;
-                  if (log.isDebugEnabled()) {
-                    log.debug("Ended.");
+                  if (log.isTraceEnabled()) {
+                    log.trace("Ended.");
                   }
                   resetOrchestrator();
                 },
@@ -93,8 +93,8 @@ public abstract class AbstractOrchestrator {
       log.error("Cannot stop: not started");
       return;
     }
-    if (log.isDebugEnabled()) {
-      log.debug("Ending...");
+    if (log.isTraceEnabled()) {
+      log.trace("Ending...");
     }
     this.started = false;
     synchronized (myThread) {
@@ -145,8 +145,8 @@ public abstract class AbstractOrchestrator {
   private boolean waitForLastRunDelay(int delay) {
     long timeToWait = computeWaitForLastRunDelay(delay);
     if (timeToWait > 0) {
-      if (log.isDebugEnabled()) {
-        log.debug("Sleeping for lastRunDelay (" + (timeToWait / 1000) + "s to wait)");
+      if (log.isTraceEnabled()) {
+        log.trace("Sleeping for lastRunDelay (" + (timeToWait / 1000) + "s to wait)");
       }
       sleepOrchestrator(timeToWait, true);
       return true;
