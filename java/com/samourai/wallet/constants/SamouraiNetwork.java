@@ -8,7 +8,7 @@ import org.bitcoinj.params.TestNet3Params;
 
 import java.util.Optional;
 
-public enum WhirlpoolNetwork {
+public enum SamouraiNetwork {
   TESTNET(
           TestNet3Params.get(),
           "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4",
@@ -29,7 +29,7 @@ public enum WhirlpoolNetwork {
   private String signingAddress;
   private PaymentCode signingPaymentCode;
 
-  WhirlpoolNetwork(
+  SamouraiNetwork(
           NetworkParameters params,
           String signingAddress,
           String signingPaymentCode) {
@@ -55,7 +55,7 @@ public enum WhirlpoolNetwork {
     return signingPaymentCode;
   }
 
-  public static Optional<WhirlpoolNetwork> find(String value) {
+  public static Optional<SamouraiNetwork> find(String value) {
     try {
       return Optional.of(valueOf(value));
     } catch (Exception e) {
@@ -63,9 +63,9 @@ public enum WhirlpoolNetwork {
     }
   }
 
-  public static WhirlpoolNetwork getByNetworkParameters(NetworkParameters params) {
+  public static SamouraiNetwork getByNetworkParameters(NetworkParameters params) {
     boolean isTestnet = FormatsUtilGeneric.getInstance().isTestNet(params);
-    WhirlpoolNetwork whirlpoolServer = isTestnet ? WhirlpoolNetwork.TESTNET : WhirlpoolNetwork.MAINNET;
+    SamouraiNetwork whirlpoolServer = isTestnet ? SamouraiNetwork.TESTNET : SamouraiNetwork.MAINNET;
     return whirlpoolServer;
   }
 }

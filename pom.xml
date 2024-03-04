@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.samourai.code.wallet</groupId>
 	<artifactId>extlibj</artifactId>
-	<version>0.0.43-dexwp-beta2-SNAPSHOT</version>
+	<version>0.0.43-dexwp-beta3-SNAPSHOT</version>
 	<name>extlibj</name>
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>io.samourai.code.wallet.bitcoinj</groupId>
 			<artifactId>bitcoinj-core</artifactId>
-			<version>007-beta18</version>
+			<version>007-beta19</version>
 		</dependency>
 		<dependency>
 			<groupId>io.samourai.code.wallet</groupId>

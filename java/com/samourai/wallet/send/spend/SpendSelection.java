@@ -14,7 +14,7 @@ import com.samourai.wallet.send.exceptions.SignTxException;
 import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.send.provider.UtxoProvider;
-import com.samourai.wallet.constants.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccount;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
 import org.slf4j.Logger;
@@ -58,7 +58,7 @@ public abstract class SpendSelection {
         return UTXO.sumValue(selectedUTXO);
     }
 
-    public abstract SpendTx spendTx(long amount, String address, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, UtxoProvider utxoProvider, long blockHeight) throws SpendException ;
+    public abstract SpendTx spendTx(long amount, String address, SamouraiAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, UtxoProvider utxoProvider, long blockHeight) throws SpendException ;
 
     protected long computeChange(long amount, BigInteger fee) throws SpendException {
         long change = getTotalValueSelected() - (amount + fee.longValue());

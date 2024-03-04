@@ -4,7 +4,7 @@ import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
-import com.samourai.wallet.constants.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccount;
 import com.samourai.wallet.constants.BIP_WALLET;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.HD_Wallet;
@@ -19,27 +19,27 @@ public class WalletSupplierImpl implements WalletSupplier {
 
   private BipFormatSupplier bipFormatSupplier;
   private IndexHandlerSupplier indexHandlerSupplier;
-  private final Map<WhirlpoolAccount, Collection<BipWallet>> walletsByAccount;
+  private final Map<SamouraiAccount, Collection<BipWallet>> walletsByAccount;
   private final Map<String, BipWallet> walletsByXPub;
   private final Map<String, BipWallet> walletsById;
 
-  private final Map<WhirlpoolAccount, Map<BipFormat, BipWallet>> walletsByAccountByAddressType; // no custom registrations here
+  private final Map<SamouraiAccount, Map<BipFormat, BipWallet>> walletsByAccountByAddressType; // no custom registrations here
 
   public WalletSupplierImpl(BipFormatSupplier bipFormatSupplier, IndexHandlerSupplier indexHandlerSupplier) {
     this.bipFormatSupplier = bipFormatSupplier;
     this.indexHandlerSupplier = indexHandlerSupplier;
 
     this.walletsByAccount = new LinkedHashMap<>();
-    for (WhirlpoolAccount whirlpoolAccount : WhirlpoolAccount.values()) {
-      walletsByAccount.put(whirlpoolAccount, new LinkedList<>());
+    for (SamouraiAccount samouraiAccount : SamouraiAccount.values()) {
+      walletsByAccount.put(samouraiAccount, new LinkedList<>());
     }
 
     this.walletsByXPub = new LinkedHashMap<>();
     this.walletsById = new LinkedHashMap<>();
 
     this.walletsByAccountByAddressType = new LinkedHashMap<>();
-    for (WhirlpoolAccount whirlpoolAccount : WhirlpoolAccount.values()) {
-      walletsByAccountByAddressType.put(whirlpoolAccount, new LinkedHashMap<>());
+    for (SamouraiAccount samouraiAccount : SamouraiAccount.values()) {
+      walletsByAccountByAddressType.put(samouraiAccount, new LinkedHashMap<>());
     }
   }
 
@@ -69,8 +69,8 @@ public class WalletSupplierImpl implements WalletSupplier {
     // no walletsByAccountByAddressType here
   }
 
-  public void register(String id, HD_Wallet bip44w, WhirlpoolAccount whirlpoolAccount, BipDerivation derivation, Collection<BipFormat> bipFormats, BipFormat bipFormatDefault) {
-    BipWallet bipWallet = new BipWallet(bipFormatSupplier, id, bip44w, indexHandlerSupplier, whirlpoolAccount, derivation, bipFormats, bipFormatDefault);
+  public void register(String id, HD_Wallet bip44w, SamouraiAccount samouraiAccount, BipDerivation derivation, Collection<BipFormat> bipFormats, BipFormat bipFormatDefault) {
+    BipWallet bipWallet = new BipWallet(bipFormatSupplier, id, bip44w, indexHandlerSupplier, samouraiAccount, derivation, bipFormats, bipFormatDefault);
     register(bipWallet);
   }
 
@@ -80,8 +80,8 @@ public class WalletSupplierImpl implements WalletSupplier {
   }
 
   @Override
-  public Collection<BipWallet> getWallets(WhirlpoolAccount whirlpoolAccount) {
-    return walletsByAccount.get(whirlpoolAccount);
+  public Collection<BipWallet> getWallets(SamouraiAccount samouraiAccount) {
+    return walletsByAccount.get(samouraiAccount);
   }
 
   @Override
@@ -105,7 +105,7 @@ public class WalletSupplierImpl implements WalletSupplier {
   }
 
   @Override
-  public BipWallet getWallet(WhirlpoolAccount account, BipFormat bipFormat) {
+  public BipWallet getWallet(SamouraiAccount account, BipFormat bipFormat) {
     return walletsByAccountByAddressType.get(account).get(bipFormat);
   }
 

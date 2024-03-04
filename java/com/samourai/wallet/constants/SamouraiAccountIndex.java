@@ -10,8 +10,8 @@ public class SamouraiAccountIndex {
   public static final int SWAPS_REFUNDS = Integer.MAX_VALUE - 5; // 2147483642
   public static final int SWAPS_ASB = Integer.MAX_VALUE - 6;	 // 2147483641
 
-  public static int find(WhirlpoolAccount whirlpoolAccount) {
-    switch (whirlpoolAccount) {
+  public static int find(SamouraiAccount samouraiAccount) {
+    switch (samouraiAccount) {
       case PREMIX: return PREMIX;
       case POSTMIX: return POSTMIX;
       case BADBANK: return BADBANK;
@@ -24,10 +24,10 @@ public class SamouraiAccountIndex {
   }
 
   @Deprecated // TODO accountIndex should not
-  public static WhirlpoolAccount find(int accountIndex) {
-    for (WhirlpoolAccount whirlpoolAccount : WhirlpoolAccount.values()) {
-      if (find(whirlpoolAccount) == accountIndex) {
-        return whirlpoolAccount;
+  public static SamouraiAccount find(int accountIndex) {
+    for (SamouraiAccount samouraiAccount : SamouraiAccount.values()) {
+      if (find(samouraiAccount) == accountIndex) {
+        return samouraiAccount;
       }
     }
     return null;

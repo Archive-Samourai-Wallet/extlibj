@@ -12,7 +12,7 @@ import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.util.FeeUtil;
-import com.samourai.wallet.constants.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccount;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ public class SpendBuilder {
 
     // forcedChangeType may be null
     public SpendTx preview(BipWallet spendWallet, BipWallet changeWallet, String address, long amount, boolean stonewall, boolean rbfOptIn, BigInteger feePerKb, BipFormat forcedChangeFormat, List<MyTransactionOutPoint> preselectedInputs, long blockHeight) throws Exception {
-        WhirlpoolAccount account = spendWallet.getAccount();
+        SamouraiAccount account = spendWallet.getAccount();
         NetworkParameters params = spendWallet.getParams();
         SpendSelection spendSelection = computeSpendSelection(spendWallet, changeWallet, address, amount, stonewall, feePerKb, forcedChangeFormat, preselectedInputs);
 
@@ -51,7 +51,7 @@ public class SpendBuilder {
     }
 
     private SpendSelection computeSpendSelection(BipWallet spendWallet, BipWallet changeWallet, String address, long amount, boolean stonewall, BigInteger feePerKb, BipFormat forcedChangeFormat, List<MyTransactionOutPoint> preselectedInputs) throws SpendException {
-        WhirlpoolAccount account = spendWallet.getAccount();
+        SamouraiAccount account = spendWallet.getAccount();
         NetworkParameters params = spendWallet.getParams();
         BipFormat changeFormat = computeAddressFormat(forcedChangeFormat, address, utxoProvider.getBipFormatSupplier(), params);
 
@@ -75,7 +75,7 @@ public class SpendBuilder {
     }
 
     // if possible, get UTXO by input 'type': p2pkh, p2sh-p2wpkh or p2wpkh, else get all UTXO
-    private Collection<UTXO> findUtxosAvailableForAddressFormat(long amount, WhirlpoolAccount account, BipFormat addressFormat, BigInteger feePerKb, NetworkParameters params) throws SpendException {
+    private Collection<UTXO> findUtxosAvailableForAddressFormat(long amount, SamouraiAccount account, BipFormat addressFormat, BigInteger feePerKb, NetworkParameters params) throws SpendException {
         // TODO filter-out do-not-spends
         /*
         //Filtering out do not spends
@@ -101,7 +101,7 @@ public class SpendBuilder {
         }
 
         // do not mix AddressTypes for postmix
-        if (account == WhirlpoolAccount.POSTMIX) {
+        if (account == SamouraiAccount.POSTMIX) {
             log.warn("InsufficientFundsException: amount="+amount+", neededAmount="+neededAmount+", availableBalance="+availableBalance+" (POSTMIX/"+addressFormat+")");
             throw new SpendException(SpendError.INSUFFICIENT_FUNDS);
         }
@@ -140,7 +140,7 @@ public class SpendBuilder {
     }
 
     private SpendSelection computeSpendSelectionForUtxosAvailable(BipWallet spendWallet, BipWallet changeWallet, String address, boolean stonewall, long amount, BipFormat changeFormat, BigInteger feePerKb, BipFormat forcedChangeFormat) throws SpendException {
-        WhirlpoolAccount account = spendWallet.getAccount();
+        SamouraiAccount account = spendWallet.getAccount();
         NetworkParameters params = spendWallet.getParams();
 
         // get all UTXO (throws SpendException on insufficient balance)

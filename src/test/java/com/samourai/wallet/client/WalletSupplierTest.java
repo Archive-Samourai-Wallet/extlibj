@@ -8,7 +8,7 @@ import com.samourai.wallet.bipWallet.BipWallet;
 import com.samourai.wallet.constants.BIP_WALLET;
 import com.samourai.wallet.hd.HD_Account;
 import com.samourai.wallet.test.AbstractTest;
-import com.samourai.wallet.constants.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccount;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
@@ -53,21 +53,21 @@ public class WalletSupplierTest extends AbstractTest {
 
   @Test
   public void getWalletByFormat() throws Exception {
-    Assertions.assertEquals("DEPOSIT_BIP44", walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, BIP_FORMAT.LEGACY).getId());
-    Assertions.assertEquals("DEPOSIT_BIP49", walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, BIP_FORMAT.SEGWIT_COMPAT).getId());
-    Assertions.assertEquals("DEPOSIT_BIP84", walletSupplier.getWallet(WhirlpoolAccount.DEPOSIT, BIP_FORMAT.SEGWIT_NATIVE).getId());
-    Assertions.assertEquals("BADBANK_BIP84", walletSupplier.getWallet(WhirlpoolAccount.BADBANK, BIP_FORMAT.SEGWIT_NATIVE).getId());
-    Assertions.assertEquals("PREMIX_BIP84", walletSupplier.getWallet(WhirlpoolAccount.PREMIX, BIP_FORMAT.SEGWIT_NATIVE).getId());
-    Assertions.assertEquals("POSTMIX_BIP84", walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, BIP_FORMAT.SEGWIT_NATIVE).getId());
-    Assertions.assertEquals("POSTMIX_BIP84", walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, BIP_FORMAT.SEGWIT_COMPAT).getId());
-    Assertions.assertEquals("POSTMIX_BIP84", walletSupplier.getWallet(WhirlpoolAccount.POSTMIX, BIP_FORMAT.LEGACY).getId());
-    Assertions.assertEquals("RICOCHET_BIP84", walletSupplier.getWallet(WhirlpoolAccount.RICOCHET, BIP_FORMAT.SEGWIT_NATIVE).getId());
+    Assertions.assertEquals("DEPOSIT_BIP44", walletSupplier.getWallet(SamouraiAccount.DEPOSIT, BIP_FORMAT.LEGACY).getId());
+    Assertions.assertEquals("DEPOSIT_BIP49", walletSupplier.getWallet(SamouraiAccount.DEPOSIT, BIP_FORMAT.SEGWIT_COMPAT).getId());
+    Assertions.assertEquals("DEPOSIT_BIP84", walletSupplier.getWallet(SamouraiAccount.DEPOSIT, BIP_FORMAT.SEGWIT_NATIVE).getId());
+    Assertions.assertEquals("BADBANK_BIP84", walletSupplier.getWallet(SamouraiAccount.BADBANK, BIP_FORMAT.SEGWIT_NATIVE).getId());
+    Assertions.assertEquals("PREMIX_BIP84", walletSupplier.getWallet(SamouraiAccount.PREMIX, BIP_FORMAT.SEGWIT_NATIVE).getId());
+    Assertions.assertEquals("POSTMIX_BIP84", walletSupplier.getWallet(SamouraiAccount.POSTMIX, BIP_FORMAT.SEGWIT_NATIVE).getId());
+    Assertions.assertEquals("POSTMIX_BIP84", walletSupplier.getWallet(SamouraiAccount.POSTMIX, BIP_FORMAT.SEGWIT_COMPAT).getId());
+    Assertions.assertEquals("POSTMIX_BIP84", walletSupplier.getWallet(SamouraiAccount.POSTMIX, BIP_FORMAT.LEGACY).getId());
+    Assertions.assertEquals("RICOCHET_BIP84", walletSupplier.getWallet(SamouraiAccount.RICOCHET, BIP_FORMAT.SEGWIT_NATIVE).getId());
 
     // swaps
-    Assertions.assertEquals("SWAPS_DEPOSIT", walletSupplier.getWallet(WhirlpoolAccount.SWAPS_DEPOSIT, BIP_FORMAT.SEGWIT_NATIVE).getId());
-    Assertions.assertEquals("SWAPS_REFUNDS", walletSupplier.getWallet(WhirlpoolAccount.SWAPS_REFUNDS, BIP_FORMAT.SEGWIT_NATIVE).getId());
-    Assertions.assertEquals("ASB_BIP84", walletSupplier.getWallet(WhirlpoolAccount.SWAPS_ASB, BIP_FORMAT.SEGWIT_NATIVE).getId());
-    Assertions.assertNull(walletSupplier.getWallet(WhirlpoolAccount.RICOCHET, BIP_FORMAT.LEGACY));
+    Assertions.assertEquals("SWAPS_DEPOSIT", walletSupplier.getWallet(SamouraiAccount.SWAPS_DEPOSIT, BIP_FORMAT.SEGWIT_NATIVE).getId());
+    Assertions.assertEquals("SWAPS_REFUNDS", walletSupplier.getWallet(SamouraiAccount.SWAPS_REFUNDS, BIP_FORMAT.SEGWIT_NATIVE).getId());
+    Assertions.assertEquals("ASB_BIP84", walletSupplier.getWallet(SamouraiAccount.SWAPS_ASB, BIP_FORMAT.SEGWIT_NATIVE).getId());
+    Assertions.assertNull(walletSupplier.getWallet(SamouraiAccount.RICOCHET, BIP_FORMAT.LEGACY));
   }
 
   @Test
@@ -148,9 +148,9 @@ public class WalletSupplierTest extends AbstractTest {
         throw new Exception("Not implemented");
       }
     };
-    Assertions.assertEquals(3, walletSupplier.getWallets(WhirlpoolAccount.DEPOSIT).size());
-    walletSupplier.register("custom", bip44w, WhirlpoolAccount.DEPOSIT, derivation, Arrays.asList(bipFormat), bipFormat);
-    Assertions.assertEquals(4, walletSupplier.getWallets(WhirlpoolAccount.DEPOSIT).size());
+    Assertions.assertEquals(3, walletSupplier.getWallets(SamouraiAccount.DEPOSIT).size());
+    walletSupplier.register("custom", bip44w, SamouraiAccount.DEPOSIT, derivation, Arrays.asList(bipFormat), bipFormat);
+    Assertions.assertEquals(4, walletSupplier.getWallets(SamouraiAccount.DEPOSIT).size());
 
     // verify
     BipWallet bipWallet = walletSupplier.getWalletById("custom");

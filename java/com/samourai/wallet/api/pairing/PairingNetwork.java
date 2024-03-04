@@ -2,18 +2,18 @@ package com.samourai.wallet.api.pairing;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Optional;
-import com.samourai.wallet.constants.WhirlpoolNetwork;
+import com.samourai.wallet.constants.SamouraiNetwork;
 
 public enum PairingNetwork {
-    MAINNET("mainnet", WhirlpoolNetwork.MAINNET),
-    TESTNET("testnet", WhirlpoolNetwork.TESTNET);
+    MAINNET("mainnet", SamouraiNetwork.MAINNET),
+    TESTNET("testnet", SamouraiNetwork.TESTNET);
 
     private String value;
-    private WhirlpoolNetwork whirlpoolNetwork;
+    private SamouraiNetwork samouraiNetwork;
 
-    PairingNetwork(String value, WhirlpoolNetwork whirlpoolNetwork) {
+    PairingNetwork(String value, SamouraiNetwork samouraiNetwork) {
         this.value = value;
-        this.whirlpoolNetwork = whirlpoolNetwork;
+        this.samouraiNetwork = samouraiNetwork;
     }
 
     public static Optional<PairingNetwork> find(String value) {
@@ -30,7 +30,7 @@ public enum PairingNetwork {
         return value;
     }
 
-    public WhirlpoolNetwork getWhirlpoolNetwork() {
-        return whirlpoolNetwork;
+    public SamouraiNetwork getSamouraiNetwork() {
+        return samouraiNetwork;
     }
 }

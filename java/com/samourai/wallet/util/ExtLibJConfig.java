@@ -6,14 +6,14 @@ import com.samourai.wallet.bip47.rpc.java.SecretPointFactoryJava;
 import com.samourai.wallet.bip47.rpc.secretPoint.ISecretPointFactory;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
-import com.samourai.wallet.constants.WhirlpoolNetwork;
+import com.samourai.wallet.constants.SamouraiNetwork;
 import com.samourai.wallet.crypto.CryptoUtil;
 import com.samourai.wallet.httpClient.IHttpClientService;
 
 import java.security.Provider;
 
 public class ExtLibJConfig {
-    protected WhirlpoolNetwork whirlpoolNetwork;
+    protected SamouraiNetwork samouraiNetwork;
     protected boolean onion;
     protected IHttpClientService httpClientService;
     protected CryptoUtil cryptoUtil;
@@ -22,8 +22,8 @@ public class ExtLibJConfig {
     private ISecretPointFactory secretPointFactory;
 
 
-    public ExtLibJConfig(WhirlpoolNetwork whirlpoolNetwork, boolean onion, Provider provider, IHttpClientService httpClientService) {
-        this(whirlpoolNetwork,
+    public ExtLibJConfig(SamouraiNetwork samouraiNetwork, boolean onion, Provider provider, IHttpClientService httpClientService) {
+        this(samouraiNetwork,
                  onion,
                  httpClientService,
                 CryptoUtil.getInstance(provider),
@@ -32,8 +32,8 @@ public class ExtLibJConfig {
                 SecretPointFactoryJava.getInstance());
     }
     
-    public ExtLibJConfig(WhirlpoolNetwork whirlpoolNetwork, boolean onion, IHttpClientService httpClientService, CryptoUtil cryptoUtil, BIP47UtilGeneric bip47Util, BipFormatSupplier bipFormatSupplier, ISecretPointFactory secretPointFactory) {
-        this.whirlpoolNetwork = whirlpoolNetwork;
+    public ExtLibJConfig(SamouraiNetwork samouraiNetwork, boolean onion, IHttpClientService httpClientService, CryptoUtil cryptoUtil, BIP47UtilGeneric bip47Util, BipFormatSupplier bipFormatSupplier, ISecretPointFactory secretPointFactory) {
+        this.samouraiNetwork = samouraiNetwork;
         this.onion = onion;
         this.httpClientService = httpClientService;
         this.cryptoUtil = cryptoUtil;
@@ -42,8 +42,8 @@ public class ExtLibJConfig {
         this.secretPointFactory = secretPointFactory;
     }
 
-    public WhirlpoolNetwork getWhirlpoolNetwork() {
-        return whirlpoolNetwork;
+    public SamouraiNetwork getSamouraiNetwork() {
+        return samouraiNetwork;
     }
 
     public boolean isOnion() {

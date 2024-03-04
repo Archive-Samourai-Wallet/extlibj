@@ -6,33 +6,33 @@ import org.bitcoinj.core.NetworkParameters;
 
 import java.util.Optional;
 
-@Deprecated // use WhirlpoolNetwork instead
+@Deprecated // use SamouraiNetwork instead
 public enum WhirlpoolServer {
   TESTNET(
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerTestnetClear(),
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerTestnetOnion(),
-          WhirlpoolNetwork.TESTNET),
+          SamouraiNetwork.TESTNET),
   INTEGRATION(
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerIntegrationClear(),
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerIntegrationOnion(),
-          WhirlpoolNetwork.INTEGRATION),
+          SamouraiNetwork.INTEGRATION),
   MAINNET(
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerMainnetClear(),
           DexConfigProvider.getInstance().getSamouraiConfig().getWhirlpoolServerMainnetOnion(),
-          WhirlpoolNetwork.MAINNET),
-  LOCAL_TESTNET("http://127.0.0.1:8080", "http://127.0.0.1:8080", WhirlpoolNetwork.LOCAL_TESTNET); // TODO
+          SamouraiNetwork.MAINNET),
+  LOCAL_TESTNET("http://127.0.0.1:8080", "http://127.0.0.1:8080", SamouraiNetwork.LOCAL_TESTNET); // TODO
 
   private String serverUrlClear;
   private String serverUrlOnion;
-  private WhirlpoolNetwork whirlpoolNetwork;
+  private SamouraiNetwork samouraiNetwork;
 
   WhirlpoolServer(
           String serverUrlClear,
           String serverUrlOnion,
-          WhirlpoolNetwork whirlpoolNetwork) {
+          SamouraiNetwork samouraiNetwork) {
     this.serverUrlClear = serverUrlClear;
     this.serverUrlOnion = serverUrlOnion;
-    this.whirlpoolNetwork = whirlpoolNetwork;
+    this.samouraiNetwork = samouraiNetwork;
   }
 
   public String getServerUrlClear() {
@@ -48,8 +48,8 @@ public enum WhirlpoolServer {
     return serverUrl;
   }
 
-  public WhirlpoolNetwork getWhirlpoolNetwork() {
-    return whirlpoolNetwork;
+  public SamouraiNetwork getSamouraiNetwork() {
+    return samouraiNetwork;
   }
 
   public static Optional<WhirlpoolServer> find(String value) {

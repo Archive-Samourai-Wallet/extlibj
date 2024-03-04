@@ -10,7 +10,7 @@ import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
 import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoProvider;
-import com.samourai.wallet.constants.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccount;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.TransactionOutput;
@@ -32,7 +32,7 @@ public class SpendSelectionStonewall extends SpendSelection {
         this.outputs = outputs;
     }
 
-    public static SpendSelectionStonewall compute(UtxoProvider utxoProvider, BipFormat changeFormat, long amount, String address, WhirlpoolAccount account, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb, IIndexHandler changeIndexHandler) {
+    public static SpendSelectionStonewall compute(UtxoProvider utxoProvider, BipFormat changeFormat, long amount, String address, SamouraiAccount account, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb, IIndexHandler changeIndexHandler) {
         // find inputs
         List<Collection<UTXO>> utxoSets = stonewallUtil.utxoSets(utxoProvider, changeFormat, account);
         Pair<List<UTXO>,List<UTXO>> utxosPair = stonewallUtil.stonewallInputs(utxoSets, changeFormat, amount, params, feePerKb);
@@ -49,7 +49,7 @@ public class SpendSelectionStonewall extends SpendSelection {
     }
 
     @Override
-    public SpendTx spendTx(long amount, String address, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, UtxoProvider utxoProvider, long blockHeight) throws SpendException {
+    public SpendTx spendTx(long amount, String address, SamouraiAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, UtxoProvider utxoProvider, long blockHeight) throws SpendException {
         // select utxos for stonewall
         long inputAmount = 0L;
         long outputAmount = 0L;

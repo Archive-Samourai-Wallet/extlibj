@@ -1,9 +1,8 @@
 package com.samourai.wallet.constants;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
-public enum WhirlpoolAccount {
+public enum SamouraiAccount {
   DEPOSIT(true),
   PREMIX(true),
   POSTMIX(true),
@@ -15,7 +14,7 @@ public enum WhirlpoolAccount {
 
   private boolean active;
 
-  WhirlpoolAccount(boolean active) {
+  SamouraiAccount(boolean active) {
     this.active = active;
   }
 
@@ -23,9 +22,9 @@ public enum WhirlpoolAccount {
     return active;
   }
 
-  public static WhirlpoolAccount[] getListByActive(final boolean active) {
+  public static SamouraiAccount[] getListByActive(final boolean active) {
     return Arrays.asList(values()).stream()
         .filter(account -> account.isActive() == active)
-        .toArray(i -> new WhirlpoolAccount[i]);
+        .toArray(i -> new SamouraiAccount[i]);
   }
 }

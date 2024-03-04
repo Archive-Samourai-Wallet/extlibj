@@ -70,7 +70,7 @@ public enum WALLET_INDEX {
     if (account == SamouraiAccountIndex.POSTMIX) {
       return WALLET_INDEX.POSTMIX_CHANGE;
     }
-    /* if (account == WhirlpoolAccount.PREMIX.getAccountIndex()) {
+    /* if (account == SamouraiAccount.PREMIX.getAccountIndex()) {
       return WALLET_INDEX.PREMIX_CHANGE;
     } */
     if (purpose == 84) {

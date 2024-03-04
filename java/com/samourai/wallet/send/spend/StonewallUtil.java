@@ -9,7 +9,7 @@ import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.RandomUtil;
-import com.samourai.wallet.constants.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccount;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.Coin;
@@ -37,7 +37,7 @@ public class StonewallUtil {
         return instance;
     }
 
-    public static List<Collection<UTXO>> utxoSets(UtxoProvider utxoProvider, BipFormat changeFormat, WhirlpoolAccount account) {
+    public static List<Collection<UTXO>> utxoSets(UtxoProvider utxoProvider, BipFormat changeFormat, SamouraiAccount account) {
         // input formats sorted by preference
         List<BipFormat> bipFormats = new LinkedList<>();
         bipFormats.add(changeFormat);
@@ -124,7 +124,7 @@ public class StonewallUtil {
     }
 
     // this will increment change index
-    public SpendSelectionStonewall stonewall(List<UTXO> utxos, List<UTXO> utxosBis, BigInteger spendAmount, String address, WhirlpoolAccount account, UtxoProvider utxoProvider, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb) {
+    public SpendSelectionStonewall stonewall(List<UTXO> utxos, List<UTXO> utxosBis, BigInteger spendAmount, String address, SamouraiAccount account, UtxoProvider utxoProvider, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb) {
 
         Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> set0 = stonewallSet(utxos, spendAmount, address, null, account, null, utxoProvider, forcedChangeFormat, params, feePerKb);
         if(set0 == null)    {
@@ -183,7 +183,7 @@ public class StonewallUtil {
     }
 
     // this will increment change index
-    private Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> stonewallSet(List<UTXO> utxos, BigInteger spendAmount, String address, List<MyTransactionOutPoint> firstPassOutpoints, WhirlpoolAccount account, List<TransactionOutput> outputs0, UtxoProvider utxoProvider, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb) {
+    private Triple<ArrayList<MyTransactionOutPoint>, ArrayList<TransactionOutput>, ArrayList<UTXO>> stonewallSet(List<UTXO> utxos, BigInteger spendAmount, String address, List<MyTransactionOutPoint> firstPassOutpoints, SamouraiAccount account, List<TransactionOutput> outputs0, UtxoProvider utxoProvider, BipFormat forcedChangeFormat, NetworkParameters params, BigInteger feePerKb) {
 
         if(utxos == null || utxos.size() == 0)    {
             return null;

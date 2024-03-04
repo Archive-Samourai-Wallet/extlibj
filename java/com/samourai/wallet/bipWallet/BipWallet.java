@@ -5,7 +5,7 @@ import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.client.indexHandler.IIndexHandler;
 import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
-import com.samourai.wallet.constants.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccount;
 import com.samourai.wallet.hd.*;
 import com.samourai.wallet.util.Util;
 import org.bitcoinj.core.NetworkParameters;
@@ -22,20 +22,20 @@ public class BipWallet {
   private HD_Wallet hdWallet;
   private HD_Account hdAccount;
   private IndexHandlerSupplier indexHandlerSupplier;
-  private WhirlpoolAccount whirlpoolAccount;
+  private SamouraiAccount samouraiAccount;
   private BipDerivation derivation;
   private Collection<BipFormat> bipFormats;
   private BipFormat bipFormatDefault;
   private String bipPub; // xpub, ypub, zpub...
   private String xPub; // pub forced as xpub
 
-  public BipWallet(BipFormatSupplier bipFormatSupplier, String id, HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, WhirlpoolAccount whirlpoolAccount, BipDerivation derivation, Collection<BipFormat> bipFormats, BipFormat bipFormatDefault) {
+  public BipWallet(BipFormatSupplier bipFormatSupplier, String id, HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, SamouraiAccount samouraiAccount, BipDerivation derivation, Collection<BipFormat> bipFormats, BipFormat bipFormatDefault) {
     this.bipFormatSupplier = bipFormatSupplier;
     this.id = id;
     this.hdWallet = new HD_Wallet(derivation.getPurpose(), bip44w);
     this.hdAccount = this.hdWallet.getAccount(derivation.getAccountIndex());
     this.indexHandlerSupplier = indexHandlerSupplier;
-    this.whirlpoolAccount = whirlpoolAccount;
+    this.samouraiAccount = samouraiAccount;
     this.derivation = derivation;
     this.bipFormats = bipFormats;
     this.bipFormatDefault = bipFormatDefault;
@@ -103,8 +103,8 @@ public class BipWallet {
     return id;
   }
 
-  public WhirlpoolAccount getAccount() {
-    return whirlpoolAccount;
+  public SamouraiAccount getAccount() {
+    return samouraiAccount;
   }
 
   public IIndexHandler getIndexHandlerReceive() {
@@ -155,7 +155,7 @@ public class BipWallet {
   public String toString() {
     return "BipWallet{" +
             "id='" + id + '\'' +
-            ", whirlpoolAccount=" + whirlpoolAccount +
+            ", samouraiAccount=" + samouraiAccount +
             ", derivation=" + derivation +
             ", bipFormatDefault=" + bipFormatDefault +
             ", bipFormats=" + bipFormats +

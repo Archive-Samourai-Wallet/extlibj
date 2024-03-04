@@ -3,7 +3,7 @@ package com.samourai.wallet.send.spend;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.send.UTXO;
-import com.samourai.wallet.constants.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccount;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +23,7 @@ public class SpendSelectionStonewallTest extends AbstractSpendTest {
         super.setUp();
     }
 
-    private Pair<List<UTXO>, List<UTXO>> stonewallInputs(BipFormat changeFormat, long amount, WhirlpoolAccount account) throws Exception {
+    private Pair<List<UTXO>, List<UTXO>> stonewallInputs(BipFormat changeFormat, long amount, SamouraiAccount account) throws Exception {
         BigInteger feePerKb = BigInteger.valueOf(50);
         List<Collection<UTXO>> utxoSets = StonewallUtil.getInstance().utxoSets(utxoProvider, changeFormat, account);
         return StonewallUtil.getInstance().stonewallInputs(utxoSets, changeFormat, amount, params, feePerKb);
@@ -32,7 +32,7 @@ public class SpendSelectionStonewallTest extends AbstractSpendTest {
     @Test
     public void stonewallInputs_noBalance() throws Exception {
         long amount = 100000;
-        WhirlpoolAccount account = WhirlpoolAccount.DEPOSIT;
+        SamouraiAccount account = SamouraiAccount.DEPOSIT;
         BipFormat changeFormat = BIP_FORMAT.SEGWIT_NATIVE;
 
         // no utxo
@@ -45,7 +45,7 @@ public class SpendSelectionStonewallTest extends AbstractSpendTest {
     @Test
     public void stonewallInputs_insufficient() throws Exception {
         long amount = 100000;
-        WhirlpoolAccount account = WhirlpoolAccount.DEPOSIT;
+        SamouraiAccount account = SamouraiAccount.DEPOSIT;
         BipFormat changeFormat = BIP_FORMAT.SEGWIT_NATIVE;
 
         // set utxos
@@ -59,7 +59,7 @@ public class SpendSelectionStonewallTest extends AbstractSpendTest {
     @Test
     public void stonewallInputs_insufficient_exact() throws Exception {
         long amount = 100000;
-        WhirlpoolAccount account = WhirlpoolAccount.DEPOSIT;
+        SamouraiAccount account = SamouraiAccount.DEPOSIT;
         BipFormat changeFormat = BIP_FORMAT.SEGWIT_NATIVE;
 
         // set utxos
@@ -73,7 +73,7 @@ public class SpendSelectionStonewallTest extends AbstractSpendTest {
     @Test
     public void stonewallInputs_exact() throws Exception {
         long amount = 100000;
-        WhirlpoolAccount account = WhirlpoolAccount.DEPOSIT;
+        SamouraiAccount account = SamouraiAccount.DEPOSIT;
         BipFormat changeFormat = BIP_FORMAT.SEGWIT_NATIVE;
 
         // set utxos
@@ -87,7 +87,7 @@ public class SpendSelectionStonewallTest extends AbstractSpendTest {
     @Test
     public void stonewallInputs_1_utxo() throws Exception {
         long amount = 1000000;
-        WhirlpoolAccount account = WhirlpoolAccount.DEPOSIT;
+        SamouraiAccount account = SamouraiAccount.DEPOSIT;
         BipFormat changeFormat = BIP_FORMAT.SEGWIT_NATIVE;
 
         // set utxos
@@ -102,7 +102,7 @@ public class SpendSelectionStonewallTest extends AbstractSpendTest {
     @Test
     public void stonewallInputs_2_utxos() throws Exception {
         long amount = 1000000;
-        WhirlpoolAccount account = WhirlpoolAccount.DEPOSIT;
+        SamouraiAccount account = SamouraiAccount.DEPOSIT;
         BipFormat changeFormat = BIP_FORMAT.SEGWIT_NATIVE;
 
         // set utxos

@@ -6,7 +6,7 @@ import com.samourai.wallet.bipWallet.BipWallet;
 import com.samourai.wallet.bipWallet.WalletSupplier;
 import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.constants.SamouraiAccountIndex;
-import com.samourai.wallet.constants.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccount;
 import com.samourai.wallet.constants.BIP_WALLET;
 import com.samourai.wallet.send.provider.CahootsUtxoProvider;
 
@@ -30,8 +30,8 @@ public class CahootsWalletImpl extends AbstractCahootsWallet {
 
     protected BipWallet getReceiveWallet(int account, BipFormat bipFormat) throws Exception {
         bipFormat = likeTypedBipFormat(bipFormat);
-        WhirlpoolAccount whirlpoolAccount = SamouraiAccountIndex.find(account);
-        return walletSupplier.getWallet(whirlpoolAccount, bipFormat);
+        SamouraiAccount samouraiAccount = SamouraiAccountIndex.find(account);
+        return walletSupplier.getWallet(samouraiAccount, bipFormat);
     }
 
     @Override

@@ -10,15 +10,18 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+// BipWallets to manage, used as BipWalletSupplier for DojoDataSourceFactory()
 public enum BIP_WALLETS implements BipWalletSupplier {
-  WHIRLPOOL(WhirlpoolAccount.DEPOSIT, WhirlpoolAccount.PREMIX, WhirlpoolAccount.POSTMIX, WhirlpoolAccount.BADBANK),
-  WALLET(WhirlpoolAccount.DEPOSIT, WhirlpoolAccount.PREMIX, WhirlpoolAccount.POSTMIX, WhirlpoolAccount.BADBANK,
-          WhirlpoolAccount.RICOCHET),
-  SWAPS(WhirlpoolAccount.SWAPS_ASB, WhirlpoolAccount.SWAPS_DEPOSIT, WhirlpoolAccount.SWAPS_REFUNDS);
+  WHIRLPOOL(SamouraiAccount.DEPOSIT, SamouraiAccount.PREMIX, SamouraiAccount.POSTMIX, SamouraiAccount.BADBANK),
+  WALLET(SamouraiAccount.DEPOSIT, SamouraiAccount.PREMIX, SamouraiAccount.POSTMIX, SamouraiAccount.BADBANK,
+          SamouraiAccount.RICOCHET),
+  SWAPS(SamouraiAccount.DEPOSIT, SamouraiAccount.PREMIX, SamouraiAccount.POSTMIX, SamouraiAccount.BADBANK,
+          SamouraiAccount.RICOCHET,
+          SamouraiAccount.SWAPS_ASB, SamouraiAccount.SWAPS_DEPOSIT, SamouraiAccount.SWAPS_REFUNDS);
 
-  private WhirlpoolAccount[] accounts;
+  private SamouraiAccount[] accounts;
 
-  BIP_WALLETS(WhirlpoolAccount... accounts) {
+  BIP_WALLETS(SamouraiAccount... accounts) {
     this.accounts = accounts;
   }
 
@@ -33,7 +36,7 @@ public enum BIP_WALLETS implements BipWalletSupplier {
             .collect(Collectors.toList());
   }
 
-  public WhirlpoolAccount[] getAccounts() {
+  public SamouraiAccount[] getAccounts() {
     return accounts;
   }
 }
