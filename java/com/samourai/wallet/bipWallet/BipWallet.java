@@ -5,9 +5,9 @@ import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.client.indexHandler.IIndexHandler;
 import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
+import com.samourai.wallet.constants.WhirlpoolAccount;
 import com.samourai.wallet.hd.*;
 import com.samourai.wallet.util.Util;
-import com.samourai.wallet.constants.WhirlpoolAccount;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,10 +28,6 @@ public class BipWallet {
   private BipFormat bipFormatDefault;
   private String bipPub; // xpub, ypub, zpub...
   private String xPub; // pub forced as xpub
-
-  public BipWallet(BipFormatSupplier bipFormatSupplier, HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, BIP_WALLET bip) {
-    this(bipFormatSupplier, bip.name(), bip44w, indexHandlerSupplier, bip.getAccount(), bip.getBipDerivation(), bip.getBipFormats(), bip.getBipFormatDefault());
-  }
 
   public BipWallet(BipFormatSupplier bipFormatSupplier, String id, HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier, WhirlpoolAccount whirlpoolAccount, BipDerivation derivation, Collection<BipFormat> bipFormats, BipFormat bipFormatDefault) {
     this.bipFormatSupplier = bipFormatSupplier;

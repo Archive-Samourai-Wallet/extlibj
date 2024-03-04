@@ -1,7 +1,7 @@
 package com.samourai.wallet.ricochet;
 
 import com.samourai.wallet.bipWallet.BipWallet;
-import com.samourai.wallet.hd.BIP_WALLET;
+import com.samourai.wallet.constants.BIP_WALLET;
 import com.samourai.wallet.test.AbstractTest;
 import com.samourai.wallet.constants.WhirlpoolAccount;
 import org.junit.jupiter.api.Assertions;

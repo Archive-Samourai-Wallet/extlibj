@@ -5,7 +5,7 @@ import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.hd.HD_Address;
 import com.samourai.wallet.hd.HD_Chain;
 import com.samourai.wallet.hd.HD_Wallet;
-import com.samourai.wallet.hd.WALLET_INDEX;
+import com.samourai.wallet.constants.WALLET_INDEX;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;

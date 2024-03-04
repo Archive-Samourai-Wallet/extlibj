@@ -1,7 +1,7 @@
-package com.samourai.wallet.hd;
+package com.samourai.wallet.constants;
 
 import com.samourai.wallet.bipWallet.BipDerivation;
-import com.samourai.wallet.constants.SamouraiAccountIndex;
+import com.samourai.wallet.hd.Chain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

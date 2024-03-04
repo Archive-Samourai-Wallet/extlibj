@@ -1,11 +1,11 @@
 package com.samourai.wallet.send.provider;
 
-import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.bipWallet.BipWallet;
 import com.samourai.wallet.bipWallet.WalletSupplier;
 import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
-import com.samourai.wallet.hd.BIP_WALLET;
+import com.samourai.wallet.constants.BIP_WALLETS;
+import com.samourai.wallet.constants.BIP_WALLET;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
@@ -46,7 +46,7 @@ public class MockUtxoProviderTest extends AbstractTest {
         // instanciate another MockUtxoProvider
         byte[] seed = hdWalletFactory.computeSeedFromWords(SEED_WORDS);
         HD_Wallet bip44w2 = hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE+"FOO", params);
-        WalletSupplier walletSupplier2 = new WalletSupplierImpl(bipFormatSupplier, new MemoryIndexHandlerSupplier(), bip44w2);
+        WalletSupplier walletSupplier2 = new WalletSupplierImpl(bipFormatSupplier, new MemoryIndexHandlerSupplier(), bip44w2, BIP_WALLETS.WHIRLPOOL);
         MockUtxoProvider utxoProvider2 = new MockUtxoProvider(params, walletSupplier2);
 
         BipWallet bipWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84);

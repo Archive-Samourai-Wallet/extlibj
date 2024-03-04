@@ -5,7 +5,7 @@ import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatImpl;
 import com.samourai.wallet.bipWallet.BipDerivation;
 import com.samourai.wallet.bipWallet.BipWallet;
-import com.samourai.wallet.hd.BIP_WALLET;
+import com.samourai.wallet.constants.BIP_WALLET;
 import com.samourai.wallet.hd.HD_Account;
 import com.samourai.wallet.test.AbstractTest;
 import com.samourai.wallet.constants.WhirlpoolAccount;

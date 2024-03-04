@@ -1,12 +1,14 @@
-package com.samourai.wallet.hd;
+package com.samourai.wallet.constants;
 
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.BipDerivation;
-import com.samourai.wallet.constants.SamouraiAccountIndex;
-import com.samourai.wallet.constants.WhirlpoolAccount;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.samourai.wallet.bipWallet.BipWallet;
+import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
+import com.samourai.wallet.hd.HD_Wallet;
+import com.samourai.wallet.hd.Purpose;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,6 +39,16 @@ public enum BIP_WALLET {
     this.bipDerivation = bipDerivation;
     this.bipFormats = Arrays.asList(bipFormats);
     this.bipFormatDefault = this.bipFormats.iterator().next();  // use first BipFormat as default
+  }
+  public static BIP_WALLET[] getListByAccounts(WhirlpoolAccount... accounts) {
+    return Arrays.stream(BIP_WALLET.values()).filter(
+                    bipWallet -> ArrayUtils.contains(accounts, bipWallet.getAccount()))
+            .toArray(i -> new BIP_WALLET[i]);
+  }
+
+  public BipWallet newBipWallet(BipFormatSupplier bipFormatSupplier, HD_Wallet bip44w, IndexHandlerSupplier indexHandlerSupplier) {
+    return new BipWallet(bipFormatSupplier, name(), bip44w, indexHandlerSupplier,
+            account, bipDerivation, bipFormats, bipFormatDefault);
   }
 
   public WhirlpoolAccount getAccount() {

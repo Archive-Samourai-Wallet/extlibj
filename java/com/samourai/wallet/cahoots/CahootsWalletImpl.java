@@ -7,8 +7,7 @@ import com.samourai.wallet.bipWallet.WalletSupplier;
 import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.constants.SamouraiAccountIndex;
 import com.samourai.wallet.constants.WhirlpoolAccount;
-import com.samourai.wallet.hd.BIP_WALLET;
-import com.samourai.wallet.hd.BipAddress;
+import com.samourai.wallet.constants.BIP_WALLET;
 import com.samourai.wallet.send.provider.CahootsUtxoProvider;
 
 import java.util.List;

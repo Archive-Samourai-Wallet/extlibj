@@ -25,9 +25,7 @@ public enum WhirlpoolAccount {
 
   public static WhirlpoolAccount[] getListByActive(final boolean active) {
     return Arrays.asList(values()).stream()
-        .filter(
-                account -> account.isActive() == active)
-        .collect(Collectors.<WhirlpoolAccount>toList())
-        .toArray(new WhirlpoolAccount[] {});
+        .filter(account -> account.isActive() == active)
+        .toArray(i -> new WhirlpoolAccount[i]);
   }
 }

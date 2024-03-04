@@ -1,6 +1,6 @@
 package com.samourai.wallet.client.indexHandler;
 
-import com.samourai.wallet.hd.WALLET_INDEX;
+import com.samourai.wallet.constants.WALLET_INDEX;
 import com.samourai.wallet.util.AddressFactoryGeneric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -4,12 +4,11 @@ import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.client.indexHandler.IndexHandlerSupplier;
-import com.samourai.wallet.hd.BIP_WALLET;
+import com.samourai.wallet.constants.WhirlpoolAccount;
+import com.samourai.wallet.constants.BIP_WALLET;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.util.Util;
-import com.samourai.wallet.constants.WhirlpoolAccount;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,12 +43,15 @@ public class WalletSupplierImpl implements WalletSupplier {
     }
   }
 
-  public WalletSupplierImpl(BipFormatSupplier bipFormatSupplier, IndexHandlerSupplier indexHandlerSupplier, HD_Wallet bip44w) {
+  public WalletSupplierImpl(BipFormatSupplier bipFormatSupplier, IndexHandlerSupplier indexHandlerSupplier, HD_Wallet bip44w, BipWalletSupplier bipWalletSupplier) {
     this(bipFormatSupplier, indexHandlerSupplier);
 
-    // register Samourai derivations
-    for (BIP_WALLET bip : BIP_WALLET.values()) {
-      BipWallet bipWallet = new BipWallet(bipFormatSupplier, bip44w, indexHandlerSupplier, bip);
+    // register wallets
+    register(bip44w, bipWalletSupplier);
+  }
+
+  public void register(HD_Wallet bip44w, BipWalletSupplier bipWalletSupplier) {
+    for (BipWallet bipWallet : bipWalletSupplier.getBipWallets(bipFormatSupplier, bip44w, indexHandlerSupplier)) {
       register(bipWallet);
     }
   }
@@ -62,7 +64,7 @@ public class WalletSupplierImpl implements WalletSupplier {
       walletsByAccountByAddressType.get(bipWallet.getAccount()).put(bipFormat, bipWallet);
     }
     if (log.isDebugEnabled()) {
-      log.debug("+BipWallet["+bipWallet.getId()+"]: "+bipWallet.toString());
+      log.debug("+BipWallet["+bipWallet.getId()+"]: "+bipWallet);
     }
     // no walletsByAccountByAddressType here
   }

@@ -1,9 +1,7 @@
 package com.samourai.wallet.client;
 
 import com.samourai.wallet.bipWallet.BipWallet;
-import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
-import com.samourai.wallet.hd.BIP_WALLET;
-import com.samourai.wallet.hd.HD_Wallet;
+import com.samourai.wallet.constants.BIP_WALLET;
 import com.samourai.wallet.test.AbstractTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

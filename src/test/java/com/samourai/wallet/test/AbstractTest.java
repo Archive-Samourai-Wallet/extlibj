@@ -1,5 +1,6 @@
 package com.samourai.wallet.test;
 
+import com.samourai.wallet.constants.BIP_WALLETS;
 import com.samourai.wallet.httpClient.IHttpClient;
 import com.samourai.http.client.JettyHttpClient;
 import com.samourai.wallet.api.backend.BackendApi;
@@ -36,10 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -113,7 +111,7 @@ public class AbstractTest {
     paymentCodeInitiator = bip47AccountInitiator.getPaymentCode();
     paymentCodeCounterparty = bip47AccountCounterparty.getPaymentCode();
 
-    walletSupplier = new WalletSupplierImpl(bipFormatSupplier, new MemoryIndexHandlerSupplier(), bip44w);
+    walletSupplier = new WalletSupplierImpl(bipFormatSupplier, new MemoryIndexHandlerSupplier(), bip44w, BIP_WALLETS.WHIRLPOOL);
     utxoProvider = new MockUtxoProvider(bip44w.getParams(), walletSupplier);
     xManagerClient = new XManagerClient(httpClient, true, false) {
       @Override
