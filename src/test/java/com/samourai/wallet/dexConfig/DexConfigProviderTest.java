@@ -1,13 +1,9 @@
 package com.samourai.wallet.dexConfig;
 
-import com.samourai.http.client.JettyHttpClient;
-import com.samourai.wallet.httpClient.IHttpClient;
 import com.samourai.wallet.test.AbstractTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
 
 public class DexConfigProviderTest extends AbstractTest {
 

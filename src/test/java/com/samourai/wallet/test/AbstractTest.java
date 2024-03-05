@@ -1,8 +1,5 @@
 package com.samourai.wallet.test;
 
-import com.samourai.wallet.constants.BIP_WALLETS;
-import com.samourai.wallet.httpClient.IHttpClient;
-import com.samourai.http.client.JettyHttpClient;
 import com.samourai.wallet.api.backend.BackendApi;
 import com.samourai.wallet.api.backend.BackendServer;
 import com.samourai.wallet.api.backend.beans.WalletResponse;
@@ -16,16 +13,18 @@ import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.WalletSupplierImpl;
 import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
+import com.samourai.wallet.constants.BIP_WALLETS;
+import com.samourai.wallet.constants.SamouraiNetwork;
 import com.samourai.wallet.crypto.CryptoUtil;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
+import com.samourai.wallet.httpClient.IHttpClient;
 import com.samourai.wallet.payload.PayloadUtilGeneric;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.beans.SpendType;
 import com.samourai.wallet.send.provider.MockUtxoProvider;
 import com.samourai.wallet.util.*;
-import com.samourai.wallet.constants.SamouraiNetwork;
 import com.samourai.wallet.xmanagerClient.XManagerClient;
 import com.samourai.xmanager.protocol.XManagerService;
 import org.bitcoinj.core.*;
@@ -37,7 +36,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
