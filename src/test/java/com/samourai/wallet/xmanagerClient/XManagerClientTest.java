@@ -23,7 +23,7 @@ public class XManagerClientTest extends AbstractTest {
     super();
     xManagerClient = new XManagerClient(httpClient, testnet, false);
 
-    IHttpClient httpClientFailing =
+    IHttpClient httpClientFailing = null; // TODO
         new JettyHttpClient(5000, null, null) {
           @Override
           public <T> Single<Optional<T>> postJson(

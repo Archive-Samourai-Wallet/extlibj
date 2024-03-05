@@ -23,7 +23,7 @@ public class StowawayExample {
     public void Stowaway() throws Exception {
 
         // configure xManagerClient
-        IHttpClient httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
+        IHttpClient httpClient = null; // TODO new JettyHttpClient(10000, Optional.empty(), "test");
         XManagerClient xManagerClient = new XManagerClient(httpClient, true, false);
 
         // instanciate service

@@ -21,7 +21,7 @@ public class Stonewallx2Example {
 
     public void Stonewallx2() throws Exception {
         // configure xManagerClient
-        IHttpClient httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
+        IHttpClient httpClient = null; //new JettyHttpClient(10000, Optional.empty(), "test");
 
         // instanciate service
         BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;

@@ -98,7 +98,7 @@ public class AbstractTest {
   @BeforeEach
   public void setUp() throws Exception {
     RandomUtil._setTestMode(true);
-    httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
+    httpClient = null; // TODO new JettyHttpClient(10000, Optional.empty(), "test");
 
     byte[] seed = hdWalletFactory.computeSeedFromWords(SEED_WORDS);
     bip44w = hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE, params);

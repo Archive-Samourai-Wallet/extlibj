@@ -12,7 +12,6 @@ import java.util.Optional;
 public class DexConfigProviderTest extends AbstractTest {
 
   private DexConfigProvider dexConfigProvider = DexConfigProvider.getInstance();
-  protected IHttpClient httpClient;
 
   @BeforeEach
   public void setUp() throws Exception{
@@ -26,8 +25,6 @@ public class DexConfigProviderTest extends AbstractTest {
 
   @Test
   public void load() throws Exception {
-    httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
-
     Assertions.assertNull(dexConfigProvider.getLastLoad());
     dexConfigProvider.load(httpClient, params, false);
     Assertions.assertNotNull(dexConfigProvider.getLastLoad());
