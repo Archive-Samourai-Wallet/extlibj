@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.samourai.code.wallet</groupId>
 	<artifactId>extlibj</artifactId>
-	<version>1.0.0-dexwp-beta2</version>
+	<version>1.0.0-dexwp-beta3-SNAPSHOT</version>
 	<name>extlibj</name>
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -81,6 +81,12 @@
 			<version>${kotlin.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.samourai.code.wallet</groupId>
+			<artifactId>java-http-client</artifactId>
+			<version>2.0.0-beta3</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<sourceDirectory>java</sourceDirectory>
@@ -88,28 +94,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.1</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.5.3</version>
-				<configuration>
-					<tagNameFormat>@{project.version}</tagNameFormat>
-					<developmentVersion>develop-SNAPSHOT</developmentVersion>
-				</configuration>
+				<version>3.2.5</version>
 			</plugin>
 			<plugin>
 				<groupId>org.jetbrains.kotlin</groupId>
@@ -138,7 +123,8 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<executions>
+				<version>3.12.1</version>
+				<executions><!-- config for kotlin -->
 					<execution>
 						<id>default-compile</id>
 						<phase>none</phase>
@@ -162,6 +148,28 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.3.0</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>3.0.1</version>
+				<configuration>
+					<tagNameFormat>@{project.version}</tagNameFormat>
+					<developmentVersion>develop-SNAPSHOT</developmentVersion>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.moditect</groupId>
@@ -201,6 +209,6 @@
 	</repositories>
 	<scm>
 		<connection>scm:git:git@code.samourai.io:wallet/ExtLibJ.git</connection>
-		<tag>1.0.0-dexwp-beta2</tag>
+		<tag>1.0.0-dexwp-beta3</tag>
 	</scm>
 </project>

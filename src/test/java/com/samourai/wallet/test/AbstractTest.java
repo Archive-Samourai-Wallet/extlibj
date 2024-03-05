@@ -1,5 +1,6 @@
 package com.samourai.wallet.test;
 
+import com.samourai.http.client.JettyHttpClient;
 import com.samourai.wallet.api.backend.BackendApi;
 import com.samourai.wallet.api.backend.BackendServer;
 import com.samourai.wallet.api.backend.beans.WalletResponse;
@@ -39,6 +40,7 @@ import org.slf4j.event.Level;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -99,7 +101,7 @@ public class AbstractTest {
   @BeforeEach
   public void setUp() throws Exception {
     RandomUtil._setTestMode(true);
-    httpClient = null; // TODO new JettyHttpClient(10000, Optional.empty(), "test");
+    httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
 
     byte[] seed = hdWalletFactory.computeSeedFromWords(SEED_WORDS);
     bip44w = hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE, params);
@@ -112,7 +114,7 @@ public class AbstractTest {
     paymentCodeInitiator = bip47AccountInitiator.getPaymentCode();
     paymentCodeCounterparty = bip47AccountCounterparty.getPaymentCode();
 
-    walletSupplier = new WalletSupplierImpl(bipFormatSupplier, new MemoryIndexHandlerSupplier(), bip44w, BIP_WALLETS.WHIRLPOOL);
+    walletSupplier = new WalletSupplierImpl(bipFormatSupplier, new MemoryIndexHandlerSupplier(), bip44w, BIP_WALLETS.SWAPS);
     utxoProvider = new MockUtxoProvider(bip44w.getParams(), walletSupplier);
     xManagerClient = new XManagerClient(httpClient, true, false) {
       @Override

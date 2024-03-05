@@ -1,11 +1,16 @@
 package com.samourai.wallet.xmanagerClient;
 
+import com.samourai.http.client.JettyHttpClient;
 import com.samourai.wallet.httpClient.IHttpClient;
 import com.samourai.wallet.test.AbstractTest;
 import com.samourai.xmanager.protocol.XManagerService;
 import com.samourai.xmanager.protocol.rest.AddressIndexResponse;
+import io.reactivex.Single;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
+import java.util.Optional;
 
 public class XManagerClientTest extends AbstractTest {
   private static final boolean testnet = true;
@@ -17,15 +22,14 @@ public class XManagerClientTest extends AbstractTest {
     super();
     xManagerClient = new XManagerClient(httpClient, testnet, false);
 
-    IHttpClient httpClientFailing = null; // TODO
-    /*
+    IHttpClient httpClientFailing =
         new JettyHttpClient(5000, null, null) {
           @Override
           public <T> Single<Optional<T>> postJson(
-              String urlStr, Class<T> responseType, Map<String, String> headers, Object bodyObj) {
+                  String urlStr, Class<T> responseType, Map<String, String> headers, Object bodyObj) {
             throw new RuntimeException("Failure");
           }
-        };*/
+        };
     xManagerClientFailing = new XManagerClient(httpClientFailing, testnet, false);
   }
 
