@@ -85,10 +85,13 @@ public class WalletSupplierImpl implements WalletSupplier {
   }
 
   @Override
-  public BipWallet getWalletByXPub(String pub) {
-    BipWallet bipWallet = walletsByXPub.get(pub);
+  public BipWallet getWalletByXPub(String xpub) {
+    if (xpub == null) {
+      throw new IllegalArgumentException("xpub arg cannot be null");
+    }
+    BipWallet bipWallet = walletsByXPub.get(xpub);
     if (bipWallet == null) {
-      log.error("BipWallet not found for: " + pub);
+      log.error("BipWallet not found for: " + xpub);
       return null;
     }
     return bipWallet;

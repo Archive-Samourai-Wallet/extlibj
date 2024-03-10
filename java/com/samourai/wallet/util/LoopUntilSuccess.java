@@ -16,19 +16,21 @@ public class LoopUntilSuccess<T> {
     private Supplier<Boolean> isDoneOrNull;
     private String id;
     private long timeoutMs;
+    private boolean done;
     
     public LoopUntilSuccess(Callable<Optional<T>> doLoop, long retryFrequencyMs, Supplier<Boolean> isDoneOrNull, long timeoutMs) {
         this.doLoop = doLoop;
-        this.retryFrequencyMs = retryFrequencyMs;
+        this.retryFrequencyMs = Math.min(retryFrequencyMs, timeoutMs);
         this.isDoneOrNull = isDoneOrNull;
         this.id = "loop-"+RandomUtil.getInstance().nextInt(1000);
         this.timeoutMs = timeoutMs;
+        this.done = false;
     }
 
     public T run() throws Exception {
         long timeDone = System.currentTimeMillis()+timeoutMs;
-        int cycle=0;
-        /*if (log.isDebugEnabled()) {
+        /*int cycle=0;
+        if (log.isDebugEnabled()) {
             log.debug("START_LOOP_UNTIL_SUCCESS "+id);
         }*/
         while (true) {
@@ -51,6 +53,7 @@ public class LoopUntilSuccess<T> {
                     /*if (log.isDebugEnabled()) {
                         log.debug("EXIT_LOOP SUCCESS "+id+" #"+opt.get());
                     }*/
+                    done = true;
                     return opt.get();
                 }
                 // if no value, continue looping
@@ -72,15 +75,11 @@ public class LoopUntilSuccess<T> {
                     }
                 }
             }
-            cycle++;
+            //cycle++;
         }
-        /*if (log.isDebugEnabled()) {
-            log.debug("EXIT_LOOP DONE "+id);
-        }*/
-
     }
 
     public boolean isDone() {
-        return (isDoneOrNull != null && isDoneOrNull.get());
+        return (done || (isDoneOrNull != null && isDoneOrNull.get()));
     }
 }
