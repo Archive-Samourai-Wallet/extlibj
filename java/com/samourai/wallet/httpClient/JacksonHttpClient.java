@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.samourai.wallet.api.backend.beans.HttpException;
 import com.samourai.wallet.util.AsyncUtil;
 import com.samourai.wallet.util.JSONUtils;
+import com.samourai.wallet.util.ShutdownException;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ public abstract class JacksonHttpClient implements IHttpClient {
           throws HttpException {
     return httpObservableBlockingSingle(() -> { // run on ioThread
       try {
-        String responseContent = handleNetworkError(
+        String responseContent = handleNetworkError("getJson "+urlStr,
                 () -> requestJsonGet(urlStr, headers, async));
         return parseJson(responseContent, responseType, 200);
       }
@@ -68,7 +69,7 @@ public abstract class JacksonHttpClient implements IHttpClient {
             () -> {
               try {
                 String jsonBody = getObjectMapper().writeValueAsString(bodyObj);
-                String responseContent = handleNetworkError(
+                String responseContent = handleNetworkError("postJson "+urlStr,
                         () -> requestJsonPost(urlStr, headers, jsonBody));
                 return parseJson(responseContent, responseType, 200);
               } catch (HttpException e) {
@@ -85,7 +86,7 @@ public abstract class JacksonHttpClient implements IHttpClient {
     return httpObservable(
             () -> {
               try {
-                return handleNetworkError(
+                return handleNetworkError("postString "+urlStr,
                         () -> requestStringPost(urlStr, headers, contentType, content));
               } catch (HttpException e) {
                 if (log.isDebugEnabled()) {
@@ -102,7 +103,7 @@ public abstract class JacksonHttpClient implements IHttpClient {
       throws HttpException {
     return httpObservableBlockingSingle(() -> { // run on ioThread
       try {
-        String responseContent = handleNetworkError(
+        String responseContent = handleNetworkError("postUrlEncoded "+urlStr,
                 () -> requestJsonPostUrlEncoded(urlStr, headers, body));
         return parseJson(responseContent, responseType, 200);
       } catch (Exception e) {
@@ -139,26 +140,34 @@ public abstract class JacksonHttpClient implements IHttpClient {
     return result;
   }
 
-  protected String handleNetworkError(Callable<String> doHttpRequest) throws HttpException {
+  protected String handleNetworkError(String logInfo, Callable<String> doHttpRequest) throws HttpException {
       try {
         try {
           // first attempt
           return doHttpRequest.call();
         } catch (HttpNetworkException e) {
           if (log.isDebugEnabled()) {
-            log.warn("HTTP_ERROR_NETWORK, retrying: " + e.getMessage());
+            log.warn("HTTP_ERROR_NETWORK " + logInfo + ", retrying: " + e.getMessage());
           }
           // change tor proxy
-          if (onNetworkError != null) {
-            onNetworkError.accept(e);
-          }
+          onNetworkError(e);
 
           // retry second attempt
           return doHttpRequest.call();
         }
+      } catch(ShutdownException e) { // silent rethrow
+        throw e;
       } catch (Exception e) { // should never happen
         throw new HttpNetworkException(e);
       }
+  }
+
+  protected void onNetworkError(HttpNetworkException e) {
+    if (onNetworkError != null) {
+      synchronized (JacksonHttpClient.class) { // avoid overlapping Tor restarts between httpClients
+        onNetworkError.accept(e);
+      }
+    }
   }
 
   protected <T> Single<Optional<T>> httpObservable(final Callable<T> supplier) {
