@@ -1,6 +1,6 @@
 package com.samourai.wallet.xmanagerClient;
 
-import com.samourai.http.client.JettyHttpClient;
+import client.JettyHttpClient;
 import com.samourai.wallet.httpClient.IHttpClient;
 import com.samourai.wallet.test.AbstractTest;
 import com.samourai.xmanager.protocol.XManagerService;
@@ -23,7 +23,7 @@ public class XManagerClientTest extends AbstractTest {
     xManagerClient = new XManagerClient(httpClient, testnet, false);
 
     IHttpClient httpClientFailing =
-        new JettyHttpClient(5000, null, null) {
+        new JettyHttpClient(5000, null, null, null) {
           @Override
           public <T> Single<Optional<T>> postJson(
                   String urlStr, Class<T> responseType, Map<String, String> headers, Object bodyObj) {

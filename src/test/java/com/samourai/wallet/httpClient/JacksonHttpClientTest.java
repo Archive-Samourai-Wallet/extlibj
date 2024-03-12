@@ -16,7 +16,7 @@ public class JacksonHttpClientTest extends AbstractTest {
 
   private JacksonHttpClient httpClient;
   private String mockResponse;
-  private Exception mockException;
+  private HttpException mockException;
 
   @BeforeEach
   public void setUp() throws Exception{
@@ -29,9 +29,9 @@ public class JacksonHttpClientTest extends AbstractTest {
     mock.message = "test";
     mockResponse = JSONUtils.getInstance().getObjectMapper().writeValueAsString(mock);
 
-    httpClient = new JacksonHttpClient() {
+    httpClient = new JacksonHttpClient(null) {
       @Override
-      protected String requestJsonGet(String urlStr, Map<String, String> headers, boolean async) throws Exception {
+      protected String requestJsonGet(String urlStr, Map<String, String> headers, boolean async) throws HttpException {
         if (mockException != null) {
           throw mockException;
         }
@@ -39,7 +39,7 @@ public class JacksonHttpClientTest extends AbstractTest {
       }
 
       @Override
-      protected String requestJsonPost(String urlStr, Map<String, String> headers, String jsonBody) throws Exception {
+      protected String requestJsonPost(String urlStr, Map<String, String> headers, String jsonBody) throws HttpException {
         if (mockException != null) {
           throw mockException;
         }
@@ -47,7 +47,7 @@ public class JacksonHttpClientTest extends AbstractTest {
       }
 
       @Override
-      protected String requestJsonPostUrlEncoded(String urlStr, Map<String, String> headers, Map<String, String> body) throws Exception {
+      protected String requestJsonPostUrlEncoded(String urlStr, Map<String, String> headers, Map<String, String> body) throws HttpException {
         if (mockException != null) {
           throw mockException;
         }
@@ -55,7 +55,7 @@ public class JacksonHttpClientTest extends AbstractTest {
       }
 
       @Override
-      protected String requestStringPost(String urlStr, Map<String, String> headers, String contentType, String content) throws Exception {
+      protected String requestStringPost(String urlStr, Map<String, String> headers, String contentType, String content) throws HttpException {
         if (mockException != null) {
           throw mockException;
         }
@@ -81,7 +81,7 @@ public class JacksonHttpClientTest extends AbstractTest {
   @Test
   public void getJsonException() throws Exception {
     // exception
-    mockException = new IllegalArgumentException("test");
+    mockException = new HttpNetworkException("test");
     try {
       httpClient.getJson("http://test", PaynymErrorResponse.class, null);
     } catch (HttpException e) {
@@ -110,7 +110,7 @@ public class JacksonHttpClientTest extends AbstractTest {
   @Test
   public void postJsonException() throws Exception {
     // exception
-    mockException = new IllegalArgumentException("test");
+    mockException = new HttpNetworkException("test");
     try {
       AsyncUtil.getInstance().blockingGet(httpClient.postJson("http://test", PaynymErrorResponse.class, null, null)).get();
     } catch (HttpException e) {
@@ -139,7 +139,7 @@ public class JacksonHttpClientTest extends AbstractTest {
   @Test
   public void postUrlEncodedException() throws Exception {
     // exception
-    mockException = new IllegalArgumentException("test");
+    mockException = new HttpNetworkException("test");
     try {
       httpClient.postUrlEncoded("http://test", PaynymErrorResponse.class, null, null);
     } catch (HttpException e) {

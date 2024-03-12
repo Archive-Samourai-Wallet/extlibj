@@ -1,11 +1,11 @@
 package com.samourai.wallet.api.paynym;
 
-import com.samourai.wallet.httpClient.IHttpClient;
 import com.samourai.wallet.api.backend.IBackendClient;
-import com.samourai.wallet.api.backend.beans.HttpException;
 import com.samourai.wallet.api.paynym.beans.*;
 import com.samourai.wallet.bip47.BIP47UtilGeneric;
 import com.samourai.wallet.bip47.rpc.BIP47Account;
+import com.samourai.wallet.httpClient.HttpResponseException;
+import com.samourai.wallet.httpClient.IHttpClient;
 import com.samourai.wallet.util.JSONUtils;
 import com.samourai.wallet.util.MessageSignUtilGeneric;
 import io.reactivex.Single;
@@ -158,9 +158,9 @@ public class PaynymApi {
   }
 
   protected Throwable responseError(Throwable throwable) {
-    if (throwable instanceof HttpException) {
+    if (throwable instanceof HttpResponseException) {
       // parse PaynymErrorResponse.message
-      String responseBody = ((HttpException) throwable).getResponseBody();
+      String responseBody = ((HttpResponseException) throwable).getResponseBody();
       try {
         PaynymErrorResponse paynymErrorResponse = JSONUtils.getInstance().getObjectMapper().readValue(responseBody, PaynymErrorResponse.class);
         return new Exception(paynymErrorResponse.message);

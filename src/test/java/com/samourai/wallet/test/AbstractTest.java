@@ -1,6 +1,6 @@
 package com.samourai.wallet.test;
 
-import com.samourai.http.client.JettyHttpClient;
+import client.JettyHttpClient;
 import com.samourai.wallet.api.backend.BackendApi;
 import com.samourai.wallet.api.backend.BackendServer;
 import com.samourai.wallet.api.backend.beans.WalletResponse;
@@ -101,7 +101,7 @@ public class AbstractTest {
   @BeforeEach
   public void setUp() throws Exception {
     RandomUtil._setTestMode(true);
-    httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
+    httpClient = new JettyHttpClient(10000, Optional.empty(), "test", null);
 
     byte[] seed = hdWalletFactory.computeSeedFromWords(SEED_WORDS);
     bip44w = hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE, params);

@@ -4,6 +4,7 @@ import com.samourai.wallet.api.backend.beans.*;
 import com.samourai.wallet.api.backend.seenBackend.ISeenBackend;
 import com.samourai.wallet.api.backend.seenBackend.SeenResponse;
 import com.samourai.wallet.api.backend.websocket.BackendWsApi;
+import com.samourai.wallet.httpClient.HttpResponseException;
 import com.samourai.wallet.util.JSONUtils;
 import com.samourai.wallet.util.Util;
 import com.samourai.wallet.util.oauth.OAuthApi;
@@ -240,7 +241,7 @@ public class BackendApi implements ISweepBackend, ISeenBackend {
         log.debug("pushTx success: "+txid);
       }
       return txid;
-    } catch (HttpException e) {
+    } catch (HttpResponseException e) {
       // parse pushTxResponse
       String responseBody = e.getResponseBody();
       BackendPushTxResponse backendPushTxResponse = null;

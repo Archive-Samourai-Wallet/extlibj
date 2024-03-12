@@ -12,23 +12,27 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 public abstract class JacksonHttpClient implements IHttpClient {
   private static final Logger log = LoggerFactory.getLogger(JacksonHttpClient.class);
 
-  public JacksonHttpClient() {
+  private Consumer<Exception> onNetworkError;
+
+  public JacksonHttpClient(Consumer<Exception> onNetworkError) {
+    this.onNetworkError = onNetworkError;
   }
 
   protected abstract String requestJsonGet(String urlStr, Map<String, String> headers, boolean async)
-      throws Exception;
+      throws HttpException;
 
   protected abstract String requestJsonPost(
-      String urlStr, Map<String, String> headers, String jsonBody) throws Exception;
+      String urlStr, Map<String, String> headers, String jsonBody) throws HttpException;
 
-  protected abstract String requestStringPost(String urlStr, Map<String, String> headers, String contentType, String content) throws Exception;
+  protected abstract String requestStringPost(String urlStr, Map<String, String> headers, String contentType, String content) throws HttpException;
 
   protected abstract String requestJsonPostUrlEncoded(
-      String urlStr, Map<String, String> headers, Map<String, String> body) throws Exception;
+      String urlStr, Map<String, String> headers, Map<String, String> body) throws HttpException;
 
     @Override
   public <T> T getJson(String urlStr, Class<T> responseType, Map<String, String> headers)
@@ -41,14 +45,15 @@ public abstract class JacksonHttpClient implements IHttpClient {
           throws HttpException {
     return httpObservableBlockingSingle(() -> { // run on ioThread
       try {
-        String responseContent = requestJsonGet(urlStr, headers, async);
-        T result = parseJson(responseContent, responseType);
-        return result;
-      } catch (Exception e) {
+        String responseContent = handleNetworkError(
+                () -> requestJsonGet(urlStr, headers, async));
+        return parseJson(responseContent, responseType, 200);
+      }
+      catch (Exception e) {
         if (log.isDebugEnabled()) {
           log.error("getJson failed: " + urlStr + ": " + e.toString());
         }
-        throw httpException(e);
+        throw e;
       }
     });
   }
@@ -63,14 +68,14 @@ public abstract class JacksonHttpClient implements IHttpClient {
             () -> {
               try {
                 String jsonBody = getObjectMapper().writeValueAsString(bodyObj);
-                String responseContent = requestJsonPost(urlStr, headers, jsonBody);
-                T result = parseJson(responseContent, responseType);
-                return result;
-              } catch (Exception e) {
+                String responseContent = handleNetworkError(
+                        () -> requestJsonPost(urlStr, headers, jsonBody));
+                return parseJson(responseContent, responseType, 200);
+              } catch (HttpException e) {
                 if (log.isDebugEnabled()) {
                   log.error("postJson failed: " + urlStr + ": " + e.toString());
                 }
-                throw httpException(e);
+                throw e;
               }
             });
   }
@@ -80,12 +85,13 @@ public abstract class JacksonHttpClient implements IHttpClient {
     return httpObservable(
             () -> {
               try {
-                return requestStringPost(urlStr, headers, contentType, content);
-              } catch (Exception e) {
+                return handleNetworkError(
+                        () -> requestStringPost(urlStr, headers, contentType, content));
+              } catch (HttpException e) {
                 if (log.isDebugEnabled()) {
                   log.error("postJson failed: " + urlStr + ": " + e.toString());
                 }
-                throw httpException(e);
+                throw e;
               }
             });
   }
@@ -96,19 +102,19 @@ public abstract class JacksonHttpClient implements IHttpClient {
       throws HttpException {
     return httpObservableBlockingSingle(() -> { // run on ioThread
       try {
-        String responseContent = requestJsonPostUrlEncoded(urlStr, headers, body);
-        T result = parseJson(responseContent, responseType);
-        return result;
+        String responseContent = handleNetworkError(
+                () -> requestJsonPostUrlEncoded(urlStr, headers, body));
+        return parseJson(responseContent, responseType, 200);
       } catch (Exception e) {
         if (log.isDebugEnabled()) {
           log.error("postUrlEncoded failed: " + urlStr + ": " + e.toString());
         }
-        throw httpException(e);
+        throw e;
       }
     });
   }
 
-  private <T> T parseJson(String responseContent, Class<T> responseType) throws Exception {
+  private <T> T parseJson(String responseContent, Class<T> responseType, int statusCode) throws HttpException {
     T result;
     if (log.isTraceEnabled()) {
       String responseStr = (responseContent != null ? responseContent : "null");
@@ -124,16 +130,35 @@ public abstract class JacksonHttpClient implements IHttpClient {
     if (String.class.equals(responseType)) {
       result = (T) responseContent;
     } else {
-      result = getObjectMapper().readValue(responseContent, responseType);
+      try {
+        result = getObjectMapper().readValue(responseContent, responseType);
+      } catch (Exception e) {
+        throw new HttpResponseException(e, responseContent, statusCode);
+      }
     }
     return result;
   }
 
-  protected HttpException httpException(Exception e) {
-    if (!(e instanceof HttpException)) {
-      return new HttpException(e);
-    }
-    return (HttpException) e;
+  protected String handleNetworkError(Callable<String> doHttpRequest) throws HttpException {
+      try {
+        try {
+          // first attempt
+          return doHttpRequest.call();
+        } catch (HttpNetworkException e) {
+          if (log.isDebugEnabled()) {
+            log.warn("HTTP_ERROR_NETWORK, retrying: " + e.getMessage());
+          }
+          // change tor proxy
+          if (onNetworkError != null) {
+            onNetworkError.accept(e);
+          }
+
+          // retry second attempt
+          return doHttpRequest.call();
+        }
+      } catch (Exception e) { // should never happen
+        throw new HttpNetworkException(e);
+      }
   }
 
   protected <T> Single<Optional<T>> httpObservable(final Callable<T> supplier) {
@@ -146,8 +171,8 @@ public abstract class JacksonHttpClient implements IHttpClient {
               httpObservable(supplier)
       );
       return opt.orElse(null);
-    } catch (Exception e) {
-      throw httpException(e);
+    } catch (Exception e) { // should never happen
+      throw new HttpNetworkException(e);
     }
   }
 
