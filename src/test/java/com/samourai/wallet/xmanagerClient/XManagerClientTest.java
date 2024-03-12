@@ -1,6 +1,6 @@
 package com.samourai.wallet.xmanagerClient;
 
-import client.JettyHttpClient;
+import com.samourai.http.client.JettyHttpClient;
 import com.samourai.wallet.httpClient.IHttpClient;
 import com.samourai.wallet.test.AbstractTest;
 import com.samourai.xmanager.protocol.XManagerService;

@@ -1,6 +1,6 @@
 package com.samourai.wallet.dexConfig;
 
-import client.JettyHttpClient;
+import com.samourai.http.client.JettyHttpClient;
 import com.samourai.wallet.httpClient.IHttpClient;
 import com.samourai.wallet.test.AbstractTest;
 import org.junit.jupiter.api.Assertions;

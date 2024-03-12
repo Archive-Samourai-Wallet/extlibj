@@ -1,6 +1,6 @@
 package com.samourai.wallet.test;
 
-import client.JettyHttpClient;
+import com.samourai.http.client.JettyHttpClient;
 import com.samourai.wallet.api.backend.BackendApi;
 import com.samourai.wallet.api.backend.BackendServer;
 import com.samourai.wallet.api.backend.beans.WalletResponse;
