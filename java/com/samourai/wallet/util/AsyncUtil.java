@@ -116,10 +116,6 @@ public class AsyncUtil {
         blockingAwait(runIOAsyncCompletable(action));
     }
 
-    /*public Future<?> runAsync(Runnable runnable) {
-        return threadUtil.getExecutorService().submit(runnable);
-    }*/
-
     public Completable runAsync(Runnable runnable, long timeoutMs) {
         Future<?> future = runAsync(() -> {
             runnable.run();
@@ -131,11 +127,10 @@ public class AsyncUtil {
     public <T> Future<T> runAsync(Callable<T> callable) {
         // preserve logging context
         String mdc = LogbackUtils.mdcAppend("runAsync="+System.currentTimeMillis());
-        final Callable<T> callableFinal = () -> {
+        return threadUtil.runAsync(() -> {
             MDC.put("mdc", mdc);
             return callable.call();
-        };
-        return threadUtil.getExecutorService().submit(callableFinal);
+        });
     }
 
     public <T> Single<T> runAsync(Callable<T> callable, long timeoutMs) {
