@@ -19,7 +19,7 @@ public class HttpResponseException extends HttpException {
     }
 
     public HttpResponseException(String responseBody, int statusCode) {
-        this("HttpResponseException: statusCode="+statusCode,
+        this("response statusCode="+statusCode,
         responseBody, statusCode);
     }
 

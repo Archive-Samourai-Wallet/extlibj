@@ -1,6 +1,7 @@
 package com.samourai.wallet.dexConfig;
 
 import com.samourai.http.client.JettyHttpClient;
+import com.samourai.wallet.httpClient.HttpUsage;
 import com.samourai.wallet.httpClient.IHttpClient;
 import com.samourai.wallet.test.AbstractTest;
 import org.junit.jupiter.api.Assertions;
@@ -26,7 +27,7 @@ public class DexConfigProviderTest extends AbstractTest {
 
   @Test
   public void load() throws Exception {
-    httpClient = new JettyHttpClient(10000, Optional.empty(), "test", null);
+    httpClient = new JettyHttpClient(10000, HttpUsage.BACKEND);
 
     Assertions.assertNull(dexConfigProvider.getLastLoad());
     dexConfigProvider.load(httpClient, params, false);

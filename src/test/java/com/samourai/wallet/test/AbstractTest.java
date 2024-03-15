@@ -19,6 +19,7 @@ import com.samourai.wallet.constants.SamouraiNetwork;
 import com.samourai.wallet.crypto.CryptoUtil;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.hd.HD_WalletFactoryGeneric;
+import com.samourai.wallet.httpClient.HttpUsage;
 import com.samourai.wallet.httpClient.IHttpClient;
 import com.samourai.wallet.payload.PayloadUtilGeneric;
 import com.samourai.wallet.send.UTXO;
@@ -101,7 +102,7 @@ public class AbstractTest {
   @BeforeEach
   public void setUp() throws Exception {
     RandomUtil._setTestMode(true);
-    httpClient = new JettyHttpClient(10000, Optional.empty(), "test", null);
+    httpClient = new JettyHttpClient(10000, HttpUsage.BACKEND);
 
     byte[] seed = hdWalletFactory.computeSeedFromWords(SEED_WORDS);
     bip44w = hdWalletFactory.getBIP44(seed, SEED_PASSPHRASE, params);

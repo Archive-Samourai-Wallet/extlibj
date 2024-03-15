@@ -157,8 +157,10 @@ public abstract class JacksonHttpClient implements IHttpClient {
         }
       } catch(ShutdownException e) { // silent rethrow
         throw e;
+      } catch (HttpException e) { // forward
+        throw e;
       } catch (Exception e) { // should never happen
-        throw new HttpNetworkException(e);
+        throw new HttpSystemException(e);
       }
   }
 
@@ -180,6 +182,8 @@ public abstract class JacksonHttpClient implements IHttpClient {
               httpObservable(supplier)
       );
       return opt.orElse(null);
+    } catch (HttpException e) { // forward
+      throw e;
     } catch (Exception e) { // should never happen
       throw new HttpNetworkException(e);
     }
