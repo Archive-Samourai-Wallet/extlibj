@@ -30,8 +30,8 @@ public class LoopUntilSuccess<T> {
     public T run() throws Exception {
         long timeDone = System.currentTimeMillis()+timeoutMs;
         int cycle=0;
-        if (log.isDebugEnabled()) {
-            log.debug("LOOP_START "+id);
+        if (log.isTraceEnabled()) {
+            log.trace("LOOP_START "+id);
         }
         while (true) {
             if (isDone()) {

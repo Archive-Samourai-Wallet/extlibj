@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.samourai.code.wallet</groupId>
     <artifactId>extlibj</artifactId>
-    <version>1.0.0-beta10</version>
+    <version>1.0.0-beta11-SNAPSHOT</version>
     <name>extlibj</name>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>io.samourai.code.wallet.bitcoinj</groupId>
             <artifactId>bitcoinj-core</artifactId>
-            <version>007-beta19</version>
+            <version>007-beta20</version>
         </dependency>
         <dependency>
             <groupId>io.samourai.code.wallet</groupId>
@@ -208,6 +208,6 @@
     </repositories>
     <scm>
         <connection>scm:git:https://code.samourai.io/wallet/ExtLibJ.git</connection>
-        <tag>1.0.0-beta10</tag>
+        <tag>1.0.0-beta6</tag>
     </scm>
 </project>
