@@ -29,30 +29,37 @@ public class LoopUntilSuccess<T> {
 
     public T run() throws Exception {
         long timeDone = System.currentTimeMillis()+timeoutMs;
-        /*int cycle=0;
+        int cycle=0;
         if (log.isDebugEnabled()) {
-            log.debug("START_LOOP_UNTIL_SUCCESS "+id);
-        }*/
+            log.debug("LOOP_START "+id);
+        }
         while (true) {
             if (isDone()) {
+                if (log.isTraceEnabled()) {
+                    log.trace("LOOP_END "+id+" exit (done)");
+                }
                 throw new InterruptedException("Loop ending with exit (done)");
             }
             if (System.currentTimeMillis()>timeDone) {
-                throw new TimeoutException("Loop ending with timeout after "+timeoutMs+"ms");
+                if (log.isTraceEnabled()) {
+                    log.trace("LOOP_END "+id+" timeout "+timeoutMs+"ms");
+                }
+                throw new TimeoutException();
             }
-            /*if (log.isDebugEnabled()) {
-                log.debug("CYCLE_LOOP_UNTIL_SUCCESS "+id+" "+cycle);
-            }*/
+            if (log.isTraceEnabled()) {
+                log.trace("LOOP_CYCLE "+id+" "+cycle);
+            }
             long loopStartTime = System.currentTimeMillis();
             try {
                 // run loop (without timeout)
-                Optional<T> opt = AsyncUtil.getInstance().blockingGet(
-                        AsyncUtil.getInstance().runAsync(doLoop, retryFrequencyMs));
+                /*Optional<T> opt = AsyncUtil.getInstance().blockingGet(
+                        AsyncUtil.getInstance().runAsync(doLoop, retryFrequencyMs));*/
+                Optional<T> opt = doLoop.call(); // TODO limit exec time with retryFrequencyMs
                 if (opt.isPresent()) {
                     // value found
-                    /*if (log.isDebugEnabled()) {
-                        log.debug("EXIT_LOOP SUCCESS "+id+" #"+opt.get());
-                    }*/
+                    if (log.isTraceEnabled()) {
+                        log.trace("LOOP_EXIT "+id+" SUCCESS "+opt.get());
+                    }
                     done = true;
                     return opt.get();
                 }
@@ -64,9 +71,6 @@ public class LoopUntilSuccess<T> {
             // wait delay before next loop
             long loopSpentTime = System.currentTimeMillis() - loopStartTime;
             long waitTime = retryFrequencyMs - loopSpentTime;
-            //if (log.isDebugEnabled()) {
-            //    log.debug("runWithTimeoutFrequency(): loop timed out, loopSpentTime=" + loopSpentTime + ", waitTime=" + waitTime);
-            //}
             if (waitTime > 0) {
                 synchronized (this) {
                     try {
@@ -75,7 +79,7 @@ public class LoopUntilSuccess<T> {
                     }
                 }
             }
-            //cycle++;
+            cycle++;
         }
     }
 

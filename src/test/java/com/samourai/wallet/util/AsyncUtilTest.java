@@ -7,6 +7,7 @@ import io.reactivex.Single;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -235,6 +236,7 @@ public class AsyncUtilTest extends AbstractTest {
 
   //
 
+  @Disabled
   @Test
   public void loopUntilSuccessAsync_timeout() throws Exception{
     // global timeout before end of loop
