@@ -105,7 +105,7 @@ public class PaynymApiTest extends AbstractTest {
       GetNymInfoResponse getNymInfo = asyncUtil.blockingGet(paynymApi.getNymInfo(paymentCode + "foo"));
       Assertions.assertTrue(false);
     } catch (HttpException e) {
-      Assertions.assertEquals("Http query failed: status=500", e.getCause().getMessage());
+      Assertions.assertEquals("response statusCode=500", e.getMessage());
     }
   }
 }

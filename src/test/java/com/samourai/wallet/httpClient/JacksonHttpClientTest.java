@@ -85,14 +85,14 @@ public class JacksonHttpClientTest extends AbstractTest {
     try {
       httpClient.getJson("http://test", PaynymErrorResponse.class, null);
     } catch (HttpException e) {
-      Assertions.assertEquals("test", e.getCause().getMessage());
+      Assertions.assertEquals("test", e.getMessage());
     }
 
     // exception: String - parseJson()
     try {
       httpClient.getJson("http://test", String.class, null);
     } catch (HttpException e) {
-      Assertions.assertEquals("test", e.getCause().getMessage());
+      Assertions.assertEquals("test", e.getMessage());
     }
   }
 
@@ -114,14 +114,14 @@ public class JacksonHttpClientTest extends AbstractTest {
     try {
       AsyncUtil.getInstance().blockingGet(httpClient.postJson("http://test", PaynymErrorResponse.class, null, null)).get();
     } catch (HttpException e) {
-      Assertions.assertEquals("test", e.getCause().getMessage());
+      Assertions.assertEquals("test", e.getMessage());
     }
 
     // exception: String - parseJson()
     try {
       AsyncUtil.getInstance().blockingGet(httpClient.postJson("http://test", String.class, null, null)).get();
     } catch (HttpException e) {
-      Assertions.assertEquals("test", e.getCause().getMessage());
+      Assertions.assertEquals("test", e.getMessage());
     }
   }
 
@@ -143,14 +143,14 @@ public class JacksonHttpClientTest extends AbstractTest {
     try {
       httpClient.postUrlEncoded("http://test", PaynymErrorResponse.class, null, null);
     } catch (HttpException e) {
-      Assertions.assertEquals("test", e.getCause().getMessage());
+      Assertions.assertEquals("test", e.getMessage());
     }
 
     // exception: String - parseJson()
     try {
       httpClient.postUrlEncoded("http://test", String.class, null, null);
     } catch (HttpException e) {
-      Assertions.assertEquals("test", e.getCause().getMessage());
+      Assertions.assertEquals("test", e.getMessage());
     }
   }
 }
