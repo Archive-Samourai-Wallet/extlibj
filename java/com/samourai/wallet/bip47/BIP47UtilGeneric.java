@@ -42,7 +42,7 @@ public abstract class BIP47UtilGeneric {
     }
 
     public SegwitAddress getSendAddress(BIP47Account bip47Account, PaymentCode pcode, int idx, NetworkParameters params) throws Exception {
-        HD_Address address = bip47Account.addressAt(0);
+        HD_Address address = bip47Account.getNotificationAddress();
         return getPaymentAddress(pcode, idx, address, params).getSegwitAddressSend();
     }
 
