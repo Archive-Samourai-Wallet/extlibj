@@ -1,8 +1,8 @@
 package com.samourai.wallet.cahoots.multi;
 
-import com.samourai.soroban.cahoots.Stonewallx2Context;
-import com.samourai.soroban.cahoots.StowawayContext;
-import com.samourai.soroban.cahoots.TypeInteraction;
+import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Context;
+import com.samourai.wallet.cahoots.stowaway.StowawayContext;
+import com.samourai.wallet.cahoots.TypeInteraction;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.AbstractCahootsService;
 import com.samourai.wallet.cahoots.CahootsType;
@@ -12,10 +12,9 @@ import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
-import com.samourai.wallet.chain.ChainSupplier;
 import com.samourai.wallet.util.TxUtil;
-import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
-import com.samourai.xmanager.client.XManagerClient;
+import com.samourai.wallet.constants.SamouraiAccountIndex;
+import com.samourai.wallet.xmanagerClient.XManagerClient;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
@@ -29,8 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, MultiCahootsContext> {

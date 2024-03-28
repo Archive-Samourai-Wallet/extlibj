@@ -9,7 +9,7 @@ import com.samourai.wallet.send.SendFactoryGeneric;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.util.FeeUtil;
-import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
+import com.samourai.wallet.constants.SamouraiAccountIndex;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.*;
 import org.bouncycastle.util.encoders.Hex;
@@ -86,7 +86,7 @@ public class RicochetUtilGeneric {
         ricochet.setSpendFrom(unspent);
 
         BipWallet bipWalletRicochet = config.getBipWalletRicochet();
-        BipAddress bipDestinationAddress = bipWalletRicochet.getNextAddress(true);
+        BipAddress bipDestinationAddress = bipWalletRicochet.getNextAddressReceive(true);
         String destinationAddress = bipDestinationAddress.getAddressString();
         Transaction txHop0 = getHop0Tx(unspent, biHop0SpendAmount.longValue(), changeAmount, destinationAddress, nTimeLock, config);
         if (log.isDebugEnabled()) {
@@ -157,7 +157,7 @@ public class RicochetUtilGeneric {
             ECKey nextKey = null;
             String nextDestinationAddress;
             if (_hop < nbHops) {
-                BipAddress bipNextDestination = bipWalletRicochet.getNextAddress(true);
+                BipAddress bipNextDestination = bipWalletRicochet.getNextAddressReceive(true);
                 nextDestinationAddress = bipDestinationAddress.getAddressString();
                 nextKey = bipDestinationAddress.getHdAddress().getECKey();
                 hop.setIndex(bipNextDestination.getHdAddress().getAddressIndex());
@@ -297,7 +297,7 @@ public class RicochetUtilGeneric {
         HashMap<String, BigInteger> receivers = new HashMap<String, BigInteger>();
 
         if (changeAmount > 0L) {
-            String change_address = config.getBipWalletChange().getNextChangeAddress(true).getAddressString();
+            String change_address = config.getBipWalletChange().getNextAddressChange(true).getAddressString();
             receivers.put(change_address, BigInteger.valueOf(changeAmount));
         }
 

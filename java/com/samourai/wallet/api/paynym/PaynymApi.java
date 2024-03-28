@@ -1,11 +1,11 @@
 package com.samourai.wallet.api.paynym;
 
-import com.samourai.http.client.IHttpClient;
 import com.samourai.wallet.api.backend.IBackendClient;
-import com.samourai.wallet.api.backend.beans.HttpException;
 import com.samourai.wallet.api.paynym.beans.*;
 import com.samourai.wallet.bip47.BIP47UtilGeneric;
-import com.samourai.wallet.bip47.rpc.BIP47Wallet;
+import com.samourai.wallet.bip47.rpc.BIP47Account;
+import com.samourai.wallet.httpClient.HttpResponseException;
+import com.samourai.wallet.httpClient.IHttpClient;
 import com.samourai.wallet.util.JSONUtils;
 import com.samourai.wallet.util.MessageSignUtilGeneric;
 import io.reactivex.Single;
@@ -77,13 +77,13 @@ public class PaynymApi {
             .map(responseOpt -> responseOpt.get());
   }
 
-  public Single<ClaimPaynymResponse> claim(String paynymToken, BIP47Wallet bip47Wallet) throws Exception {
+  public Single<ClaimPaynymResponse> claim(String paynymToken, BIP47Account bip47Account) throws Exception {
     if (log.isDebugEnabled()) {
       log.debug("claim");
     }
     Map<String,String> headers = computeHeaders(paynymToken);
     String url = urlServer+URL_CLAIM;
-    String signature = computeSignature(bip47Wallet, paynymToken);
+    String signature = computeSignature(bip47Account, paynymToken);
     ClaimPaynymRequest request = new ClaimPaynymRequest(signature);
     return httpClient.postJson(url, ClaimPaynymResponse.class, headers, request)
             .onErrorResumeNext(throwable -> {
@@ -92,15 +92,15 @@ public class PaynymApi {
             .map(responseOpt -> responseOpt.get());
   }
 
-  public Single<AddPaynymResponse> addPaynym(String paynymToken, BIP47Wallet bip47Wallet) throws Exception {
+  public Single<AddPaynymResponse> addPaynym(String paynymToken, BIP47Account bip47Account) throws Exception {
     if (log.isDebugEnabled()) {
       log.debug("addPaynym");
     }
     Map<String,String> headers = computeHeaders(paynymToken);
     String url = urlServer+URL_ADD;
-    String nym = bip47Wallet.getAccount(0).getPaymentCode();
-    String code = bip47Util.getFeaturePaymentCode(bip47Wallet).toString();
-    String signature = computeSignature(bip47Wallet, paynymToken);
+    String nym = bip47Account.getPaymentCode().toString();
+    String code = bip47Account.getPaymentCodeSamourai().toString();
+    String signature = computeSignature(bip47Account, paynymToken);
     AddPaynymRequest request = new AddPaynymRequest(nym, code, signature);
     return httpClient.postJson(url, AddPaynymResponse.class, headers, request)
             .onErrorResumeNext(throwable -> {
@@ -123,13 +123,13 @@ public class PaynymApi {
             .map(responseOpt -> responseOpt.get());
   }
 
-  public Single follow(String paynymToken, BIP47Wallet bip47Wallet, String paymentCodeTarget) throws Exception {
+  public Single follow(String paynymToken, BIP47Account bip47Account, String paymentCodeTarget) throws Exception {
     if (log.isDebugEnabled()) {
       log.debug("follow");
     }
     Map<String,String> headers = computeHeaders(paynymToken);
     String url = urlServer+URL_FOLLOW;
-    String signature = computeSignature(bip47Wallet, paynymToken);
+    String signature = computeSignature(bip47Account, paynymToken);
     FollowPaynymRequest request = new FollowPaynymRequest(paymentCodeTarget, signature);
     return httpClient.postJson(url, Object.class, headers, request)
             .onErrorResumeNext(throwable -> {
@@ -138,13 +138,13 @@ public class PaynymApi {
             .map(responseOpt -> responseOpt.get());
   }
 
-  public Single unfollow(String paynymToken, BIP47Wallet bip47Wallet, String paymentCodeTarget) throws Exception {
+  public Single unfollow(String paynymToken, BIP47Account bip47Account, String paymentCodeTarget) throws Exception {
     if (log.isDebugEnabled()) {
       log.debug("unfollow");
     }
     Map<String,String> headers = computeHeaders(paynymToken);
     String url = urlServer+URL_UNFOLLOW;
-    String signature = computeSignature(bip47Wallet, paynymToken);
+    String signature = computeSignature(bip47Account, paynymToken);
     UnfollowPaynymRequest request = new UnfollowPaynymRequest(paymentCodeTarget, signature);
     return httpClient.postJson(url, Object.class, headers, request)
             .onErrorResumeNext(throwable -> {
@@ -153,14 +153,14 @@ public class PaynymApi {
             .map(responseOpt -> responseOpt.get());
   }
 
-  protected String computeSignature(BIP47Wallet bip47Wallet, String payNymToken) {
-    return MessageSignUtilGeneric.getInstance().signMessage(bip47Util.getNotificationAddress(bip47Wallet).getECKey(), payNymToken);
+  protected String computeSignature(BIP47Account bip47Account, String payNymToken) {
+    return MessageSignUtilGeneric.getInstance().signMessage(bip47Account.getNotificationAddress().getECKey(), payNymToken);
   }
 
   protected Throwable responseError(Throwable throwable) {
-    if (throwable instanceof HttpException) {
+    if (throwable instanceof HttpResponseException) {
       // parse PaynymErrorResponse.message
-      String responseBody = ((HttpException) throwable).getResponseBody();
+      String responseBody = ((HttpResponseException) throwable).getResponseBody();
       try {
         PaynymErrorResponse paynymErrorResponse = JSONUtils.getInstance().getObjectMapper().readValue(responseBody, PaynymErrorResponse.class);
         return new Exception(paynymErrorResponse.message);

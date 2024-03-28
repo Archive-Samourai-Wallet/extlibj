@@ -5,6 +5,7 @@ import com.google.common.base.Optional;
 
 public enum PairingType {
     WHIRLPOOL_GUI("whirlpool.gui"),
+    SAMOURAI_WALLET_FULL("samourai.wallet.full"),
     SWAPS_GUI("swaps.gui");
 
     private String value;

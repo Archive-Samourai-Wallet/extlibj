@@ -13,6 +13,7 @@ import org.bitcoinj.core.TransactionOutPoint;
 import org.bitcoinj.params.TestNet3Params;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
 import java.nio.ByteBuffer;
 
 public class PaymentCodeTest {
@@ -22,21 +23,21 @@ public class PaymentCodeTest {
 
     @Test
     public void testPaymentCode() throws Exception {
-        BIP47Wallet bip47Wallet1 = cryptoTestUtil.generateBip47Wallet(params);
-        BIP47Wallet bip47Wallet2 = cryptoTestUtil.generateBip47Wallet(params);
+        BIP47Account bip47Account1 = cryptoTestUtil.generateBip47Wallet(params).getAccount(0);
+        BIP47Account bip47Account2 = cryptoTestUtil.generateBip47Wallet(params).getAccount(0);
 
-        PaymentCode paymentCode1 = new PaymentCode(bip47Wallet1.getAccount(0).getPaymentCode());
-        PaymentCode paymentCode2 = new PaymentCode(bip47Wallet2.getAccount(0).getPaymentCode());
+        PaymentCode paymentCode1 = bip47Account1.getPaymentCode();
+        PaymentCode paymentCode2 = bip47Account2.getPaymentCode();
 
         int idx = 0;
 
         // calculate send addresses
-        SegwitAddress sendAddress1 = bip47Util.getSendAddress(bip47Wallet1, paymentCode2, idx, params).getSegwitAddressSend();
-        SegwitAddress sendAddress2 = bip47Util.getSendAddress(bip47Wallet2, paymentCode1, idx, params).getSegwitAddressSend();
+        SegwitAddress sendAddress1 = bip47Util.getSendAddress(bip47Account1, paymentCode2, idx, params);
+        SegwitAddress sendAddress2 = bip47Util.getSendAddress(bip47Account2, paymentCode1, idx, params);
 
         // calculate receive addresses
-        SegwitAddress receiveAddress1 = bip47Util.getReceiveAddress(bip47Wallet1, paymentCode2, idx, params).getSegwitAddressReceive();
-        SegwitAddress receiveAddress2 = bip47Util.getReceiveAddress(bip47Wallet2, paymentCode1, idx, params).getSegwitAddressReceive();
+        SegwitAddress receiveAddress1 = bip47Util.getReceiveAddress(bip47Account1, paymentCode2, idx, params);
+        SegwitAddress receiveAddress2 = bip47Util.getReceiveAddress(bip47Account2, paymentCode1, idx, params);
 
         // mutual confrontation should give same result
         Assertions.assertEquals(sendAddress1.getBech32AsString(), receiveAddress2.getBech32AsString());
@@ -76,10 +77,10 @@ public class PaymentCodeTest {
         byte[] data = ByteBuffer.allocate(64).putInt(1234).array();
 
         BIP47Wallet bip47Wallet = cryptoTestUtil.generateBip47Wallet(params);
-        String paymentCodeStr = bip47Wallet.getAccount(0).getPaymentCode();
+        PaymentCode paymentCode = bip47Wallet.getAccount(0).getPaymentCode();
 
         // mask: client side
-        HD_Address notifAddressCli = new PaymentCode(paymentCodeStr).notificationAddress(params);
+        HD_Address notifAddressCli = paymentCode.notificationAddress(params);
         ISecretPoint secretPointMask = new SecretPointJava(inputKey.getPrivKeyBytes(), notifAddressCli.getPubKey());
         byte[] dataMasked = PaymentCode.xorMask(data, secretPointMask, inputOutPoint);
 
@@ -99,5 +100,16 @@ public class PaymentCodeTest {
             () -> {
                 PaymentCode paymentCode1 = new PaymentCode("PM8TJdufVsRkwm8K4uLBUdPEzoZCsq2JCN47wQxcD");
             });
+    }
+
+    @Test
+    public void equals() throws Exception {
+        BIP47Wallet bip47Wallet1 = cryptoTestUtil.generateBip47Wallet(params);
+
+        PaymentCode paymentCode1 = bip47Wallet1.getAccount(0).getPaymentCode();
+        PaymentCode paymentCode2 = bip47Wallet1.getAccount(1).getPaymentCode();
+
+        Assertions.assertEquals(paymentCode1, bip47Wallet1.getAccount(0).getPaymentCode());
+        Assertions.assertNotEquals(paymentCode1, paymentCode2);
     }
 }

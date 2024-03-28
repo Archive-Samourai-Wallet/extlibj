@@ -14,7 +14,6 @@ import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 
-import javax.annotation.Nullable;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -55,7 +54,7 @@ public class AESUtil {
     }
 
     @Deprecated
-    public static String decryptWithSetMode(String ciphertext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws InvalidCipherTextException, UnsupportedEncodingException, DecryptionException {
+    public static String decryptWithSetMode(String ciphertext, CharSequenceX password, int iterations, int mode, BlockCipherPadding padding) throws InvalidCipherTextException, UnsupportedEncodingException, DecryptionException {
         final int AESBlockSize = 4;
 
         byte[] cipherdata = Base64.decodeBase64(ciphertext.getBytes());
@@ -120,7 +119,7 @@ public class AESUtil {
     }
 
     @Deprecated
-    public static String encryptWithSetMode(String cleartext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws DecryptionException, UnsupportedEncodingException {
+    public static String encryptWithSetMode(String cleartext, CharSequenceX password, int iterations, int mode, BlockCipherPadding padding) throws DecryptionException, UnsupportedEncodingException {
 
         final int AESBlockSize = 4;
 

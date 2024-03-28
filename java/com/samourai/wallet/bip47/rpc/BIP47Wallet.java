@@ -46,5 +46,4 @@ public class BIP47Wallet extends HD_Wallet {
     public BIP47Account getAccount(int accountId) {
         return new BIP47Account(mParams, mRoot, accountId);
     }
-
 }

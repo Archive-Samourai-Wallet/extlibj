@@ -1,7 +1,6 @@
 package com.samourai.wallet.send.spend;
 
 import com.samourai.wallet.SamouraiWalletConst;
-import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.BipWallet;
@@ -13,7 +12,7 @@ import com.samourai.wallet.send.beans.SpendTx;
 import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.util.FeeUtil;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccount;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 public class SpendBuilder {
@@ -34,26 +32,12 @@ public class SpendBuilder {
     }
 
     // forcedChangeType may be null
-    public SpendTx preview(BipWallet spendWallet, BipWallet changeWallet, String address, long amount, boolean boltzmann, boolean rbfOptIn, BigInteger feePerKb, BipFormat forcedChangeFormat, List<MyTransactionOutPoint> preselectedInputs, long blockHeight) throws Exception {
-        WhirlpoolAccount account = spendWallet.getAccount();
+    public SpendTx preview(BipWallet spendWallet, BipWallet changeWallet, String address, long amount, boolean stonewall, boolean rbfOptIn, BigInteger feePerKb, BipFormat forcedChangeFormat, List<MyTransactionOutPoint> preselectedInputs, long blockHeight) throws Exception {
+        SamouraiAccount account = spendWallet.getAccount();
         NetworkParameters params = spendWallet.getParams();
-        BipFormat addressFormat = computeAddressFormat(forcedChangeFormat, address, utxoProvider.getBipFormatSupplier(), params);
+        SpendSelection spendSelection = computeSpendSelection(spendWallet, changeWallet, address, amount, stonewall, feePerKb, forcedChangeFormat, preselectedInputs);
 
-        // if possible, get UTXO by input 'type': p2pkh, p2sh-p2wpkh or p2wpkh, else get all UTXO
-        long neededAmount = computeNeededAmount(account, amount, addressFormat, feePerKb);
-
-        SpendSelection spendSelection;
-        if (preselectedInputs != null && !preselectedInputs.isEmpty()) {
-            // get preselected UTXO
-            spendSelection = computeUtxoPreselection(neededAmount, preselectedInputs);
-        }
-        else {
-            // get all UTXO
-            Collection<UTXO> utxos = findUtxos(neededAmount, account, addressFormat);
-            spendSelection = computeUtxoSelection(spendWallet, changeWallet, address, boltzmann, amount, neededAmount, utxos, addressFormat, feePerKb, forcedChangeFormat);
-        }
-
-        SpendTx spendTx = spendSelection.spendTx(amount, address, addressFormat, account, rbfOptIn, params, feePerKb, utxoProvider, blockHeight);
+        SpendTx spendTx = spendSelection.spendTx(amount, address, account, rbfOptIn, params, feePerKb, utxoProvider, blockHeight);
         if (spendTx != null) {
             if (log.isDebugEnabled()) {
                 log.debug("spend type:" + spendSelection.getSpendType());
@@ -66,9 +50,32 @@ public class SpendBuilder {
         return spendTx;
     }
 
-    private Collection<UTXO> findUtxos(long neededAmount, WhirlpoolAccount account, BipFormat addressFormat) {
-        Collection<UTXO> utxos = utxoProvider.getUtxos(account, addressFormat);
+    private SpendSelection computeSpendSelection(BipWallet spendWallet, BipWallet changeWallet, String address, long amount, boolean stonewall, BigInteger feePerKb, BipFormat forcedChangeFormat, List<MyTransactionOutPoint> preselectedInputs) throws SpendException {
+        SamouraiAccount account = spendWallet.getAccount();
+        NetworkParameters params = spendWallet.getParams();
+        BipFormat changeFormat = computeAddressFormat(forcedChangeFormat, address, utxoProvider.getBipFormatSupplier(), params);
 
+        Collection<UTXO> allUtxos = utxoProvider.getUtxos(account);
+        SpendSelection spendSelection = null;
+        if (amount > 0 && UTXO.sumValue(allUtxos) == amount) {
+            // spend entire balance (can only be simple spend, fees will be deducted later)
+            if (log.isDebugEnabled()) {
+                log.debug("SIMPLE spending (entire balance)");
+            }
+            spendSelection = new SpendSelectionSimple(utxoProvider.getBipFormatSupplier(), allUtxos, changeFormat, true);
+        }
+        else if (preselectedInputs != null && !preselectedInputs.isEmpty()) {
+            // spend preselected UTXOs
+            spendSelection = computeSpendSelectionForUtxosPreselected(amount, changeFormat, preselectedInputs, feePerKb, params);
+        } else {
+            // spend best UTXOs
+            spendSelection = computeSpendSelectionForUtxosAvailable(spendWallet, changeWallet, address, stonewall, amount, changeFormat, feePerKb, forcedChangeFormat);
+        }
+        return spendSelection;
+    }
+
+    // if possible, get UTXO by input 'type': p2pkh, p2sh-p2wpkh or p2wpkh, else get all UTXO
+    private Collection<UTXO> findUtxosAvailableForAddressFormat(long amount, SamouraiAccount account, BipFormat addressFormat, BigInteger feePerKb, NetworkParameters params) throws SpendException {
         // TODO filter-out do-not-spends
         /*
         //Filtering out do not spends
@@ -86,22 +93,32 @@ public class SpendBuilder {
         }*/
 
         // spend by addressType
-        if (UTXO.sumValue(utxos) >= neededAmount) {
-            return utxos;
+        Collection<UTXO> utxosByAddressFormat = utxoProvider.getUtxos(account, addressFormat);
+        long neededAmount = computeNeededAmount(UTXO.listOutpoints(utxosByAddressFormat), amount, feePerKb, params);
+        long availableBalance = UTXO.sumValue(utxosByAddressFormat);
+        if (availableBalance >= neededAmount) {
+            return utxosByAddressFormat;
         }
 
         // do not mix AddressTypes for postmix
-        if (account == WhirlpoolAccount.POSTMIX) {
-            return new LinkedList<>(); // not enough postmix
+        if (account == SamouraiAccount.POSTMIX) {
+            log.warn("InsufficientFundsException: amount="+amount+", neededAmount="+neededAmount+", availableBalance="+availableBalance+" (POSTMIX/"+addressFormat+")");
+            throw new SpendException(SpendError.INSUFFICIENT_FUNDS);
         }
 
         // fallback by mixed type
-        utxos = utxoProvider.getUtxos(account);
-        return UTXO.sumValue(utxos) >= neededAmount ? utxos : new LinkedList<>();
+        Collection<UTXO> allUtxos = utxoProvider.getUtxos(account);
+        neededAmount = computeNeededAmount(UTXO.listOutpoints(allUtxos), amount, feePerKb, params);
+        availableBalance = UTXO.sumValue(allUtxos);
+        if (availableBalance >= neededAmount) {
+            return allUtxos;
+        }
+        log.warn("InsufficientFundsException: amount="+amount+", neededAmount="+neededAmount+", availableBalance="+availableBalance+" ("+account+"/all)");
+        throw new SpendException(SpendError.INSUFFICIENT_FUNDS);
     }
 
-    private SpendSelection computeUtxoPreselection(long amount, Collection<MyTransactionOutPoint> preselectedInputs) throws SpendException {
-        // find preselected UTXOs
+    private SpendSelection computeSpendSelectionForUtxosPreselected(long amount, BipFormat changeFormat, Collection<MyTransactionOutPoint> preselectedInputs, BigInteger feePerKb, NetworkParameters params) throws SpendException {
+        // use all preselected UTXOs
         Collection<UTXO> utxos = new ArrayList<>();
         for (MyTransactionOutPoint outPoint : preselectedInputs) {
             UTXO u = new UTXO();
@@ -112,39 +129,27 @@ public class SpendBuilder {
         }
 
         // check balance
-        long balance = UTXO.sumValue(utxos);
-        if (amount > balance) {
-            log.warn("InsufficientFundsException: amount="+amount+", preselectedBalance="+balance);
+        long neededAmount = computeNeededAmount(preselectedInputs, amount, feePerKb, params);
+        long preselectedBalance = UTXO.sumValue(utxos);
+        if (neededAmount > preselectedBalance) {
+            log.warn("InsufficientFundsException: amount="+amount+", neededAmount="+neededAmount+", preselectedBalance="+preselectedBalance);
             throw new SpendException(SpendError.INSUFFICIENT_FUNDS);
         }
 
-        return new SpendSelectionSimple(utxoProvider.getBipFormatSupplier(), utxos);
+        return new SpendSelectionSimple(utxoProvider.getBipFormatSupplier(), utxos, changeFormat, false);
     }
 
-    private SpendSelection computeUtxoSelection(BipWallet spendWallet, BipWallet changeWallet, String address, boolean boltzmann, long amount, long neededAmount, Collection<UTXO> utxos, BipFormat addressFormat,  BigInteger feePerKb, BipFormat forcedChangeFormat) throws SpendException {
-        WhirlpoolAccount account = spendWallet.getAccount();
+    private SpendSelection computeSpendSelectionForUtxosAvailable(BipWallet spendWallet, BipWallet changeWallet, String address, boolean stonewall, long amount, BipFormat changeFormat, BigInteger feePerKb, BipFormat forcedChangeFormat) throws SpendException {
+        SamouraiAccount account = spendWallet.getAccount();
         NetworkParameters params = spendWallet.getParams();
-        long balance = UTXO.sumValue(utxos);
 
-        // insufficient balance
-        if (amount > balance) {
-            log.warn("InsufficientFundsException: amount="+amount+", balance="+balance);
-            throw new SpendException(SpendError.INSUFFICIENT_FUNDS);
-        }
+        // get all UTXO (throws SpendException on insufficient balance)
+        Collection<UTXO> utxos = findUtxosAvailableForAddressFormat(amount, account, changeFormat, feePerKb, params);
 
-        // entire balance (can only be simple spend)
-        if (amount == balance) {
-            // take all utxos, deduct fee
-            if (log.isDebugEnabled()) {
-                log.debug("SIMPLE spending all utxos");
-            }
-            return new SpendSelectionSimple(utxoProvider.getBipFormatSupplier(), utxos);
-        }
-
-        // boltzmann spend
-        if (boltzmann) {
+        // stonewall spend
+        if (stonewall) {
             IIndexHandler changeIndexHandler = changeWallet.getIndexHandlerChange();
-            SpendSelection spendSelection = SpendSelectionBoltzmann.compute(neededAmount, utxoProvider, addressFormat, amount, address, account, forcedChangeFormat, params, feePerKb, changeIndexHandler);
+            SpendSelection spendSelection = SpendSelectionStonewall.compute(utxoProvider, changeFormat, amount, address, account, forcedChangeFormat, params, feePerKb, changeIndexHandler);
             if (spendSelection != null) {
                 return spendSelection;
             }
@@ -152,22 +157,8 @@ public class SpendBuilder {
 
         // simple spend (less than balance)
         BipFormatSupplier bipFormatSupplier = utxoProvider.getBipFormatSupplier();
-
-        // get smallest 1 UTXO > than spend + fee + dust
-        SpendSelection spendSelection = SpendSelectionSimple.computeSpendSingle(utxos, amount, bipFormatSupplier, params, feePerKb);
+        SpendSelection spendSelection = SpendSelectionSimple.compute(utxos, amount, changeFormat, bipFormatSupplier, params, feePerKb);
         if (spendSelection != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("SIMPLE spending smallest possible utxo");
-            }
-            return spendSelection;
-        }
-
-        // get largest UTXOs > than spend + fee + dust
-        spendSelection = SpendSelectionSimple.computeSpendMultiple(utxos, amount, bipFormatSupplier, params, feePerKb);
-        if (spendSelection != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("SIMPLE spending multiple utxos");
-            }
             return spendSelection;
         }
 
@@ -175,21 +166,13 @@ public class SpendBuilder {
         throw new SpendException(SpendError.MAKING);
     }
 
-    private long computeNeededAmount(WhirlpoolAccount account, long amount, BipFormat changeFormat, BigInteger feePerKb) {
-        long neededAmount = 0L;
-        if (changeFormat == BIP_FORMAT.SEGWIT_NATIVE) {
-            neededAmount += FeeUtil.getInstance().estimatedFeeSegwit(0, 0, UTXO.countOutpoints(utxoProvider.getUtxos(account, BIP_FORMAT.SEGWIT_NATIVE)), 4, 0, feePerKb).longValue();
-//                    Log.d("segwit:" + neededAmount);
-        } else if (changeFormat == BIP_FORMAT.SEGWIT_COMPAT) {
-            neededAmount += FeeUtil.getInstance().estimatedFeeSegwit(0, UTXO.countOutpoints(utxoProvider.getUtxos(account, BIP_FORMAT.SEGWIT_COMPAT)), 0, 4, 0, feePerKb).longValue();
-//                    Log.d("segwit:" + neededAmount);
-        } else {
-            neededAmount += FeeUtil.getInstance().estimatedFeeSegwit(UTXO.countOutpoints(utxoProvider.getUtxos(account, BIP_FORMAT.LEGACY)), 0, 0, 4, 0, feePerKb).longValue();
-//                    Log.d("p2pkh:" + neededAmount);
-        }
-        neededAmount += amount;
-        neededAmount += SamouraiWalletConst.bDust.longValue();
-        return neededAmount;
+    private static long computeNeededAmount(long fee, long amount) {
+        return fee + amount + SamouraiWalletConst.bDust.longValue();
+    }
+
+    public static long computeNeededAmount(Collection<MyTransactionOutPoint> outPoints, long amount, BigInteger feePerKb, NetworkParameters params) {
+        long fee = FeeUtil.getInstance().estimatedFeeSegwit(outPoints, 4, 0, feePerKb, params).longValue();
+        return computeNeededAmount(fee, amount);
     }
 
     public static BipFormat computeAddressFormat(BipFormat forcedChangeFormat, String address, BipFormatSupplier bipFormatSupplier, NetworkParameters params) {

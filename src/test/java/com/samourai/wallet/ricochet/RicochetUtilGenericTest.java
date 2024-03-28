@@ -1,9 +1,9 @@
 package com.samourai.wallet.ricochet;
 
 import com.samourai.wallet.bipWallet.BipWallet;
-import com.samourai.wallet.hd.BIP_WALLET;
+import com.samourai.wallet.constants.BIP_WALLET;
 import com.samourai.wallet.test.AbstractTest;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccount;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -62,7 +62,7 @@ public class RicochetUtilGenericTest extends AbstractTest {
 
     private RicochetConfig computeConfig(boolean useBip47) {
         int bip47WalletOutgoingIdx = 0;
-        return new RicochetConfig(1, useBip47, "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4", true, true, 999999, utxoProvider, bip47Util, bipWalletRicochet, bipWalletSpend, WhirlpoolAccount.DEPOSIT, bip47Wallet, bip47WalletOutgoingIdx);
+        return new RicochetConfig(1, useBip47, "tb1q9m8cc0jkjlc9zwvea5a2365u6px3yu646vgez4", true, true, 999999, utxoProvider, bip47Util, bipWalletRicochet, bipWalletSpend, SamouraiAccount.DEPOSIT, bip47Wallet.getAccount(0), bip47WalletOutgoingIdx);
     }
 
 }

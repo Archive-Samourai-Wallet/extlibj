@@ -1,12 +1,14 @@
 package com.samourai.wallet.api.paynym.beans;
 
+import com.samourai.wallet.bip47.rpc.PaymentCode;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Objects;
 
 public class PaynymState {
   private boolean claimed;
-  private String paymentCode;
+  private PaymentCode paymentCode;
   private String nymID; // null when not claimed
   private String nymName; // null when not claimed
   private String nymAvatar; // null when not claimed
@@ -15,7 +17,7 @@ public class PaynymState {
   private Collection<PaynymContact> followers;
 
   // claimed
-  public PaynymState(String paymentCode, String nymID, String nymName, String nymAvatar, boolean segwit, Collection<PaynymContact> following, Collection<PaynymContact> followers) {
+  public PaynymState(PaymentCode paymentCode, String nymID, String nymName, String nymAvatar, boolean segwit, Collection<PaynymContact> following, Collection<PaynymContact> followers) {
     this.claimed = true;
     this.paymentCode = paymentCode;
     this.nymID = nymID;
@@ -27,7 +29,7 @@ public class PaynymState {
   }
 
   // not claimed
-  public PaynymState(String paymentCode) {
+  public PaynymState(PaymentCode paymentCode) {
     this.claimed = false;
     this.paymentCode = paymentCode;
     this.nymID = null;
@@ -54,7 +56,7 @@ public class PaynymState {
     return claimed;
   }
 
-  public String getPaymentCode() {
+  public PaymentCode getPaymentCode() {
     return paymentCode;
   }
 

@@ -2,6 +2,7 @@ package com.samourai.wallet.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 public abstract class AbstractOrchestrator {
   private Logger log;
@@ -32,22 +33,28 @@ public abstract class AbstractOrchestrator {
     this.lastRun = 0;
   }
 
+  protected String getThreadName() {
+    return getClass().getSimpleName();
+  }
+
   public synchronized void start(boolean daemon) {
     if (isStarted()) {
       log.error("Cannot start: already started");
       return;
     }
-    if (log.isDebugEnabled()) {
-      log.debug(
+    if (log.isTraceEnabled()) {
+      log.trace(
           "Starting... loopDelay="
               + LOOP_DELAY
               + ", lastRunDelay="
               + (LAST_RUN_DELAY != null ? LAST_RUN_DELAY : "null"));
     }
     this.started = true;
+    String mdc = LogbackUtils.mdcAppend("orchestrator="+getThreadName());
     this.myThread =
         new Thread(
                 () -> {
+                  MDC.put("mdc",mdc);
                   if (START_DELAY > 0) {
                     doSleep(START_DELAY);
                   }
@@ -69,12 +76,12 @@ public abstract class AbstractOrchestrator {
 
                   // thread exiting
                   myThread = null;
-                  if (log.isDebugEnabled()) {
-                    log.debug("Ended.");
+                  if (log.isTraceEnabled()) {
+                    log.trace("Ended.");
                   }
                   resetOrchestrator();
                 },
-            getClass().getSimpleName());
+            getThreadName());
     this.myThread.setDaemon(daemon);
     this.myThread.start();
   }
@@ -86,8 +93,8 @@ public abstract class AbstractOrchestrator {
       log.error("Cannot stop: not started");
       return;
     }
-    if (log.isDebugEnabled()) {
-      log.debug("Ending...");
+    if (log.isTraceEnabled()) {
+      log.trace("Ending...");
     }
     this.started = false;
     synchronized (myThread) {
@@ -138,8 +145,8 @@ public abstract class AbstractOrchestrator {
   private boolean waitForLastRunDelay(int delay) {
     long timeToWait = computeWaitForLastRunDelay(delay);
     if (timeToWait > 0) {
-      if (log.isDebugEnabled()) {
-        log.debug("Sleeping for lastRunDelay (" + (timeToWait / 1000) + "s to wait)");
+      if (log.isTraceEnabled()) {
+        log.trace("Sleeping for lastRunDelay (" + (timeToWait / 1000) + "s to wait)");
       }
       sleepOrchestrator(timeToWait, true);
       return true;
@@ -158,5 +165,9 @@ public abstract class AbstractOrchestrator {
 
   public boolean isDontDisturb() {
     return dontDisturb;
+  }
+
+  protected int getLOOP_DELAY() {
+    return LOOP_DELAY;
   }
 }

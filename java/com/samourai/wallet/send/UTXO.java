@@ -12,22 +12,28 @@ import java.util.stream.Collectors;
 public class UTXO {
 
     private String path = null;
+    private String xpub = null;
 
     private List<MyTransactionOutPoint> outpoints = null;
 
     public UTXO() {
-        this(new ArrayList<MyTransactionOutPoint>(), null);
+        this(new ArrayList<>(), null, null);
     }
 
-    public UTXO(List<MyTransactionOutPoint> outpoints, String path) {
+    public UTXO(String path, String xpub) {
+        this(new ArrayList<>(), path, xpub);
+    }
+
+    public UTXO(List<MyTransactionOutPoint> outpoints, String path, String xpub) {
         this.outpoints = outpoints;
         this.path = path;
+        this.xpub = xpub;
     }
 
-    public Collection<UnspentOutput> toUnspentOutputs(String xpub) {
+    public Collection<UnspentOutput> toUnspentOutputs() {
         List<UnspentOutput> unspentOutputs = new LinkedList<>();
         for (MyTransactionOutPoint outPoint : outpoints) {
-            unspentOutputs.add(new UnspentOutput(outPoint, null, path, xpub));
+            unspentOutputs.add(new UnspentOutput(outPoint, path, xpub));
         }
         return unspentOutputs;
     }
@@ -46,6 +52,14 @@ public class UTXO {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public String getXpub() {
+        return xpub;
+    }
+
+    public void setXpub(String xpub) {
+        this.xpub = xpub;
     }
 
     public long getValue() {
@@ -107,6 +121,14 @@ public class UTXO {
 
         }
 
+    }
+
+    public static List<MyTransactionOutPoint> listOutpoints(Collection<UTXO> utxos) {
+        List<MyTransactionOutPoint> outPoints = new LinkedList<>();
+        for (UTXO utxo : utxos) {
+            outPoints.addAll(utxo.getOutpoints());
+        }
+        return outPoints;
     }
 
     public static int countOutpoints(Collection<UTXO> utxos) {

@@ -1,8 +1,7 @@
 package com.samourai.wallet.send.beans;
 
-import com.samourai.soroban.cahoots.CahootsContext;
+import com.samourai.wallet.cahoots.CahootsContext;
 import com.samourai.wallet.api.backend.IPushTx;
-import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.cahoots.Cahoots;
 import com.samourai.wallet.cahoots.CahootsType;
 import com.samourai.wallet.send.MyTransactionOutPoint;
@@ -21,9 +20,10 @@ public class SpendTxCahoots extends SpendTx {
     private Cahoots cahoots;
     private CahootsContext cahootsContext;
 
-    public SpendTxCahoots(BipFormat changeFormat, Cahoots cahoots, CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) throws SpendException {
-        super(CahootsType.find(cahoots.getType()).get().getSpendType(), changeFormat,
+    public SpendTxCahoots(Cahoots cahoots, CahootsContext cahootsContext, UtxoKeyProvider utxoKeyProvider) throws SpendException {
+        super(CahootsType.find(cahoots.getType()).get().getSpendType(),
                 cahoots.getSpendAmount(),
+                false,
                 cahoots.getFeeAmount(),
                 cahootsContext.getMinerFeePaid(),
                 cahootsContext.getSamouraiFee(),

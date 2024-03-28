@@ -18,7 +18,7 @@ import java.nio.ByteBuffer;
  */
 public class BIP47Account extends HD_Account {
 
-    private String strPaymentCode = null;
+    private PaymentCode paymentCode = null;
 
     /**
      * Constructor for account.
@@ -30,7 +30,7 @@ public class BIP47Account extends HD_Account {
      */
     public BIP47Account(NetworkParameters params, DeterministicKey wKey, int child) {
         super(params, wKey, child);
-        strPaymentCode = createPaymentCodeFromAccountKey();
+        paymentCode = new PaymentCode(createPaymentCodeFromAccountKey());
     }
 
     /**
@@ -48,12 +48,12 @@ public class BIP47Account extends HD_Account {
         // assign master key to account key
         if(FormatsUtilGeneric.getInstance().isValidPaymentCode(data))  {
             aKey = createMasterPubKeyFromPaymentCode(data);
-            strPaymentCode = data;
+            paymentCode = new PaymentCode(data);
         }
         else if(FormatsUtilGeneric.getInstance().isValidXpub(data))  {
             aKey = FormatsUtilGeneric.getInstance().createMasterPubKeyFromXPub(data);
             strXPUB = data;
-            strPaymentCode = createPaymentCodeFromAccountKey();
+            paymentCode = new PaymentCode(createPaymentCodeFromAccountKey());
         }
         else    {
             ;
@@ -96,15 +96,12 @@ public class BIP47Account extends HD_Account {
      * @return String
      *
      */
-    public String getPaymentCode() {
+    public PaymentCode getPaymentCode() {
+        return paymentCode;
+    }
 
-        if(strPaymentCode != null)  {
-            return strPaymentCode;
-        }
-        else  {
-            return null;
-        }
-
+    public PaymentCode getPaymentCodeSamourai() {
+        return new PaymentCode(getPaymentCode().makePaymentCodeSamourai());
     }
 
     /**

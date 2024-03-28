@@ -10,7 +10,6 @@ import org.bouncycastle.util.BigIntegers;
 import java.math.BigInteger;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import javax.annotation.Nullable;
 
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
@@ -129,7 +128,7 @@ public class P2TRAddress extends SegwitAddress {
      * @return Returns a private key in bytes.
      * @throws IOException
      */
-    public ECKey getTweakedPrivKey(@Nullable byte[] hash) throws IOException {
+    public ECKey getTweakedPrivKey(byte[] hash) throws IOException {
         BigInteger privKey0 = ecKey.getPrivKey();
         Point privPoint = Point.mul(Point.getG(), ecKey.getPrivKey());
         BigInteger privKey;

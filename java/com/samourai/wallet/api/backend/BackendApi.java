@@ -4,12 +4,13 @@ import com.samourai.wallet.api.backend.beans.*;
 import com.samourai.wallet.api.backend.seenBackend.ISeenBackend;
 import com.samourai.wallet.api.backend.seenBackend.SeenResponse;
 import com.samourai.wallet.api.backend.websocket.BackendWsApi;
+import com.samourai.wallet.httpClient.HttpResponseException;
 import com.samourai.wallet.util.JSONUtils;
 import com.samourai.wallet.util.Util;
 import com.samourai.wallet.util.oauth.OAuthApi;
 import com.samourai.wallet.util.oauth.OAuthManager;
 import com.samourai.wallet.util.oauth.OAuthManagerJava;
-import com.samourai.websocket.client.IWebsocketClient;
+import com.samourai.wallet.websocketClient.IWebsocketClient;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,11 +69,7 @@ public class BackendApi implements ISweepBackend, ISeenBackend {
     return zpubStr;
   }
 
-  public List<UnspentOutput> fetchUtxos(String zpub) throws Exception {
-    return fetchUtxos(new String[]{zpub});
-  }
-
-  public List<UnspentOutput> fetchUtxos(String[] zpubs) throws Exception {
+  public List<UnspentOutput> fetchUtxos(String... zpubs) throws Exception {
     String zpubStr = computeZpubStr(zpubs);
     String url = computeAuthUrl(urlBackend + URL_UNSPENT + zpubStr);
     if (log.isDebugEnabled()) {
@@ -88,7 +85,7 @@ public class BackendApi implements ISweepBackend, ISeenBackend {
     return unspentOutputs;
   }
 
-  public Map<String,MultiAddrResponse.Address> fetchAddresses(String[] zpubs) throws Exception {
+  public Map<String,MultiAddrResponse.Address> fetchAddresses(String... zpubs) throws Exception {
     String zpubStr = computeZpubStr(zpubs);
     String url = computeAuthUrl(urlBackend + URL_MULTIADDR + zpubStr);
     if (log.isDebugEnabled()) {
@@ -114,12 +111,12 @@ public class BackendApi implements ISweepBackend, ISeenBackend {
 
     if (log.isDebugEnabled()) {
       log.debug(
-          "fetchAddress "
-              + zpub
-              + ": account_index="
-              + address.account_index
-              + ", change_index="
-              + address.change_index);
+              "fetchAddress "
+                      + zpub
+                      + ": account_index="
+                      + address.account_index
+                      + ", change_index="
+                      + address.change_index);
     }
     return address;
   }
@@ -144,11 +141,7 @@ public class BackendApi implements ISweepBackend, ISeenBackend {
     return httpClient.getJson(url, TxDetail.class, headers);
   }
 
-  public WalletResponse fetchWallet(String zpub) throws Exception {
-    return fetchWallet(new String[]{zpub});
-  }
-
-  public WalletResponse fetchWallet(String[] zpubs) throws Exception {
+  public WalletResponse fetchWallet(String... zpubs) throws Exception {
     String zpubStr = computeZpubStr(zpubs);
     String url = computeAuthUrl(urlBackend + URL_WALLET + zpubStr);
     if (log.isDebugEnabled()) {
@@ -179,14 +172,14 @@ public class BackendApi implements ISweepBackend, ISeenBackend {
     return response;
   }
 
-  public void initBip84(String zpub) throws Exception {
+  public void initBip84(String xpub) throws Exception {
     String url = computeAuthUrl(urlBackend + URL_INIT_BIP84);
     if (log.isDebugEnabled()) {
       log.debug("initBip84");
     }
     Map<String,String> headers = computeHeaders();
     Map<String, String> postBody = new HashMap<String, String>();
-    postBody.put("xpub", zpub);
+    postBody.put("xpub", xpub);
     postBody.put("type", "new");
     postBody.put("segwit", "bip84");
     httpClient.postUrlEncoded(url, Void.class, headers, postBody);
@@ -219,11 +212,11 @@ public class BackendApi implements ISweepBackend, ISeenBackend {
     return seen(Arrays.asList(address)).isSeen(address);
   }
 
-  @Override
   public String pushTx(String txHex) throws Exception {
     return pushTx(txHex, null);
   }
 
+  @Override
   public String pushTx(String txHex, Collection<Integer> strictModeVouts) throws Exception {
     if (log.isDebugEnabled()) {
       log.debug("pushTx... " + txHex);
@@ -248,7 +241,7 @@ public class BackendApi implements ISweepBackend, ISeenBackend {
         log.debug("pushTx success: "+txid);
       }
       return txid;
-    } catch (HttpException e) {
+    } catch (HttpResponseException e) {
       // parse pushTxResponse
       String responseBody = e.getResponseBody();
       BackendPushTxResponse backendPushTxResponse = null;
@@ -306,6 +299,7 @@ public class BackendApi implements ISweepBackend, ISeenBackend {
     return url;
   }
 
+  @Override
   public IBackendClient getHttpClient() {
     return httpClient;
   }

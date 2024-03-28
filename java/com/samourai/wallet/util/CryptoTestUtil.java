@@ -40,22 +40,8 @@ public class CryptoTestUtil {
         return instance;
     }
 
-    public byte[] generateSeed() throws Exception {
-        int nbWords = 12;
-        // len == 16 (12 words), len == 24 (18 words), len == 32 (24 words)
-        int len = (nbWords / 3) * 4;
-
-        byte seed[] = RandomUtil.getInstance().nextBytes(len);
-        return seed;
-    }
-
-    public HD_Wallet generateWallet(int purpose, NetworkParameters networkParameters) throws Exception {
-        byte seed[] = generateSeed();
-        return hdWalletFactory.getHD(purpose, seed, "test", networkParameters);
-    }
-
     public BIP47Wallet generateBip47Wallet(NetworkParameters networkParameters) throws Exception {
-        HD_Wallet bip44Wallet = generateWallet(44, networkParameters);
+        HD_Wallet bip44Wallet = hdWalletFactory.generateWallet(44, networkParameters);
         BIP47Wallet bip47Wallet = new BIP47Wallet(bip44Wallet);
         return bip47Wallet;
     }
@@ -148,10 +134,9 @@ public class CryptoTestUtil {
         String inputHash = "598cbf9f11ab9a1a5e788dbd11a7cf970089cec43e04fc073eb91c0a5717fd0e";
         byte[] scriptBytes = bipFormatSupplier.getTransactionOutput(address, value, params).getScriptBytes();
         MyTransactionOutPoint outPoint = new MyTransactionOutPoint(params, new Sha256Hash(inputHash), tx.getInputs().size(), BigInteger.valueOf(value), scriptBytes, address, 9999);
-        String pubkey = privKey.getPublicKeyAsHex();
         String path = "path...";
         String xpub = "xpub...";
-        UnspentOutput utxo = new UnspentOutput(outPoint, pubkey, path, xpub);
+        UnspentOutput utxo = new UnspentOutput(outPoint, path, xpub);
         TransactionInput input = utxo.computeSpendInput(params);
         tx.addInput(input);
     }

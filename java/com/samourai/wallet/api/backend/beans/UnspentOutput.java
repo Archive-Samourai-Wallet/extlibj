@@ -23,7 +23,6 @@ public class UnspentOutput {
     public long value;
     public String script;
     public String addr;
-    public String pubkey;
     public int confirmations;
     public Xpub xpub;
 
@@ -38,12 +37,11 @@ public class UnspentOutput {
         this.value = copy.value;
         this.script = copy.script;
         this.addr = copy.addr;
-        this.pubkey = copy.pubkey;
         this.confirmations = copy.confirmations;
         this.xpub = copy.xpub;
     }
 
-    public UnspentOutput(MyTransactionOutPoint outPoint, String pubkey, String path, String xpub) {
+    public UnspentOutput(MyTransactionOutPoint outPoint, String path, String xpub) {
         this.tx_hash = outPoint.getTxHash().toString();
         this.tx_output_n = outPoint.getTxOutputN();
         this.tx_version = -1; // ignored
@@ -51,7 +49,6 @@ public class UnspentOutput {
         this.value = outPoint.getValue().getValue();
         this.script = outPoint.getScriptBytes() != null ? Hex.toHexString(outPoint.getScriptBytes()) : null;
         this.addr = outPoint.getAddress();
-        this.pubkey = pubkey;
         this.confirmations = outPoint.getConfirmations();
         this.xpub = new Xpub();
         this.xpub.path = path;
@@ -63,11 +60,19 @@ public class UnspentOutput {
     }
 
     public int computePathChainIndex() {
-        return Integer.parseInt(xpub.path.split(PATH_SEPARATOR)[1]);
+        try {
+            return Integer.parseInt(xpub.path.split(PATH_SEPARATOR)[1]);
+        } catch (Exception e) {
+            throw new RuntimeException("computePathChainIndex failed for utxo path: "+xpub.path);
+        }
     }
 
     public int computePathAddressIndex() {
-        return Integer.parseInt(xpub.path.split(PATH_SEPARATOR)[2]);
+        try {
+            return Integer.parseInt(xpub.path.split(PATH_SEPARATOR)[2]);
+        } catch (Exception e) {
+            throw new RuntimeException("computePathAddressIndex failed for utxo path: "+xpub.path);
+        }
     }
 
     public String getPath() {
@@ -84,6 +89,14 @@ public class UnspentOutput {
             return HD_Address.getPathAddressBip47(purpose, coinType, accountIndex);
         }
         return HD_Address.getPathAddress(purpose, coinType, accountIndex, computePathChainIndex(), computePathAddressIndex());
+    }
+
+    public static String computePath(HD_Address hdAddress) {
+        return computePath(hdAddress.getChainIndex(), hdAddress.getAddressIndex());
+    }
+
+    public static String computePath(int chainIndex, int addressIndex) {
+        return "m"+PATH_SEPARATOR+chainIndex+PATH_SEPARATOR+addressIndex;
     }
 
     public MyTransactionOutPoint computeOutpoint(NetworkParameters params) {
@@ -121,17 +134,20 @@ public class UnspentOutput {
 
     @Override
     public String toString() {
-      return tx_hash
-          + ":"
-          + tx_output_n
+      return getUtxoName()
           + " ("
           + value
           + " sats, "
           + confirmations
-          + " confirmations, path="
-          + (xpub != null && xpub.path != null ? xpub.path : "null")
+          + " confirmations"
+          + ", path=" + (xpub != null && xpub.path != null ? xpub.path : "null")
+          + ", xpub=" + (xpub != null && xpub.m != null ? xpub.m : "null")
           + ", address="
           + addr
           + ")";
+    }
+
+    public String getUtxoName() {
+        return tx_hash+":"+tx_output_n;
     }
   }

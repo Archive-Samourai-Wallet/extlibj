@@ -10,8 +10,8 @@ import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.Chain;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.UTXO;
-import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccountIndex;
+import com.samourai.wallet.constants.SamouraiAccount;
 import org.bitcoinj.core.*;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -25,10 +25,11 @@ import java.util.stream.Collectors;
 public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvider {
 
   private NetworkParameters params;
-  private Map<WhirlpoolAccount, List<UTXO>> utxosByAccount;
+  private Map<SamouraiAccount, List<UTXO>> utxosByAccount;
   private WalletSupplier walletSupplier;
   private CahootsUtxoProvider cahootsUtxoProvider;
   private int nbUtxos = 0;
+  private Integer forcedWalletUniqueId = null;
 
   public MockUtxoProvider(NetworkParameters params, WalletSupplier walletSupplier) {
     this.params = params;
@@ -37,15 +38,20 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
     utxosByAccount = new LinkedHashMap<>();
 
     // init wallets
-    for (WhirlpoolAccount account : WhirlpoolAccount.values()) {
+    for (SamouraiAccount account : SamouraiAccount.values()) {
       utxosByAccount.put(account, new LinkedList<>());
     }
   }
 
+  public void setRetroCompatibilityMode() {
+    // for retro-compatible tests
+    this.forcedWalletUniqueId = 1000;
+  }
+
   public void clear() {
     // reset indexs
-    for (WhirlpoolAccount whirlpoolAccount : WhirlpoolAccount.values()) {
-      Collection<BipWallet> bipWallets = walletSupplier.getWallets(whirlpoolAccount);
+    for (SamouraiAccount samouraiAccount : SamouraiAccount.values()) {
+      Collection<BipWallet> bipWallets = walletSupplier.getWallets(samouraiAccount);
       for (BipWallet bipWallet : bipWallets) {
         for (Chain chain : Chain.values()) {
           bipWallet.getIndexHandler(chain).set(0, true);
@@ -61,39 +67,48 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
   }
 
   public UTXO addUtxo(int account, String txid, int n, long value, String address) throws Exception {
-    WhirlpoolAccount whirlpoolAccount = SamouraiAccountIndex.find(account);
-    BipWallet bipWallet = walletSupplier.getWallet(whirlpoolAccount, BIP_FORMAT.SEGWIT_NATIVE);
-    return addUtxo(bipWallet, Sha256Hash.of(txid.getBytes()).toString(), n, value, address, ECKey.fromPrivate(BigInteger.valueOf(1234)));
+    SamouraiAccount samouraiAccount = SamouraiAccountIndex.find(account);
+    BipWallet bipWallet = walletSupplier.getWallet(samouraiAccount, BIP_FORMAT.SEGWIT_NATIVE);
+    return addUtxo(bipWallet, Sha256Hash.of(txid.getBytes()).toString(), n, value, address, ECKey.fromPrivate(BigInteger.valueOf(1234)), null);
   }
 
   public UTXO addUtxo(BipWallet bipWallet, long value) throws Exception {
     int n = nbUtxos+1; // keep backward-compatibility with existing tests
-    BipAddress bipAddress = bipWallet.getAddressAt(0, n);
+    BipFormat bipFormat = bipWallet.getBipFormatDefault();
+    BipAddress bipAddress = bipWallet.getAddressAt(0, n, bipFormat);
     String address = bipAddress.getAddressString();
+    String path = UnspentOutput.computePath(bipAddress.getHdAddress());
     ECKey ecKey = bipAddress.getHdAddress().getECKey();
-    String txid = generateTxHash(n, params);
-    return addUtxo(bipWallet, txid, n, value, address, ecKey);
+    // use a namespace specific to BipWallet for generating txid
+    int walletUniqueId = new BigInteger(bipWallet.getHdAccount().xpubstr().getBytes()).intValue();
+    int uniqueId = forcedWalletUniqueId != null ? forcedWalletUniqueId : walletUniqueId;
+    String txid = generateTxHash(Math.abs(n*uniqueId), params);
+    return addUtxo(bipWallet, txid, n, value, address, ecKey, path);
   }
 
   public UTXO addUtxo(BipWallet bipWallet, String txid, int n, long value, String address, ECKey ecKey) throws Exception {
-    UTXO utxo = new UTXO();
+    return addUtxo(bipWallet, txid, n, value, address, ecKey, null);
+  }
 
-    nbUtxos++;
-    String pub = bipWallet.getPub();
-    UnspentOutput unspentOutput = computeUtxo(txid, n, pub, address, value, 999, getBipFormatSupplier(), params);
+  public UTXO addUtxo(BipWallet bipWallet, String txid, int n, long value, String address, ECKey ecKey, String path) throws Exception {
+    String xpub = bipWallet.getXPub();
+    UnspentOutput unspentOutput = computeUtxo(txid, n, path, xpub, address, value, 999, getBipFormatSupplier(), params);
     MyTransactionOutPoint outPoint = unspentOutput.computeOutpoint(params);
-    utxo.getOutpoints().add(outPoint);
-    WhirlpoolAccount account = bipWallet.getAccount();
+    UTXO utxo = new UTXO(Arrays.asList(outPoint), path, xpub);
+    nbUtxos++;
+
+    SamouraiAccount account = bipWallet.getAccount();
     utxosByAccount.get(account).add(utxo);
     setKey(outPoint, ecKey);
     return utxo;
   }
 
-  private static UnspentOutput computeUtxo(String hash, int n, String xpub, String address, long value, int confirms, BipFormatSupplier bipFormatSupplier, NetworkParameters params) throws Exception {
+  private static UnspentOutput computeUtxo(String hash, int n, String path, String xpub, String address, long value, int confirms, BipFormatSupplier bipFormatSupplier, NetworkParameters params) throws Exception {
     UnspentOutput utxo = new UnspentOutput();
     utxo.tx_hash = hash;
     utxo.tx_output_n = n;
     utxo.xpub = new UnspentOutput.Xpub();
+    utxo.xpub.path = path;
     utxo.xpub.m = xpub;
     utxo.confirmations = confirms;
     utxo.addr = address;
@@ -102,26 +117,25 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
     return utxo;
   }
 
-  private static String generateTxHash(int i, NetworkParameters params) {
+  private static String generateTxHash(int uniqueId, NetworkParameters params) {
     Transaction tx = new Transaction(params);
-    long uniqueId = i*1000;
     tx.addOutput(Coin.valueOf(uniqueId), ECKey.fromPrivate(BigInteger.valueOf(uniqueId))); // mock key)
     return tx.getHashAsString();
   }
 
   @Override
-  public String getNextChangeAddress(WhirlpoolAccount account, BipFormat bipFormat, boolean increment) {
+  public String getNextAddressChange(SamouraiAccount account, BipFormat bipFormat, boolean increment) {
     BipWallet bipWallet = walletSupplier.getWallet(account, bipFormat);
-    return bipWallet.getNextChangeAddress(increment).getAddressString();
+    return bipWallet.getNextAddressChange(increment).getAddressString();
   }
 
   @Override
-  public Collection<UTXO> getUtxos(WhirlpoolAccount account) {
+  public Collection<UTXO> getUtxos(SamouraiAccount account) {
     return utxosByAccount.get(account);
   }
 
   @Override
-  public Collection<UTXO> getUtxos(WhirlpoolAccount account, BipFormat bipFormat) {
+  public Collection<UTXO> getUtxos(SamouraiAccount account, BipFormat bipFormat) {
     return utxosByAccount.get(account).stream().filter(utxo -> {
       // TODO zeroleak optimize
       String address = utxo.getOutpoints().iterator().next().getAddress();

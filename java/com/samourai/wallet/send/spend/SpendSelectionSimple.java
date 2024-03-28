@@ -11,7 +11,7 @@ import com.samourai.wallet.send.beans.SpendType;
 import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoProvider;
 import com.samourai.wallet.util.FeeUtil;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccount;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
@@ -22,16 +22,41 @@ import java.util.*;
 
 public class SpendSelectionSimple extends SpendSelection {
     private static final Logger log = LoggerFactory.getLogger(SpendSelectionSimple.class);
+    private BipFormat changeFormat;
+    private boolean entireBalance;
 
-    public SpendSelectionSimple(BipFormatSupplier bipFormatSupplier, Collection<UTXO> utxos) {
+    protected SpendSelectionSimple(BipFormatSupplier bipFormatSupplier, Collection<UTXO> utxos, BipFormat changeFormat, boolean entireBalance) {
         super(bipFormatSupplier, SpendType.SIMPLE);
 
         for (UTXO utxo : utxos) {
             addSelectedUTXO(utxo);
         }
+        this.changeFormat = changeFormat;
+        this.entireBalance = entireBalance;
     }
 
-    public static SpendSelectionSimple computeSpendSingle(Collection<UTXO> utxos, long amount, BipFormatSupplier bipFormatSupplier, NetworkParameters params, BigInteger feePerKb) {
+    public static SpendSelectionSimple compute(Collection<UTXO> utxos, long amount, BipFormat changeFormat, BipFormatSupplier bipFormatSupplier, NetworkParameters params, BigInteger feePerKb) {
+        // get smallest 1 UTXO > than spend + fee + dust
+        SpendSelectionSimple spendSelection = computeSingleSmallestUtxo(utxos, amount, changeFormat, bipFormatSupplier, params, feePerKb);
+        if (spendSelection != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("SIMPLE spending smallest possible utxo");
+            }
+            return spendSelection;
+        }
+
+        // get largest UTXOs > than spend + fee + dust
+        spendSelection = SpendSelectionSimple.computeMultipleLargestUtxos(utxos, amount, changeFormat, bipFormatSupplier, params, feePerKb);
+        if (spendSelection != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("SIMPLE spending multiple utxos");
+            }
+            return spendSelection;
+        }
+        return null;
+    }
+
+    private static SpendSelectionSimple computeSingleSmallestUtxo(Collection<UTXO> utxos, long amount, BipFormat changeFormat, BipFormatSupplier bipFormatSupplier, NetworkParameters params, BigInteger feePerKb) {
         // sort in ascending order by value
         List<UTXO> sortedUtxos = new ArrayList<>(utxos);
         Collections.sort(sortedUtxos, new UTXO.UTXOComparator());
@@ -49,13 +74,13 @@ public class SpendSelectionSimple extends SpendSelection {
                     log.debug("total value selected:" + u.getValue());
                     log.debug("nb inputs:" + u.getOutpoints().size());
                 }
-                return new SpendSelectionSimple(bipFormatSupplier, Arrays.asList(u));
+                return new SpendSelectionSimple(bipFormatSupplier, Arrays.asList(u), changeFormat, false);
             }
         }
         return null;
     }
 
-    public static SpendSelectionSimple computeSpendMultiple(Collection<UTXO> utxos, long amount, BipFormatSupplier bipFormatSupplier, NetworkParameters params, BigInteger feePerKb) {
+    private static SpendSelectionSimple computeMultipleLargestUtxos(Collection<UTXO> utxos, long amount, BipFormat changeFormat, BipFormatSupplier bipFormatSupplier, NetworkParameters params, BigInteger feePerKb) {
         // sort in descending order by value
         List<UTXO> sortedUtxos = new ArrayList<>(utxos);
         Collections.sort(sortedUtxos, new UTXO.UTXOComparator());
@@ -88,21 +113,21 @@ public class SpendSelectionSimple extends SpendSelection {
                     log.debug("total value selected:" + totalValueSelected);
                     log.debug("nb inputs:" + selected);
                 }
-                return new SpendSelectionSimple(bipFormatSupplier, selectedUTXO);
+                return new SpendSelectionSimple(bipFormatSupplier, selectedUTXO, changeFormat, false);
             }
         }
         return null;
     }
 
     @Override
-    public SpendTx spendTx(long amount, String address, BipFormat addressFormat, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, UtxoProvider utxoProvider, long blockHeight) throws SpendException {
-        List<MyTransactionOutPoint> outpoints = getSpendFrom();
+    public SpendTx spendTx(long amount, String address, SamouraiAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, UtxoProvider utxoProvider, long blockHeight) throws SpendException {
+        Collection<MyTransactionOutPoint> outpoints = getSpendFrom();
         Triple<Integer, Integer, Integer> outpointTypes = FeeUtil.getInstance().getOutpointCount(new Vector(outpoints), params);
         BigInteger fee;
         long change;
         Map<String, Long> receivers = new HashMap<>();
         if (amount == getTotalValueSelected()) {
-            // NO CHANGE = 1 output
+            // NO CHANGE = 1 output, spending entire balance
 
             // estimate fee
             fee = FeeUtil.getInstance().estimatedFeeSegwit(outpointTypes.getLeft(), outpointTypes.getMiddle(), outpointTypes.getRight(), 1, 0, feePerKb);
@@ -136,7 +161,7 @@ public class SpendSelectionSimple extends SpendSelection {
             receivers.put(address, amount);
 
             // add change output
-            String changeAddress = utxoProvider.getNextChangeAddress(account, addressFormat, true);
+            String changeAddress = utxoProvider.getNextAddressChange(account, changeFormat, true);
             if (changeAddress.equals(address)) {
                 // prevent erasing existing receiver
                 log.error("address and changeAddress are identical");
@@ -149,7 +174,11 @@ public class SpendSelectionSimple extends SpendSelection {
         // fee sanity check
         //
         // TODO zeroleak restoreChangeIndexes?
-        SpendTx spendTx = computeSpendTx(addressFormat, amount, fee.longValue(), change, receivers, rbfOptIn, utxoProvider, params, blockHeight);
+        SpendTx spendTx = computeSpendTx(amount, entireBalance, fee.longValue(), change, receivers, rbfOptIn, utxoProvider, params, blockHeight);
         return spendTx;
+    }
+
+    public boolean isEntireBalance() {
+        return entireBalance;
     }
 }

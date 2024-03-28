@@ -79,4 +79,8 @@ public class MyTransactionOutPoint extends TransactionOutPoint {
     public Sha256Hash getTxHash() {
         return getHash();
     }
+
+    public String getUtxoName() {
+        return getTxHash().toString()+":"+getTxOutputN();
+    }
 }

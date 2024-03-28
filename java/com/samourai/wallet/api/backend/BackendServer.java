@@ -1,6 +1,6 @@
 package com.samourai.wallet.api.backend;
 
-import com.samourai.dex.config.DexConfigProvider;
+import com.samourai.wallet.dexConfig.DexConfigProvider;
 
 public enum BackendServer {
   MAINNET(

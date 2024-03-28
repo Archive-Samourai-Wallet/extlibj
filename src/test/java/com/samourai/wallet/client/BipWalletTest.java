@@ -1,9 +1,8 @@
 package com.samourai.wallet.client;
 
+import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipWallet.BipWallet;
-import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
-import com.samourai.wallet.hd.BIP_WALLET;
-import com.samourai.wallet.hd.HD_Wallet;
+import com.samourai.wallet.constants.BIP_WALLET;
 import com.samourai.wallet.test.AbstractTest;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.MainNetParams;
@@ -17,8 +16,6 @@ public class BipWalletTest extends AbstractTest {
   private BipWallet bipWalletDeposit44;
   private BipWallet bipWalletPremix;
   private BipWallet bipWalletPostmix84;
-  private BipWallet bipWalletPostmix84AsBip44;
-  private BipWallet bipWalletPostmix84AsBip49;
   private BipWallet bipWalletBadbank;
 
   public BipWalletTest() throws Exception {
@@ -34,8 +31,6 @@ public class BipWalletTest extends AbstractTest {
     bipWalletDeposit44 = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP44);
     bipWalletPremix = walletSupplier.getWallet(BIP_WALLET.PREMIX_BIP84);
     bipWalletPostmix84 = walletSupplier.getWallet(BIP_WALLET.POSTMIX_BIP84);
-    bipWalletPostmix84AsBip44 = walletSupplier.getWallet(BIP_WALLET.POSTMIX_BIP84_AS_BIP44);
-    bipWalletPostmix84AsBip49 = walletSupplier.getWallet(BIP_WALLET.POSTMIX_BIP84_AS_BIP49);
     bipWalletBadbank = walletSupplier.getWallet(BIP_WALLET.BADBANK_BIP84);
   }
 
@@ -54,29 +49,50 @@ public class BipWalletTest extends AbstractTest {
   @Test
   public void getNextAddress() throws Exception {
     // receive
-    Assertions.assertEquals("m/84'/1'/0'/0/0", bipWalletDeposit84.getNextAddress().getPathAddress());
-    Assertions.assertEquals("m/84'/1'/0'/0/1", bipWalletDeposit84.getNextAddress().getPathAddress());
-    Assertions.assertEquals("m/84'/1'/0'/0/2", bipWalletDeposit84.getNextAddress().getPathAddress());
+    Assertions.assertEquals("m/84'/1'/0'/0/0", bipWalletDeposit84.getNextAddressReceive().getPathAddress());
+    Assertions.assertEquals("m/84'/1'/0'/0/1", bipWalletDeposit84.getNextAddressReceive().getPathAddress());
+    Assertions.assertEquals("m/84'/1'/0'/0/2", bipWalletDeposit84.getNextAddressReceive(true).getPathAddress());
+    Assertions.assertEquals("m/84'/1'/0'/0/3", bipWalletDeposit84.getNextAddressReceive(false).getPathAddress());
+    Assertions.assertEquals("m/84'/1'/0'/0/3", bipWalletDeposit84.getNextAddressReceive(false).getPathAddress());
 
     // change
-    Assertions.assertEquals("m/84'/1'/0'/1/0", bipWalletDeposit84.getNextChangeAddress().getPathAddress());
-    Assertions.assertEquals("m/84'/1'/0'/1/1", bipWalletDeposit84.getNextChangeAddress().getPathAddress());
-    Assertions.assertEquals("m/84'/1'/0'/1/2", bipWalletDeposit84.getNextChangeAddress().getPathAddress());
+    Assertions.assertEquals("m/84'/1'/0'/1/0", bipWalletDeposit84.getNextAddressChange().getPathAddress());
+    Assertions.assertEquals("m/84'/1'/0'/1/1", bipWalletDeposit84.getNextAddressChange().getPathAddress());
+    Assertions.assertEquals("m/84'/1'/0'/1/2", bipWalletDeposit84.getNextAddressChange(true).getPathAddress());
+    Assertions.assertEquals("m/84'/1'/0'/1/3", bipWalletDeposit84.getNextAddressChange(false).getPathAddress());
+    Assertions.assertEquals("m/84'/1'/0'/1/3", bipWalletDeposit84.getNextAddressChange(false).getPathAddress());
 
-    // postmix wallets use same counter
-    Assertions.assertEquals("m/84'/1'/2147483646'/0/0", bipWalletPostmix84.getNextAddress().getPathAddress());
-    Assertions.assertEquals("m/84'/1'/2147483646'/0/1", bipWalletPostmix84AsBip44.getNextAddress().getPathAddress());
-    Assertions.assertEquals("m/84'/1'/2147483646'/0/2", bipWalletPostmix84AsBip49.getNextAddress().getPathAddress());
-    Assertions.assertEquals("m/84'/1'/2147483646'/0/3", bipWalletPostmix84.getNextAddress().getPathAddress());
-    Assertions.assertEquals("m/84'/1'/2147483646'/0/4", bipWalletPostmix84AsBip44.getNextAddress().getPathAddress());
-    Assertions.assertEquals("m/84'/1'/2147483646'/0/5", bipWalletPostmix84AsBip49.getNextAddress().getPathAddress());
+    // postmix
+    Assertions.assertEquals("m/84'/1'/2147483646'/0/0", bipWalletPostmix84.getNextAddressReceive().getPathAddress());
+    Assertions.assertEquals("m/84'/1'/2147483646'/0/1", bipWalletPostmix84.getNextAddressReceive().getPathAddress());
+    Assertions.assertEquals("m/84'/1'/2147483646'/0/2", bipWalletPostmix84.getNextAddressReceive(true).getPathAddress());
+    Assertions.assertEquals("m/84'/1'/2147483646'/0/3", bipWalletPostmix84.getNextAddressReceive(false).getPathAddress());
+    Assertions.assertEquals("m/84'/1'/2147483646'/0/3", bipWalletPostmix84.getNextAddressReceive(false).getPathAddress());
+
+    // postmix wallets use same counter for any bipFormat
+    Assertions.assertEquals("m/84'/1'/2147483646'/0/3", bipWalletPostmix84.getNextAddressReceive(BIP_FORMAT.SEGWIT_COMPAT).getPathAddress());
+    Assertions.assertEquals("m/84'/1'/2147483646'/0/4", bipWalletPostmix84.getNextAddressReceive(BIP_FORMAT.LEGACY).getPathAddress());
+    Assertions.assertEquals("m/84'/1'/2147483646'/0/5", bipWalletPostmix84.getNextAddressReceive(BIP_FORMAT.SEGWIT_NATIVE).getPathAddress());
+    Assertions.assertEquals("m/84'/1'/2147483646'/0/6", bipWalletPostmix84.getNextAddressReceive(BIP_FORMAT.SEGWIT_NATIVE, false).getPathAddress());
+    Assertions.assertEquals("m/84'/1'/2147483646'/0/6", bipWalletPostmix84.getNextAddressReceive(BIP_FORMAT.SEGWIT_NATIVE, false).getPathAddress());
+
+    Assertions.assertEquals("mnda9Ff5QkBdJcUw3yeTrvW2FgCMrzVpfd", bipWalletPostmix84.getNextAddressReceive(BIP_FORMAT.LEGACY, false).getAddressString());
+    Assertions.assertEquals("2MsTFsbkSfgxTF5JWaFqk7UfNcYq3Jh52Dr", bipWalletPostmix84.getNextAddressReceive(BIP_FORMAT.SEGWIT_COMPAT, false).getAddressString());
+    Assertions.assertEquals("tb1qfcy56p45asmfyahp29vt6ccc2zh5yndlyjk9h0", bipWalletPostmix84.getNextAddressReceive(BIP_FORMAT.SEGWIT_NATIVE, false).getAddressString());
   }
 
   @Test
-  public void getZpub() throws Exception {
+  public void getBipPub() throws Exception {
     Assertions.assertEquals(
         "vpub5YEQpEDPAZWVTkmWASSHyaUMsae7uV9FnRrhZ3cqV6RFbBQx7wjVsUfLqSE3hgNY8WQixurkbWNkfV2sRE7LPfNKQh2t3s5une4QZthwdCu",
-        bipWalletDeposit84.getPub());
+        bipWalletDeposit84.getBipPub());
+  }
+
+  @Test
+  public void getXPub() throws Exception {
+    Assertions.assertEquals(
+            "tpubDCGZwoNuBCYuS9LbHLzdbfzjYe2fn7dKAHVSUPTkb1vuSfi7hUuiG3eT7tE1DzdcjhBF5SZk3vuu8EkcFUnbsaBpCyB2uDP7v3n774RGre9",
+            bipWalletDeposit84.getXPub());
   }
 
   @Test
@@ -102,11 +118,5 @@ public class BipWalletTest extends AbstractTest {
 
     Assertions.assertEquals("m/84'/1'/2147483646", bipWalletPostmix84.getDerivation().getPathAccount(params));
     Assertions.assertEquals("m/84'/1'/2147483646'/2", bipWalletPostmix84.getDerivation().getPathChain(2, params));
-
-    Assertions.assertEquals("m/84'/1'/2147483646", bipWalletPostmix84AsBip44.getDerivation().getPathAccount(params));
-    Assertions.assertEquals("m/84'/1'/2147483646'/2", bipWalletPostmix84AsBip44.getDerivation().getPathChain(2, params));
-
-    Assertions.assertEquals("m/84'/1'/2147483646", bipWalletPostmix84AsBip49.getDerivation().getPathAccount(params));
-    Assertions.assertEquals("m/84'/1'/2147483646'/2", bipWalletPostmix84AsBip49.getDerivation().getPathChain(2, params));
   }
 }

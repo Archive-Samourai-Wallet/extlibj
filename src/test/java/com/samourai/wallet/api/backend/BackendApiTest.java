@@ -23,9 +23,9 @@ import java.util.*;
 public class BackendApiTest extends AbstractTest {
 
   private static final String VPUB_1 =
-      "vpub5SLqN2bLY4WeYBwMrtdanr5SfhRC7AyW1aEwbtVbt7t9y6kgBCS6ajVA4LL7Jy2iojpH1hjaiTMp5h4y9dG2dC64bAk9ZwuFCX6AvxFddaa";
+          "vpub5SLqN2bLY4WeYBwMrtdanr5SfhRC7AyW1aEwbtVbt7t9y6kgBCS6ajVA4LL7Jy2iojpH1hjaiTMp5h4y9dG2dC64bAk9ZwuFCX6AvxFddaa";
   private static final String VPUB_2 =
-      "vpub5b14oTd3mpWGzbxkqgaESn4Pq1MkbLbzvWZju8Y6LiqsN9JXX7ZzvdCp1qDDxLqeHGr6BUssz2yFmUDm5Fp9jTdz4madyxK6mwgsCvYdK5S";
+          "vpub5b14oTd3mpWGzbxkqgaESn4Pq1MkbLbzvWZju8Y6LiqsN9JXX7ZzvdCp1qDDxLqeHGr6BUssz2yFmUDm5Fp9jTdz4madyxK6mwgsCvYdK5S";
 
   private ECKey inputKey = ECKey.fromPrivate(new BigInteger("45292090369707310635285627500870691371399357286012942906204494584441273561412"));
   private ECKey outputKey = ECKey.fromPrivate(new BigInteger("77292090369707310635285627500870691371399357286012942906204494584441273561412"));
@@ -149,7 +149,7 @@ public class BackendApiTest extends AbstractTest {
     TxDetail tx = backendApi.fetchTx(txid, true);
 
     Assertions.assertEquals(
-        "0ba8c89afc51b65f133ac40131de7e170a41f87c5a4943502ff5705aae6341a8", tx.txid);
+            "0ba8c89afc51b65f133ac40131de7e170a41f87c5a4943502ff5705aae6341a8", tx.txid);
     Assertions.assertEquals(222, tx.size);
     Assertions.assertEquals(141, tx.vsize);
     Assertions.assertEquals(1, tx.version);
@@ -159,18 +159,18 @@ public class BackendApiTest extends AbstractTest {
     Assertions.assertEquals(0, tx.inputs[0].n);
     Assertions.assertEquals(4294967295L, tx.inputs[0].seq);
     Assertions.assertEquals(
-        "d60fae44ba8c728d43e7692c530b391eb393e298b169df3c09c150f79a66f1cc",
-        tx.inputs[0].outpoint.txid);
+            "d60fae44ba8c728d43e7692c530b391eb393e298b169df3c09c150f79a66f1cc",
+            tx.inputs[0].outpoint.txid);
     Assertions.assertEquals(1, tx.inputs[0].outpoint.vout);
     Assertions.assertEquals(238749293, tx.inputs[0].outpoint.value);
     Assertions.assertEquals(
-        "0014ded4c3777ae40d686c981ee566a7021beda15ad1", tx.inputs[0].outpoint.scriptpubkey);
+            "0014ded4c3777ae40d686c981ee566a7021beda15ad1", tx.inputs[0].outpoint.scriptpubkey);
 
     Assertions.assertEquals(2, tx.outputs.length);
     Assertions.assertEquals(0, tx.outputs[0].n);
     Assertions.assertEquals(50000000, tx.outputs[0].value);
     Assertions.assertEquals(
-        "001495df5bf26f2ae0307133ff6dc0a7d2e729872e89", tx.outputs[0].scriptpubkey);
+            "001495df5bf26f2ae0307133ff6dc0a7d2e729872e89", tx.outputs[0].scriptpubkey);
     Assertions.assertEquals("witness_v0_keyhash", tx.outputs[0].type);
     Assertions.assertEquals("tb1qjh04hun09tsrqufnlakupf7juu5cwt5f87gh5u", tx.outputs[0].address);
   }
@@ -201,6 +201,19 @@ public class BackendApiTest extends AbstractTest {
     // push
     try {
       backendApi.pushTx(TxUtil.getInstance().getTxHex(tx));
+      Assertions.assertTrue(false);
+    } catch (BackendPushTxException e) {
+      Assertions.assertEquals("bad-txns-inputs-missingorspent", e.getMessage());
+      Assertions.assertEquals("bad-txns-inputs-missingorspent", e.getPushTxError());
+    }
+  }
+
+  @Test
+  public void pushTx_fail() throws Exception {
+    // push
+    try {
+      String hex = "010000000001015f5e263ccc20a0d6b34d9b26eb8ac14ff7623b68dd55f8b2fb35d02e49cc9fcf0000000000ffffffff050000000000000000536a4c506ccfebfe774392f9b35bd2440e36370f1f904b7b0bab5bc4437b04748f02fa705bb14939be6d926a66fa65983ade03633d1fdb8c858e44f83ce8d625d5b27cc445663e665ecfd20d811a06061baad401881300000000000016001484a3fbbfdbd4166e5835e99b6ca7cd112c3c9c5559370000000000001600142c0038638b6ee7cd9a11653e1cf3a8fccf249fb8a687010000000000160014022ffa36b5b8dc9ee0a8ca4e6b51ec1745a70df0a68701000000000016001423d282ec3309b6de0b3f76f642150dbd54a8d4d402483045022100f48c654b60a90cc7298590da04e1bc63f90431554c73408064bcc1c5906b29d902205bdc9e3b081136aa1d9d56d3105f75a6308f5c2b38ac3126fbb98c14bc1b392a012103900b856c3780555390f1e70a68bdd3e341efc0110db071bdf190b76fe041657900000000";
+      backendApi.pushTx(hex);
       Assertions.assertTrue(false);
     } catch (BackendPushTxException e) {
       Assertions.assertEquals("bad-txns-inputs-missingorspent", e.getMessage());
@@ -274,11 +287,11 @@ public class BackendApiTest extends AbstractTest {
   }
 
   private void assertAddressEquals(
-      MultiAddrResponse.Address address,
-      String zpub,
-      int accountIndex,
-      int changeIndex,
-      int finalBalance) {
+          MultiAddrResponse.Address address,
+          String zpub,
+          int accountIndex,
+          int changeIndex,
+          int finalBalance) {
     Assertions.assertEquals(accountIndex, address.account_index);
     Assertions.assertEquals(changeIndex, address.change_index);
     Assertions.assertEquals(finalBalance, address.final_balance);
@@ -286,11 +299,11 @@ public class BackendApiTest extends AbstractTest {
   }
 
   private void assertAddressEquals(
-      WalletResponse.Address address,
-      String zpub,
-      int accountIndex,
-      int changeIndex,
-      int finalBalance) {
+          WalletResponse.Address address,
+          String zpub,
+          int accountIndex,
+          int changeIndex,
+          int finalBalance) {
     Assertions.assertEquals(accountIndex, address.account_index);
     Assertions.assertEquals(changeIndex, address.change_index);
     Assertions.assertEquals(finalBalance, address.final_balance);

@@ -1,15 +1,13 @@
 package com.samourai.wallet.cahoots.stowaway;
 
-import com.samourai.soroban.cahoots.StowawayContext;
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
-import com.samourai.wallet.hd.BipAddress;
+import com.samourai.wallet.constants.SamouraiAccountIndex;
 import com.samourai.wallet.send.UTXO;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.RandomUtil;
-import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
 import org.bitcoinj.core.*;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
@@ -128,7 +126,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         List<TransactionInput> inputsA = cahootsContext.addInputs(selectedUTXO);
 
         // receive output
-        BipAddress receiveAddress = cahootsWallet.fetchAddressReceive(receiveAccount, true, BIP_FORMAT.SEGWIT_NATIVE);
+        String receiveAddress = cahootsWallet.fetchAddressReceive(receiveAccount, true, BIP_FORMAT.SEGWIT_NATIVE);
         if (log.isDebugEnabled()) {
             log.debug("+output (CounterParty receive) = "+receiveAddress);
         }
@@ -136,7 +134,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         TransactionOutput output_A0 = computeTxOutput(receiveAddress, stowaway0.getSpendAmount(), cahootsContext);
         outputsA.add(output_A0);
 
-        stowaway0.setDestination(receiveAddress.getAddressString());
+        stowaway0.setDestination(receiveAddress);
         stowaway0.setCounterpartyAccount(cahootsContext.getAccount());
 
         Stowaway stowaway1 = stowaway0.copy();
@@ -328,7 +326,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         cahootsContext.setMinerFeePaid(fee); // sender pays all minerFee
 
         // change output
-        BipAddress changeAddress = cahootsWallet.fetchAddressChange(stowaway1.getAccount(), true, BIP_FORMAT.SEGWIT_NATIVE);
+        String changeAddress = cahootsWallet.fetchAddressChange(stowaway1.getAccount(), true, BIP_FORMAT.SEGWIT_NATIVE);
         if (log.isDebugEnabled()) {
             log.debug("+output (sender change) = "+changeAddress);
         }

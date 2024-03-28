@@ -1,5 +1,6 @@
 package com.samourai.wallet.util;
 
+import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import org.bitcoinj.core.*;
 import org.bitcoinj.script.Script;
 import org.slf4j.Logger;
@@ -69,6 +70,18 @@ public class TxUtil {
       }
     }
     return inputPubkey;
+  }
+
+  public TransactionOutput findOutputByAddress(Transaction tx, String address, BipFormatSupplier bipFormatSupplier) throws Exception {
+    TransactionOutput txOut = null;
+    for (TransactionOutput transactionOutput : tx.getOutputs()) {
+      String toAddress = bipFormatSupplier.getToAddress(transactionOutput);
+      if(toAddress.equalsIgnoreCase(address)) {
+        txOut = transactionOutput;
+        break;
+      }
+    }
+    return txOut;
   }
 
   public String getTxHex(Transaction tx) {

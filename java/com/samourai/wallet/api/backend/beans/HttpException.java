@@ -1,27 +1,12 @@
 package com.samourai.wallet.api.backend.beans;
 
-public class HttpException extends Exception {
-  private String responseBody;
+public abstract class HttpException extends Exception {
 
-  public HttpException(Exception cause, String responseBody) {
+  public HttpException(Exception cause) {
     super(cause);
-    this.responseBody = responseBody;
   }
 
-  public HttpException(String message, String responseBody) {
+  public HttpException(String message) {
     super(message);
-    this.responseBody = responseBody;
-  }
-
-  public String getResponseBody() {
-    return responseBody;
-  }
-
-  @Override
-  public String toString() {
-    return "HttpException{" +
-            "message=" + getMessage() + ", " +
-            "responseBody='" + responseBody + '\'' +
-            '}';
   }
 }

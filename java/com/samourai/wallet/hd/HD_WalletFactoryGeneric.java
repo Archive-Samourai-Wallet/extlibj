@@ -2,6 +2,7 @@ package com.samourai.wallet.hd;
 
 import com.samourai.wallet.bip47.rpc.BIP47Wallet;
 import com.samourai.wallet.util.FormatsUtilGeneric;
+import com.samourai.wallet.util.RandomUtil;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.bitcoinj.core.AddressFormatException;
@@ -16,6 +17,7 @@ import java.util.List;
 
 public class HD_WalletFactoryGeneric {
   private static HD_WalletFactoryGeneric instance = null;
+  private static final RandomUtil randomUtil = RandomUtil.getInstance();
 
   public static HD_WalletFactoryGeneric getInstance() {
     if(instance == null) {
@@ -101,6 +103,28 @@ public class HD_WalletFactoryGeneric {
       MnemonicException.MnemonicLengthException, MnemonicException.MnemonicWordException,
       MnemonicException.MnemonicChecksumException {
     byte[] seed = mc.toEntropy(words);
+    return seed;
+  }
+
+  public HD_Wallet generateWallet(int purpose, NetworkParameters networkParameters) {
+    try {
+      byte seed[] = generateSeed(24);
+      String passphrase = generatePassphrase(15, 30);
+      return getHD(purpose, seed, passphrase, networkParameters);
+    } catch(Exception e) {
+      throw new RuntimeException(e); // should never happen
+    }
+  }
+
+  protected String generatePassphrase(int min, int bound) {
+    int len = randomUtil.nextInt(min, bound);
+    return randomUtil.nextString(len);
+  }
+
+  public byte[] generateSeed(int nbWords) {
+    // len == 16 (12 words), len == 24 (18 words), len == 32 (24 words)
+    int len = (nbWords / 3) * 4;
+    byte seed[] = randomUtil.nextBytes(len);
     return seed;
   }
 

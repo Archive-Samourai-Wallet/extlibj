@@ -14,7 +14,7 @@ import java.security.SecureRandom;
 public class BIP_FORMAT {
     public static final BipFormat LEGACY = new BipFormatImpl("LEGACY", "Original (P2PKH)") {
         @Override
-        public String getPub(HD_Account hdAccount) {
+        public String getBipPub(HD_Account hdAccount) {
             return hdAccount.xpubstr();
         }
 
@@ -52,7 +52,7 @@ public class BIP_FORMAT {
 
     public static final BipFormat SEGWIT_COMPAT = new BipFormatImpl("SEGWIT_COMPAT", "Segwit compatible (P2SH_P2WPKH)") {
         @Override
-        public String getPub(HD_Account hdAccount) {
+        public String getBipPub(HD_Account hdAccount) {
             return hdAccount.ypubstr();
         }
 
@@ -94,7 +94,7 @@ public class BIP_FORMAT {
 
     public static final BipFormat SEGWIT_NATIVE = new BipFormatImpl("SEGWIT_NATIVE", "Segwit native (P2WPKH)") {
         @Override
-        public String getPub(HD_Account hdAccount) {
+        public String getBipPub(HD_Account hdAccount) {
             return hdAccount.zpubstr();
         }
 
@@ -136,7 +136,7 @@ public class BIP_FORMAT {
 
     public static final BipFormat TAPROOT = new BipFormatImpl("TAPROOT", "Taproot (P2TR)") {
         @Override
-        public String getPub(HD_Account hdAccount) {
+        public String getBipPub(HD_Account hdAccount) {
             return hdAccount.zpubstr();
         }
 

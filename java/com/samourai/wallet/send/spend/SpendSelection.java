@@ -1,7 +1,6 @@
 package com.samourai.wallet.send.spend;
 
 import com.samourai.wallet.SamouraiWalletConst;
-import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.SendFactoryGeneric;
@@ -15,7 +14,7 @@ import com.samourai.wallet.send.exceptions.SignTxException;
 import com.samourai.wallet.send.exceptions.SpendException;
 import com.samourai.wallet.send.provider.UtxoKeyProvider;
 import com.samourai.wallet.send.provider.UtxoProvider;
-import com.samourai.whirlpool.client.wallet.beans.WhirlpoolAccount;
+import com.samourai.wallet.constants.SamouraiAccount;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
 import org.slf4j.Logger;
@@ -23,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -50,19 +50,15 @@ public abstract class SpendSelection {
         selectedUTXO.add(utxo);
     }
 
-    public List<MyTransactionOutPoint> getSpendFrom() {
-        final List<MyTransactionOutPoint> outPoints = new ArrayList<MyTransactionOutPoint>();
-        for (UTXO u : selectedUTXO) {
-            outPoints.addAll(u.getOutpoints());
-        }
-        return outPoints;
+    public Collection<MyTransactionOutPoint> getSpendFrom() {
+        return UTXO.listOutpoints(selectedUTXO);
     }
 
     public long getTotalValueSelected() {
         return UTXO.sumValue(selectedUTXO);
     }
 
-    public abstract SpendTx spendTx(long amount, String address, BipFormat changeFormat, WhirlpoolAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, UtxoProvider utxoProvider, long blockHeight) throws SpendException ;
+    public abstract SpendTx spendTx(long amount, String address, SamouraiAccount account, boolean rbfOptIn, NetworkParameters params, BigInteger feePerKb, UtxoProvider utxoProvider, long blockHeight) throws SpendException ;
 
     protected long computeChange(long amount, BigInteger fee) throws SpendException {
         long change = getTotalValueSelected() - (amount + fee.longValue());
@@ -73,7 +69,7 @@ public abstract class SpendSelection {
         return change;
     }
 
-    protected SpendTx computeSpendTx(BipFormat changeFormat, long amount, long minerFee, long change, Map<String, Long> receivers, boolean rbfOptIn, UtxoKeyProvider keyProvider, NetworkParameters params, long blockHeight) throws SpendException {
+    protected SpendTx computeSpendTx(long amount, boolean entireBalance, long minerFee, long change, Map<String, Long> receivers, boolean rbfOptIn, UtxoKeyProvider keyProvider, NetworkParameters params, long blockHeight) throws SpendException {
         // spend tx
         Transaction tx;
         try {
@@ -141,6 +137,6 @@ public abstract class SpendSelection {
             }
         }*/
 
-        return new SpendTxSimple(spendType, changeFormat, amount, minerFee, 0, change, getSpendFrom(), receivers, tx);
+        return new SpendTxSimple(spendType, amount, entireBalance, minerFee, 0, change, getSpendFrom(), receivers, tx);
     }
 }

@@ -1,35 +1,35 @@
 package com.samourai.wallet.send.beans;
 
 import com.samourai.wallet.api.backend.IPushTx;
-import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.send.MyTransactionOutPoint;
 import com.samourai.wallet.send.exceptions.SpendException;
 import org.bitcoinj.core.TransactionOutPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 public abstract class SpendTx {
     private static final Logger log = LoggerFactory.getLogger(SpendTx.class);
     private SpendType spendType;
-    private BipFormat changeFormat;
     private long amount;
+    private boolean entireBalance;
     private long minerFeeTotal;
     private long minerFeePaid;
     private long samouraiFee;
     private long change;
-    private List<MyTransactionOutPoint> spendFrom;
+    private Collection<MyTransactionOutPoint> spendFrom;
     private Map<String, Long> receivers;
     private int virtualTransactionSize;
     private int weight;
     private String txid;
 
-    public SpendTx(SpendType spendType, BipFormat changeFormat, long amount, long minerFeeTotal, long minerFeePaid, long samouraiFee, long change, List<MyTransactionOutPoint> spendFrom, Map<String, Long> receivers, int virtualTransactionSize, int weight, String txid) throws SpendException {
+    public SpendTx(SpendType spendType, long amount, boolean entireBalance, long minerFeeTotal, long minerFeePaid, long samouraiFee, long change, Collection<MyTransactionOutPoint> spendFrom, Map<String, Long> receivers, int virtualTransactionSize, int weight, String txid) throws SpendException {
         this.spendType = spendType;
-        this.changeFormat = changeFormat;
         this.amount = amount;
+        this.entireBalance = entireBalance;
         this.minerFeeTotal = minerFeeTotal;
         this.minerFeePaid = minerFeePaid;
         this.samouraiFee = samouraiFee;
@@ -59,12 +59,12 @@ public abstract class SpendTx {
         return spendType;
     }
 
-    public BipFormat getChangeFormat() {
-        return changeFormat;
-    }
-
     public long getAmount() {
         return amount;
+    }
+
+    public boolean isEntireBalance() {
+        return entireBalance;
     }
 
     public long getMinerFeeTotal() {
@@ -87,7 +87,7 @@ public abstract class SpendTx {
         return receivers;
     }
 
-    public List<? extends TransactionOutPoint> getSpendFrom() {
+    public Collection<? extends TransactionOutPoint> getSpendFrom() {
         return spendFrom;
     }
 

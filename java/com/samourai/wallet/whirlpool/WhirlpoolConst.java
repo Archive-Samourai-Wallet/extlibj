@@ -1,6 +1,6 @@
 package com.samourai.wallet.whirlpool;
 
-import com.samourai.whirlpool.client.wallet.beans.SamouraiAccountIndex;
+import com.samourai.wallet.constants.SamouraiAccountIndex;
 
 public class WhirlpoolConst {
     public final static int WHIRLPOOL_BADBANK_ACCOUNT = SamouraiAccountIndex.BADBANK;

@@ -2,7 +2,10 @@ package com.samourai.wallet.util;
 
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
-import com.samourai.wallet.hd.*;
+import com.samourai.wallet.hd.HD_Address;
+import com.samourai.wallet.hd.HD_Chain;
+import com.samourai.wallet.hd.HD_Wallet;
+import com.samourai.wallet.constants.WALLET_INDEX;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
@@ -98,7 +101,8 @@ public class AddressFactoryGeneric {
     }
 
     public Pair<Integer, String> getAddress(WALLET_INDEX walletIndex) {
-        return getAddress(walletIndex, walletIndex.getBipWallet().getBipFormat(), false);
+        BipFormat bipFormat = walletIndex.getBipWallet().getBipFormatDefault();
+        return getAddress(walletIndex, bipFormat, false);
     }
 
     public Pair<Integer, String> getAddress(WALLET_INDEX walletIndex, BipFormat bipFormat) {
@@ -106,7 +110,8 @@ public class AddressFactoryGeneric {
     }
 
     public Pair<Integer, String> getAddressAndIncrement(WALLET_INDEX walletIndex) {
-        return getAddress(walletIndex, walletIndex.getBipWallet().getBipFormat(), true);
+        BipFormat bipFormat = walletIndex.getBipWallet().getBipFormatDefault();
+        return getAddress(walletIndex, bipFormat, true);
     }
 
     public Pair<Integer, String> getAddressAndIncrement(WALLET_INDEX walletIndex, BipFormat bipFormat) {
@@ -152,7 +157,8 @@ public class AddressFactoryGeneric {
     protected HD_Chain getHdCHain(WALLET_INDEX walletIndex) {
         int account = walletIndex.getBipWallet().getBipDerivation().getAccountIndex();
         int chain = walletIndex.getChainIndex();
-        HD_Wallet hdWallet = getHdWallet(walletIndex.getBipWallet().getBipFormat());
+        BipFormat bipFormat = walletIndex.getBipWallet().getBipFormatDefault();
+        HD_Wallet hdWallet = getHdWallet(bipFormat);
         if (hdWallet == null) {
             // may happen on wallet startup
             return null;

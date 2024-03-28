@@ -1,19 +1,14 @@
 package examples;
 
-import com.samourai.http.client.IHttpClient;
-import com.samourai.http.client.JettyHttpClient;
-import com.samourai.soroban.cahoots.ManualCahootsMessage;
-import com.samourai.soroban.cahoots.ManualCahootsService;
-import com.samourai.soroban.cahoots.StowawayContext;
-import com.samourai.soroban.client.SorobanInteraction;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.CahootsWallet;
-import com.samourai.xmanager.client.XManagerClient;
+import com.samourai.wallet.cahoots.manual.ManualCahootsMessage;
+import com.samourai.wallet.cahoots.manual.ManualCahootsService;
+import com.samourai.wallet.cahoots.stowaway.StowawayContext;
+import com.samourai.wallet.sorobanClient.SorobanInteraction;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.TestNet3Params;
-
-import java.util.Optional;
 
 public class StowawayExample {
     // instanciate real wallets here!
@@ -21,11 +16,6 @@ public class StowawayExample {
     private static final CahootsWallet cahootsWalletCounterparty = null;
 
     public void Stowaway() throws Exception {
-
-        // configure xManagerClient
-        IHttpClient httpClient = new JettyHttpClient(10000, Optional.empty(), "test");
-        XManagerClient xManagerClient = new XManagerClient(httpClient, true, false);
-
         // instanciate service
         BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;
         NetworkParameters params = TestNet3Params.get();

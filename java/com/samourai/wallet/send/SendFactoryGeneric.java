@@ -6,6 +6,7 @@ import com.samourai.wallet.bip69.BIP69OutputComparator;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.bipWallet.KeyBag;
 import com.samourai.wallet.send.exceptions.MakeTxException;
 import com.samourai.wallet.send.exceptions.SignTxException;
 import com.samourai.wallet.send.exceptions.SignTxLengthException;
@@ -146,25 +147,16 @@ public class SendFactoryGeneric {
             }
         }
 
-        Transaction signedTx = signTransaction(unsignedTx, keyBag, utxoProvider.getBipFormatSupplier());
-        if(signedTx == null)    {
-            return null;
-        }
-        else    {
-            String hexString = TxUtil.getInstance().getTxHex(signedTx);
-            if(hexString.length() > (100 * 1024)) {
-                log.warn("Transaction length too long: txLength="+hexString.length());
-                throw new SignTxLengthException();
-//              Log.i("SendFactory", "Transaction length too long");
-            }
-
-            return signedTx;
-        }
+        return signTransaction(unsignedTx, keyBag, utxoProvider.getBipFormatSupplier());
     }
 
     // used by Android
     public Transaction signTransaction(Transaction transaction, Map<String,ECKey> keyBag) throws SignTxException {
         return signTransaction(transaction, keyBag, BIP_FORMAT.PROVIDER);
+    }
+
+    public Transaction signTransaction(Transaction transaction, KeyBag keyBag, BipFormatSupplier bipFormatSupplier) throws SignTxException {
+        return signTransaction(transaction, keyBag.toMap(), bipFormatSupplier);
     }
 
     public synchronized Transaction signTransaction(Transaction transaction, Map<String,ECKey> keyBag, BipFormatSupplier bipFormatSupplier) throws SignTxException {
@@ -181,6 +173,13 @@ public class SendFactoryGeneric {
             }
         }
         transaction.verify();
+
+        String hexString = TxUtil.getInstance().getTxHex(transaction);
+        if(hexString.length() > (100 * 1024)) {
+            log.warn("Transaction length too long: txLength="+hexString.length());
+            throw new SignTxLengthException();
+//              Log.i("SendFactory", "Transaction length too long");
+        }
         return transaction;
     }
 

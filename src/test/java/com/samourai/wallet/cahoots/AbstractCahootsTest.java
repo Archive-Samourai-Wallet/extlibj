@@ -1,8 +1,7 @@
 package com.samourai.wallet.cahoots;
 
-import com.samourai.soroban.cahoots.CahootsContext;
-import com.samourai.soroban.cahoots.ManualCahootsMessage;
-import com.samourai.soroban.cahoots.ManualCahootsService;
+import com.samourai.wallet.cahoots.manual.ManualCahootsMessage;
+import com.samourai.wallet.cahoots.manual.ManualCahootsService;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipWallet.WalletSupplier;
 import com.samourai.wallet.bipWallet.WalletSupplierImpl;
@@ -10,7 +9,8 @@ import com.samourai.wallet.cahoots.multi.MultiCahootsService;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
 import com.samourai.wallet.client.indexHandler.MemoryIndexHandlerSupplier;
-import com.samourai.wallet.hd.BIP_WALLET;
+import com.samourai.wallet.constants.BIP_WALLETS;
+import com.samourai.wallet.constants.BIP_WALLET;
 import com.samourai.wallet.hd.Chain;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.send.provider.MockUtxoProvider;
@@ -19,8 +19,6 @@ import com.samourai.wallet.util.TestUtil;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 public abstract class AbstractCahootsTest extends AbstractTest {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahootsTest.class);
@@ -58,14 +56,14 @@ public abstract class AbstractCahootsTest extends AbstractTest {
         super.setUp();
 
         final HD_Wallet bip84WalletSender = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_INITIATOR);
-        WalletSupplier walletSupplierSender = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletSender);
+        WalletSupplier walletSupplierSender = new WalletSupplierImpl(bipFormatSupplier, new MemoryIndexHandlerSupplier(), bip84WalletSender, BIP_WALLETS.WHIRLPOOL);
         utxoProviderSender = new MockUtxoProvider(params, walletSupplierSender);
-        cahootsWalletSender = new CahootsWallet(walletSupplierSender, mockChainSupplier, bipFormatSupplier, params, utxoProviderSender.getCahootsUtxoProvider());
+        cahootsWalletSender = new CahootsWalletImpl(mockChainSupplier, walletSupplierSender, utxoProviderSender.getCahootsUtxoProvider());
 
         final HD_Wallet bip84WalletCounterparty = TestUtil.computeBip84wallet(SEED_WORDS, SEED_PASSPHRASE_COUNTERPARTY);
-        WalletSupplier walletSupplierCounterparty = new WalletSupplierImpl(new MemoryIndexHandlerSupplier(), bip84WalletCounterparty);
+        WalletSupplier walletSupplierCounterparty = new WalletSupplierImpl(bipFormatSupplier, new MemoryIndexHandlerSupplier(), bip84WalletCounterparty, BIP_WALLETS.WHIRLPOOL);
         utxoProviderCounterparty = new MockUtxoProvider(params, walletSupplierCounterparty);
-        cahootsWalletCounterparty = new CahootsWallet(walletSupplierCounterparty, mockChainSupplier, bipFormatSupplier, params, utxoProviderCounterparty.getCahootsUtxoProvider());
+        cahootsWalletCounterparty = new CahootsWalletImpl(mockChainSupplier, walletSupplierCounterparty, utxoProviderCounterparty.getCahootsUtxoProvider());
 
         SENDER_RECEIVE_84 = new String[4];
         for (int i = 0; i < 4; i++) {

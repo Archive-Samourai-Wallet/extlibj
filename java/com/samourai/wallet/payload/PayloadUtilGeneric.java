@@ -3,7 +3,7 @@ package com.samourai.wallet.payload;
 import com.samourai.wallet.api.pairing.PairingDojo;
 import com.samourai.wallet.bipWallet.BipWallet;
 import com.samourai.wallet.bipWallet.WalletSupplier;
-import com.samourai.wallet.hd.BIP_WALLET;
+import com.samourai.wallet.constants.BIP_WALLET;
 import com.samourai.wallet.hd.HD_Wallet;
 import com.samourai.wallet.util.FormatsUtilGeneric;
 import com.samourai.wallet.util.SystemUtil;
