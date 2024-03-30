@@ -62,61 +62,6 @@ public class SamouraiConfig {
             "http://334cb6simoua5uiy4buacqxuh56u3mukeggu3p3xnlmyp7skirv2jzid.onion"
     );
 
-    // whrilpool-client: WhrilpoolServer
-    private String whirlpoolServerTestnetClear = "https://pool.whirl.mx:8081";
-    private String whirlpoolServerTestnetOnion = "http://y5qvjlxvbohc73slq4j4qldoegyukvpp74mbsrjosnrsgg7w5fon6nyd.onion";
-    private String whirlpoolServerMainnetClear = "https://pool.whirl.mx:8080";
-    private String whirlpoolServerMainnetOnion = "http://udkmfc5j6zvv3ysavbrwzhwji4hpyfe3apqa6yst7c7l32mygf65g4ad.onion";
-    private String whirlpoolServerIntegrationClear = "https://pool.whirl.mx:8082";
-    private String whirlpoolServerIntegrationOnion = "http://yuvewbfkftftcbzn54lfx3i5s4jxr4sfgpsbkvcflgzcvumyxrkopmyd.onion";
-
-    public String getWhirlpoolServerIntegrationClear() {
-        return whirlpoolServerIntegrationClear;
-    }
-
-    public void setWhirlpoolServerIntegrationClear(String whirlpoolServerIntegrationClear) {
-        this.whirlpoolServerIntegrationClear = whirlpoolServerIntegrationClear;
-    }
-
-    public String getWhirlpoolServerIntegrationOnion() {
-        return whirlpoolServerIntegrationOnion;
-    }
-
-    public void setWhirlpoolServerIntegrationOnion(String whirlpoolServerIntegrationOnion) {
-        this.whirlpoolServerIntegrationOnion = whirlpoolServerIntegrationOnion;
-    }
-    public String getWhirlpoolServerTestnetClear() {
-        return whirlpoolServerTestnetClear;
-    }
-
-    public void setWhirlpoolServerTestnetClear(String whirlpoolServerTestnetClear) {
-        this.whirlpoolServerTestnetClear = whirlpoolServerTestnetClear;
-    }
-
-    public String getWhirlpoolServerTestnetOnion() {
-        return whirlpoolServerTestnetOnion;
-    }
-
-    public void setWhirlpoolServerTestnetOnion(String whirlpoolServerTestnetOnion) {
-        this.whirlpoolServerTestnetOnion = whirlpoolServerTestnetOnion;
-    }
-
-    public String getWhirlpoolServerMainnetClear() {
-        return whirlpoolServerMainnetClear;
-    }
-
-    public void setWhirlpoolServerMainnetClear(String whirlpoolServerMainnetClear) {
-        this.whirlpoolServerMainnetClear = whirlpoolServerMainnetClear;
-    }
-
-    public String getWhirlpoolServerMainnetOnion() {
-        return whirlpoolServerMainnetOnion;
-    }
-
-    public void setWhirlpoolServerMainnetOnion(String whirlpoolServerMainnetOnion) {
-        this.whirlpoolServerMainnetOnion = whirlpoolServerMainnetOnion;
-    }
-
     public SamouraiConfig() {
     }
 
