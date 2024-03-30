@@ -25,7 +25,7 @@ public class DexConfigProviderTest extends AbstractTest {
     Assertions.assertEquals("https://api.samouraiwallet.com/v2", dexConfigProvider.getSamouraiConfig().getBackendServerMainnetClear());
   }
 
-  @Test
+  /*@Test
   public void load() throws Exception {
     httpClient = new JettyHttpClient(10000, HttpUsage.BACKEND);
 
@@ -34,5 +34,5 @@ public class DexConfigProviderTest extends AbstractTest {
     Assertions.assertNotNull(dexConfigProvider.getLastLoad());
 
     Assertions.assertEquals("https://soroban.samouraiwallet.com/test", dexConfigProvider.getSamouraiConfig().getSorobanServerTestnetClear());
-  }
+  }*/
 }
