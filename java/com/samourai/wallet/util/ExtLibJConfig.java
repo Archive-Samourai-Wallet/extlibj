@@ -46,8 +46,16 @@ public class ExtLibJConfig {
         return samouraiNetwork;
     }
 
+    public void setSamouraiNetwork(SamouraiNetwork samouraiNetwork) {
+        this.samouraiNetwork = samouraiNetwork;
+    }
+
     public boolean isOnion() {
         return onion;
+    }
+
+    public void setOnion(boolean onion) {
+        this.onion = onion;
     }
 
     public IHttpClientService getHttpClientService() {
