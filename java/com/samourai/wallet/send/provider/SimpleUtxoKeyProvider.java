@@ -18,7 +18,7 @@ public class SimpleUtxoKeyProvider implements UtxoKeyProvider {
 
   public SimpleUtxoKeyProvider(BipFormatSupplier bipFormatSupplier) {
     this.bipFormatSupplier = bipFormatSupplier;
-    this.keys = new LinkedHashMap<String, ECKey>();
+    this.keys = new LinkedHashMap<>();
   }
 
   public void setKey(TransactionOutPoint outPoint, ECKey key) {
@@ -32,6 +32,11 @@ public class SimpleUtxoKeyProvider implements UtxoKeyProvider {
       return null;
     }
     return ecKey.getPrivKeyBytes();
+  }
+
+  @Override
+  public byte[] _getPrivKeyBip47(String utxoHash, int utxoIndex, String xpub) throws Exception {
+    throw new Exception("_getPrivKeyBip47 not implemented yet");
   }
 
   @Override

@@ -61,17 +61,17 @@ public class UnspentOutput {
 
     public int computePathChainIndex() {
         try {
-            return Integer.parseInt(xpub.path.split(PATH_SEPARATOR)[1]);
+            return Integer.parseInt(getPath().split(PATH_SEPARATOR)[1]);
         } catch (Exception e) {
-            throw new RuntimeException("computePathChainIndex failed for utxo path: "+xpub.path);
+            throw new RuntimeException("computePathChainIndex failed for utxo path: "+getPath());
         }
     }
 
     public int computePathAddressIndex() {
         try {
-            return Integer.parseInt(xpub.path.split(PATH_SEPARATOR)[2]);
+            return Integer.parseInt(getPath().split(PATH_SEPARATOR)[2]);
         } catch (Exception e) {
-            throw new RuntimeException("computePathAddressIndex failed for utxo path: "+xpub.path);
+            throw new RuntimeException("computePathAddressIndex failed for utxo path: "+getPath());
         }
     }
 
