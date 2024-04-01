@@ -29,15 +29,16 @@ public class SamouraiConfig {
             "http://212.47.230.157:4242"
     );
     private Collection<String> sorobanServerDexTestnetOnion = Arrays.asList(
-            "http://sorin6xws7lfvz2ikma3ceqzlbmmp4huyfwla3d5mzkcjnta2djgggid.onion",
             "http://sor2aduqon52pngz56b3pp2niq5vp4l7xstco654gfa37fcaoblle5yd.onion",
             "http://sor3xcg6i4tyt4uawt2t3i3ml4dzubh46wyloptl3g5jyshkgekuumyd.onion",
-            "http://sor4ky4w6iywr3terpofu3xlnwrnawbb4aq2okobixojatswelfpsuad.onion",
-            "http://sor5qv4q3uvg3cyfaay5dazkvuytukepexlqehgirxbq7ynszpqo4uad.onion",
             "http://sor6jatlc2pim7mg4paxy6kgzuw7qidajlxk7xy6ic6ytcpcy47lucyd.onion",
             "http://sor7qfbf24l3gdba5ed625pfwfebwctiao5po3zux3c6udlboowkucid.onion",
             "http://sorark2anb6q6oz6egxo4zo67cmlnfvjxz2h34v74ta6jozceqclw5yd.onion",
-            "http://sorbutari3lpxmqhpzu3jojflteluekxnfyu2jgs4vqkgtsxrjyv4byd.onion"
+            "http://sorbutari3lpxmqhpzu3jojflteluekxnfyu2jgs4vqkgtsxrjyv4byd.onion",
+            "http://sori5763cjjz2iylge5mmgphw7nn2onal7msewk6zoxjwhxhx2crdyad.onion",
+            "http://sor4bdycjobng56dusw7hb7oiqykpgblmkaqlg2cdabrh7rkovol3bad.onion",
+            "http://sor5fjivjq3rnxloamuux5prbjj5idvca4dulvpkb5bxrneuihrd5wqd.onion"
+
     );
     private Collection<String> sorobanServerDexMainnetClear = Arrays.asList(
             "http://185.100.84.98:4242",
