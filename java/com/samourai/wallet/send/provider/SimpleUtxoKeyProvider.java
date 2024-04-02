@@ -1,5 +1,6 @@
 package com.samourai.wallet.send.provider;
 
+import com.samourai.wallet.api.backend.beans.UnspentOutput;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import org.bitcoinj.core.ECKey;
@@ -18,7 +19,7 @@ public class SimpleUtxoKeyProvider implements UtxoKeyProvider {
 
   public SimpleUtxoKeyProvider(BipFormatSupplier bipFormatSupplier) {
     this.bipFormatSupplier = bipFormatSupplier;
-    this.keys = new LinkedHashMap<String, ECKey>();
+    this.keys = new LinkedHashMap<>();
   }
 
   public void setKey(TransactionOutPoint outPoint, ECKey key) {
@@ -32,6 +33,11 @@ public class SimpleUtxoKeyProvider implements UtxoKeyProvider {
       return null;
     }
     return ecKey.getPrivKeyBytes();
+  }
+
+  @Override
+  public byte[] _getPrivKeyBip47(UnspentOutput unspentOutput) throws Exception {
+    throw new Exception("_getPrivKeyBip47 not implemented yet");
   }
 
   @Override

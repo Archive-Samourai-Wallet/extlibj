@@ -113,17 +113,6 @@ public class WalletSupplierImpl implements WalletSupplier {
   }
 
   @Override
-  public BipWallet getWallet(UnspentOutput unspentOutput) {
-    return getWalletByXPub(unspentOutput.xpub.m);
-  }
-
-  @Override
-  public BipAddress getAddress(UnspentOutput unspentOutput) {
-    BipWallet bipWallet = getWallet(unspentOutput);
-    return bipWallet != null ? bipWallet.getAddressAt(unspentOutput) : null;
-  }
-
-  @Override
   public String[] getXPubs(boolean withIgnoredAccounts, BipFormat... bipFormats) {
     List<String> xPubs = new LinkedList<>();
     for (BipWallet bipWallet : walletsByXPub.values()) {

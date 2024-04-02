@@ -29,15 +29,16 @@ public class SamouraiConfig {
             "http://212.47.230.157:4242"
     );
     private Collection<String> sorobanServerDexTestnetOnion = Arrays.asList(
-            "http://sorin6xws7lfvz2ikma3ceqzlbmmp4huyfwla3d5mzkcjnta2djgggid.onion",
             "http://sor2aduqon52pngz56b3pp2niq5vp4l7xstco654gfa37fcaoblle5yd.onion",
             "http://sor3xcg6i4tyt4uawt2t3i3ml4dzubh46wyloptl3g5jyshkgekuumyd.onion",
-            "http://sor4ky4w6iywr3terpofu3xlnwrnawbb4aq2okobixojatswelfpsuad.onion",
-            "http://sor5qv4q3uvg3cyfaay5dazkvuytukepexlqehgirxbq7ynszpqo4uad.onion",
             "http://sor6jatlc2pim7mg4paxy6kgzuw7qidajlxk7xy6ic6ytcpcy47lucyd.onion",
             "http://sor7qfbf24l3gdba5ed625pfwfebwctiao5po3zux3c6udlboowkucid.onion",
             "http://sorark2anb6q6oz6egxo4zo67cmlnfvjxz2h34v74ta6jozceqclw5yd.onion",
-            "http://sorbutari3lpxmqhpzu3jojflteluekxnfyu2jgs4vqkgtsxrjyv4byd.onion"
+            "http://sorbutari3lpxmqhpzu3jojflteluekxnfyu2jgs4vqkgtsxrjyv4byd.onion",
+            "http://sori5763cjjz2iylge5mmgphw7nn2onal7msewk6zoxjwhxhx2crdyad.onion",
+            "http://sor4bdycjobng56dusw7hb7oiqykpgblmkaqlg2cdabrh7rkovol3bad.onion",
+            "http://sor5fjivjq3rnxloamuux5prbjj5idvca4dulvpkb5bxrneuihrd5wqd.onion"
+
     );
     private Collection<String> sorobanServerDexMainnetClear = Arrays.asList(
             "http://185.100.84.98:4242",
@@ -61,61 +62,6 @@ public class SamouraiConfig {
             "http://oxtyspz3im74ebdaxq3ozm2y6jlgiru4m6wn7oznvc6nwpiububel7ad.onion",
             "http://334cb6simoua5uiy4buacqxuh56u3mukeggu3p3xnlmyp7skirv2jzid.onion"
     );
-
-    // whrilpool-client: WhrilpoolServer
-    private String whirlpoolServerTestnetClear = "https://pool.whirl.mx:8081";
-    private String whirlpoolServerTestnetOnion = "http://y5qvjlxvbohc73slq4j4qldoegyukvpp74mbsrjosnrsgg7w5fon6nyd.onion";
-    private String whirlpoolServerMainnetClear = "https://pool.whirl.mx:8080";
-    private String whirlpoolServerMainnetOnion = "http://udkmfc5j6zvv3ysavbrwzhwji4hpyfe3apqa6yst7c7l32mygf65g4ad.onion";
-    private String whirlpoolServerIntegrationClear = "https://pool.whirl.mx:8082";
-    private String whirlpoolServerIntegrationOnion = "http://yuvewbfkftftcbzn54lfx3i5s4jxr4sfgpsbkvcflgzcvumyxrkopmyd.onion";
-
-    public String getWhirlpoolServerIntegrationClear() {
-        return whirlpoolServerIntegrationClear;
-    }
-
-    public void setWhirlpoolServerIntegrationClear(String whirlpoolServerIntegrationClear) {
-        this.whirlpoolServerIntegrationClear = whirlpoolServerIntegrationClear;
-    }
-
-    public String getWhirlpoolServerIntegrationOnion() {
-        return whirlpoolServerIntegrationOnion;
-    }
-
-    public void setWhirlpoolServerIntegrationOnion(String whirlpoolServerIntegrationOnion) {
-        this.whirlpoolServerIntegrationOnion = whirlpoolServerIntegrationOnion;
-    }
-    public String getWhirlpoolServerTestnetClear() {
-        return whirlpoolServerTestnetClear;
-    }
-
-    public void setWhirlpoolServerTestnetClear(String whirlpoolServerTestnetClear) {
-        this.whirlpoolServerTestnetClear = whirlpoolServerTestnetClear;
-    }
-
-    public String getWhirlpoolServerTestnetOnion() {
-        return whirlpoolServerTestnetOnion;
-    }
-
-    public void setWhirlpoolServerTestnetOnion(String whirlpoolServerTestnetOnion) {
-        this.whirlpoolServerTestnetOnion = whirlpoolServerTestnetOnion;
-    }
-
-    public String getWhirlpoolServerMainnetClear() {
-        return whirlpoolServerMainnetClear;
-    }
-
-    public void setWhirlpoolServerMainnetClear(String whirlpoolServerMainnetClear) {
-        this.whirlpoolServerMainnetClear = whirlpoolServerMainnetClear;
-    }
-
-    public String getWhirlpoolServerMainnetOnion() {
-        return whirlpoolServerMainnetOnion;
-    }
-
-    public void setWhirlpoolServerMainnetOnion(String whirlpoolServerMainnetOnion) {
-        this.whirlpoolServerMainnetOnion = whirlpoolServerMainnetOnion;
-    }
 
     public SamouraiConfig() {
     }

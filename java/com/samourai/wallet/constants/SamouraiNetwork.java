@@ -11,31 +11,24 @@ import java.util.Optional;
 public enum SamouraiNetwork {
   TESTNET(
           TestNet3Params.get(),
-          "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4",
-          "PM8TJSs3yAbowqwTXs3YmkJZ6JARF87uf35MztevhXtAsvv2hRHhSt4phK3PLJ6HmDiyzvdbYBNawkncG6fnH5mGqMmY6rB6DcMUfgcZME6g7soodeHR"), // TODO
+          "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4"), // TODO
   INTEGRATION(
           TestNet3Params.get(),
-          "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4",
-          "PM8TJSs3yAbowqwTXs3YmkJZ6JARF87uf35MztevhXtAsvv2hRHhSt4phK3PLJ6HmDiyzvdbYBNawkncG6fnH5mGqMmY6rB6DcMUfgcZME6g7soodeHR"), // TODO
+          "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4"), // TODO
   MAINNET(
           MainNetParams.get(),
-          "1NwVafYT1s6SF5Atusv7A8MASzCvGruGXq",
-          "PM8TJSs3yAbowqwTXs3YmkJZ6JARF87uf35MztevhXtAsvv2hRHhSt4phK3PLJ6HmDiyzvdbYBNawkncG6fnH5mGqMmY6rB6DcMUfgcZME6g7soodeHR"), // TODO
+          "1NwVafYT1s6SF5Atusv7A8MASzCvGruGXq"), // TODO
   LOCAL_TESTNET(TestNet3Params.get(),
-          "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4",
-          "PM8TJSs3yAbowqwTXs3YmkJZ6JARF87uf35MztevhXtAsvv2hRHhSt4phK3PLJ6HmDiyzvdbYBNawkncG6fnH5mGqMmY6rB6DcMUfgcZME6g7soodeHR"); // TODO
+          "mi42XN9J3eLdZae4tjQnJnVkCcNDRuAtz4"); // TODO
 
   private NetworkParameters params;
   private String signingAddress;
-  private PaymentCode signingPaymentCode;
 
   SamouraiNetwork(
           NetworkParameters params,
-          String signingAddress,
-          String signingPaymentCode) {
+          String signingAddress) {
     this.params = params;
     this.signingAddress = signingAddress;
-    this.signingPaymentCode = new PaymentCode(signingPaymentCode);
   }
 
   public NetworkParameters getParams() {
@@ -51,10 +44,6 @@ public enum SamouraiNetwork {
     this.signingAddress = signingAddress;
   }
 
-  public PaymentCode getSigningPaymentCode() {
-    return signingPaymentCode;
-  }
-
   public static Optional<SamouraiNetwork> find(String value) {
     try {
       return Optional.of(valueOf(value));
@@ -65,7 +54,7 @@ public enum SamouraiNetwork {
 
   public static SamouraiNetwork getByNetworkParameters(NetworkParameters params) {
     boolean isTestnet = FormatsUtilGeneric.getInstance().isTestNet(params);
-    SamouraiNetwork whirlpoolServer = isTestnet ? SamouraiNetwork.TESTNET : SamouraiNetwork.MAINNET;
-    return whirlpoolServer;
+    SamouraiNetwork samouraiNetwork = isTestnet ? SamouraiNetwork.TESTNET : SamouraiNetwork.MAINNET;
+    return samouraiNetwork;
   }
 }

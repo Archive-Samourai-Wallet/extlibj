@@ -17,10 +17,6 @@ public interface WalletSupplier {
 
   BipWallet getWallet(BIP_WALLET bip);
 
-  BipWallet getWallet(UnspentOutput unspentOutput);
-
-  BipAddress getAddress(UnspentOutput unspentOutput);
-
   BipWallet getWalletByXPub(String pub);
 
   BipWallet getWalletById(String id);

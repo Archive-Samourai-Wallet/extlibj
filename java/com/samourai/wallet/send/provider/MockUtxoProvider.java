@@ -6,6 +6,7 @@ import com.samourai.wallet.bipFormat.BipFormat;
 import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.bipWallet.BipWallet;
 import com.samourai.wallet.bipWallet.WalletSupplier;
+import com.samourai.wallet.constants.BIP_WALLET;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.hd.Chain;
 import com.samourai.wallet.send.MyTransactionOutPoint;
@@ -86,18 +87,44 @@ public class MockUtxoProvider extends SimpleUtxoKeyProvider implements UtxoProvi
     return addUtxo(bipWallet, txid, n, value, address, ecKey, path);
   }
 
+  public UTXO addUtxoBip47(long value) throws Exception {
+    int n = (nbUtxos+1)*1000; // keep backward-compatibility with existing tests, *1000 to differenciate BIP47
+    // bip84 utxos are temporarily using DEPOSIT_BIP84 for testing purpose
+    BipWallet bipWallet = walletSupplier.getWallet(BIP_WALLET.DEPOSIT_BIP84);
+    BipFormat bipFormat = bipWallet.getBipFormatDefault();
+    BipAddress bipAddress = bipWallet.getAddressAt(0, n, bipFormat);
+    String address = bipAddress.getAddressString();
+    String path = null;
+    ECKey ecKey = bipAddress.getHdAddress().getECKey();
+    // use a namespace specific to BipWallet for generating txid
+    int walletUniqueId = new BigInteger(bipWallet.getHdAccount().xpubstr().getBytes()).intValue();
+    int uniqueId = forcedWalletUniqueId != null ? forcedWalletUniqueId : walletUniqueId;
+    String txid = generateTxHash(Math.abs(n*uniqueId), params);
+    return addUtxo(bipWallet, txid, n, value, address, ecKey, path);
+  }
+
   public UTXO addUtxo(BipWallet bipWallet, String txid, int n, long value, String address, ECKey ecKey) throws Exception {
     return addUtxo(bipWallet, txid, n, value, address, ecKey, null);
   }
 
   public UTXO addUtxo(BipWallet bipWallet, String txid, int n, long value, String address, ECKey ecKey, String path) throws Exception {
     String xpub = bipWallet.getXPub();
+    SamouraiAccount account = bipWallet.getAccount();
+    return addUtxo(xpub, account, txid, n, value, address, ecKey, path);
+  }
+
+  public UTXO addUtxoBip47(BipWallet bipWallet, String txid, int n, long value, String address, ECKey ecKey, String path) throws Exception {
+    String xpub = null;
+    SamouraiAccount account = bipWallet.getAccount();
+    return addUtxo(xpub, account, txid, n, value, address, ecKey, path);
+  }
+
+  protected UTXO addUtxo(String xpub, SamouraiAccount account, String txid, int n, long value, String address, ECKey ecKey, String path) throws Exception {
     UnspentOutput unspentOutput = computeUtxo(txid, n, path, xpub, address, value, 999, getBipFormatSupplier(), params);
     MyTransactionOutPoint outPoint = unspentOutput.computeOutpoint(params);
     UTXO utxo = new UTXO(Arrays.asList(outPoint), path, xpub);
     nbUtxos++;
 
-    SamouraiAccount account = bipWallet.getAccount();
     utxosByAccount.get(account).add(utxo);
     setKey(outPoint, ecKey);
     return utxo;

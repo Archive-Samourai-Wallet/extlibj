@@ -1,13 +1,6 @@
 package com.samourai.wallet.dexConfig;
 
-import com.samourai.wallet.api.backend.IBackendClient;
-import com.samourai.wallet.constants.WhirlpoolServer;
-import com.samourai.wallet.util.JSONUtils;
-import com.samourai.wallet.util.MessageSignUtilGeneric;
-import org.bitcoinj.core.NetworkParameters;
-
 public class DexConfigProvider {
-    public static final String ENDPOINT_DEXCONFIG = "/rest/dex-config";
     private static DexConfigProvider instance;
 
     public static DexConfigProvider getInstance() {
@@ -25,7 +18,7 @@ public class DexConfigProvider {
         this.samouraiConfig = new SamouraiConfig();
     }
 
-    public void load(IBackendClient httpClient, NetworkParameters networkParameters, boolean onion) throws Exception {
+    /*public void load(IBackendClient httpClient, NetworkParameters networkParameters, boolean onion) throws Exception {
         WhirlpoolServer whirlpoolServer = WhirlpoolServer.getByNetworkParameters(networkParameters);
         String dexURL = whirlpoolServer.getServerUrl(onion) + ENDPOINT_DEXCONFIG;
         load(httpClient, networkParameters, dexURL, whirlpoolServer.getSamouraiNetwork().getSigningAddress());
@@ -47,7 +40,7 @@ public class DexConfigProvider {
         } else {
             throw new Exception("Invalid DexConfig signature");
         }
-    }
+    }*/
 
     public SamouraiConfig getSamouraiConfig() {
         return samouraiConfig;

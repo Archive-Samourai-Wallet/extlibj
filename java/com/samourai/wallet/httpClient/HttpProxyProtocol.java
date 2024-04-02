@@ -4,7 +4,8 @@ import java.util.Optional;
 
 public enum HttpProxyProtocol {
   HTTP,
-  SOCKS;
+  SOCKS,
+  SOCKS5;
 
   public static Optional<HttpProxyProtocol> find(String value) {
     try {

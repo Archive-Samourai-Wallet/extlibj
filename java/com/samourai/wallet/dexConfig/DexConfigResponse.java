@@ -5,7 +5,7 @@ package com.samourai.wallet.dexConfig;
  */
 public class DexConfigResponse {
     private String samouraiConfig; // SamouraiConfig serialized as JSON string
-    private String signature; // signature of 'samouraiConfig' with WhirlpoolServer.signingAddress
+    private String signature; // signature of 'samouraiConfig' with SamouraiNetwork.signingAddress
 
     public DexConfigResponse() {
     }
