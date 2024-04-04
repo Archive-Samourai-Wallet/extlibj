@@ -1,14 +1,11 @@
 package examples;
 
-import com.samourai.wallet.bipFormat.BIP_FORMAT;
-import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.CahootsWallet;
 import com.samourai.wallet.cahoots.TxBroadcastInteraction;
 import com.samourai.wallet.cahoots.manual.ManualCahootsMessage;
 import com.samourai.wallet.cahoots.manual.ManualCahootsService;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Context;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.params.TestNet3Params;
+import com.samourai.wallet.util.ExtLibJConfig;
 
 public class Stonewallx2Example {
     // TODO instanciate real wallets here!
@@ -17,9 +14,8 @@ public class Stonewallx2Example {
 
     public void Stonewallx2() throws Exception {
         // instanciate service
-        BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;
-        NetworkParameters params = TestNet3Params.get();
-        ManualCahootsService cahootsService = new ManualCahootsService(bipFormatSupplier, params);
+        ExtLibJConfig extLibJConfig = null; // TODO provide impl
+        ManualCahootsService cahootsService = new ManualCahootsService(extLibJConfig);
 
         // instanciate sender
         int senderAccount = 0;

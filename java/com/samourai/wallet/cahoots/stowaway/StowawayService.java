@@ -2,10 +2,10 @@ package com.samourai.wallet.cahoots.stowaway;
 
 import com.samourai.wallet.SamouraiWalletConst;
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
-import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.constants.SamouraiAccountIndex;
 import com.samourai.wallet.send.UTXO;
+import com.samourai.wallet.util.ExtLibJConfig;
 import com.samourai.wallet.util.FeeUtil;
 import com.samourai.wallet.util.RandomUtil;
 import org.bitcoinj.core.*;
@@ -21,8 +21,8 @@ import java.util.List;
 public class StowawayService extends AbstractCahoots2xService<Stowaway, StowawayContext> {
     private static final Logger log = LoggerFactory.getLogger(StowawayService.class);
 
-    public StowawayService(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
-        super(CahootsType.STOWAWAY, bipFormatSupplier, params);
+    public StowawayService(ExtLibJConfig config) {
+        super(config, CahootsType.STOWAWAY);
     }
 
     @Override
@@ -94,6 +94,7 @@ public class StowawayService extends AbstractCahoots2xService<Stowaway, Stowaway
         // step0: B sends spend amount to A,  creates step0
         //
         //
+        NetworkParameters params = getExtLibJConfig().getSamouraiNetwork().getParams();
         Stowaway stowaway0 = new Stowaway(spendAmount, params, account, fingerprint);
         return stowaway0;
     }

@@ -47,9 +47,9 @@ public abstract class AbstractCahootsTest extends AbstractTest {
     protected static String[] COUNTERPARTY_CHANGE_POSTMIX_44;
     protected static String[] COUNTERPARTY_CHANGE_POSTMIX_84;
 
-    protected Stonewallx2Service stonewallx2Service = new Stonewallx2Service(bipFormatSupplier, params);
-    protected StowawayService stowawayService = new StowawayService(bipFormatSupplier, params);
-    protected MultiCahootsService multiCahootsService = new MultiCahootsService(bipFormatSupplier, params, stonewallx2Service, stowawayService);
+    protected Stonewallx2Service stonewallx2Service = new Stonewallx2Service(extLibJConfig);
+    protected StowawayService stowawayService = new StowawayService(extLibJConfig);
+    protected MultiCahootsService multiCahootsService = new MultiCahootsService(extLibJConfig, stonewallx2Service, stowawayService);
     protected ManualCahootsService manualCahootsService = new ManualCahootsService(stowawayService, stonewallx2Service, multiCahootsService);
 
     public void setUp() throws Exception {

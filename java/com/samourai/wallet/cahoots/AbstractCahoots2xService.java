@@ -1,9 +1,8 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.wallet.SamouraiWalletConst;
-import com.samourai.wallet.bipFormat.BipFormatSupplier;
+import com.samourai.wallet.util.ExtLibJConfig;
 import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,8 +13,8 @@ import java.util.Objects;
 public abstract class AbstractCahoots2xService<T extends Cahoots2x, C extends CahootsContext> extends AbstractCahootsService<T,C> {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahoots2xService.class);
     private static final long LOCK_TIME_LENIENCE = 2; // 2 blocks
-    public AbstractCahoots2xService(CahootsType cahootsType, BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
-        super(cahootsType, bipFormatSupplier, params, TypeInteraction.TX_BROADCAST);
+    public AbstractCahoots2xService(ExtLibJConfig extLibJConfig, CahootsType cahootsType) {
+        super(extLibJConfig, cahootsType, TypeInteraction.TX_BROADCAST);
     }
 
     @Override

@@ -1,10 +1,10 @@
 package com.samourai.wallet.cahoots;
 
 import com.samourai.wallet.cahoots.manual.ManualCahootsMessage;
-import com.samourai.wallet.sorobanClient.SorobanInteraction;
-import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.hd.BipAddress;
 import com.samourai.wallet.send.MyTransactionOutPoint;
+import com.samourai.wallet.sorobanClient.SorobanInteraction;
+import com.samourai.wallet.util.ExtLibJConfig;
 import org.bitcoinj.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,15 +15,13 @@ import java.util.List;
 public abstract class AbstractCahootsService<T extends Cahoots, C extends CahootsContext> {
     private static final Logger log = LoggerFactory.getLogger(AbstractCahootsService.class);
 
+    private ExtLibJConfig extLibJConfig;
     private CahootsType cahootsType;
-    private BipFormatSupplier bipFormatSupplier;
-    protected NetworkParameters params;
     private TypeInteraction typeInteractionBroadcast;
 
-    public AbstractCahootsService(CahootsType cahootsType, BipFormatSupplier bipFormatSupplier, NetworkParameters params, TypeInteraction typeInteractionBroadcast) {
+    public AbstractCahootsService(ExtLibJConfig extLibJConfig, CahootsType cahootsType, TypeInteraction typeInteractionBroadcast) {
+        this.extLibJConfig = extLibJConfig;
         this.cahootsType = cahootsType;
-        this.bipFormatSupplier = bipFormatSupplier;
-        this.params = params;
         this.typeInteractionBroadcast = typeInteractionBroadcast;
     }
 
@@ -111,7 +109,7 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
 
         for(TransactionOutput output : transaction.getOutputs()) {
             if (!output.getScriptPubKey().isOpReturn()) {
-                String outputAddress = bipFormatSupplier.getToAddress(output);
+                String outputAddress = extLibJConfig.getBipFormatSupplier().getToAddress(output);
                 if (outputAddress != null && cahootsContext.getOutputAddresses().contains(outputAddress)) {
                     if (output.getValue() != null) {
                         if (log.isDebugEnabled()) {
@@ -134,7 +132,8 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
 
     protected  TransactionOutput computeTxOutput(String receiveAddressString, long amount, C cahootsContext) throws Exception{
         cahootsContext.addOutputAddress(receiveAddressString); // save output address for computeSpendAmount()
-        return bipFormatSupplier.getTransactionOutput(receiveAddressString, amount, params);
+        NetworkParameters params = extLibJConfig.getSamouraiNetwork().getParams();
+        return extLibJConfig.getBipFormatSupplier().getTransactionOutput(receiveAddressString, amount, params);
     }
 
     private long computeFeeAmountActual(Cahoots cahoots) {
@@ -163,7 +162,7 @@ public abstract class AbstractCahootsService<T extends Cahoots, C extends Cahoot
         }
     }
 
-    public BipFormatSupplier getBipFormatSupplier() {
-        return bipFormatSupplier;
+    public ExtLibJConfig getExtLibJConfig() {
+        return extLibJConfig;
     }
 }

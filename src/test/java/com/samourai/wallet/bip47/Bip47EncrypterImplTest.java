@@ -15,8 +15,8 @@ public class Bip47EncrypterImplTest extends AbstractTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        bip47EncrypterInitiator = new Bip47EncrypterImpl(bip47AccountInitiator, cryptoUtil, bip47Util);
-        bip47EncrypterCounterparty = new Bip47EncrypterImpl(bip47AccountCounterparty, cryptoUtil, bip47Util);
+        bip47EncrypterInitiator = new Bip47EncrypterImpl(extLibJConfig, bip47AccountInitiator);
+        bip47EncrypterCounterparty = new Bip47EncrypterImpl(extLibJConfig, bip47AccountCounterparty);
     }
 
     @Test

@@ -12,6 +12,7 @@ import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
+import com.samourai.wallet.util.ExtLibJConfig;
 import com.samourai.wallet.util.TxUtil;
 import com.samourai.wallet.constants.SamouraiAccountIndex;
 import com.samourai.wallet.xmanagerClient.XManagerClient;
@@ -37,8 +38,8 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
 
     private long threshold = -1;
 
-    public MultiCahootsService(BipFormatSupplier bipFormatSupplier, NetworkParameters params, Stonewallx2Service stonewallx2Service, StowawayService stowawayService) {
-        super(CahootsType.MULTI, bipFormatSupplier, params, TypeInteraction.TX_BROADCAST_MULTI);
+    public MultiCahootsService(ExtLibJConfig extLibJConfig, Stonewallx2Service stonewallx2Service, StowawayService stowawayService) {
+        super(extLibJConfig, CahootsType.MULTI, TypeInteraction.TX_BROADCAST_MULTI);
         this.stonewallx2Service = stonewallx2Service;
         this.stowawayService = stowawayService;
     }
@@ -51,6 +52,7 @@ public class MultiCahootsService extends AbstractCahootsService<MultiCahoots, Mu
         Stonewallx2Context stonewallContext = cahootsContext.getStonewallx2Context();
         STONEWALLx2 stonewall0 = stonewallx2Service.startInitiator(stonewallContext);
 
+        NetworkParameters params = getExtLibJConfig().getSamouraiNetwork().getParams();
         MultiCahoots multiCahoots0 = new MultiCahoots(params, stowaway0, stonewall0);
         return multiCahoots0;
     }

@@ -1,10 +1,8 @@
 package com.samourai.wallet.bip47.rpc;
 
-import com.samourai.wallet.bip47.BIP47UtilGeneric;
-import com.samourai.wallet.crypto.CryptoUtil;
 import com.samourai.wallet.crypto.impl.ECDHKeySet;
+import com.samourai.wallet.util.ExtLibJConfig;
 import com.samourai.wallet.util.MessageSignUtilGeneric;
-import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.slf4j.Logger;
@@ -13,18 +11,15 @@ import org.slf4j.LoggerFactory;
 public class Bip47EncrypterImpl implements Bip47Encrypter {
   private static final Logger log = LoggerFactory.getLogger(Bip47EncrypterImpl.class);
   private static final MessageSignUtilGeneric messageSignUtil = MessageSignUtilGeneric.getInstance();
+  private ExtLibJConfig extLibJConfig;
 
   private BIP47Account bip47Account;
-  private CryptoUtil cryptoUtil;
-  private BIP47UtilGeneric bip47Util;
 
   public Bip47EncrypterImpl(
-      BIP47Account bip47Account,
-      CryptoUtil cryptoUtil,
-      BIP47UtilGeneric bip47Util) {
+          ExtLibJConfig extLibJConfig,
+      BIP47Account bip47Account) {
+    this.extLibJConfig = extLibJConfig;
     this.bip47Account = bip47Account;
-    this.cryptoUtil = cryptoUtil;
-    this.bip47Util = bip47Util;
   }
 
   @Override
@@ -55,26 +50,26 @@ public class Bip47EncrypterImpl implements Bip47Encrypter {
     NetworkParameters params = bip47Account.getParams();
     ECKey notificationAddressKey = bip47Account.getNotificationAddress().getECKey();
     ECKey partnerKey = paymentCodePartner.notificationAddress(params).getECKey();
-    return cryptoUtil.getSharedSecret(notificationAddressKey, partnerKey);
+    return extLibJConfig.getCryptoUtil().getSharedSecret(notificationAddressKey, partnerKey);
   }
 
   @Override
   public String decrypt(byte[] encrypted, PaymentCode paymentCodePartner) throws Exception {
     ECDHKeySet sharedSecret = getSharedSecret(paymentCodePartner);
-    return cryptoUtil.decryptString(encrypted, sharedSecret);
+    return extLibJConfig.getCryptoUtil().decryptString(encrypted, sharedSecret);
   }
 
   @Override
   public byte[] encrypt(String payload, PaymentCode paymentCodePartner) throws Exception {
     ECDHKeySet sharedSecret = getSharedSecret(paymentCodePartner);
-    return cryptoUtil.encrypt(payload.getBytes(), sharedSecret);
+    return extLibJConfig.getCryptoUtil().encrypt(payload.getBytes(), sharedSecret);
   }
 
   @Override
   public PaymentAddress getSharedPaymentAddress(PaymentCode paymentCodePartner) throws Exception {
     NetworkParameters params = bip47Account.getParams();
     ECKey notificationAddressKey = bip47Account.getNotificationAddress().getECKey();
-    return bip47Util.getPaymentAddress(paymentCodePartner, 0, notificationAddressKey, params);
+    return extLibJConfig.getBip47Util().getPaymentAddress(paymentCodePartner, 0, notificationAddressKey, params);
   }
 
   @Override

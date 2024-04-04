@@ -2,13 +2,9 @@ package com.samourai.wallet.cahoots.stonewallx2;
 
 import com.samourai.wallet.bipFormat.BIP_FORMAT;
 import com.samourai.wallet.bipFormat.BipFormat;
-import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.*;
 import com.samourai.wallet.send.MyTransactionOutPoint;
-import com.samourai.wallet.util.FeeUtil;
-import com.samourai.wallet.util.FormatsUtilGeneric;
-import com.samourai.wallet.util.RandomUtil;
-import com.samourai.wallet.util.TxUtil;
+import com.samourai.wallet.util.*;
 import com.samourai.wallet.xmanagerClient.XManagerClient;
 import com.samourai.xmanager.protocol.XManagerService;
 import org.apache.commons.lang3.StringUtils;
@@ -26,8 +22,8 @@ import java.util.Objects;
 public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, Stonewallx2Context> {
     private static final Logger log = LoggerFactory.getLogger(Stonewallx2Service.class);
 
-    public Stonewallx2Service(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
-        super(CahootsType.STONEWALLX2, bipFormatSupplier, params);
+    public Stonewallx2Service(ExtLibJConfig extLibJConfig) {
+        super(extLibJConfig, CahootsType.STONEWALLX2);
     }
 
     @Override
@@ -114,6 +110,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         // step0: B sends spend amount to A,  creates step0
         //
         //
+        NetworkParameters params = getExtLibJConfig().getSamouraiNetwork().getParams();
         STONEWALLx2 stonewall0 = new STONEWALLx2(spendAmount, address, paynymDestination, params, account, fingerprint);
         return stonewall0;
     }
@@ -198,6 +195,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         if(balance.isGreaterThan(thresholdAsCoin) && isBech32Destination && xManagerClient != null) {
             // mix to external
             String xmAddress = xManagerClient.getAddressOrDefault(XManagerService.STONEWALL, 3);
+            NetworkParameters params = getExtLibJConfig().getSamouraiNetwork().getParams();
             if(!xmAddress.equals(XManagerService.STONEWALL.getDefaultAddress(params == TestNet3Params.get()))) {
                 log.info("EXTRACTING FUNDS TO EXTERNAL WALLET > " + xmAddress);
                 TransactionOutput mixOutput = computeTxOutput(xmAddress, stonewall0.getSpendAmount(), cahootsContext);
@@ -220,7 +218,8 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
 
         List<String> seenTxs = new ArrayList<>();
         // contributor mix output: like-typed with destination
-        BipFormat bipFormatDestination = getBipFormatSupplier().findByAddress(stonewall0.getDestination(), params);
+        NetworkParameters params = getExtLibJConfig().getSamouraiNetwork().getParams();
+        BipFormat bipFormatDestination = getExtLibJConfig().getBipFormatSupplier().findByAddress(stonewall0.getDestination(), params);
         log.debug("BIP FORMAT:: " + bipFormatDestination.getId());
         String receiveAddress = getContributorMixAddress(cahootsWallet, stonewall0, true, bipFormatDestination);
         TransactionOutput mixOutput = computeTxOutput(receiveAddress, stonewall0.getSpendAmount(), cahootsContext);
@@ -380,7 +379,7 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         cahootsContext.setMinerFeePaid(minerFeePaid); // sender & counterparty pay half minerFee
 
         // update counterparty change output to pay half of fees
-        TransactionOutput counterpartyChangeOutput = TxUtil.getInstance().findOutputByAddress(transaction, stonewall1.getCollabChange(), getBipFormatSupplier());
+        TransactionOutput counterpartyChangeOutput = TxUtil.getInstance().findOutputByAddress(transaction, stonewall1.getCollabChange(), getExtLibJConfig().getBipFormatSupplier());
         if (counterpartyChangeOutput == null) {
             throw new Exception("Cannot compose #Cahoots: counterpartyChangeOutput not found");
         }
@@ -409,7 +408,8 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         outputsB.add(output_B0);
 
         // destination output
-        TransactionOutput destOutput = getBipFormatSupplier().getTransactionOutput(stonewall1.getDestination(), stonewall1.getSpendAmount(), params);
+        NetworkParameters params = getExtLibJConfig().getSamouraiNetwork().getParams();
+        TransactionOutput destOutput = getExtLibJConfig().getBipFormatSupplier().getTransactionOutput(stonewall1.getDestination(), stonewall1.getSpendAmount(), params);
         transaction.addOutput(destOutput);
 
         STONEWALLx2 stonewall2 = stonewall1.copy();

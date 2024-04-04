@@ -1,17 +1,16 @@
 package com.samourai.wallet.cahoots.manual;
 
 import com.samourai.wallet.cahoots.*;
-import com.samourai.wallet.sorobanClient.SorobanInteraction;
-import com.samourai.wallet.sorobanClient.SorobanMessageService;
-import com.samourai.wallet.sorobanClient.SorobanReply;
-import com.samourai.wallet.bipFormat.BipFormatSupplier;
 import com.samourai.wallet.cahoots.multi.MultiCahoots;
 import com.samourai.wallet.cahoots.multi.MultiCahootsService;
 import com.samourai.wallet.cahoots.stonewallx2.STONEWALLx2;
 import com.samourai.wallet.cahoots.stonewallx2.Stonewallx2Service;
 import com.samourai.wallet.cahoots.stowaway.Stowaway;
 import com.samourai.wallet.cahoots.stowaway.StowawayService;
-import org.bitcoinj.core.NetworkParameters;
+import com.samourai.wallet.sorobanClient.SorobanInteraction;
+import com.samourai.wallet.sorobanClient.SorobanMessageService;
+import com.samourai.wallet.sorobanClient.SorobanReply;
+import com.samourai.wallet.util.ExtLibJConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,10 +27,10 @@ public class ManualCahootsService extends SorobanMessageService<ManualCahootsMes
         this.multiCahootsService = multiCahootsService;
     }
 
-    public ManualCahootsService(BipFormatSupplier bipFormatSupplier, NetworkParameters params) {
-        this.stowawayService = new StowawayService(bipFormatSupplier, params);
-        this.stonewallx2Service = new Stonewallx2Service(bipFormatSupplier, params);
-        this.multiCahootsService = new MultiCahootsService(bipFormatSupplier, params, stonewallx2Service, stowawayService);
+    public ManualCahootsService(ExtLibJConfig extLibJConfig) {
+        this.stowawayService = new StowawayService(extLibJConfig);
+        this.stonewallx2Service = new Stonewallx2Service(extLibJConfig);
+        this.multiCahootsService = new MultiCahootsService(extLibJConfig, stonewallx2Service, stowawayService);
     }
 
     public ManualCahootsMessage initiate(CahootsContext cahootsContext) throws Exception {

@@ -1,6 +1,7 @@
 package com.samourai.wallet.test;
 
 import com.samourai.http.client.JettyHttpClient;
+import com.samourai.http.client.JettyHttpClientService;
 import com.samourai.wallet.api.backend.BackendApi;
 import com.samourai.wallet.api.backend.BackendServer;
 import com.samourai.wallet.api.backend.beans.WalletResponse;
@@ -32,6 +33,7 @@ import com.samourai.xmanager.protocol.XManagerService;
 import org.bitcoinj.core.*;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
@@ -57,13 +59,13 @@ public class AbstractTest {
   protected static final String ADDRESS_P2TR = "tb1pqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesf3hn0c";
   protected static final String ADDRESS_XMANAGER = "tb1q6m3urxjc8j2l8fltqj93jarmzn0975nnxuymnx";
 
-  protected NetworkParameters params = TestNet3Params.get();
   protected SamouraiNetwork samouraiNetwork = SamouraiNetwork.TESTNET;
+  protected NetworkParameters params = samouraiNetwork.getParams();
+  protected ExtLibJConfig extLibJConfig = new ExtLibJConfig(samouraiNetwork, false, new BouncyCastleProvider(), new JettyHttpClientService());
   protected HD_WalletFactoryGeneric hdWalletFactory = HD_WalletFactoryGeneric.getInstance();
   protected IHttpClient httpClient;
-  protected BipFormatSupplier bipFormatSupplier = BIP_FORMAT.PROVIDER;
+  protected BipFormatSupplier bipFormatSupplier = extLibJConfig.getBipFormatSupplier();
   protected CryptoTestUtil cryptoTestUtil = CryptoTestUtil.getInstance();
-  protected CryptoUtil cryptoUtil = CryptoUtil.getInstanceJava();
   protected AsyncUtil asyncUtil = AsyncUtil.getInstance();
   protected ThreadUtil threadUtil = ThreadUtil.getInstance();
 
