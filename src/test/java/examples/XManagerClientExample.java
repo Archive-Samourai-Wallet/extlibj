@@ -18,11 +18,11 @@ public class XManagerClientExample {
     XManagerEnv xManagerEnv = XManagerEnv.get(testnet);
 
     // get address (or default when server unavailable)
-    String address = xManagerClient.getAddressOrDefault(XManagerService.RICOCHET);
+    XManagerService xmService = XManagerService.XM000; // TODO provide ID
+    String address = xManagerClient.getAddressOrDefault(xmService);
 
     // get address + index
-    AddressIndexResponse addressIndexResponse =
-        xManagerClient.getAddressIndexOrDefault(XManagerService.RICOCHET);
+    AddressIndexResponse addressIndexResponse = xManagerClient.getAddressIndexOrDefault(xmService);
     System.out.println(
         "address=" + addressIndexResponse.address + ", index=" + addressIndexResponse.index);
 
@@ -32,7 +32,7 @@ public class XManagerClientExample {
     try {
       boolean valid =
           xManagerClient.verifyAddressIndexResponse(
-              XManagerService.RICOCHET, addressToValidate, indexToValidate);
+                  xmService, addressToValidate, indexToValidate);
     } catch (Exception e) {
       // server not available
     }

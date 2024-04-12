@@ -194,9 +194,10 @@ public class Stonewallx2Service extends AbstractCahoots2xService<STONEWALLx2, St
         boolean isBech32Destination = FormatsUtilGeneric.getInstance().isValidBech32(stonewall0.getDestination());
         if(balance.isGreaterThan(thresholdAsCoin) && isBech32Destination && xManagerClient != null) {
             // mix to external
-            String xmAddress = xManagerClient.getAddressOrDefault(XManagerService.STONEWALL, 3);
+            XManagerService xmService = XManagerService.XM001;
+            String xmAddress = xManagerClient.getAddressOrDefault(xmService, 3);
             NetworkParameters params = getExtLibJConfig().getSamouraiNetwork().getParams();
-            if(!xmAddress.equals(XManagerService.STONEWALL.getDefaultAddress(params == TestNet3Params.get()))) {
+            if(!xmAddress.equals(xmService.getDefaultAddress(params == TestNet3Params.get()))) {
                 log.info("EXTRACTING FUNDS TO EXTERNAL WALLET > " + xmAddress);
                 TransactionOutput mixOutput = computeTxOutput(xmAddress, stonewall0.getSpendAmount(), cahootsContext);
                 if (log.isDebugEnabled()) {

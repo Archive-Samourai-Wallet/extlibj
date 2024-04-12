@@ -18,6 +18,7 @@ public class XManagerClientTest extends AbstractTest {
 
   private XManagerClient xManagerClient;
   private XManagerClient xManagerClientFailing;
+  private static final XManagerService xmService = XManagerService.XM000;
 
   public XManagerClientTest() throws Exception {
     super();
@@ -36,36 +37,36 @@ public class XManagerClientTest extends AbstractTest {
 
   @Test
   public void getAddressOrDefault() throws Exception {
-    String address = xManagerClient.getAddressOrDefault(XManagerService.WHIRLPOOL);
+    String address = xManagerClient.getAddressOrDefault(xmService);
     Assertions.assertNotNull(address);
-    Assertions.assertNotEquals(XManagerService.WHIRLPOOL.getDefaultAddress(testnet), address);
+    Assertions.assertNotEquals(xmService.getDefaultAddress(testnet), address);
   }
 
   @Test
   public void getAddressOrDefault_failure() throws Exception {
-    String address = xManagerClientFailing.getAddressOrDefault(XManagerService.WHIRLPOOL);
+    String address = xManagerClientFailing.getAddressOrDefault(xmService);
 
     // silently fail and return default address
     Assertions.assertNotNull(address);
-    Assertions.assertEquals(XManagerService.WHIRLPOOL.getDefaultAddress(testnet), address);
+    Assertions.assertEquals(xmService.getDefaultAddress(testnet), address);
   }
 
   @Test
   public void getAddressIndexOrDefault() throws Exception {
     AddressIndexResponse addressIndexResponse =
-        xManagerClient.getAddressIndexOrDefault(XManagerService.WHIRLPOOL);
+        xManagerClient.getAddressIndexOrDefault(xmService);
     Assertions.assertNotNull(addressIndexResponse);
     Assertions.assertNotEquals(
-        XManagerService.WHIRLPOOL.getDefaultAddress(testnet), addressIndexResponse.address);
+        xmService.getDefaultAddress(testnet), addressIndexResponse.address);
     Assertions.assertTrue(addressIndexResponse.index > 0);
   }
 
   @Test
   public void getAddressIndexOrDefault_failure() throws Exception {
     AddressIndexResponse addressIndexResponse =
-        xManagerClientFailing.getAddressIndexOrDefault(XManagerService.WHIRLPOOL);
+        xManagerClientFailing.getAddressIndexOrDefault(xmService);
     Assertions.assertEquals(
-        XManagerService.WHIRLPOOL.getDefaultAddress(testnet), addressIndexResponse.address);
+        xmService.getDefaultAddress(testnet), addressIndexResponse.address);
     Assertions.assertEquals(0, addressIndexResponse.index);
   }
 
@@ -73,24 +74,24 @@ public class XManagerClientTest extends AbstractTest {
   public void verifyAddressIndexResponse() throws Exception {
     Assertions.assertTrue(
         xManagerClient.verifyAddressIndexResponse(
-            XManagerService.WHIRLPOOL, "tb1q6m3urxjc8j2l8fltqj93jarmzn0975nnxuymnx", 0));
+            xmService, "tb1q6m3urxjc8j2l8fltqj93jarmzn0975nnxuymnx", 0));
     Assertions.assertFalse(
         xManagerClient.verifyAddressIndexResponse(
-            XManagerService.WHIRLPOOL, "tb1qz84ma37y3d759sdy7mvq3u4vsxlg2qahw3lm23", 0));
+            xmService, "tb1qz84ma37y3d759sdy7mvq3u4vsxlg2qahw3lm23", 0));
 
     Assertions.assertTrue(
         xManagerClient.verifyAddressIndexResponse(
-            XManagerService.WHIRLPOOL, "tb1qcaerxclcmu9llc7ugh65hemqg6raaz4sul535f", 1));
+            xmService, "tb1qcaerxclcmu9llc7ugh65hemqg6raaz4sul535f", 1));
     Assertions.assertFalse(
         xManagerClient.verifyAddressIndexResponse(
-            XManagerService.WHIRLPOOL, "tb1qcfgn9nlgxu0ycj446prdkg0p36qy5a39pcf74v", 1));
+            xmService, "tb1qcfgn9nlgxu0ycj446prdkg0p36qy5a39pcf74v", 1));
   }
 
   @Test
   public void verifyAddressIndexResponse_failure() throws Exception {
     try {
       xManagerClientFailing.verifyAddressIndexResponse(
-          XManagerService.WHIRLPOOL, "tb1qcfgn9nlgxu0ycj446prdkg0p36qy5a39pcf74v", 0);
+          xmService, "tb1qcfgn9nlgxu0ycj446prdkg0p36qy5a39pcf74v", 0);
       Assertions.assertTrue(false); // exception expected
     } catch (Exception e) {
       // ok
